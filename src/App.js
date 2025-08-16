@@ -1,5 +1,5 @@
+import React from 'react';
 import IntegratedGolfGame from './IntegratedGolfGame';
-import './App.css';
 
 function App() {
   return <IntegratedGolfGame />;
