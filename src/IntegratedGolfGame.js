@@ -15,7 +15,8 @@ import {
   BarChart3,
   ArrowLeft,
   Target,
-  Camera
+  Camera,
+  CircleDollarSign
 } from 'lucide-react';
 
 // Toast 组件
@@ -77,8 +78,31 @@ const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreen
 });
 
 // 该洞成绩确认对话框
-const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, rankings, gameMode, getHandicapForHole, pars, t }) => {
+const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
   if (!isOpen || !players) return null;
+
+  // Calculate Skins winner if in Skins mode
+  let skinsWinner = null;
+  let skinsAmount = 0;
+  let netWinnings = 0;
+  if (gameMode === 'skins' && Number(stake) > 0) {
+    const par = pars[hole] || 4;
+    const playerScores = players.map(p => ({
+      player: p,
+      score: scores[p] || par,
+      netScore: (scores[p] || par) - getHandicapForHole(p, par)
+    }));
+    
+    playerScores.sort((a, b) => a.netScore - b.netScore);
+    const minScore = playerScores[0].netScore;
+    const winners = playerScores.filter(p => p.netScore === minScore);
+    
+    if (winners.length === 1) {
+      skinsWinner = winners[0].player;
+      skinsAmount = prizePool + (Number(stake) || 0) * activePlayers.length;
+      netWinnings = skinsAmount - Number(stake);
+    }
+  }
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
@@ -87,10 +111,35 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
           {t('confirmHoleScore').replace('{hole}', hole)}
         </h3>
         
+        {/* Show Skins winner if applicable */}
+        {gameMode === 'skins' && Number(stake) > 0 && (
+          <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
+            {skinsWinner ? (
+              <>
+                <div className="text-center text-purple-800 font-semibold">
+                  {t('skinsWinner').replace('{player}', skinsWinner)}
+                </div>
+                <div className="text-center text-2xl font-bold text-purple-600 mt-1">
+                  ${netWinnings}
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="text-center text-purple-800 font-semibold">
+                  {t('holeTied')}
+                </div>
+                <div className="text-center text-sm text-purple-600 mt-1">
+                  {t('poolGrows')}: ${prizePool + (Number(stake) || 0) * activePlayers.length}
+                </div>
+              </>
+            )}
+          </div>
+        )}
+        
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-3">{t('holeScoresSummary')}</p>
           <div className="space-y-2">
-            {gameMode === 'matchPlay' ? (
+            {(gameMode === 'matchPlay' || gameMode === 'skins') ? (
               players.map(player => {
                 const score = scores[player] || (pars[hole] || 4);
                 const handicap = getHandicapForHole(player, pars[hole] || 4);
@@ -118,7 +167,7 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
                     <span className="font-bold text-gray-900">{r.score}</span>
                     {r.up && <span className="ml-1 text-xs text-yellow-600">(UP)</span>}
                     <div className="text-xs text-gray-600">
-                      {t('rank').replace('{n}', r.finalRank)}
+                      {r.finalRank === 1 ? t('winner') : t('rank').replace('{n}', r.finalRank)}
                     </div>
                   </div>
                 </div>
@@ -260,7 +309,6 @@ function IntegratedGolfGame() {
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
   const [prizePool, setPrizePool] = useState('');
-  const [initialPrizePool, setInitialPrizePool] = useState('');
   const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   
@@ -276,8 +324,9 @@ function IntegratedGolfGame() {
   const [pendingRankings, setPendingRankings] = useState(null);
   const [gameComplete, setGameComplete] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
+  const [totalSpent, setTotalSpent] = useState({});
 
-  // 获取活跃玩家 - 先定义这个，因为后面会用到
+  // 获取活跃玩家
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
@@ -289,6 +338,13 @@ function IntegratedGolfGame() {
   const showConfirm = useCallback((message, action, showScreenshotHint = false) => {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
   }, []);
+
+  // 页面切换时清理弹窗
+  useEffect(() => {
+    if (currentSection === 'scorecard') {
+      setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
+    }
+  }, [currentSection]);
 
   // 检查是否有未完成的游戏
   useEffect(() => {
@@ -312,7 +368,6 @@ function IntegratedGolfGame() {
     try {
       if (typeof window !== 'undefined' && window.localStorage) {
         const gameState = {
-          // 游戏进度
           currentSection,
           currentHole,
           scores,
@@ -321,11 +376,10 @@ function IntegratedGolfGame() {
           allUps,
           totalMoney,
           moneyDetails,
+          totalSpent,
           completedHoles,
           gameComplete,
           currentHoleSettlement,
-          
-          // 游戏设置
           courseType,
           holes,
           pars,
@@ -333,11 +387,8 @@ function IntegratedGolfGame() {
           playerNames,
           stake,
           prizePool,
-          initialPrizePool,
           handicap,
           playerHandicaps,
-          
-          // 元数据
           savedAt: new Date().toISOString(),
           version: '1.0'
         };
@@ -348,8 +399,8 @@ function IntegratedGolfGame() {
       console.log('Failed to save game state:', error);
     }
   }, [currentSection, currentHole, scores, ups, allScores, allUps, totalMoney, 
-      moneyDetails, completedHoles, gameComplete, currentHoleSettlement, courseType,
-      holes, pars, gameMode, playerNames, stake, prizePool, initialPrizePool,
+      moneyDetails, totalSpent, completedHoles, gameComplete, currentHoleSettlement, courseType,
+      holes, pars, gameMode, playerNames, stake, prizePool,
       handicap, playerHandicaps]);
 
   // 恢复游戏状态
@@ -361,7 +412,6 @@ function IntegratedGolfGame() {
           try {
             const state = JSON.parse(savedGame);
             
-            // 恢复所有状态
             setCurrentSection(state.currentSection || 'home');
             setCurrentHole(state.currentHole || 0);
             setScores(state.scores || {});
@@ -370,6 +420,7 @@ function IntegratedGolfGame() {
             setAllUps(state.allUps || {});
             setTotalMoney(state.totalMoney || {});
             setMoneyDetails(state.moneyDetails || {});
+            setTotalSpent(state.totalSpent || {});
             setCompletedHoles(state.completedHoles || []);
             setGameComplete(state.gameComplete || false);
             setCurrentHoleSettlement(state.currentHoleSettlement || null);
@@ -381,9 +432,11 @@ function IntegratedGolfGame() {
             setPlayerNames(state.playerNames || ['', '', '', '']);
             setStake(state.stake || '');
             setPrizePool(state.prizePool || '');
-            setInitialPrizePool(state.initialPrizePool || '');
             setHandicap(state.handicap || 'off');
             setPlayerHandicaps(state.playerHandicaps || {});
+            
+            // 清理弹窗状态
+            setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
             
             setHasUnfinishedGame(false);
             showToast(lang === 'zh' ? '游戏已恢复' : 'Game restored');
@@ -410,6 +463,7 @@ function IntegratedGolfGame() {
     }
   }, []);
 
+  // 翻译函数 - 修改为使用罚金池
   const t = useCallback((key) => {
     const translations = {
       zh: {
@@ -432,10 +486,12 @@ function IntegratedGolfGame() {
         gameMode: '游戏模式',
         matchPlay: 'Match Play',
         win123: 'Win123',
+        skins: 'Skins',
         stake: '底注',
         prizePool: '奖金池',
+        penaltyPot: '罚金池',
+        optional: '可选',
         enterStake: '输入金额（可选）',
-        enterPool: '输入奖金池',
         handicap: '差点',
         handicapSettings: '差点设置',
         off: '关',
@@ -448,11 +504,18 @@ function IntegratedGolfGame() {
         nextHole: '确认成绩 →',
         currentMoney: '实时战况',
         poolBalance: '奖池余额',
+        carryOverPool: '累积奖池',
+        currentHoleStake: '本洞赌注',
+        holeTied: '本洞平局',
+        poolGrows: '下洞奖池',
+        accumulatedFromTies: '含之前平局累积',
+        skinsWinner: '{player}赢得Skins！',
         holeSettlement: '该洞结算',
         settlement: '该洞结算',
         fromPool: '奖池',
         netScore: '净杆',
         rank: '第{n}名',
+        winner: '胜利',
         scorecardTitle: '成绩卡',
         resume: '继续比赛',
         finishRound: '确认并结束',
@@ -464,7 +527,6 @@ function IntegratedGolfGame() {
         confirm: '确认',
         switchLang: 'English',
         noStake: '请输入底注金额',
-        noPool: '请输入奖金池金额',
         atLeast2: '请至少输入2名玩家',
         gameOver: '比赛结束！',
         backToHome: '回到首页',
@@ -492,7 +554,8 @@ function IntegratedGolfGame() {
         duplicateNames: '玩家名不可重复',
         confirmBackToHome: '确定要回到首页吗？',
         dataWillBeLost: '所有比赛数据将被清除',
-        screenshotHint: '建议您先截图保存成绩记录'
+        screenshotHint: '建议您先截图保存成绩记录',
+        totalLoss: '累计'
       },
       en: {
         title: 'HandinCap',
@@ -514,10 +577,12 @@ function IntegratedGolfGame() {
         gameMode: 'Game Mode',
         matchPlay: 'Match Play',
         win123: 'Win123',
+        skins: 'Skins',
         stake: 'Stake',
         prizePool: 'Prize Pool',
+        penaltyPot: 'Pot',
+        optional: 'Optional',
         enterStake: 'Enter amount (optional)',
-        enterPool: 'Enter prize pool',
         handicap: 'Handicap',
         handicapSettings: 'Handicap Settings',
         off: 'Off',
@@ -530,11 +595,18 @@ function IntegratedGolfGame() {
         nextHole: 'Confirm & Next',
         currentMoney: 'Live Standings',
         poolBalance: 'Pool Balance',
+        carryOverPool: 'Carry-Over Pool',
+        currentHoleStake: 'Current Hole Stake',
+        holeTied: 'Hole Tied',
+        poolGrows: 'Next hole pool',
+        accumulatedFromTies: 'Accumulated from previous ties',
+        skinsWinner: '{player} wins the Skin!',
         holeSettlement: 'Hole Settlement',
         settlement: 'Hole Settlement',
         fromPool: 'Pool',
         netScore: 'Net',
         rank: 'Rank {n}',
+        winner: 'Winner',
         scorecardTitle: 'Score Card',
         resume: 'Resume Game',
         finishRound: 'Confirm & Finish',
@@ -546,7 +618,6 @@ function IntegratedGolfGame() {
         confirm: 'Confirm',
         switchLang: '中文',
         noStake: 'Please enter stake amount',
-        noPool: 'Please enter prize pool amount',
         atLeast2: 'Please enter at least 2 players',
         gameOver: 'Game Over!',
         backToHome: 'Back to Home',
@@ -574,7 +645,8 @@ function IntegratedGolfGame() {
         duplicateNames: 'Player names must be unique',
         confirmBackToHome: 'Return to home?',
         dataWillBeLost: 'All game data will be lost',
-        screenshotHint: 'We recommend taking a screenshot to save your scores'
+        screenshotHint: 'We recommend taking a screenshot to save your scores',
+        totalLoss: 'Total'
       }
     };
     return translations[lang][key] || key;
@@ -677,7 +749,6 @@ function IntegratedGolfGame() {
       return;
     }
 
-    // 检查重复名字
     const uniqueNames = new Set(activePlayers);
     if (uniqueNames.size !== activePlayers.length) {
       showToast(t('duplicateNames'), 'error');
@@ -687,29 +758,31 @@ function IntegratedGolfGame() {
     const stakeValue = Number(stake) || 0;
     
     if (gameMode === 'matchPlay') {
-      // Match Play模式允许stake为0
+      // Match Play模式不需要特殊处理
+    } else if (gameMode === 'skins') {
+      if (stakeValue <= 0) {
+        showToast(t('noStake'), 'error');
+        return;
+      }
+      setPrizePool(0);  // Skins模式始终从0开始
     } else if (gameMode === 'win123') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
         return;
       }
-      const poolValue = Number(initialPrizePool) || 0;
-      if (poolValue <= 0) {
-        showToast(t('noPool'), 'error');
-        return;
-      }
-      setPrizePool(poolValue);
+      setPrizePool(0);  // Win123模式也从0开始（罚金池）
     }
 
-    // 初始化游戏数据
     const initMoney = {};
     const initDetails = {};
     const initAllScores = {};
+    const initSpent = {};
     
     activePlayers.forEach(player => {
       initMoney[player] = 0;
       initDetails[player] = { fromPool: 0, fromPlayers: {} };
       initAllScores[player] = {};
+      initSpent[player] = 0;
       activePlayers.forEach(other => {
         if (other !== player) {
           initDetails[player].fromPlayers[other] = 0;
@@ -721,6 +794,7 @@ function IntegratedGolfGame() {
     setMoneyDetails(initDetails);
     setAllScores(initAllScores);
     setAllUps({});
+    setTotalSpent(initSpent);
     setCurrentHole(0);  
     setScores({});
     setUps({});
@@ -729,11 +803,9 @@ function IntegratedGolfGame() {
     setCurrentHoleSettlement(null);
     setCurrentSection('game');
     
-    // 保存游戏状态到localStorage
     setTimeout(() => {
       try {
         if (typeof window !== 'undefined' && window.localStorage) {
-          const poolValue = Number(initialPrizePool) || 0;
           const gameState = {
             currentSection: 'game',
             currentHole: 0,
@@ -743,6 +815,7 @@ function IntegratedGolfGame() {
             allUps: {},
             totalMoney: initMoney,
             moneyDetails: initDetails,
+            totalSpent: initSpent,
             completedHoles: [],
             gameComplete: false,
             currentHoleSettlement: null,
@@ -752,8 +825,7 @@ function IntegratedGolfGame() {
             gameMode,
             playerNames,
             stake,
-            prizePool: gameMode === 'win123' ? poolValue : '',
-            initialPrizePool,
+            prizePool: 0,
             handicap,
             playerHandicaps,
             savedAt: new Date().toISOString(),
@@ -765,7 +837,7 @@ function IntegratedGolfGame() {
         console.log('Failed to save initial game state:', error);
       }
     }, 100);
-  }, [activePlayers, stake, gameMode, initialPrizePool, showToast, t, courseType, holes, pars, playerNames, handicap, playerHandicaps]);
+  }, [activePlayers, stake, gameMode, showToast, t, courseType, holes, pars, playerNames, handicap, playerHandicaps]);
 
   // 获取handicap
   const getHandicapForHole = useCallback((player, par = 4) => {
@@ -812,7 +884,54 @@ function IntegratedGolfGame() {
     return results;
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
-  // 计算Win123
+  // calculateSkins函数
+  const calculateSkins = useCallback((holeScores, holeNum) => {
+    const stakeValue = Number(stake) || 0;
+    const par = pars[holeNum] || 4;
+    
+    const currentPrizePool = Math.max(0, prizePool);
+    
+    const playerScores = activePlayers.map(p => ({
+      player: p,
+      score: holeScores[p] || par,
+      netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+    }));
+    
+    playerScores.sort((a, b) => a.netScore - b.netScore);
+    const minScore = playerScores[0].netScore;
+    const winners = playerScores.filter(p => p.netScore === minScore);
+    
+    const results = {};
+    let poolChange = 0;
+    
+    // 每个玩家都要投入底注
+    activePlayers.forEach(player => {
+      results[player] = { 
+        money: -stakeValue,  // 先扣除本洞投入
+        fromPool: 0,
+        spent: stakeValue    // 记录本洞投入
+      };
+    });
+    
+    const holeStake = stakeValue * activePlayers.length;
+    
+    if (winners.length === 1) {
+      const winner = winners[0].player;
+      const winAmount = currentPrizePool + holeStake;
+      // 赢家获得奖池，但已经扣了底注，所以是净赢
+      results[winner].money = winAmount - stakeValue;
+      results[winner].fromPool = currentPrizePool;
+      
+      poolChange = -currentPrizePool;
+    } else {
+      // 平局时奖池累积
+      poolChange = holeStake;
+    }
+    
+    return { results, poolChange, isTied: winners.length > 1, winner: winners.length === 1 ? winners[0].player : null, winAmount: winners.length === 1 ? currentPrizePool + holeStake : 0 };
+  }, [activePlayers, stake, pars, getHandicapForHole, prizePool]);
+
+  // 修改后的calculateWin123 - 新规则
   const calculateWin123 = useCallback((holeScores, holeUps, holeNum) => {
     const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
@@ -825,11 +944,10 @@ function IntegratedGolfGame() {
     
     playerScores.sort((a, b) => a.netScore - b.netScore);
     
-    // 确定排名
     const uniqueScores = [...new Set(playerScores.map(p => p.netScore))];
     const rankings = [...playerScores];
     
-    // 应用跳跃规则
+    // 计算排名
     if (uniqueScores.length === 1) {
       rankings.forEach(r => r.finalRank = 1);
     } else if (uniqueScores.length === 2) {
@@ -846,7 +964,7 @@ function IntegratedGolfGame() {
         if (r.netScore === firstScore) {
           r.finalRank = 1;
         } else if (r.netScore === secondScore) {
-          r.finalRank = firstCount === 1 ? 3 : 4;
+          r.finalRank = firstCount >= 3 ? 4 : 3;
         } else {
           r.finalRank = 4;
         }
@@ -855,48 +973,42 @@ function IntegratedGolfGame() {
       rankings.forEach((r, i) => r.finalRank = i + 1);
     }
     
-    // 计算赔付
     const results = {};
     let poolChange = 0;
     
+    // 初始化结果
     activePlayers.forEach(player => {
-      results[player] = { money: 0, fromPool: 0, fromPlayers: {} };
+      results[player] = { money: 0, fromPool: 0 };
     });
     
+    // 新规则：只处理罚金池
     if (uniqueScores.length > 1) {
-      const winners = rankings.filter(r => r.finalRank === 1);
-      const losers = rankings.filter(r => r.finalRank > 1);
-      
-      losers.forEach(loser => {
-        let basePay = 0;
-        if (loser.finalRank === 2) basePay = stakeValue;
-        else if (loser.finalRank === 3) basePay = stakeValue * 2;
-        else if (loser.finalRank === 4) basePay = stakeValue * 3;
+      rankings.forEach(r => {
+        let penalty = 0;
         
-        let actualPay = loser.up ? basePay * 2 : basePay;
-        let payPerWinner = actualPay / winners.length;
+        // 根据排名计算基础罚金
+        if (r.finalRank === 2) penalty = stakeValue;
+        else if (r.finalRank === 3) penalty = stakeValue * 2;
+        else if (r.finalRank === 4) penalty = stakeValue * 3;
         
-        winners.forEach(winner => {
-          results[winner.player].money += payPerWinner;
-          results[winner.player].fromPlayers[loser.player] = (results[winner.player].fromPlayers[loser.player] || 0) + payPerWinner;
-          results[loser.player].money -= payPerWinner;
-          results[loser.player].fromPlayers[winner.player] = (results[loser.player].fromPlayers[winner.player] || 0) - payPerWinner;
-        });
-        
-        if (loser.up) {
-          const poolLoss = stakeValue * 6;
-          results[loser.player].fromPool = -poolLoss;
-          results[loser.player].money -= poolLoss;
-          poolChange += poolLoss;
+        // UP的影响 - 新规则
+        if (r.up) {
+          if (r.finalRank === 1) {
+            // 赢家UP从罚金池获得6倍底注
+            const poolWin = stakeValue * 6;
+            results[r.player].money = poolWin;
+            results[r.player].fromPool = poolWin;
+            poolChange -= poolWin;
+          } else {
+            // 输家UP罚金翻倍
+            penalty = penalty * 2;
+          }
         }
-      });
-      
-      winners.forEach(winner => {
-        if (winner.up) {
-          const poolWin = stakeValue * 6;
-          results[winner.player].fromPool = poolWin;
-          results[winner.player].money += poolWin;
-          poolChange -= poolWin;
+        
+        // 输家扣钱（进罚金池）
+        if (r.finalRank > 1) {
+          results[r.player].money = -penalty;
+          poolChange += penalty;
         }
       });
     }
@@ -912,7 +1024,6 @@ function IntegratedGolfGame() {
     const newScore = Math.max(1, current + delta);
     setScores(prev => ({ ...prev, [player]: newScore }));
     
-    // 实时计算该洞结算
     const newScores = { ...scores, [player]: newScore };
     const holeScores = {};
     const holeUps = {};
@@ -925,20 +1036,21 @@ function IntegratedGolfGame() {
     if (gameMode === 'matchPlay') {
       const settlement = calculateMatchPlay(holeScores, holeNum);
       setCurrentHoleSettlement(settlement);
+    } else if (gameMode === 'skins') {
+      const { results } = calculateSkins(holeScores, holeNum);
+      setCurrentHoleSettlement(results);
     } else if (gameMode === 'win123') {
       const { results } = calculateWin123(holeScores, holeUps, holeNum);
       setCurrentHoleSettlement(results);
     }
     
-    // 自动保存当前状态
     setTimeout(() => saveGameState(), 100);
-  }, [scores, currentHole, holes, pars, ups, activePlayers, gameMode, calculateMatchPlay, calculateWin123, saveGameState]);
+  }, [scores, currentHole, holes, pars, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, saveGameState]);
 
   // 切换UP
   const toggleUp = useCallback((player) => {
     setUps(prev => ({ ...prev, [player]: !prev[player] }));
     
-    // 重新计算该洞结算
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
     const holeScores = {};
@@ -953,11 +1065,10 @@ function IntegratedGolfGame() {
       setCurrentHoleSettlement(results);
     }
     
-    // 自动保存当前状态
     setTimeout(() => saveGameState(), 100);
   }, [ups, currentHole, holes, pars, scores, activePlayers, gameMode, calculateWin123, saveGameState]);
 
-  // 处理下一洞
+  // proceedToNextHole中Win123逻辑修改
   const proceedToNextHole = useCallback(() => {
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
@@ -969,7 +1080,6 @@ function IntegratedGolfGame() {
       currentHoleUps[player] = ups[player] || false;
     });
     
-    // 更新所有分数记录
     const newAllScores = { ...allScores };
     const newAllUps = { ...allUps };
     
@@ -983,9 +1093,10 @@ function IntegratedGolfGame() {
     setAllScores(newAllScores);
     setAllUps(newAllUps);
     
-    // 计算金额
     const stakeValue = Number(stake) || 0;
-    if (stakeValue > 0) {
+    let finalPrizePool = prizePool;
+    
+    if (stakeValue > 0 || gameMode === 'skins') {
       if (gameMode === 'matchPlay') {
         const settlement = calculateMatchPlay(currentHoleScores, holeNum);
         
@@ -995,6 +1106,28 @@ function IntegratedGolfGame() {
         });
         setTotalMoney(newTotalMoney);
         
+      } else if (gameMode === 'skins') {
+        const { results, poolChange } = calculateSkins(currentHoleScores, holeNum);
+        
+        const newTotalMoney = { ...totalMoney };
+        const newDetails = { ...moneyDetails };
+        const newSpent = { ...totalSpent };
+        
+        activePlayers.forEach(player => {
+          newSpent[player] = (newSpent[player] || 0) + (results[player].spent || 0);
+          newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
+          
+          if (results[player].fromPool) {
+            newDetails[player].fromPool += results[player].fromPool;
+          }
+        });
+        
+        setTotalMoney(newTotalMoney);
+        setMoneyDetails(newDetails);
+        setTotalSpent(newSpent);
+        finalPrizePool = prizePool + poolChange;
+        setPrizePool(finalPrizePool);
+        
       } else if (gameMode === 'win123') {
         const { results, poolChange } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
         
@@ -1003,48 +1136,40 @@ function IntegratedGolfGame() {
         
         activePlayers.forEach(player => {
           newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
-          newDetails[player].fromPool += results[player].fromPool;
-          
-          Object.keys(results[player].fromPlayers).forEach(other => {
-            if (!newDetails[player].fromPlayers[other]) {
-              newDetails[player].fromPlayers[other] = 0;
-            }
-            newDetails[player].fromPlayers[other] += results[player].fromPlayers[other];
-          });
+          if (results[player].fromPool) {
+            newDetails[player].fromPool = (newDetails[player].fromPool || 0) + results[player].fromPool;
+          }
         });
         
         setTotalMoney(newTotalMoney);
         setMoneyDetails(newDetails);
-        setPrizePool(prizePool + poolChange);
+        finalPrizePool = prizePool + poolChange;
+        setPrizePool(finalPrizePool);
       }
     }
     
     setCompletedHoles([...completedHoles, holeNum]);
     
-    // 检查是否是最后一洞
     if (currentHole >= holes.length - 1) {
       setGameComplete(true);
       showToast(t('gameOver'));
       setCurrentSection('scorecard');
-      // 游戏结束，清除保存的状态
       clearSavedGame();
     } else {
       setCurrentHole(currentHole + 1);
       setScores({});
       setUps({});
       setCurrentHoleSettlement(null);
-      // 保存游戏进度
       setTimeout(() => saveGameState(), 100);
     }
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
     
-    // 保存进度（如果不是游戏结束）
-    if (!gameComplete) {
+    if (!gameComplete && currentHole < holes.length - 1) {
       setTimeout(() => saveGameState(), 100);
     }
-  }, [currentHole, holes, scores, ups, activePlayers, allScores, allUps, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateWin123, showToast, t, clearSavedGame, saveGameState, gameComplete]);
+  }, [currentHole, holes, scores, ups, activePlayers, allScores, allUps, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, clearSavedGame, saveGameState, gameComplete, totalSpent]);
 
   // 显示确认对话框
   const nextHole = useCallback(() => {
@@ -1076,7 +1201,6 @@ function IntegratedGolfGame() {
       const prevHoleIndex = currentHole - 1;
       const prevHoleNum = holes[prevHoleIndex];
       
-      // 恢复上一洞的分数
       const prevScores = {};
       const prevUps = {};
       
@@ -1092,14 +1216,15 @@ function IntegratedGolfGame() {
       setScores(prevScores);
       setUps(prevUps);
       
-      // 重新计算金额
       const stakeValue = Number(stake) || 0;
       const newTotalMoney = {};
       const newDetails = {};
-      let newPrizePool = Number(initialPrizePool) || 0;
+      const newSpent = {};
+      let newPrizePool = 0;
       
       activePlayers.forEach(player => {
         newTotalMoney[player] = 0;
+        newSpent[player] = 0;
         newDetails[player] = { fromPool: 0, fromPlayers: {} };
         activePlayers.forEach(other => {
           if (other !== player) {
@@ -1108,8 +1233,7 @@ function IntegratedGolfGame() {
         });
       });
       
-      if (stakeValue > 0) {
-        // 重新计算前面所有洞的金额
+      if (stakeValue > 0 || gameMode === 'skins') {
         for (let i = 0; i < prevHoleIndex; i++) {
           const holeNum = holes[i];
           const holeScores = {};
@@ -1125,14 +1249,61 @@ function IntegratedGolfGame() {
             activePlayers.forEach(player => {
               newTotalMoney[player] += settlement[player].money;
             });
+          } else if (gameMode === 'skins') {
+            const calculateSkinsForPrevHole = (holeScores, holeNum, currentPool) => {
+              const stakeValue = Number(stake) || 0;
+              const par = pars[holeNum] || 4;
+              
+              const playerScores = activePlayers.map(p => ({
+                player: p,
+                score: holeScores[p] || par,
+                netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+              }));
+              
+              playerScores.sort((a, b) => a.netScore - b.netScore);
+              const minScore = playerScores[0].netScore;
+              const winners = playerScores.filter(p => p.netScore === minScore);
+              
+              const results = {};
+              let poolChange = 0;
+              
+              activePlayers.forEach(player => {
+                results[player] = { 
+                  money: -stakeValue,
+                  fromPool: 0,
+                  spent: stakeValue
+                };
+              });
+              
+              const holeStake = stakeValue * activePlayers.length;
+              
+              if (winners.length === 1) {
+                const winner = winners[0].player;
+                const winAmount = currentPool + holeStake;
+                results[winner].money = winAmount - stakeValue;
+                results[winner].fromPool = currentPool;
+                poolChange = -currentPool;
+              } else {
+                poolChange = holeStake;
+              }
+              
+              return { results, poolChange };
+            };
+            
+            const { results, poolChange } = calculateSkinsForPrevHole(holeScores, holeNum, newPrizePool);
+            activePlayers.forEach(player => {
+              newSpent[player] += results[player].spent || 0;
+              newTotalMoney[player] += results[player].money;
+              newDetails[player].fromPool += results[player].fromPool;
+            });
+            newPrizePool += poolChange;
           } else if (gameMode === 'win123') {
             const { results, poolChange } = calculateWin123(holeScores, holeUps, holeNum);
             activePlayers.forEach(player => {
               newTotalMoney[player] += results[player].money;
-              newDetails[player].fromPool += results[player].fromPool;
-              Object.keys(results[player].fromPlayers).forEach(other => {
-                newDetails[player].fromPlayers[other] += results[player].fromPlayers[other];
-              });
+              if (results[player].fromPool) {
+                newDetails[player].fromPool += results[player].fromPool;
+              }
             });
             newPrizePool += poolChange;
           }
@@ -1141,7 +1312,8 @@ function IntegratedGolfGame() {
       
       setTotalMoney(newTotalMoney);
       setMoneyDetails(newDetails);
-      if (gameMode === 'win123') {
+      setTotalSpent(newSpent);
+      if (gameMode === 'win123' || gameMode === 'skins') {
         setPrizePool(newPrizePool);
       }
       
@@ -1149,10 +1321,9 @@ function IntegratedGolfGame() {
       setCurrentHole(prevHoleIndex);
       setCurrentHoleSettlement(null);
       
-      // 关闭确认对话框
       setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
     });
-  }, [currentHole, holes, activePlayers, allScores, allUps, completedHoles, initialPrizePool, gameMode, pars, stake, calculateMatchPlay, calculateWin123, showConfirm, t]);
+  }, [currentHole, holes, activePlayers, allScores, allUps, completedHoles, gameMode, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showConfirm, t]);
 
   const goHome = useCallback(() => {
     const resetGame = () => {
@@ -1161,7 +1332,6 @@ function IntegratedGolfGame() {
       setPlayerNames(['', '', '', '']);
       setStake('');
       setPrizePool('');
-      setInitialPrizePool('');
       setHandicap('off');
       setPlayerHandicaps({});
       setCourseType('f18');
@@ -1174,28 +1344,26 @@ function IntegratedGolfGame() {
       setAllUps({});
       setTotalMoney({});
       setMoneyDetails({});
+      setTotalSpent({});
       setCompletedHoles([]);
       setGameComplete(false);
       setCurrentHoleSettlement(null);
-      setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
       
-      // 清除保存的游戏状态
       clearSavedGame();
     };
 
     if (gameComplete) {
-      const message = `${t('confirmBackToHome')}\n${t('dataWillBeLost')}`;
-      showConfirm(message, resetGame, true);
+      resetGame();
     } else {
       resetGame();
     }
-  }, [gameComplete, showConfirm, t, clearSavedGame]);
+  }, [gameComplete, clearSavedGame]);
 
   // 渲染界面
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
-      {/* 顶部导航 */}
-      {currentSection !== 'game' && (
+      {/* 顶部导航 - 只在首页显示语言切换 */}
+      {currentSection === 'home' && (
         <div className="flex justify-end items-center p-3 bg-white border-b border-gray-200">
           <button
             onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
@@ -1271,29 +1439,27 @@ function IntegratedGolfGame() {
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-2.5 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900 mb-2">{t('setPar')}</h3>
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('setPar')}</h3>
                 
-                {/* 极限压缩布局 for 18洞球场 */}
                 {(courseType === 'f18' || courseType === 'b18') ? (
-                  <div className="grid grid-cols-2 gap-1">
+                  <div className="grid grid-cols-2 gap-3">
                     {getVerticalArrangedHoles().map((pair, index) => (
                       <React.Fragment key={index}>
-                        {/* 左列 */}
                         {pair[0] && (
-                          <div className="flex items-center justify-between p-1 bg-gray-50 rounded">
-                            <span className="text-xs font-medium text-gray-700 min-w-[35px]">
+                          <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-700 min-w-[40px]">
                               {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
                             </span>
-                            <div className="flex gap-0.5">
+                            <div className="flex gap-1">
                               {[3, 4, 5].map(par => (
                                 <button
                                   key={par}
                                   onClick={() => setPar(pair[0], par)}
-                                  className={`w-6 h-6 rounded text-xs font-bold transition-all ${
+                                  className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
                                     pars[pair[0]] === par
-                                      ? 'bg-green-600 text-white'
-                                      : 'bg-white text-gray-700 border border-gray-300'
+                                      ? 'bg-green-600 text-white shadow-sm'
+                                      : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
                                   }`}
                                 >
                                   {par}
@@ -1303,21 +1469,20 @@ function IntegratedGolfGame() {
                           </div>
                         )}
                         
-                        {/* 右列 */}
                         {pair[1] ? (
-                          <div className="flex items-center justify-between p-1 bg-gray-50 rounded">
-                            <span className="text-xs font-medium text-gray-700 min-w-[35px]">
+                          <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                            <span className="text-sm font-medium text-gray-700 min-w-[40px]">
                               {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
                             </span>
-                            <div className="flex gap-0.5">
+                            <div className="flex gap-1">
                               {[3, 4, 5].map(par => (
                                 <button
                                   key={par}
                                   onClick={() => setPar(pair[1], par)}
-                                  className={`w-6 h-6 rounded text-xs font-bold transition-all ${
+                                  className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
                                     pars[pair[1]] === par
-                                      ? 'bg-green-600 text-white'
-                                      : 'bg-white text-gray-700 border border-gray-300'
+                                      ? 'bg-green-600 text-white shadow-sm'
+                                      : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
                                   }`}
                                 >
                                   {par}
@@ -1332,7 +1497,6 @@ function IntegratedGolfGame() {
                     ))}
                   </div>
                 ) : (
-                  /* 9洞球场布局 */
                   <div className="grid grid-cols-1 gap-1">
                     {holes.map(hole => (
                       <div key={hole} className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
@@ -1359,7 +1523,6 @@ function IntegratedGolfGame() {
                   </div>
                 )}
                 
-                {/* 总杆数显示 */}
                 <div className="mt-2 pt-2 border-t text-center">
                   <span className="text-sm text-gray-600">{t('par')}: </span>
                   <span className="text-lg font-bold text-green-600">{calculateTotalPar()}</span>
@@ -1416,52 +1579,46 @@ function IntegratedGolfGame() {
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="space-y-4">
-                  {/* 游戏模式选择 */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-2">
                       {t('gameMode')}:
                     </label>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="grid grid-cols-3 gap-2">
                       <button
                         onClick={() => setGameMode('matchPlay')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${
+                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
                           gameMode === 'matchPlay'
                             ? 'bg-blue-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
                         <Trophy className="w-4 h-4" />
-                        {t('matchPlay')}
+                        <span style={{ fontSize: '12px' }}>{t('matchPlay')}</span>
                       </button>
                       <button
                         onClick={() => setGameMode('win123')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-2 ${
+                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
                           gameMode === 'win123'
                             ? 'bg-green-600 text-white'
                             : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
                         }`}
                       >
                         <DollarSign className="w-4 h-4" />
-                        {t('win123')}
+                        <span style={{ fontSize: '12px' }}>{t('win123')}</span>
+                      </button>
+                      <button
+                        onClick={() => setGameMode('skins')}
+                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                          gameMode === 'skins'
+                            ? 'bg-purple-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <CircleDollarSign className="w-4 h-4" />
+                        <span style={{ fontSize: '12px' }}>{t('skins')}</span>
                       </button>
                     </div>
                   </div>
-
-                  {/* Win123需要奖金池 */}
-                  {gameMode === 'win123' && (
-                    <div className="space-y-1">
-                      <label className="block text-xs font-medium text-gray-700">
-                        {t('prizePool')}:
-                      </label>
-                      <input
-                        type="number"
-                        value={initialPrizePool}
-                        onChange={(e) => setInitialPrizePool(e.target.value)}
-                        placeholder={t('enterPool')}
-                        className="w-full px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
-                      />
-                    </div>
-                  )}
                   
                   <div className="space-y-1">
                     <label className="block text-xs font-medium text-gray-700">
@@ -1506,7 +1663,6 @@ function IntegratedGolfGame() {
                 </div>
               </div>
 
-              {/* Handicap设置区域 */}
               {handicap === 'on' && activePlayers.length > 0 && (
                 <div className="bg-white rounded-lg p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
@@ -1541,13 +1697,15 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 成绩卡 */}
+          {/* 成绩卡页面 */}
           {currentSection === 'scorecard' && (
             <div className="space-y-3 py-3">
-              <div className="text-center">
-                <h2 className="text-xl font-bold text-gray-900">
-                  {t('scorecardTitle')}
-                </h2>
+              <div className="relative">
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {t('scorecardTitle')}
+                  </h2>
+                </div>
               </div>
 
               {(() => {
@@ -1576,7 +1734,6 @@ function IntegratedGolfGame() {
                 
                 return (
                   <>
-                    {/* 总杆数显示卡 */}
                     {gameComplete && hasData && (
                       <div className="bg-white rounded-lg p-3 shadow-sm">
                         <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
@@ -1607,10 +1764,8 @@ function IntegratedGolfGame() {
                       </div>
                     )}
 
-                    {/* 详细成绩表 */}
                     {hasData ? (
                       <>
-                        {/* 前九洞 */}
                         {frontNine.length > 0 && (
                           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                             <table className="w-full" style={{ fontSize: '10px' }}>
@@ -1650,12 +1805,19 @@ function IntegratedGolfGame() {
                                       const score = allScores[player]?.[hole];
                                       const par = pars[hole] || 4;
                                       const handicapValue = getHandicapForHole(player, par);
-                                      const displayScore = score ? (handicapValue > 0 ? score - handicapValue : score) : null;
+                                      const netScore = score ? score - handicapValue : null;
                                       
                                       return (
                                         <td key={hole} className="px-0 py-1 text-center">
-                                          {displayScore ? (
-                                            <ScoreDisplay score={displayScore} par={par} />
+                                          {score ? (
+                                            <div>
+                                              <ScoreDisplay score={score} par={par} />
+                                              {!gameComplete && handicap === 'on' && handicapValue > 0 && (
+                                                <div style={{ fontSize: '8px', color: '#059669' }}>
+                                                  ({netScore})
+                                                </div>
+                                              )}
+                                            </div>
                                           ) : '-'}
                                         </td>
                                       );
@@ -1670,7 +1832,6 @@ function IntegratedGolfGame() {
                           </div>
                         )}
 
-                        {/* 后九洞 */}
                         {backNine.length > 0 && (
                           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                             <table className="w-full" style={{ fontSize: '10px' }}>
@@ -1710,12 +1871,19 @@ function IntegratedGolfGame() {
                                       const score = allScores[player]?.[hole];
                                       const par = pars[hole] || 4;
                                       const handicapValue = getHandicapForHole(player, par);
-                                      const displayScore = score ? (handicapValue > 0 ? score - handicapValue : score) : null;
+                                      const netScore = score ? score - handicapValue : null;
                                       
                                       return (
                                         <td key={hole} className="px-0 py-1 text-center">
-                                          {displayScore ? (
-                                            <ScoreDisplay score={displayScore} par={par} />
+                                          {score ? (
+                                            <div>
+                                              <ScoreDisplay score={score} par={par} />
+                                              {!gameComplete && handicap === 'on' && handicapValue > 0 && (
+                                                <div style={{ fontSize: '8px', color: '#059669' }}>
+                                                  ({netScore})
+                                                </div>
+                                              )}
+                                            </div>
                                           ) : '-'}
                                         </td>
                                       );
@@ -1740,16 +1908,24 @@ function IntegratedGolfGame() {
                 );
               })()}
 
-              {/* 最终结算 - 只在有金额且游戏结束时显示 */}
-              {gameComplete && Number(stake) > 0 && (
+              {(gameComplete || completedHoles.length === holes.length) && (Number(stake) > 0 || (gameMode === 'skins' && prizePool > 0)) && (
                 <div className="bg-yellow-50 rounded-lg p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">
                     {t('finalSettlement')}
                   </h3>
+                  {(gameMode === 'skins' || gameMode === 'win123') && prizePool > 0 && (
+                    <div className="mb-3 text-center p-2 bg-purple-100 rounded">
+                      <span className="text-sm text-purple-700">
+                        {gameMode === 'win123' ? t('penaltyPot') : t('carryOverPool')}: 
+                      </span>
+                      <span className="text-lg font-bold text-purple-800 ml-2">
+                        ${prizePool}
+                      </span>
+                    </div>
+                  )}
                   <div className="space-y-2">
                     {activePlayers.map(player => {
                       const amount = totalMoney[player] || 0;
-                      const details = moneyDetails[player];
                       
                       return (
                         <div key={player} className="border-b border-yellow-200 last:border-b-0 pb-2">
@@ -1761,20 +1937,6 @@ function IntegratedGolfGame() {
                               {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
                             </span>
                           </div>
-                          
-                          {gameMode === 'win123' && details && (
-                            <div className="text-xs text-gray-600 mt-1 grid grid-cols-2 gap-1">
-                              {details.fromPool !== 0 && (
-                                <div>{t('fromPool')}: {details.fromPool > 0 ? '+' : ''}${details.fromPool.toFixed(1)}</div>
-                              )}
-                              {Object.entries(details.fromPlayers || {}).map(([other, val]) => {
-                                if (val === 0) return null;
-                                return (
-                                  <div key={other}>{other}: {val > 0 ? '+' : ''}${val.toFixed(1)}</div>
-                                );
-                              })}
-                            </div>
-                          )}
                         </div>
                       );
                     })}
@@ -1791,13 +1953,18 @@ function IntegratedGolfGame() {
                     {t('resume')}
                   </button>
                 ) : (
-                  <button
-                    onClick={goHome}
-                    className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2"
-                  >
-                    <Home className="w-5 h-5" />
-                    {t('backToHome')}
-                  </button>
+                  <div className="w-full">
+                    <button
+                      onClick={goHome}
+                      className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2"
+                    >
+                      <Home className="w-5 h-5" />
+                      {t('backToHome')}
+                    </button>
+                    <p className="text-xs text-gray-500 text-center mt-2">
+                      {lang === 'zh' ? '所有比赛数据将被清除' : 'All game data will be cleared'}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
@@ -1805,50 +1972,43 @@ function IntegratedGolfGame() {
         </div>
       </div>
 
-      {/* 游戏进行 */}
+      {/* 游戏进行页面 */}
       {currentSection === 'game' && (
         <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
-          {/* 语言切换按钮 */}
-          <div className="absolute top-2 right-2 z-10">
-            <button
-              onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
-              className="px-2 py-1 bg-white bg-opacity-20 backdrop-blur-sm text-white rounded-md hover:bg-opacity-30 text-xs font-medium"
-            >
-              {t('switchLang')}
-            </button>
-          </div>
-          
-          {/* 游戏头部 */}
-          <div className="bg-green-800 bg-opacity-50 text-center pt-8 pb-3">
-            <h1 className="text-xl font-bold mb-1">
-              {t('holeTitle').replace('{hole}', holes[currentHole])}
+          <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
+            <h1 className="text-2xl font-bold mb-2">
+              {t('hole')} {holes[currentHole]} (PAR {pars[holes[currentHole]] || 4})
             </h1>
-            <div className="flex justify-center gap-3">
-              <span className="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-medium">
-                {t('par')} {pars[holes[currentHole]] || 4}
-              </span>
-              <span className="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-medium">
-                {currentHole + 1}/{holes.length}
-              </span>
-            </div>
             {Number(stake) > 0 && (
-              <div className="flex justify-center gap-3 mt-1.5">
-                <span className="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-medium">
-                  {gameMode === 'matchPlay' ? 'Match Play' : 'Win123'}
-                </span>
-                <span className="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-medium">
-                  {t('stake')}: ${Number(stake) || 0}
-                </span>
-                {gameMode === 'win123' && (
-                  <span className="bg-white bg-opacity-20 px-2 py-0.5 rounded-full text-xs font-medium">
-                    {t('poolBalance')}: ${prizePool}
+              <div className="text-base">
+                {t('stake')}: ${Number(stake)} 
+                {(gameMode === 'skins' || gameMode === 'win123') && (
+                  <span className="ml-4">
+                    {gameMode === 'win123' ? t('penaltyPot') : t('poolBalance')}: ${gameMode === 'skins' ? prizePool + (Number(stake) || 0) * activePlayers.length : prizePool}
                   </span>
                 )}
               </div>
             )}
+            {!gameComplete && completedHoles.length < holes.length && (
+              <button
+                onClick={() => {
+                  const message = lang === 'zh' 
+                    ? '确定要终止比赛吗？\n未完成的洞将不计入成绩' 
+                    : 'End the game now?\nIncomplete holes will not be counted';
+                  showConfirm(message, () => {
+                    setGameComplete(true);
+                    clearSavedGame();
+                    showToast(t('gameOver'));
+                    setCurrentSection('scorecard');
+                  }, true);
+                }}
+                className="absolute top-4 right-4 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition"
+              >
+                {lang === 'zh' ? '终止' : 'End'}
+              </button>
+            )}
           </div>
 
-          {/* 玩家记分卡 */}
           <div className="bg-white text-gray-900 p-3">
             <div className="grid gap-3">
               {activePlayers.map(player => {
@@ -1919,8 +2079,7 @@ function IntegratedGolfGame() {
             </div>
           </div>
 
-          {/* 该洞结算 - 只有底注大于0时显示 */}
-          {Number(stake) > 0 && currentHoleSettlement && (
+          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'win123' && (
             <div className="bg-orange-50 text-gray-900 p-3">
               <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
               <div className={`grid gap-2 ${
@@ -1947,8 +2106,34 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 金钱显示 - 只有底注大于0时显示 */}
-          {Number(stake) > 0 && (
+          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'matchPlay' && (
+            <div className="bg-orange-50 text-gray-900 p-3">
+              <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
+              <div className={`grid gap-2 ${
+                activePlayers.length <= 2 ? 'grid-cols-2' :
+                activePlayers.length === 3 ? 'grid-cols-3' :
+                'grid-cols-2'
+              }`}>
+                {activePlayers.map(player => {
+                  const amount = currentHoleSettlement[player]?.money || 0;
+                  return (
+                    <div key={player} className="bg-white p-2 rounded-md text-center">
+                      <div className="text-xs font-medium truncate">{player}</div>
+                      <div className={`text-sm font-bold ${
+                        amount > 0 ? 'text-green-600' : 
+                        amount < 0 ? 'text-red-600' : 
+                        'text-gray-500'
+                      }`}>
+                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
             <div className="bg-blue-50 text-gray-900 p-3">
               <h3 className="text-center font-semibold mb-2 text-sm">{t('currentMoney')}</h3>
               <div className={`grid gap-2 ${
@@ -1958,7 +2143,6 @@ function IntegratedGolfGame() {
               }`}>
                 {activePlayers.map(player => {
                   const amount = totalMoney[player] || 0;
-                  const details = moneyDetails[player];
                   
                   return (
                     <div key={player} className="bg-white p-2 rounded-md">
@@ -1968,22 +2152,16 @@ function IntegratedGolfGame() {
                         amount < 0 ? 'text-red-600' : 
                         'text-gray-500'
                       }`}>
-                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                        {gameMode === 'win123' ? (
+                          <>
+                            {t('totalLoss')}: {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                          </>
+                        ) : (
+                          <>
+                            {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                          </>
+                        )}
                       </div>
-                      
-                      {gameMode === 'win123' && details && (details.fromPool !== 0 || Object.values(details.fromPlayers || {}).some(v => v !== 0)) && (
-                        <div className="text-xs text-gray-600 mt-1 space-y-0.5">
-                          {details.fromPool !== 0 && (
-                            <div>{t('fromPool')}: {details.fromPool > 0 ? '+' : ''}${details.fromPool.toFixed(1)}</div>
-                          )}
-                          {Object.entries(details.fromPlayers || {}).map(([other, val]) => {
-                            if (val === 0) return null;
-                            return (
-                              <div key={other} className="truncate">{other}: {val > 0 ? '+' : ''}${val.toFixed(1)}</div>
-                            );
-                          })}
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -1991,7 +2169,6 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 导航按钮 */}
           <div className="bg-white p-3">
             <div className="flex gap-2">
               <button
@@ -2018,7 +2195,6 @@ function IntegratedGolfGame() {
         </div>
       )}
 
-      {/* Toast 通知 */}
       {toast && (
         <Toast
           message={toast.message}
@@ -2027,7 +2203,6 @@ function IntegratedGolfGame() {
         />
       )}
 
-      {/* 确认对话框 */}
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
         onClose={() => setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false })}
@@ -2039,7 +2214,6 @@ function IntegratedGolfGame() {
         showScreenshotHint={confirmDialog.showScreenshotHint}
       />
 
-      {/* 该洞成绩确认对话框 */}
       <HoleScoreConfirmDialog
         isOpen={holeConfirmDialog.isOpen}
         onClose={() => {
@@ -2057,6 +2231,9 @@ function IntegratedGolfGame() {
         getHandicapForHole={getHandicapForHole}
         pars={pars}
         t={t}
+        stake={stake}
+        prizePool={prizePool}
+        activePlayers={activePlayers}
       />
     </div>
   );
