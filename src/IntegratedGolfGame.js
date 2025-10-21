@@ -16,10 +16,64 @@ import {
   ArrowLeft,
   Target,
   Camera,
-  CircleDollarSign
+  CircleDollarSign,
+  Search
 } from 'lucide-react';
 
-// Toast 组件
+// 球场数据库
+const GOLF_COURSES = {
+  "PGCC": {
+    shortName: "PGCC",
+    fullName: "Palm Garden Golf Club",
+    pars: [4,4,3,5,4,4,3,4,4, 4,5,4,3,4,4,5,3,4]
+  },
+  "TROPICANA": {
+    shortName: "TROPICANA",
+    fullName: "Tropicana Golf & Country Resort",
+    pars: [4,3,4,5,4,4,4,3,5, 4,4,3,5,4,4,4,3,4]
+  },
+  "MINES": {
+    shortName: "MINES",
+    fullName: "Mines Resort & Golf Club",
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,4,5,4,3,4,5]
+  },
+  "SRGCC": {
+    shortName: "SRGCC",
+    fullName: "Saujana Golf & Country Club (Palm)",
+    pars: [4,4,3,4,5,4,4,3,5, 4,5,4,3,4,4,5,3,4]
+  },
+  "GLENMARIE": {
+    shortName: "GLENMARIE",
+    fullName: "Glenmarie Golf & Country Club (Valley)",
+    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5]
+  },
+  "KGNS": {
+    shortName: "KGNS",
+    fullName: "KGNS Golf Club",
+    pars: [4,5,4,3,4,4,5,3,4, 4,4,3,5,4,4,3,4,5]
+  },
+  "KLGCC": {
+    shortName: "KLGCC",
+    fullName: "Kuala Lumpur Golf & Country Club",
+    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5]
+  },
+  "NILAI-LG": {
+    shortName: "NILAI L+G",
+    fullName: "Nilai Springs (Lake + Garden)",
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,5,4,3,4,5,4]
+  },
+  "NILAI-LV": {
+    shortName: "NILAI L+V",
+    fullName: "Nilai Springs (Lake + Valley)",
+    pars: [4,3,5,4,4,3,4,5,4, 5,4,3,4,4,5,3,4,4]
+  },
+  "NILAI-GV": {
+    shortName: "NILAI G+V",
+    fullName: "Nilai Springs (Garden + Valley)",
+    pars: [4,4,3,5,4,3,4,5,4, 5,4,3,4,4,5,3,4,4]
+  }
+};
+
 const Toast = memo(({ message, type, onClose }) => {
   useEffect(() => {
     const timer = setTimeout(onClose, 3000);
@@ -40,7 +94,6 @@ const Toast = memo(({ message, type, onClose }) => {
   );
 });
 
-// 确认对话框
 const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreenshotHint }) => {
   if (!isOpen) return null;
 
@@ -77,11 +130,9 @@ const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreen
   );
 });
 
-// 该洞成绩确认对话框
 const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
   if (!isOpen || !players) return null;
 
-  // Calculate Skins winner if in Skins mode
   let skinsWinner = null;
   let skinsAmount = 0;
   let netWinnings = 0;
@@ -111,7 +162,6 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
           {t('confirmHoleScore').replace('{hole}', hole)}
         </h3>
         
-        {/* Show Skins winner if applicable */}
         {gameMode === 'skins' && Number(stake) > 0 && (
           <div className="mb-4 p-3 bg-purple-50 border border-purple-200 rounded-lg">
             {skinsWinner ? (
@@ -195,7 +245,6 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
   );
 });
 
-// 输入组件
 const PlayerInput = memo(({ index, value, placeholder, onChange }) => {
   const handleChange = useCallback((e) => {
     onChange(index, e.target.value);
@@ -212,7 +261,6 @@ const PlayerInput = memo(({ index, value, placeholder, onChange }) => {
   );
 });
 
-// Handicap输入组件
 const HandicapRow = memo(({ playerName, handicaps, onChange }) => {
   const handleParChange = useCallback((parType, value) => {
     onChange(playerName, parType, value);
@@ -265,7 +313,6 @@ const HandicapRow = memo(({ playerName, handicaps, onChange }) => {
   );
 });
 
-// 成绩显示组件
 const ScoreDisplay = memo(({ score, par }) => {
   const diff = score - par;
   
@@ -276,14 +323,9 @@ const ScoreDisplay = memo(({ score, par }) => {
   else if (diff === 1) colorClass = 'text-orange-600';
   else colorClass = 'text-red-600';
   
-  const fontSize = window.innerWidth < 360 ? '11px' : 
-                   window.innerWidth < 375 ? '12px' : 
-                   window.innerWidth < 414 ? '13px' : '14px';
-  
-  return <span className={`font-semibold ${colorClass}`} style={{ fontSize }}>{score}</span>;
+  return <span className={`font-semibold ${colorClass}`}>{score}</span>;
 });
 
-// 球场配置
 const courses = {
   f9: [1,2,3,4,5,6,7,8,9],
   b9: [10,11,12,13,14,15,16,17,18],
@@ -297,14 +339,16 @@ function IntegratedGolfGame() {
   const [toast, setToast] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', action: null, showScreenshotHint: false });
   const [holeConfirmDialog, setHoleConfirmDialog] = useState({ isOpen: false, action: null });
-  const [hasUnfinishedGame, setHasUnfinishedGame] = useState(false);
   
-  // 球场设置
+  const [setupMode, setSetupMode] = useState('auto');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [courseApplied, setCourseApplied] = useState(false);
+  
   const [courseType, setCourseType] = useState('f18');
   const [holes, setHoles] = useState(courses.f18);
   const [pars, setPars] = useState(courses.f18.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
   
-  // 游戏设置
   const [gameMode, setGameMode] = useState('matchPlay'); 
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
@@ -312,7 +356,6 @@ function IntegratedGolfGame() {
   const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   
-  // 游戏数据
   const [currentHole, setCurrentHole] = useState(1);
   const [scores, setScores] = useState({});  
   const [ups, setUps] = useState({});  
@@ -326,7 +369,6 @@ function IntegratedGolfGame() {
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
 
-  // 获取活跃玩家
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
@@ -339,140 +381,39 @@ function IntegratedGolfGame() {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
   }, []);
 
-  // 页面切换时清理弹窗
   useEffect(() => {
     if (currentSection === 'scorecard') {
       setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
     }
   }, [currentSection]);
 
-  // 检查是否有未完成的游戏
-  useEffect(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          const state = JSON.parse(savedGame);
-          if (!state.gameComplete && state.currentSection === 'game') {
-            setHasUnfinishedGame(true);
-          }
-        }
-      }
-    } catch (error) {
-      console.log('localStorage not available:', error);
-    }
+  const filteredCourses = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    
+    const query = searchQuery.toLowerCase();
+    return Object.values(GOLF_COURSES).filter(course => 
+      course.shortName.toLowerCase().includes(query) ||
+      course.fullName.toLowerCase().includes(query)
+    );
+  }, [searchQuery]);
+
+  const getParColorClass = useCallback((par) => {
+    if (par === 3) return 'bg-yellow-300 text-black';
+    if (par === 5) return 'bg-orange-300 text-black';
+    return 'bg-gray-300 text-black';
   }, []);
 
-  // 保存游戏状态
-  const saveGameState = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const gameState = {
-          currentSection,
-          currentHole,
-          scores,
-          ups,
-          allScores,
-          allUps,
-          totalMoney,
-          moneyDetails,
-          totalSpent,
-          completedHoles,
-          gameComplete,
-          currentHoleSettlement,
-          courseType,
-          holes,
-          pars,
-          gameMode,
-          playerNames,
-          stake,
-          prizePool,
-          handicap,
-          playerHandicaps,
-          savedAt: new Date().toISOString(),
-          version: '1.0'
-        };
-        
-        localStorage.setItem('golfGameState', JSON.stringify(gameState));
-      }
-    } catch (error) {
-      console.log('Failed to save game state:', error);
-    }
-  }, [currentSection, currentHole, scores, ups, allScores, allUps, totalMoney, 
-      moneyDetails, totalSpent, completedHoles, gameComplete, currentHoleSettlement, courseType,
-      holes, pars, gameMode, playerNames, stake, prizePool,
-      handicap, playerHandicaps]);
-
-  // 恢复游戏状态
-  const loadGameState = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          try {
-            const state = JSON.parse(savedGame);
-            
-            setCurrentSection(state.currentSection || 'home');
-            setCurrentHole(state.currentHole || 0);
-            setScores(state.scores || {});
-            setUps(state.ups || {});
-            setAllScores(state.allScores || {});
-            setAllUps(state.allUps || {});
-            setTotalMoney(state.totalMoney || {});
-            setMoneyDetails(state.moneyDetails || {});
-            setTotalSpent(state.totalSpent || {});
-            setCompletedHoles(state.completedHoles || []);
-            setGameComplete(state.gameComplete || false);
-            setCurrentHoleSettlement(state.currentHoleSettlement || null);
-            
-            setCourseType(state.courseType || 'f18');
-            setHoles(state.holes || courses.f18);
-            setPars(state.pars || {});
-            setGameMode(state.gameMode || 'matchPlay');
-            setPlayerNames(state.playerNames || ['', '', '', '']);
-            setStake(state.stake || '');
-            setPrizePool(state.prizePool || '');
-            setHandicap(state.handicap || 'off');
-            setPlayerHandicaps(state.playerHandicaps || {});
-            
-            // 清理弹窗状态
-            setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
-            
-            setHasUnfinishedGame(false);
-            showToast(lang === 'zh' ? '游戏已恢复' : 'Game restored');
-          } catch (error) {
-            console.error('Failed to parse game state:', error);
-            showToast(lang === 'zh' ? '恢复失败' : 'Failed to restore', 'error');
-          }
-        }
-      }
-    } catch (error) {
-      console.log('localStorage not available:', error);
-    }
-  }, [lang, showToast]);
-
-  // 清除保存的游戏
-  const clearSavedGame = useCallback(() => {
-    try {
-      if (typeof window !== 'undefined' && window.localStorage) {
-        localStorage.removeItem('golfGameState');
-        setHasUnfinishedGame(false);
-      }
-    } catch (error) {
-      console.log('Failed to clear saved game:', error);
-    }
-  }, []);
-
-  // 翻译函数 - 修改为使用罚金池
   const t = useCallback((key) => {
     const translations = {
       zh: {
         title: 'HandinCap',
         subtitle: '让每一杆都算数',
         create: '创建新局',
-        continueGame: '继续游戏',
         courseTitle: '球场设置',
-        courseSubtitle: '选择比赛类型和洞设置',
+        autoMode: '自动搜索',
+        manualMode: '手动输入',
+        searchPlaceholder: '搜索球场名称...',
+        selectCourse: '选择球场',
         gameType: '比赛类型',
         setPar: '设置各洞PAR值',
         confirmCourse: '确认设置',
@@ -499,24 +440,17 @@ function IntegratedGolfGame() {
         back: '返回',
         start: '开始比赛',
         hole: '洞',
-        holeTitle: '第{hole}洞',
         par: 'PAR',
         nextHole: '确认成绩 →',
         currentMoney: '实时战况',
         poolBalance: '奖池余额',
-        carryOverPool: '累积奖池',
-        currentHoleStake: '本洞赌注',
         holeTied: '本洞平局',
         poolGrows: '下洞奖池',
-        accumulatedFromTies: '含之前平局累积',
         skinsWinner: '{player}赢得Skins！',
         holeSettlement: '该洞结算',
-        settlement: '该洞结算',
-        fromPool: '奖池',
         netScore: '净杆',
         rank: '第{n}名',
         winner: '胜利',
-        scorecardTitle: '成绩卡',
         resume: '继续比赛',
         finishRound: '确认并结束',
         confirmHoleScore: '确认第{hole}洞成绩',
@@ -537,11 +471,6 @@ function IntegratedGolfGame() {
         standardPar: '标准杆',
         finalSettlement: '最终结算',
         noScoreData: '还没有开始记分',
-        eagle: '老鹰球',
-        birdie: '小鸟球',
-        parLabel: '标准杆',
-        bogey: '柏忌',
-        doubleplus: '双柏忌+',
         f9: '前9洞',
         b9: '后9洞',
         f18: '前18洞',
@@ -552,18 +481,28 @@ function IntegratedGolfGame() {
         b18Desc: '10-18,1-9洞',
         saved: '已保存！',
         duplicateNames: '玩家名不可重复',
-        confirmBackToHome: '确定要回到首页吗？',
-        dataWillBeLost: '所有比赛数据将被清除',
         screenshotHint: '建议您先截图保存成绩记录',
-        totalLoss: '累计'
+        totalLoss: '累计',
+        totalPar: 'PAR',
+        noCourses: '未找到球场',
+        trySearch: '请尝试其他关键词',
+        front9: '前九',
+        back9: '后九',
+        eagle: '老鹰',
+        birdie: '小鸟',
+        parLabel: '标准杆',
+        bogey: '柏忌',
+        doubleplus: '双柏忌+'
       },
       en: {
         title: 'HandinCap',
         subtitle: 'Your Handicap in Hand',
         create: 'Create New Game',
-        continueGame: 'Continue Game',
         courseTitle: 'Course Setup',
-        courseSubtitle: 'Select game type and holes',
+        autoMode: 'Auto Search',
+        manualMode: 'Manual Input',
+        searchPlaceholder: 'Search course name...',
+        selectCourse: 'Select Course',
         gameType: 'Game Type',
         setPar: 'Set PAR Values',
         confirmCourse: 'Confirm',
@@ -590,24 +529,17 @@ function IntegratedGolfGame() {
         back: 'Back',
         start: 'Start Game',
         hole: 'Hole',
-        holeTitle: 'Hole {hole}',
         par: 'PAR',
         nextHole: 'Confirm & Next',
         currentMoney: 'Live Standings',
         poolBalance: 'Pool Balance',
-        carryOverPool: 'Carry-Over Pool',
-        currentHoleStake: 'Current Hole Stake',
         holeTied: 'Hole Tied',
         poolGrows: 'Next hole pool',
-        accumulatedFromTies: 'Accumulated from previous ties',
         skinsWinner: '{player} wins the Skin!',
         holeSettlement: 'Hole Settlement',
-        settlement: 'Hole Settlement',
-        fromPool: 'Pool',
         netScore: 'Net',
         rank: 'Rank {n}',
         winner: 'Winner',
-        scorecardTitle: 'Score Card',
         resume: 'Resume Game',
         finishRound: 'Confirm & Finish',
         confirmHoleScore: 'Confirm Hole {hole} Scores',
@@ -628,11 +560,6 @@ function IntegratedGolfGame() {
         standardPar: 'Par',
         finalSettlement: 'Final Settlement',
         noScoreData: 'No scores recorded yet',
-        eagle: 'Eagle',
-        birdie: 'Birdie',
-        parLabel: 'Par',
-        bogey: 'Bogey',
-        doubleplus: 'Double+',
         f9: 'Front 9',
         b9: 'Back 9',
         f18: 'Front 18',
@@ -643,35 +570,66 @@ function IntegratedGolfGame() {
         b18Desc: '10-18, 1-9',
         saved: 'Saved!',
         duplicateNames: 'Player names must be unique',
-        confirmBackToHome: 'Return to home?',
-        dataWillBeLost: 'All game data will be lost',
         screenshotHint: 'We recommend taking a screenshot to save your scores',
-        totalLoss: 'Total'
+        totalLoss: 'Total',
+        totalPar: 'PAR',
+        noCourses: 'No courses found',
+        trySearch: 'Try different keywords',
+        front9: 'Front 9',
+        back9: 'Back 9',
+        eagle: 'Eagle',
+        birdie: 'Birdie',
+        parLabel: 'Par',
+        bogey: 'Bogey',
+        doubleplus: 'Double+'
       }
     };
     return translations[lang][key] || key;
   }, [lang]);
 
-  // 设置球场类型
   const setCourse = useCallback((type) => {
     setCourseType(type);
     const newHoles = courses[type];
     setHoles(newHoles);
-    setPars(newHoles.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
-  }, []);
+    
+    if (selectedCourse) {
+      const newPars = {};
+      newHoles.forEach((hole, index) => {
+        newPars[hole] = selectedCourse.pars[index] || 4;
+      });
+      setPars(newPars);
+    } else {
+      setPars(newHoles.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
+    }
+  }, [selectedCourse]);
 
-  // 设置PAR值
   const setPar = useCallback((hole, par) => {
     setPars(prev => ({ ...prev, [hole]: par }));
   }, []);
 
-  // 确认球场设置
   const confirmCourse = useCallback(() => {
     showToast(t('saved'));
     setCurrentSection('players');
   }, [showToast, t]);
 
-  // 获取竖向排列的洞
+  const selectAndApplyCourse = useCallback((course) => {
+    setSelectedCourse(course);
+    setCourseApplied(false);
+    
+    setCourseType('f18');
+    const newHoles = courses.f18;
+    setHoles(newHoles);
+    
+    const newPars = {};
+    newHoles.forEach((hole, index) => {
+      newPars[hole] = course.pars[index] || 4;
+    });
+    setPars(newPars);
+    setCourseApplied(true);
+    
+    setSearchQuery('');
+  }, []);
+
   const getVerticalArrangedHoles = useCallback(() => {
     const arranged = [];
     
@@ -692,12 +650,10 @@ function IntegratedGolfGame() {
     return arranged;
   }, [holes, courseType]);
 
-  // 计算总PAR
   const calculateTotalPar = useCallback(() => {
     return holes.reduce((sum, hole) => sum + (pars[hole] || 4), 0);
   }, [holes, pars]);
 
-  // 更新玩家名字
   const updatePlayerName = useCallback((index, value) => {
     setPlayerNames(prev => {
       const newNames = [...prev];
@@ -706,7 +662,6 @@ function IntegratedGolfGame() {
     });
   }, []);
 
-  // 更新玩家差点
   const updatePlayerHandicap = useCallback((playerName, parType, value) => {
     setPlayerHandicaps(prev => ({
       ...prev,
@@ -717,7 +672,6 @@ function IntegratedGolfGame() {
     }));
   }, []);
 
-  // 获取成绩标签
   const getScoreLabel = useCallback((netScore, par) => {
     const diff = netScore - par;
     let textKey, className;
@@ -742,7 +696,6 @@ function IntegratedGolfGame() {
     return { text: t(textKey), class: className };
   }, [t]);
 
-  // 开始游戏
   const startGame = useCallback(() => {
     if (activePlayers.length < 2) {
       showToast(t('atLeast2'), 'error');
@@ -758,19 +711,18 @@ function IntegratedGolfGame() {
     const stakeValue = Number(stake) || 0;
     
     if (gameMode === 'matchPlay') {
-      // Match Play模式不需要特殊处理
     } else if (gameMode === 'skins') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
         return;
       }
-      setPrizePool(0);  // Skins模式始终从0开始
+      setPrizePool(0);
     } else if (gameMode === 'win123') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
         return;
       }
-      setPrizePool(0);  // Win123模式也从0开始（罚金池）
+      setPrizePool(0);
     }
 
     const initMoney = {};
@@ -802,44 +754,8 @@ function IntegratedGolfGame() {
     setGameComplete(false);
     setCurrentHoleSettlement(null);
     setCurrentSection('game');
-    
-    setTimeout(() => {
-      try {
-        if (typeof window !== 'undefined' && window.localStorage) {
-          const gameState = {
-            currentSection: 'game',
-            currentHole: 0,
-            scores: {},
-            ups: {},
-            allScores: initAllScores,
-            allUps: {},
-            totalMoney: initMoney,
-            moneyDetails: initDetails,
-            totalSpent: initSpent,
-            completedHoles: [],
-            gameComplete: false,
-            currentHoleSettlement: null,
-            courseType,
-            holes,
-            pars,
-            gameMode,
-            playerNames,
-            stake,
-            prizePool: 0,
-            handicap,
-            playerHandicaps,
-            savedAt: new Date().toISOString(),
-            version: '1.0'
-          };
-          localStorage.setItem('golfGameState', JSON.stringify(gameState));
-        }
-      } catch (error) {
-        console.log('Failed to save initial game state:', error);
-      }
-    }, 100);
-  }, [activePlayers, stake, gameMode, showToast, t, courseType, holes, pars, playerNames, handicap, playerHandicaps]);
+  }, [activePlayers, stake, gameMode, showToast, t]);
 
-  // 获取handicap
   const getHandicapForHole = useCallback((player, par = 4) => {
     if (handicap !== 'on') return 0;
     const handicaps = playerHandicaps[player];
@@ -851,7 +767,6 @@ function IntegratedGolfGame() {
     return 0;
   }, [handicap, playerHandicaps]);
 
-  // 计算Match Play
   const calculateMatchPlay = useCallback((holeScores, holeNum) => {
     const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
@@ -884,7 +799,6 @@ function IntegratedGolfGame() {
     return results;
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
-  // calculateSkins函数
   const calculateSkins = useCallback((holeScores, holeNum) => {
     const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
@@ -904,12 +818,11 @@ function IntegratedGolfGame() {
     const results = {};
     let poolChange = 0;
     
-    // 每个玩家都要投入底注
     activePlayers.forEach(player => {
       results[player] = { 
-        money: -stakeValue,  // 先扣除本洞投入
+        money: -stakeValue,
         fromPool: 0,
-        spent: stakeValue    // 记录本洞投入
+        spent: stakeValue
       };
     });
     
@@ -918,20 +831,17 @@ function IntegratedGolfGame() {
     if (winners.length === 1) {
       const winner = winners[0].player;
       const winAmount = currentPrizePool + holeStake;
-      // 赢家获得奖池，但已经扣了底注，所以是净赢
       results[winner].money = winAmount - stakeValue;
       results[winner].fromPool = currentPrizePool;
       
       poolChange = -currentPrizePool;
     } else {
-      // 平局时奖池累积
       poolChange = holeStake;
     }
     
     return { results, poolChange, isTied: winners.length > 1, winner: winners.length === 1 ? winners[0].player : null, winAmount: winners.length === 1 ? currentPrizePool + holeStake : 0 };
   }, [activePlayers, stake, pars, getHandicapForHole, prizePool]);
 
-  // 修改后的calculateWin123 - 新规则
   const calculateWin123 = useCallback((holeScores, holeUps, holeNum) => {
     const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
@@ -947,7 +857,6 @@ function IntegratedGolfGame() {
     const uniqueScores = [...new Set(playerScores.map(p => p.netScore))];
     const rankings = [...playerScores];
     
-    // 计算排名
     if (uniqueScores.length === 1) {
       rankings.forEach(r => r.finalRank = 1);
     } else if (uniqueScores.length === 2) {
@@ -976,36 +885,29 @@ function IntegratedGolfGame() {
     const results = {};
     let poolChange = 0;
     
-    // 初始化结果
     activePlayers.forEach(player => {
       results[player] = { money: 0, fromPool: 0 };
     });
     
-    // 新规则：只处理罚金池
     if (uniqueScores.length > 1) {
       rankings.forEach(r => {
         let penalty = 0;
         
-        // 根据排名计算基础罚金
         if (r.finalRank === 2) penalty = stakeValue;
         else if (r.finalRank === 3) penalty = stakeValue * 2;
         else if (r.finalRank === 4) penalty = stakeValue * 3;
         
-        // UP的影响 - 新规则
         if (r.up) {
           if (r.finalRank === 1) {
-            // 赢家UP从罚金池获得6倍底注
             const poolWin = stakeValue * 6;
             results[r.player].money = poolWin;
             results[r.player].fromPool = poolWin;
             poolChange -= poolWin;
           } else {
-            // 输家UP罚金翻倍
             penalty = penalty * 2;
           }
         }
         
-        // 输家扣钱（进罚金池）
         if (r.finalRank > 1) {
           results[r.player].money = -penalty;
           poolChange += penalty;
@@ -1016,7 +918,6 @@ function IntegratedGolfGame() {
     return { results, poolChange, rankings };
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
-  // 改变分数
   const changeScore = useCallback((player, delta) => {
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
@@ -1043,11 +944,8 @@ function IntegratedGolfGame() {
       const { results } = calculateWin123(holeScores, holeUps, holeNum);
       setCurrentHoleSettlement(results);
     }
-    
-    setTimeout(() => saveGameState(), 100);
-  }, [scores, currentHole, holes, pars, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, saveGameState]);
+  }, [scores, currentHole, holes, pars, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
-  // 切换UP
   const toggleUp = useCallback((player) => {
     setUps(prev => ({ ...prev, [player]: !prev[player] }));
     
@@ -1064,11 +962,8 @@ function IntegratedGolfGame() {
       const { results } = calculateWin123(holeScores, newUps, holeNum);
       setCurrentHoleSettlement(results);
     }
-    
-    setTimeout(() => saveGameState(), 100);
-  }, [ups, currentHole, holes, pars, scores, activePlayers, gameMode, calculateWin123, saveGameState]);
+  }, [ups, currentHole, holes, pars, scores, activePlayers, gameMode, calculateWin123]);
 
-  // proceedToNextHole中Win123逻辑修改
   const proceedToNextHole = useCallback(() => {
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
@@ -1154,24 +1049,17 @@ function IntegratedGolfGame() {
       setGameComplete(true);
       showToast(t('gameOver'));
       setCurrentSection('scorecard');
-      clearSavedGame();
     } else {
       setCurrentHole(currentHole + 1);
       setScores({});
       setUps({});
       setCurrentHoleSettlement(null);
-      setTimeout(() => saveGameState(), 100);
     }
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
-    
-    if (!gameComplete && currentHole < holes.length - 1) {
-      setTimeout(() => saveGameState(), 100);
-    }
-  }, [currentHole, holes, scores, ups, activePlayers, allScores, allUps, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, clearSavedGame, saveGameState, gameComplete, totalSpent]);
+  }, [currentHole, holes, scores, ups, activePlayers, allScores, allUps, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, totalSpent]);
 
-  // 显示确认对话框
   const nextHole = useCallback(() => {
     if (gameMode === 'win123') {
       const holeNum = holes[currentHole];
@@ -1193,7 +1081,6 @@ function IntegratedGolfGame() {
     });
   }, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
-  // 返回上一洞
   const prevHole = useCallback(() => {
     if (currentHole === 0) return;
     
@@ -1323,7 +1210,7 @@ function IntegratedGolfGame() {
       
       setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
     });
-  }, [currentHole, holes, activePlayers, allScores, allUps, completedHoles, gameMode, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showConfirm, t]);
+  }, [currentHole, holes, activePlayers, allScores, allUps, completedHoles, gameMode, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showConfirm, t, getHandicapForHole]);
 
   const goHome = useCallback(() => {
     const resetGame = () => {
@@ -1348,8 +1235,10 @@ function IntegratedGolfGame() {
       setCompletedHoles([]);
       setGameComplete(false);
       setCurrentHoleSettlement(null);
-      
-      clearSavedGame();
+      setSetupMode('auto');
+      setSearchQuery('');
+      setSelectedCourse(null);
+      setCourseApplied(false);
     };
 
     if (gameComplete) {
@@ -1357,12 +1246,18 @@ function IntegratedGolfGame() {
     } else {
       resetGame();
     }
-  }, [gameComplete, clearSavedGame]);
+  }, [gameComplete]);
 
-  // 渲染界面
+  // 根据排名返回奖牌
+  const getMedal = useCallback((rank) => {
+    if (rank === 1) return '🥇';
+    if (rank === 2) return '🥈';
+    if (rank === 3) return '🥉';
+    return '';
+  }, []);
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
-      {/* 顶部导航 - 只在首页显示语言切换 */}
       {currentSection === 'home' && (
         <div className="flex justify-end items-center p-3 bg-white border-b border-gray-200">
           <button
@@ -1397,16 +1292,6 @@ function IntegratedGolfGame() {
                   <Play className="w-5 h-5" />
                   {t('create')}
                 </button>
-                
-                {hasUnfinishedGame && (
-                  <button
-                    onClick={loadGameState}
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
-                  >
-                    <Play className="w-5 h-5" />
-                    {t('continueGame')}
-                  </button>
-                )}
               </div>
             </div>
           )}
@@ -1414,120 +1299,337 @@ function IntegratedGolfGame() {
           {/* 球场设置页面 */}
           {currentSection === 'course' && (
             <div className="space-y-4 py-3">
-              <div className="bg-white rounded-lg p-3 shadow-sm">
-                <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                  <Target className="w-4 h-4" />
-                  {t('gameType')}
-                </h3>
-                <div className="grid grid-cols-2 gap-3">
-                  {Object.keys(courses).map(type => (
-                    <button
-                      key={type}
-                      onClick={() => setCourse(type)}
-                      className={`p-2 rounded-lg border transition transform hover:scale-105 ${
-                        courseType === type
-                          ? 'bg-green-600 text-white border-green-600 shadow-md'
-                          : 'bg-gray-50 text-gray-900 border-gray-200 hover:border-green-300 hover:shadow-sm'
-                      }`}
-                    >
-                      <h4 className="font-semibold text-xs">{t(type)}</h4>
-                      <p className="text-xs opacity-80" style={{ fontSize: '10px' }}>
-                        {t(`${type}Desc`)}
-                      </p>
-                    </button>
-                  ))}
+              <div className="bg-white rounded-lg p-4 shadow-sm">
+                <div className="flex items-center justify-between mb-3">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <Target className="w-5 h-5 text-green-600" />
+                    {t('courseTitle')}
+                  </h2>
+                </div>
+                
+                <div className="flex rounded-lg border-2 border-green-600 overflow-hidden">
+                  <button
+                    onClick={() => setSetupMode('auto')}
+                    className={`flex-1 px-4 py-2.5 font-semibold text-sm transition flex items-center justify-center gap-2 ${
+                      setupMode === 'auto'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-green-50'
+                    }`}
+                  >
+                    <Search className="w-4 h-4" />
+                    {t('autoMode')}
+                  </button>
+                  <button
+                    onClick={() => setSetupMode('manual')}
+                    className={`flex-1 px-4 py-2.5 font-semibold text-sm transition flex items-center justify-center gap-2 ${
+                      setupMode === 'manual'
+                        ? 'bg-green-600 text-white'
+                        : 'bg-white text-gray-700 hover:bg-green-50'
+                    }`}
+                  >
+                    <Settings className="w-4 h-4" />
+                    {t('manualMode')}
+                  </button>
                 </div>
               </div>
 
-              <div className="bg-white rounded-lg p-4 shadow-sm">
-                <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('setPar')}</h3>
-                
-                {(courseType === 'f18' || courseType === 'b18') ? (
-                  <div className="grid grid-cols-2 gap-3">
-                    {getVerticalArrangedHoles().map((pair, index) => (
-                      <React.Fragment key={index}>
-                        {pair[0] && (
-                          <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <span className="text-sm font-medium text-gray-700 min-w-[40px]">
-                              {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
-                            </span>
-                            <div className="flex gap-1">
-                              {[3, 4, 5].map(par => (
-                                <button
-                                  key={par}
-                                  onClick={() => setPar(pair[0], par)}
-                                  className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
-                                    pars[pair[0]] === par
-                                      ? 'bg-green-600 text-white shadow-sm'
-                                      : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
-                                  }`}
-                                >
-                                  {par}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {pair[1] ? (
-                          <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
-                            <span className="text-sm font-medium text-gray-700 min-w-[40px]">
-                              {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
-                            </span>
-                            <div className="flex gap-1">
-                              {[3, 4, 5].map(par => (
-                                <button
-                                  key={par}
-                                  onClick={() => setPar(pair[1], par)}
-                                  className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
-                                    pars[pair[1]] === par
-                                      ? 'bg-green-600 text-white shadow-sm'
-                                      : 'bg-white text-gray-700 border border-gray-300 hover:border-gray-400'
-                                  }`}
-                                >
-                                  {par}
-                                </button>
-                              ))}
-                            </div>
-                          </div>
+              {setupMode === 'auto' && (
+                <>
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Search className="w-4 h-4" />
+                      {t('selectCourse')}
+                    </h3>
+                    
+                    <div className="relative mb-3">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <input
+                        type="text"
+                        placeholder={t('searchPlaceholder')}
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="w-full pl-10 pr-10 py-2.5 rounded-lg border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                      />
+                      {searchQuery && (
+                        <button
+                          onClick={() => setSearchQuery('')}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      )}
+                    </div>
+
+                    {searchQuery.trim() && (
+                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                        {filteredCourses.length > 0 ? (
+                          filteredCourses.map((course) => {
+                            const coursePar = course.pars.reduce((sum, par) => sum + par, 0);
+                            
+                            return (
+                              <div
+                                key={course.shortName}
+                                className="border border-gray-200 bg-white hover:border-green-300 hover:shadow-sm rounded-lg p-3 cursor-pointer transition"
+                                onClick={() => selectAndApplyCourse(course)}
+                              >
+                                <div className="flex items-start justify-between">
+                                  <div className="flex-1">
+                                    <h4 className="font-semibold text-sm text-gray-900 mb-0.5">
+                                      {course.fullName}
+                                    </h4>
+                                    <p className="text-xs text-gray-500">
+                                      {course.shortName}
+                                    </p>
+                                  </div>
+                                  <div className="text-right ml-3">
+                                    <div className="text-xs text-gray-500">{t('totalPar')}</div>
+                                    <div className="text-lg font-bold text-green-600">{coursePar}</div>
+                                  </div>
+                                </div>
+                              </div>
+                            );
+                          })
                         ) : (
-                          <div></div>
+                          <div className="text-center py-8 text-gray-500">
+                            <Search className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                            <p className="text-sm font-medium">{t('noCourses')}</p>
+                            <p className="text-xs mt-1">{t('trySearch')}</p>
+                          </div>
                         )}
-                      </React.Fragment>
-                    ))}
+                      </div>
+                    )}
                   </div>
-                ) : (
-                  <div className="grid grid-cols-1 gap-1">
-                    {holes.map(hole => (
-                      <div key={hole} className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
-                        <span className="text-sm font-medium text-gray-900">
-                          {t('hole')} {hole}
-                        </span>
-                        <div className="flex gap-1">
-                          {[3, 4, 5].map(par => (
-                            <button
-                              key={par}
-                              onClick={() => setPar(hole, par)}
-                              className={`w-8 h-8 rounded font-bold text-sm transition-all ${
-                                pars[hole] === par
-                                  ? 'bg-green-600 text-white'
-                                  : 'bg-white text-gray-700 border border-gray-300'
-                              }`}
-                            >
-                              {par}
-                            </button>
-                          ))}
+
+                  {selectedCourse && courseApplied && (
+                    <>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <div className="mb-3">
+                          <div className="flex items-start gap-2 mb-1">
+                            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                            <div className="flex-1">
+                              <h3 className="text-sm font-semibold text-gray-900">
+                                {selectedCourse.fullName}
+                              </h3>
+                              <p className="text-xs text-gray-500">
+                                {selectedCourse.shortName}
+                              </p>
+                            </div>
+                          </div>
+                          <div className="text-right">
+                            <span className="text-sm font-bold text-green-600">
+                              PAR {calculateTotalPar()}
+                            </span>
+                          </div>
+                        </div>
+                        
+                        <div className="flex rounded-lg border-2 border-green-600 overflow-hidden mb-4">
+                          <button
+                            onClick={() => {
+                              setCourseType('f18');
+                              const newHoles = courses.f18;
+                              setHoles(newHoles);
+                              const newPars = {};
+                              newHoles.forEach((hole, index) => {
+                                newPars[hole] = selectedCourse.pars[index] || 4;
+                              });
+                              setPars(newPars);
+                            }}
+                            className={`flex-1 px-4 py-2 font-semibold text-sm transition ${
+                              courseType === 'f18'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-white text-gray-700 hover:bg-green-50'
+                            }`}
+                          >
+                            {t('f18')}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setCourseType('b18');
+                              const newHoles = courses.b18;
+                              setHoles(newHoles);
+                              const newPars = {};
+                              newHoles.forEach((hole, index) => {
+                                if (index < 9) {
+                                  newPars[hole] = selectedCourse.pars[hole - 1] || 4;
+                                } else {
+                                  newPars[hole] = selectedCourse.pars[hole - 1] || 4;
+                                }
+                              });
+                              setPars(newPars);
+                            }}
+                            className={`flex-1 px-4 py-2 font-semibold text-sm transition ${
+                              courseType === 'b18'
+                                ? 'bg-green-600 text-white'
+                                : 'bg-white text-gray-700 hover:bg-green-50'
+                            }`}
+                          >
+                            {t('b18')}
+                          </button>
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <div className="bg-green-600 text-white text-sm font-bold py-2 rounded-t-lg text-center mb-3">
+                              {courseType === 'b18' ? t('back9') : t('front9')}
+                            </div>
+                            <div className="space-y-2">
+                              {holes.slice(0, 9).map(hole => (
+                                <div key={hole}>
+                                  <div className="text-xs text-gray-600 mb-1 font-medium text-center">
+                                    {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
+                                  </div>
+                                  <div className={`${getParColorClass(pars[hole])} rounded-md font-bold text-base py-2.5 shadow-sm text-center`}>
+                                    {pars[hole]}
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                          
+                          {holes.length > 9 && (
+                            <div>
+                              <div className="bg-green-600 text-white text-sm font-bold py-2 rounded-t-lg text-center mb-3">
+                                {courseType === 'b18' ? t('front9') : t('back9')}
+                              </div>
+                              <div className="space-y-2">
+                                {holes.slice(9, 18).map(hole => (
+                                  <div key={hole}>
+                                    <div className="text-xs text-gray-600 mb-1 font-medium text-center">
+                                      {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
+                                    </div>
+                                    <div className={`${getParColorClass(pars[hole])} rounded-md font-bold text-base py-2.5 shadow-sm text-center`}>
+                                      {pars[hole]}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
-                    ))}
+                    </>
+                  )}
+                </>
+              )}
+
+              {setupMode === 'manual' && (
+                <>
+                  <div className="bg-white rounded-lg p-3 shadow-sm">
+                    <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
+                      <Target className="w-4 h-4" />
+                      {t('gameType')}
+                    </h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      {Object.keys(courses).map(type => (
+                        <button
+                          key={type}
+                          onClick={() => setCourse(type)}
+                          className={`p-2 rounded-lg border transition transform hover:scale-105 ${
+                            courseType === type
+                              ? 'bg-green-600 text-white border-green-600 shadow-md'
+                              : 'bg-gray-50 text-gray-900 border-gray-200 hover:border-green-300 hover:shadow-sm'
+                          }`}
+                        >
+                          <h4 className="font-semibold text-xs">{t(type)}</h4>
+                          <p className="text-xs opacity-80" style={{ fontSize: '10px' }}>
+                            {t(`${type}Desc`)}
+                          </p>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                )}
-                
-                <div className="mt-2 pt-2 border-t text-center">
-                  <span className="text-sm text-gray-600">{t('par')}: </span>
-                  <span className="text-lg font-bold text-green-600">{calculateTotalPar()}</span>
-                </div>
-              </div>
+
+                  <div className="bg-white rounded-lg p-4 shadow-sm">
+                    <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('setPar')}</h3>
+                    
+                    {(courseType === 'f18' || courseType === 'b18') ? (
+                      <div className="grid grid-cols-2 gap-3">
+                        {getVerticalArrangedHoles().map((pair, index) => (
+                          <React.Fragment key={index}>
+                            {pair[0] && (
+                              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700 min-w-[40px]">
+                                  {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
+                                </span>
+                                <div className="flex gap-1">
+                                  {[3, 4, 5].map(par => (
+                                    <button
+                                      key={par}
+                                      onClick={() => setPar(pair[0], par)}
+                                      className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
+                                        pars[pair[0]] === par
+                                          ? getParColorClass(par) + ' shadow-md ring-2 ring-green-600'
+                                          : 'bg-gray-100 text-gray-500 border border-gray-400 hover:bg-gray-200'
+                                      }`}
+                                    >
+                                      {par}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            
+                            {pair[1] ? (
+                              <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
+                                <span className="text-sm font-medium text-gray-700 min-w-[40px]">
+                                  {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
+                                </span>
+                                <div className="flex gap-1">
+                                  {[3, 4, 5].map(par => (
+                                    <button
+                                      key={par}
+                                      onClick={() => setPar(pair[1], par)}
+                                      className={`w-8 h-8 rounded-md text-sm font-bold transition-all ${
+                                        pars[pair[1]] === par
+                                          ? getParColorClass(par) + ' shadow-md ring-2 ring-green-600'
+                                          : 'bg-gray-100 text-gray-500 border border-gray-400 hover:bg-gray-200'
+                                      }`}
+                                    >
+                                      {par}
+                                    </button>
+                                  ))}
+                                </div>
+                              </div>
+                            ) : (
+                              <div></div>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-1">
+                        {holes.map(hole => (
+                          <div key={hole} className="flex items-center justify-between p-1.5 bg-gray-50 rounded">
+                            <span className="text-sm font-medium text-gray-900">
+                              {t('hole')} {hole}
+                            </span>
+                            <div className="flex gap-1">
+                              {[3, 4, 5].map(par => (
+                                <button
+                                  key={par}
+                                  onClick={() => setPar(hole, par)}
+                                  className={`w-8 h-8 rounded font-bold text-sm transition-all ${
+                                    pars[hole] === par
+                                      ? getParColorClass(par) + ' shadow-md ring-2 ring-green-600'
+                                      : 'bg-gray-100 text-gray-500 border border-gray-400'
+                                  }`}
+                                >
+                                  {par}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    
+                    <div className="mt-2 pt-2 border-t text-center">
+                      <span className="text-sm text-gray-600">{t('par')}: </span>
+                      <span className="text-lg font-bold text-green-600">{calculateTotalPar()}</span>
+                    </div>
+                  </div>
+                </>
+              )}
 
               <div className="flex gap-3">
                 <button
@@ -1697,16 +1799,20 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 成绩卡页面 */}
+          {/* 成绩卡页面 - 使用新设计 */}
           {currentSection === 'scorecard' && (
             <div className="space-y-3 py-3">
-              <div className="relative">
-                <div className="text-center">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {t('scorecardTitle')}
-                  </h2>
+              {/* 醒目的球场标题 - 只在有选择球场时显示 */}
+              {selectedCourse && (
+                <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-4 text-white shadow-md text-center">
+                  <h1 className="text-2xl font-bold mb-1">
+                    {selectedCourse.fullName}
+                  </h1>
+                  <p className="text-sm text-green-100">
+                    {selectedCourse.shortName}
+                  </p>
                 </div>
-              </div>
+              )}
 
               {(() => {
                 const hasData = completedHoles.length > 0;
@@ -1731,6 +1837,42 @@ function IntegratedGolfGame() {
                 activePlayers.forEach(player => {
                   playerTotals[player] = calculateTotal(player, completedHoles);
                 });
+
+                // 计算成绩排名
+                const scoreRankings = activePlayers
+                  .map(player => ({ player, score: playerTotals[player] }))
+                  .sort((a, b) => a.score - b.score)
+                  .reduce((acc, { player }, index, arr) => {
+                    if (index === 0) {
+                      acc[player] = 1;
+                    } else {
+                      const prevPlayer = arr[index - 1].player;
+                      if (playerTotals[player] === playerTotals[prevPlayer]) {
+                        acc[player] = acc[prevPlayer];
+                      } else {
+                        acc[player] = index + 1;
+                      }
+                    }
+                    return acc;
+                  }, {});
+
+                // 计算盈利排名
+                const moneyRankings = (Number(stake) > 0) ? activePlayers
+                  .map(player => ({ player, money: totalMoney[player] }))
+                  .sort((a, b) => b.money - a.money)
+                  .reduce((acc, { player }, index, arr) => {
+                    if (index === 0) {
+                      acc[player] = 1;
+                    } else {
+                      const prevPlayer = arr[index - 1].player;
+                      if (totalMoney[player] === totalMoney[prevPlayer]) {
+                        acc[player] = acc[prevPlayer];
+                      } else {
+                        acc[player] = index + 1;
+                      }
+                    }
+                    return acc;
+                  }, {}) : {};
                 
                 return (
                   <>
@@ -1745,10 +1887,15 @@ function IntegratedGolfGame() {
                             const diff = total - totalPar;
                             const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
                             const diffColor = diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600';
+                            const rank = scoreRankings[player];
+                            const medal = getMedal(rank);
                             
                             return (
                               <div key={player} className="text-center p-2 bg-gray-50 rounded">
-                                <div className="text-xs font-medium text-gray-700">{player}</div>
+                                <div className="text-xs font-medium text-gray-700 flex items-center justify-center gap-1">
+                                  {player}
+                                  {medal && <span className="text-sm">{medal}</span>}
+                                </div>
                                 <div className="flex items-baseline justify-center gap-1">
                                   <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
                                   {total > 0 && (
@@ -1916,7 +2063,7 @@ function IntegratedGolfGame() {
                   {(gameMode === 'skins' || gameMode === 'win123') && prizePool > 0 && (
                     <div className="mb-3 text-center p-2 bg-purple-100 rounded">
                       <span className="text-sm text-purple-700">
-                        {gameMode === 'win123' ? t('penaltyPot') : t('carryOverPool')}: 
+                        {gameMode === 'win123' ? t('penaltyPot') : t('prizePool')}: 
                       </span>
                       <span className="text-lg font-bold text-purple-800 ml-2">
                         ${prizePool}
@@ -1924,22 +2071,54 @@ function IntegratedGolfGame() {
                     </div>
                   )}
                   <div className="space-y-2">
-                    {activePlayers.map(player => {
-                      const amount = totalMoney[player] || 0;
-                      
-                      return (
-                        <div key={player} className="border-b border-yellow-200 last:border-b-0 pb-2">
-                          <div className="flex justify-between items-center">
-                            <span className="font-semibold text-gray-900">{player}</span>
-                            <span className={`font-bold ${
-                              amount > 0 ? 'text-green-600' : amount < 0 ? 'text-red-600' : 'text-gray-500'
-                            }`}>
-                              {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                            </span>
+                    {(() => {
+                      const playerTotals = {};
+                      activePlayers.forEach(player => {
+                        playerTotals[player] = completedHoles.reduce((total, hole) => {
+                          const score = allScores[player]?.[hole];
+                          return total + (score || 0);
+                        }, 0);
+                      });
+
+                      const moneyRankings = activePlayers
+                        .map(player => ({ player, money: totalMoney[player] }))
+                        .sort((a, b) => b.money - a.money)
+                        .reduce((acc, { player }, index, arr) => {
+                          if (index === 0) {
+                            acc[player] = 1;
+                          } else {
+                            const prevPlayer = arr[index - 1].player;
+                            if (totalMoney[player] === totalMoney[prevPlayer]) {
+                              acc[player] = acc[prevPlayer];
+                            } else {
+                              acc[player] = index + 1;
+                            }
+                          }
+                          return acc;
+                        }, {});
+
+                      return activePlayers.map(player => {
+                        const amount = totalMoney[player] || 0;
+                        const rank = moneyRankings[player];
+                        const medal = getMedal(rank);
+                        
+                        return (
+                          <div key={player} className="border-b border-yellow-200 last:border-b-0 pb-2">
+                            <div className="flex justify-between items-center">
+                              <span className="font-semibold text-gray-900 flex items-center gap-1">
+                                {player}
+                                {amount > 0 && medal && <span className="text-base">{medal}</span>}
+                              </span>
+                              <span className={`font-bold ${
+                                amount > 0 ? 'text-green-600' : amount < 0 ? 'text-red-600' : 'text-gray-500'
+                              }`}>
+                                {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      );
-                    })}
+                        );
+                      });
+                    })()}
                   </div>
                 </div>
               )}
@@ -1997,7 +2176,6 @@ function IntegratedGolfGame() {
                     : 'End the game now?\nIncomplete holes will not be counted';
                   showConfirm(message, () => {
                     setGameComplete(true);
-                    clearSavedGame();
                     showToast(t('gameOver'));
                     setCurrentSection('scorecard');
                   }, true);
