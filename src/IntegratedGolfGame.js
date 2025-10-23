@@ -25,52 +25,82 @@ const GOLF_COURSES = {
   "PGCC": {
     shortName: "PGCC",
     fullName: "Palm Garden Golf Club",
-    pars: [4,4,3,5,4,4,3,4,4, 4,5,4,3,4,4,5,3,4]
+    pars: [4,4,3,5,4,4,3,4,4, 4,5,4,3,4,4,5,3,4],
+    blueTees: [380,365,165,510,385,370,155,390,375, 360,495,380,170,385,365,520,150,370],
+    whiteTees: [350,340,145,480,360,345,140,365,350, 340,470,355,155,360,345,490,135,345],
+    redTees: [310,310,120,440,325,310,115,330,320, 310,430,325,130,330,315,450,110,315]
   },
   "TROPICANA": {
     shortName: "TROPICANA",
     fullName: "Tropicana Golf & Country Resort",
-    pars: [4,3,4,5,4,4,4,3,5, 4,4,3,5,4,4,4,3,4]
+    pars: [4,3,4,5,4,4,4,3,5, 4,4,3,5,4,4,4,3,4],
+    blueTees: [375,160,380,505,370,385,365,175,515, 380,375,165,510,370,380,375,150,365],
+    whiteTees: [345,145,355,475,345,360,340,160,485, 355,350,150,480,345,355,350,135,340],
+    redTees: [315,125,320,435,315,325,310,135,445, 325,320,125,440,315,325,320,115,310]
   },
   "MINES": {
     shortName: "MINES",
     fullName: "Mines Resort & Golf Club",
-    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,4,5,4,3,4,5]
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,4,5,4,3,4,5],
+    blueTees: [370,155,520,375,380,170,385,525,370, 375,380,160,385,515,375,165,380,520],
+    whiteTees: [345,140,490,350,355,155,360,495,345, 350,355,145,360,485,350,150,355,490],
+    redTees: [315,120,450,320,325,130,330,455,315, 320,325,125,330,445,320,130,325,450]
   },
   "SRGCC": {
     shortName: "SRGCC",
     fullName: "Saujana Golf & Country Club (Palm)",
-    pars: [4,4,3,4,5,4,4,3,5, 4,5,4,3,4,4,5,3,4]
+    pars: [4,4,3,4,5,4,4,3,5, 4,5,4,3,4,4,5,3,4],
+    blueTees: [380,370,165,375,515,385,375,170,520, 380,510,375,165,380,375,525,160,370],
+    whiteTees: [355,345,150,350,485,360,350,155,490, 355,480,350,150,355,350,495,145,345],
+    redTees: [325,315,130,320,445,330,320,135,450, 325,440,320,130,325,320,455,125,315]
   },
   "GLENMARIE": {
     shortName: "GLENMARIE",
     fullName: "Glenmarie Golf & Country Club (Valley)",
-    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5]
+    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5],
+    blueTees: [510,380,160,375,385,520,165,380,375, 370,375,515,155,385,380,370,170,525],
+    whiteTees: [480,355,145,350,360,490,150,355,350, 345,350,485,140,360,355,345,155,495],
+    redTees: [440,325,125,320,330,450,130,325,320, 315,320,445,120,330,325,315,135,455]
   },
   "KGNS": {
     shortName: "KGNS",
     fullName: "KGNS Golf Club",
-    pars: [4,5,4,3,4,4,5,3,4, 4,4,3,5,4,4,3,4,5]
+    pars: [4,5,4,3,4,4,5,3,4, 4,4,3,5,4,4,3,4,5],
+    blueTees: [375,505,380,170,385,375,515,165,370, 380,375,160,520,385,380,165,375,510],
+    whiteTees: [350,475,355,155,360,350,485,150,345, 355,350,145,490,360,355,150,350,480],
+    redTees: [320,435,325,135,330,320,445,130,315, 325,320,125,450,330,325,130,320,440]
   },
   "KLGCC": {
     shortName: "KLGCC",
     fullName: "Kuala Lumpur Golf & Country Club",
-    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5]
+    pars: [5,4,3,4,4,5,3,4,4, 4,4,5,3,4,4,4,3,5],
+    blueTees: [515,385,165,370,380,510,170,385,375, 375,380,520,160,380,375,370,165,515],
+    whiteTees: [485,360,150,345,355,480,155,360,350, 350,355,490,145,355,350,345,150,485],
+    redTees: [445,330,130,315,325,440,135,330,320, 320,325,450,125,325,320,315,130,445]
   },
   "NILAI-LG": {
     shortName: "NILAI L+G",
     fullName: "Nilai Springs (Lake + Garden)",
-    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,5,4,3,4,5,4]
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,3,5,4,3,4,5,4],
+    blueTees: [380,165,515,375,385,160,380,520,370, 375,380,170,510,385,165,375,515,380],
+    whiteTees: [355,150,485,350,360,145,355,490,345, 350,355,155,480,360,150,350,485,355],
+    redTees: [325,130,445,320,330,125,325,450,315, 320,325,135,440,330,130,320,445,325]
   },
   "NILAI-LV": {
     shortName: "NILAI L+V",
     fullName: "Nilai Springs (Lake + Valley)",
-    pars: [4,3,5,4,4,3,4,5,4, 5,4,3,4,4,5,3,4,4]
+    pars: [4,3,5,4,4,3,4,5,4, 5,4,3,4,4,5,3,4,4],
+    blueTees: [375,170,510,380,375,165,385,525,370, 515,375,160,380,385,520,170,375,380],
+    whiteTees: [350,155,480,355,350,150,360,495,345, 485,350,145,355,360,490,155,350,355],
+    redTees: [320,135,440,325,320,130,330,455,315, 445,320,125,325,330,450,135,320,325]
   },
   "NILAI-GV": {
     shortName: "NILAI G+V",
     fullName: "Nilai Springs (Garden + Valley)",
-    pars: [4,4,3,5,4,3,4,5,4, 5,4,3,4,4,5,3,4,4]
+    pars: [4,4,3,5,4,3,4,5,4, 5,4,3,4,4,5,3,4,4],
+    blueTees: [380,375,165,520,385,170,375,515,380, 510,380,160,375,385,525,165,380,375],
+    whiteTees: [355,350,150,490,360,155,350,485,355, 480,355,145,350,360,495,150,355,350],
+    redTees: [325,320,130,450,330,135,320,445,325, 440,325,125,320,330,455,130,325,320]
   }
 };
 
@@ -368,14 +398,102 @@ function IntegratedGolfGame() {
   const [gameComplete, setGameComplete] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
+  const [hasSavedGame, setHasSavedGame] = useState(false);
 
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
 
+  // 从localStorage加载游戏状态
+  useEffect(() => {
+    const savedGame = localStorage.getItem('golfGameState');
+    if (savedGame) {
+      setHasSavedGame(true);
+    }
+  }, []);
+
+  // 清除已保存的游戏
+  const clearSavedGame = useCallback(() => {
+    localStorage.removeItem('golfGameState');
+    setHasSavedGame(false);
+  }, []);
+
   const showToast = useCallback((message, type = 'success') => {
     setToast({ message, type });
   }, []);
+
+  // 恢复游戏状态
+  const resumeGame = useCallback(() => {
+    const savedGame = localStorage.getItem('golfGameState');
+    if (savedGame) {
+      try {
+        const gameState = JSON.parse(savedGame);
+        setLang(gameState.lang || 'zh');
+        setCourseType(gameState.courseType || 'f18');
+        setHoles(gameState.holes || courses.f18);
+        setPars(gameState.pars || {});
+        setGameMode(gameState.gameMode || 'matchPlay');
+        setPlayerNames(gameState.playerNames || ['', '', '', '']);
+        setStake(gameState.stake || '');
+        setPrizePool(gameState.prizePool || '');
+        setHandicap(gameState.handicap || 'off');
+        setPlayerHandicaps(gameState.playerHandicaps || {});
+        setCurrentHole(gameState.currentHole || 0);
+        setScores(gameState.scores || {});
+        setUps(gameState.ups || {});
+        setAllScores(gameState.allScores || {});
+        setAllUps(gameState.allUps || {});
+        setTotalMoney(gameState.totalMoney || {});
+        setMoneyDetails(gameState.moneyDetails || {});
+        setCompletedHoles(gameState.completedHoles || []);
+        setGameComplete(gameState.gameComplete || false);
+        setCurrentHoleSettlement(gameState.currentHoleSettlement || null);
+        setTotalSpent(gameState.totalSpent || {});
+        setSelectedCourse(gameState.selectedCourse || null);
+        setSetupMode(gameState.setupMode || 'auto');
+        setCurrentSection('game');
+      } catch (error) {
+        console.error('Failed to resume game:', error);
+        showToast('恢复游戏失败', 'error');
+      }
+    }
+  }, [showToast]);
+
+  // 保存游戏状态到localStorage
+  useEffect(() => {
+    if (currentSection === 'game' && activePlayers.length > 0) {
+      const gameState = {
+        lang,
+        courseType,
+        holes,
+        pars,
+        gameMode,
+        playerNames,
+        stake,
+        prizePool,
+        handicap,
+        playerHandicaps,
+        currentHole,
+        scores,
+        ups,
+        allScores,
+        allUps,
+        totalMoney,
+        moneyDetails,
+        completedHoles,
+        gameComplete,
+        currentHoleSettlement,
+        totalSpent,
+        selectedCourse,
+        setupMode
+      };
+      localStorage.setItem('golfGameState', JSON.stringify(gameState));
+      setHasSavedGame(true);
+    }
+  }, [currentSection, lang, courseType, holes, pars, gameMode, playerNames, stake, prizePool, 
+      handicap, playerHandicaps, currentHole, scores, ups, allScores, allUps, totalMoney, 
+      moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
+      selectedCourse, setupMode, activePlayers.length]);
 
   const showConfirm = useCallback((message, action, showScreenshotHint = false) => {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
@@ -496,7 +614,7 @@ function IntegratedGolfGame() {
       },
       en: {
         title: 'HandinCap',
-        subtitle: 'Your Handicap in Hand',
+        subtitle: 'Just a Game',
         create: 'Create New Game',
         courseTitle: 'Course Setup',
         autoMode: 'Auto Search',
@@ -1214,6 +1332,7 @@ function IntegratedGolfGame() {
 
   const goHome = useCallback(() => {
     const resetGame = () => {
+      clearSavedGame(); // 清除已保存的游戏
       setCurrentSection('home');
       setGameMode('matchPlay');
       setPlayerNames(['', '', '', '']);
@@ -1246,7 +1365,7 @@ function IntegratedGolfGame() {
     } else {
       resetGame();
     }
-  }, [gameComplete]);
+  }, [gameComplete, clearSavedGame]);
 
   // 根据排名返回奖牌
   const getMedal = useCallback((rank) => {
@@ -1285,6 +1404,15 @@ function IntegratedGolfGame() {
               </div>
               
               <div className="w-full max-w-xs space-y-3">
+                {hasSavedGame && (
+                  <button
+                    onClick={resumeGame}
+                    className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
+                  >
+                    <Play className="w-5 h-5" />
+                    {t('resume')}
+                  </button>
+                )}
                 <button
                   onClick={() => setCurrentSection('course')}
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
@@ -1361,7 +1489,7 @@ function IntegratedGolfGame() {
                     </div>
 
                     {searchQuery.trim() && (
-                      <div className="space-y-2 max-h-64 overflow-y-auto">
+                      <div className="space-y-2 max-h-96 overflow-y-auto">
                         {filteredCourses.length > 0 ? (
                           filteredCourses.map((course) => {
                             const coursePar = course.pars.reduce((sum, par) => sum + par, 0);
@@ -1467,38 +1595,49 @@ function IntegratedGolfGame() {
                           </button>
                         </div>
                         
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <div className="bg-green-600 text-white text-sm font-bold py-2 rounded-t-lg text-center mb-3">
-                              {courseType === 'b18' ? t('back9') : t('front9')}
+                        {/* Par值详细显示 - 前九后九竖向两列布局 */}
+                        <div className="grid grid-cols-2 gap-2">
+                          {/* 前九 */}
+                          <div className="border-2 border-green-600 rounded-lg overflow-hidden">
+                            <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
+                              {t('front9')}
                             </div>
-                            <div className="space-y-2">
-                              {holes.slice(0, 9).map(hole => (
+                            <div className="p-1.5 space-y-1">
+                              {holes.slice(0, 9).map((hole, idx) => (
                                 <div key={hole}>
-                                  <div className="text-xs text-gray-600 mb-1 font-medium text-center">
+                                  <div className="text-xs text-gray-600 mb-0.5 font-medium text-center">
                                     {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
                                   </div>
-                                  <div className={`${getParColorClass(pars[hole])} rounded-md font-bold text-base py-2.5 shadow-sm text-center`}>
-                                    {pars[hole]}
+                                  <div className={`rounded font-bold text-sm py-1.5 shadow-sm text-center ${
+                                    pars[hole] === 3 ? 'bg-yellow-300 text-black' :
+                                    pars[hole] === 5 ? 'bg-orange-300 text-black' :
+                                    'bg-gray-300 text-black'
+                                  }`}>
+                                    Par {pars[hole]}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
                           
+                          {/* 后九 */}
                           {holes.length > 9 && (
-                            <div>
-                              <div className="bg-green-600 text-white text-sm font-bold py-2 rounded-t-lg text-center mb-3">
-                                {courseType === 'b18' ? t('front9') : t('back9')}
+                            <div className="border-2 border-green-600 rounded-lg overflow-hidden">
+                              <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
+                                {t('back9')}
                               </div>
-                              <div className="space-y-2">
-                                {holes.slice(9, 18).map(hole => (
+                              <div className="p-1.5 space-y-1">
+                                {holes.slice(9, 18).map((hole, idx) => (
                                   <div key={hole}>
-                                    <div className="text-xs text-gray-600 mb-1 font-medium text-center">
+                                    <div className="text-xs text-gray-600 mb-0.5 font-medium text-center">
                                       {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
                                     </div>
-                                    <div className={`${getParColorClass(pars[hole])} rounded-md font-bold text-base py-2.5 shadow-sm text-center`}>
-                                      {pars[hole]}
+                                    <div className={`rounded font-bold text-sm py-1.5 shadow-sm text-center ${
+                                      pars[hole] === 3 ? 'bg-yellow-300 text-black' :
+                                      pars[hole] === 5 ? 'bg-orange-300 text-black' :
+                                      'bg-gray-300 text-black'
+                                    }`}>
+                                      Par {pars[hole]}
                                     </div>
                                   </div>
                                 ))}
@@ -2168,6 +2307,47 @@ function IntegratedGolfGame() {
                 )}
               </div>
             )}
+            
+            {/* 显示该洞的Tee台距离 - 卡片式 */}
+            {selectedCourse && selectedCourse.blueTees && (
+              <div className="mt-2 px-4">
+                <div className="grid grid-cols-3 gap-1.5">
+                  {/* Blue Tee */}
+                  <div className="bg-blue-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
+                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                      <span className="inline-block w-1.5 h-1.5 bg-blue-700 rounded-full"></span>
+                      <span className="text-xs font-semibold text-white">Blue</span>
+                    </div>
+                    <div className="text-sm font-bold text-white">
+                      {selectedCourse.blueTees[holes[currentHole] - 1]}m
+                    </div>
+                  </div>
+                  
+                  {/* White Tee */}
+                  <div className="bg-gray-200 rounded-md py-1 px-1.5 text-center shadow-sm">
+                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                      <span className="inline-block w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                      <span className="text-xs font-semibold text-gray-700">White</span>
+                    </div>
+                    <div className="text-sm font-bold text-gray-900">
+                      {selectedCourse.whiteTees[holes[currentHole] - 1]}m
+                    </div>
+                  </div>
+                  
+                  {/* Red Tee */}
+                  <div className="bg-red-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
+                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                      <span className="inline-block w-1.5 h-1.5 bg-red-700 rounded-full"></span>
+                      <span className="text-xs font-semibold text-white">Red</span>
+                    </div>
+                    <div className="text-sm font-bold text-white">
+                      {selectedCourse.redTees[holes[currentHole] - 1]}m
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {!gameComplete && completedHoles.length < holes.length && (
               <button
                 onClick={() => {
