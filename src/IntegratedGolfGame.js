@@ -1285,7 +1285,13 @@ function IntegratedGolfGame() {
       setHasSavedGame(true);
     }
   }, []);
-
+useEffect(() => {
+  if (currentSection === 'course') {
+    setSearchQuery('');
+    setSelectedCourse(null);
+    setCourseApplied(false);
+  }
+}, [currentSection]);
   // 清除已保存的游戏
   const clearSavedGame = useCallback(() => {
     localStorage.removeItem('golfGameState');
@@ -2343,7 +2349,12 @@ const filteredCourses = useMemo(() => {
                   </button>
                 )}
                 <button
-                  onClick={() => setCurrentSection('course')}
+                  onClick={() => {
+    setSearchQuery('');
+    setSelectedCourse(null);
+    setCourseApplied(false);
+    setCurrentSection('course');
+  }}
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
                 >
                   <Play className="w-5 h-5" />
@@ -2697,7 +2708,12 @@ const filteredCourses = useMemo(() => {
 
               <div className="flex gap-3">
                 <button
-                  onClick={() => setCurrentSection('home')}
+                  onClick={() => {
+      setSearchQuery('');
+      setSelectedCourse(null);
+      setCourseApplied(false);
+      setCurrentSection('home');
+    }}
                   className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
                   {t('back')}
