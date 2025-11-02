@@ -22,13 +22,13 @@ import {
 
 // 球场数据库
 const GOLF_COURSES = {
-  "PGCC": {
-    shortName: "PGCC",
-    fullName: "Palm Garden Golf Club",
-    pars: [4,4,3,5,4,4,3,4,4, 4,5,4,3,4,4,5,3,4],
-    blueTees: [380,365,165,510,385,370,155,390,375, 360,495,380,170,385,365,520,150,370],
-    whiteTees: [350,340,145,480,360,345,140,365,350, 340,470,355,155,360,345,490,135,345],
-    redTees: [310,310,120,440,325,310,115,330,320, 310,430,325,130,330,315,450,110,315]
+  "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "BJGCR",
+    fullName: "Bukit Jalil Golf & Country Resort",
+    pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
   },
   "TROPICANA": {
     shortName: "TROPICANA",
@@ -379,7 +379,8 @@ function IntegratedGolfGame() {
   const [holes, setHoles] = useState(courses.f18);
   const [pars, setPars] = useState(courses.f18.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
   
-  const [gameMode, setGameMode] = useState('matchPlay'); 
+  const [gameMode, setGameMode] = useState('matchPlay');
+  const [jumboMode, setJumboMode] = useState(false);
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
   const [prizePool, setPrizePool] = useState('');
@@ -451,6 +452,7 @@ function IntegratedGolfGame() {
         setTotalSpent(gameState.totalSpent || {});
         setSelectedCourse(gameState.selectedCourse || null);
         setSetupMode(gameState.setupMode || 'auto');
+        setJumboMode(gameState.jumboMode || false);
         setCurrentSection('game');
       } catch (error) {
         console.error('Failed to resume game:', error);
@@ -485,7 +487,8 @@ function IntegratedGolfGame() {
         currentHoleSettlement,
         totalSpent,
         selectedCourse,
-        setupMode
+        setupMode,
+        jumboMode
       };
       localStorage.setItem('golfGameState', JSON.stringify(gameState));
       setHasSavedGame(true);
@@ -493,7 +496,7 @@ function IntegratedGolfGame() {
   }, [currentSection, lang, courseType, holes, pars, gameMode, playerNames, stake, prizePool, 
       handicap, playerHandicaps, currentHole, scores, ups, allScores, allUps, totalMoney, 
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
-      selectedCourse, setupMode, activePlayers.length]);
+      selectedCourse, setupMode, jumboMode, activePlayers.length]);
 
   const showConfirm = useCallback((message, action, showScreenshotHint = false) => {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
@@ -518,6 +521,7 @@ function IntegratedGolfGame() {
   const getParColorClass = useCallback((par) => {
     if (par === 3) return 'bg-yellow-300 text-black';
     if (par === 5) return 'bg-orange-300 text-black';
+    if (par === 6) return 'bg-red-400 text-black';
     return 'bg-gray-300 text-black';
   }, []);
 
@@ -541,6 +545,10 @@ function IntegratedGolfGame() {
         player2: '玩家2',
         player3: '玩家3',
         player4: '玩家4',
+        player5: '玩家5',
+        player6: '玩家6',
+        player7: '玩家7',
+        player8: '玩家8',
         enterName: '输入姓名',
         gameMode: '游戏模式',
         matchPlay: 'Match Play',
@@ -630,6 +638,10 @@ function IntegratedGolfGame() {
         player2: 'Player 2',
         player3: 'Player 3',
         player4: 'Player 4',
+        player5: 'Player 5',
+        player6: 'Player 6',
+        player7: 'Player 7',
+        player8: 'Player 8',
         enterName: 'Enter name',
         gameMode: 'Game Mode',
         matchPlay: 'Match Play',
@@ -777,6 +789,18 @@ function IntegratedGolfGame() {
       const newNames = [...prev];
       newNames[index] = value;
       return newNames;
+    });
+  }, []);
+
+  const toggleJumboMode = useCallback(() => {
+    setJumboMode(prev => {
+      const newMode = !prev;
+      if (newMode) {
+        setPlayerNames(['', '', '', '', '', '', '', '']);
+      } else {
+        setPlayerNames(['', '', '', '']);
+      }
+      return newMode;
     });
   }, []);
 
@@ -1332,9 +1356,10 @@ function IntegratedGolfGame() {
 
   const goHome = useCallback(() => {
     const resetGame = () => {
-      clearSavedGame(); // 清除已保存的游戏
+      clearSavedGame();
       setCurrentSection('home');
       setGameMode('matchPlay');
+      setJumboMode(false);
       setPlayerNames(['', '', '', '']);
       setStake('');
       setPrizePool('');
@@ -1367,7 +1392,6 @@ function IntegratedGolfGame() {
     }
   }, [gameComplete, clearSavedGame]);
 
-  // 根据排名返回奖牌
   const getMedal = useCallback((rank) => {
     if (rank === 1) return '🥇';
     if (rank === 2) return '🥈';
@@ -1391,7 +1415,6 @@ function IntegratedGolfGame() {
       <div className="flex-1 overflow-auto">
         <div className="max-w-md mx-auto p-3">
           
-          {/* 首页 */}
           {currentSection === 'home' && (
             <div className="h-full flex flex-col items-center justify-center px-4">
               <div className="text-center mb-8">
@@ -1424,7 +1447,6 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 球场设置页面 */}
           {currentSection === 'course' && (
             <div className="space-y-4 py-3">
               <div className="bg-white rounded-lg p-4 shadow-sm">
@@ -1595,9 +1617,7 @@ function IntegratedGolfGame() {
                           </button>
                         </div>
                         
-                        {/* Par值详细显示 - 前九后九竖向两列布局 */}
                         <div className="grid grid-cols-2 gap-2">
-                          {/* 前九 */}
                           <div className="border-2 border-green-600 rounded-lg overflow-hidden">
                             <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
                               {t('front9')}
@@ -1620,7 +1640,6 @@ function IntegratedGolfGame() {
                             </div>
                           </div>
                           
-                          {/* 后九 */}
                           {holes.length > 9 && (
                             <div className="border-2 border-green-600 rounded-lg overflow-hidden">
                               <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
@@ -1691,7 +1710,7 @@ function IntegratedGolfGame() {
                                   {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
                                 </span>
                                 <div className="flex gap-1">
-                                  {[3, 4, 5].map(par => (
+                                  {[3, 4, 5, 6].map(par => (
                                     <button
                                       key={par}
                                       onClick={() => setPar(pair[0], par)}
@@ -1714,7 +1733,7 @@ function IntegratedGolfGame() {
                                   {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
                                 </span>
                                 <div className="flex gap-1">
-                                  {[3, 4, 5].map(par => (
+                                  {[3, 4, 5, 6].map(par => (
                                     <button
                                       key={par}
                                       onClick={() => setPar(pair[1], par)}
@@ -1743,7 +1762,7 @@ function IntegratedGolfGame() {
                               {t('hole')} {hole}
                             </span>
                             <div className="flex gap-1">
-                              {[3, 4, 5].map(par => (
+                              {[3, 4, 5, 6].map(par => (
                                 <button
                                   key={par}
                                   onClick={() => setPar(hole, par)}
@@ -1787,7 +1806,6 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 玩家设置页面 */}
           {currentSection === 'players' && (
             <div className="space-y-4 py-3">
               <div className="text-center">
@@ -1797,12 +1815,25 @@ function IntegratedGolfGame() {
               </div>
 
               <div className="bg-white rounded-lg p-4 shadow-sm">
-                <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                  <Users className="w-4 h-4" />
-                  {t('players')}
-                </h3>
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    {t('players')}
+                  </h3>
+                  <button
+                    onClick={toggleJumboMode}
+                    className={`px-3 py-1.5 rounded-md font-medium text-xs transition ${
+                      jumboMode
+                        ? 'bg-purple-600 text-white hover:bg-purple-700'
+                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                    }`}
+                  >
+                    {lang === 'zh' ? '多人' : 'Jumbo'}
+                  </button>
+                </div>
+                
                 <div className="space-y-3">
-                  {[0, 1, 2, 3].map(i => (
+                  {Array.from({ length: jumboMode ? 8 : 4 }, (_, i) => i).map(i => (
                     <div key={i} className="space-y-1">
                       <label className="block text-xs font-medium text-gray-700">
                         {t(`player${i + 1}`)}:
@@ -1938,10 +1969,8 @@ function IntegratedGolfGame() {
             </div>
           )}
 
-          {/* 成绩卡页面 - 使用新设计 */}
           {currentSection === 'scorecard' && (
             <div className="space-y-3 py-3">
-              {/* 醒目的球场标题 - 只在有选择球场时显示 */}
               {selectedCourse && (
                 <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-4 text-white shadow-md text-center">
                   <h1 className="text-2xl font-bold mb-1">
@@ -1977,7 +2006,6 @@ function IntegratedGolfGame() {
                   playerTotals[player] = calculateTotal(player, completedHoles);
                 });
 
-                // 计算成绩排名
                 const scoreRankings = activePlayers
                   .map(player => ({ player, score: playerTotals[player] }))
                   .sort((a, b) => a.score - b.score)
@@ -1995,7 +2023,6 @@ function IntegratedGolfGame() {
                     return acc;
                   }, {});
 
-                // 计算盈利排名
                 const moneyRankings = (Number(stake) > 0) ? activePlayers
                   .map(player => ({ player, money: totalMoney[player] }))
                   .sort((a, b) => b.money - a.money)
@@ -2290,7 +2317,6 @@ function IntegratedGolfGame() {
         </div>
       </div>
 
-      {/* 游戏进行页面 */}
       {currentSection === 'game' && (
         <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
@@ -2308,42 +2334,53 @@ function IntegratedGolfGame() {
               </div>
             )}
             
-            {/* 显示该洞的Tee台距离 - 卡片式 */}
-            {selectedCourse && selectedCourse.blueTees && (
+            {selectedCourse && (
+              selectedCourse.blueTees || 
+              selectedCourse.whiteTees || 
+              selectedCourse.redTees
+            ) && (
               <div className="mt-2 px-4">
-                <div className="grid grid-cols-3 gap-1.5">
-                  {/* Blue Tee */}
-                  <div className="bg-blue-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
-                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
-                      <span className="inline-block w-1.5 h-1.5 bg-blue-700 rounded-full"></span>
-                      <span className="text-xs font-semibold text-white">Blue</span>
+                <div className="grid gap-1.5" style={{
+                  gridTemplateColumns: `repeat(${
+                    [selectedCourse.blueTees, selectedCourse.whiteTees, selectedCourse.redTees]
+                      .filter(Boolean).length
+                  }, 1fr)`
+                }}>
+                  {selectedCourse.blueTees && (
+                    <div className="bg-blue-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                        <span className="inline-block w-1.5 h-1.5 bg-blue-700 rounded-full"></span>
+                        <span className="text-xs font-semibold text-white">Blue</span>
+                      </div>
+                      <div className="text-sm font-bold text-white">
+                        {selectedCourse.blueTees[holes[currentHole] - 1]}m
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-white">
-                      {selectedCourse.blueTees[holes[currentHole] - 1]}m
-                    </div>
-                  </div>
+                  )}
                   
-                  {/* White Tee */}
-                  <div className="bg-gray-200 rounded-md py-1 px-1.5 text-center shadow-sm">
-                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
-                      <span className="inline-block w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
-                      <span className="text-xs font-semibold text-gray-700">White</span>
+                  {selectedCourse.whiteTees && (
+                    <div className="bg-gray-200 rounded-md py-1 px-1.5 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                        <span className="inline-block w-1.5 h-1.5 bg-gray-400 rounded-full"></span>
+                        <span className="text-xs font-semibold text-gray-700">White</span>
+                      </div>
+                      <div className="text-sm font-bold text-gray-900">
+                        {selectedCourse.whiteTees[holes[currentHole] - 1]}m
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-gray-900">
-                      {selectedCourse.whiteTees[holes[currentHole] - 1]}m
-                    </div>
-                  </div>
+                  )}
                   
-                  {/* Red Tee */}
-                  <div className="bg-red-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
-                    <div className="flex items-center justify-center gap-0.5 mb-0.5">
-                      <span className="inline-block w-1.5 h-1.5 bg-red-700 rounded-full"></span>
-                      <span className="text-xs font-semibold text-white">Red</span>
+                  {selectedCourse.redTees && (
+                    <div className="bg-red-500 bg-opacity-90 rounded-md py-1 px-1.5 text-center shadow-sm">
+                      <div className="flex items-center justify-center gap-0.5 mb-0.5">
+                        <span className="inline-block w-1.5 h-1.5 bg-red-700 rounded-full"></span>
+                        <span className="text-xs font-semibold text-white">Red</span>
+                      </div>
+                      <div className="text-sm font-bold text-white">
+                        {selectedCourse.redTees[holes[currentHole] - 1]}m
+                      </div>
                     </div>
-                    <div className="text-sm font-bold text-white">
-                      {selectedCourse.redTees[holes[currentHole] - 1]}m
-                    </div>
-                  </div>
+                  )}
                 </div>
               </div>
             )}
