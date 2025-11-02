@@ -1381,15 +1381,48 @@ function IntegratedGolfGame() {
     }
   }, [currentSection]);
 
-  const filteredCourses = useMemo(() => {
-    if (!searchQuery.trim()) return [];
-    
-    const query = searchQuery.toLowerCase();
-    return Object.values(GOLF_COURSES).filter(course => 
-      course.shortName.toLowerCase().includes(query) ||
-      course.fullName.toLowerCase().includes(query)
-    );
-  }, [searchQuery]);
+const filteredCourses = useMemo(() => {
+  if (!searchQuery.trim()) return [];
+  
+  // 将搜索词拆分成多个关键词
+  const keywords = searchQuery.toLowerCase().trim().split(/\s+/);
+  
+  // 过滤并评分
+  const coursesWithScore = Object.values(GOLF_COURSES)
+    .map(course => {
+      const fullNameLower = course.fullName.toLowerCase();
+      const shortNameLower = course.shortName.toLowerCase();
+      
+      // 确保所有关键词都匹配
+      const allKeywordsMatch = keywords.every(keyword => 
+        fullNameLower.includes(keyword) || shortNameLower.includes(keyword)
+      );
+      
+      if (!allKeywordsMatch) return null;
+      
+      // 计算匹配分数
+      let score = 0;
+      
+      if (fullNameLower === searchQuery.toLowerCase()) score += 100;
+      if (shortNameLower === searchQuery.toLowerCase()) score += 100;
+      if (fullNameLower.startsWith(searchQuery.toLowerCase())) score += 50;
+      if (shortNameLower.startsWith(searchQuery.toLowerCase())) score += 50;
+      
+      keywords.forEach(keyword => {
+        if (fullNameLower.includes(keyword)) score += 10;
+        if (shortNameLower.includes(keyword)) score += 5;
+        if (fullNameLower.startsWith(keyword)) score += 5;
+        if (shortNameLower.startsWith(keyword)) score += 3;
+      });
+      
+      return { course, score };
+    })
+    .filter(item => item !== null)
+    .sort((a, b) => b.score - a.score)
+    .map(item => item.course);
+  
+  return coursesWithScore;
+}, [searchQuery]);
 
   const getParColorClass = useCallback((par) => {
     if (par === 3) return 'bg-yellow-300 text-black';
