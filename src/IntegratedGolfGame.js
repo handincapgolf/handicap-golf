@@ -25,15 +25,17 @@ const GOLF_COURSES = {
   "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
     shortName: "BJGCR",
     fullName: "Bukit Jalil Golf & Country Resort",
+    location: ["Bukit Jalil", "Kuala Lumpur", "Malaysia"]
     pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "99_EAST_LANGKAWI": {
-    shortName: "EL",
-    fullName: "99 East langkawi",
+  "99_East_Golf_Club": {
+    shortName: "99EGC",
+    fullName: "99 East Golf Club",
+    location: ["Langkawi", "Kedah", "Malaysia"],
     pars: [5,3,4,4,4,5,4,4,3, 5,3,4,4,4,5,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -43,6 +45,7 @@ const GOLF_COURSES = {
   "AMVERTON_COVE_GOLF_AND_ISLAND_RESORT": {
     shortName: "ACGIR",
     fullName: "Amverton Cove Golf & Island Resort",
+    location: ["Carey Island", "Selangor", "Malaysia"],
     pars: [4,5,4,4,3,4,3,5,4, 5,4,3,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -52,15 +55,17 @@ const GOLF_COURSES = {
   "AWANA_GENTING_HIGHLANDS": {
     shortName: "AGH",
     fullName: "Awana Genting Highlands",
+    location: ["Genting Highlands", "Pahang", "Malaysia"],
     pars: [4,4,4,3,5,3,4,5,3, 4,4,5,5,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "AWANA_KIJAL": {
-    shortName: "AK",
-    fullName: "Awana Kijal",
+  "Awana_Kijal_Golf_Beach_&_Spa_Resort": {
+    shortName: "AKGBSR",
+    fullName: "Awana Kijal Golf Beach & Spa Resort",
+    location: ["Kijal", "Terengganu", "Malaysia"],
     pars: [4,4,5,3,4,4,3,4,5, 4,4,3,5,3,5,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -70,6 +75,7 @@ const GOLF_COURSES = {
   "BENTONG_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Bentong Golf Club",
+    location: ["Bentong", "Pahang", "Malaysia"],
     pars: [4,4,4,3,4,3,5,4,5, 3,4,4,4,5,3,4,4,5],
     blueTees: null,
     whiteTees: null,
@@ -79,16 +85,8 @@ const GOLF_COURSES = {
   "BERJAYA_HILLS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BHGCC",
     fullName: "Berjaya Hills Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "BGCC": {
-    shortName: "B",
-    fullName: "BGCC",
-    pars: [5,4,4,3,4,4,4,3,5, 4,4,4,4,3,4,5,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -97,6 +95,7 @@ const GOLF_COURSES = {
   "BINTULU_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Bintulu Golf Club",
+    location: ["Bintulu", "Sarawak", "Malaysia"],
     pars: [5,4,3,4,4,4,3,4,5, 4,3,4,4,4,5,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -106,6 +105,7 @@ const GOLF_COURSES = {
   "BLACK_FOREST_GOLF_AND_COUNTRY CLUB": {
     shortName: "BFGCC",
     fullName: "Black Forest Golf & Country Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,5,3,4,4, 4,5,3,4,5,4,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -115,6 +115,7 @@ const GOLF_COURSES = {
   "BORNEO_GOLF&_COUNTRY CLUB": {
     shortName: "BGCC",
     fullName: "Borneo Golf & Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
     pars: [4,4,5,4,3,5,4,3,4, 4,5,4,4,3,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -124,6 +125,7 @@ const GOLF_COURSES = {
   "BUKIT_BANANG_GOLF_AND_COUNTRY CLUB": {
     shortName: "BBGCC",
     fullName: "Bukit Banang Golf & Country Club",
+    location: ["Banting", "Selangor", "Malaysia"],
     pars: [4,5,4,4,4,3,5,3,4, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -133,6 +135,7 @@ const GOLF_COURSES = {
   "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
     shortName: "BJGCR",
     fullName: "Bukit Jalil Golf & Country Resort",
+    location: ["Bukit Jalil", "Kuala Lumpur", "Malaysia"],
     pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -142,6 +145,7 @@ const GOLF_COURSES = {
   "BUKIT_KEMUNING_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BKGCC",
     fullName: "Bukit Kemuning Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,3,4,4,5, 4,4,5,3,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -151,6 +155,7 @@ const GOLF_COURSES = {
   "BUKIT_TINGGI_GOLF_AND_COUNTRY CLUB": {
     shortName: "BTGCC",
     fullName: "Bukit Tinggi Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -158,26 +163,29 @@ const GOLF_COURSES = {
   },
 
   "BUKIT_UNGGUL": {
-    shortName: "BU",
-    fullName: "Bukit Unggul",
-    pars: [4,3,5,4,4,4,3,4,4, 5,4,4,4,3,5,4,3,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
+  shortName: "BUCC",
+  fullName: "Bukit Unggul Country Club",
+  location: ["Dengkil", "Selangor", "Malaysia"],
+  pars: [4,3,5,4,4,4,3,4,4, 5,4,4,4,3,5,4,3,4],
+  blueTees: null,
+  whiteTees: null,
+  redTees: null
+ },
 
-  "BUKIT_UTAMA": {
-    shortName: "BU",
-    fullName: "Bukit Utama",
-    pars: [4,3,4,3,4,4,5,3,4, 3,4,3,4,3,4,4,5,3],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
+  "THE_CLUB_AT_BUKIT_UTAMA": {
+  shortName: "TCBU",
+  fullName: "The Club @ Bukit Utama",
+  location: ["Bandar Utama", "Selangor", "Malaysia"],
+  pars: [4,3,4,3,4,4,5,3,4],  //
+  blueTees: null,
+  whiteTees: null,
+  redTees: null
+},
 
   "BUTTERWORTH_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Butterworth Golf Club",
+    location: ["Butterworth", "Penang", "Malaysia"],
     pars: [4,4,5,3,4,4,5,3,4, 4,4,4,4,4,4,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -187,6 +195,7 @@ const GOLF_COURSES = {
   "CINTA_SAYANG_GOLF_RESORT": {
     shortName: "CSGR",
     fullName: "Cinta Sayang Golf Resort",
+    location: ["Sungai Petani", "Kedah", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,4,5,3,5,4,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -196,6 +205,7 @@ const GOLF_COURSES = {
   "CLEARWATER_SANCTUARY_GOLF_RESORT": {
     shortName: "CSGR",
     fullName: "Clearwater Sanctuary Golf Resort",
+    location: ["Batu Gajah", "Perak", "Malaysia"],
     pars: [4,4,3,5,4,5,3,4,4, 4,3,4,5,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -205,6 +215,7 @@ const GOLF_COURSES = {
   "DAIMAN_18_GOLF_CLUB": {
     shortName: "DGC",
     fullName: "Daiman 18 Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,5,3,4,5,3,4,4,4, 4,5,3,5,4,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -214,6 +225,7 @@ const GOLF_COURSES = {
   "DALIT_BAY_GOLF_AND_COUNTRY CLUB": {
     shortName: "DBGCC",
     fullName: "Dalit Bay Golf & Country Club",
+    location: ["Tuaran", "Sabah", "Malaysia"],
     pars: [4,4,5,3,5,4,4,3,4, 4,3,5,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -221,8 +233,9 @@ const GOLF_COURSES = {
   },
 
   "DAMAI_GOLF_AND_COUNTRY CLUB": {
-    shortName: "DGACC",
+    shortName: "DGCC",
     fullName: "Damai Golf And Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
     pars: [5,4,3,4,4,3,4,5,4, 4,5,4,4,3,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -232,16 +245,8 @@ const GOLF_COURSES = {
   "DAMAI_LAUT_GOLF_AND_COUNTRY CLUB": {
     shortName: "DLGCC",
     fullName: "Damai Laut Golf & Country Club",
+    location: ["Lumut", "Perak", "Malaysia"],
     pars: [4,5,3,4,5,4,3,4,4, 4,5,4,3,4,4,4,3,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "MEN	TEES	LADIES": {
-    shortName: "MTL",
-    fullName: "Men	Tees	Ladies",
-    pars: [4,4,3,5,4,3,4,4,5, 4,4,4,3,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -250,6 +255,7 @@ const GOLF_COURSES = {
   "DICKSON_BAY": {
     shortName: "DB",
     fullName: "Dickson Bay",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -257,8 +263,9 @@ const GOLF_COURSES = {
   },
 
   "EASTWOOD_VALLEY_GOLF_AND_COUNTRY CLUB": {
-    shortName: "EVGACC",
+    shortName: "EVGCC",
     fullName: "Eastwood valley golf and country club",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,4,3,4,4,5,4,3,4, 5,4,4,3,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -268,6 +275,7 @@ const GOLF_COURSES = {
   "FRASER_HILL_GOLF_COURSE": {
     shortName: "FHGC",
     fullName: "Fraser hill Golf Course",
+    location: ["Fraser's Hill", "Pahang", "Malaysia"],
     pars: [4,3,5,4,3,3,4,3,3, 4,4,4,4,4,4,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -277,15 +285,17 @@ const GOLF_COURSES = {
   "GREEN_ACRES_GOLF_AND_COUNTRY_RESORT": {
     shortName: "GAGCR",
     fullName: "Green Acres Golf & Country Resort",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,4,4,3,5, 4,4,4,3,5,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "GUNUNG_RAYA": {
+  "Gunung_Raya_Golf_Resort": {
     shortName: "GR",
-    fullName: "Gunung Raya",
+    fullName: "Gunung Raya Golf Resort",
+    location: ["Langkawi", "Kedah", "Malaysia"],
     pars: [4,5,4,3,4,4,3,5,4, 5,3,4,4,4,5,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -295,6 +305,7 @@ const GOLF_COURSES = {
   "HORIZON_HILLS": {
     shortName: "HH",
     fullName: "Horizon Hills",
+    location: ["Iskandar Puteri", "Johor", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 4,4,3,5,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -304,6 +315,7 @@ const GOLF_COURSES = {
   "IMPIAN_EMAS_GOLF_AND_COUNTRY CLUB": {
     shortName: "IEGCC",
     fullName: "Impian Emas Golf & country club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,3,5,4,4, 4,5,3,4,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -313,6 +325,7 @@ const GOLF_COURSES = {
   "IMPIAN_GOLF_AND_COUNTRY CLUB": {
     shortName: "IGCC",
     fullName: "Impian Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,3,5,4,5,4,3,4,4, 4,4,3,4,5,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -322,16 +335,8 @@ const GOLF_COURSES = {
   "IOI_PALM_VILLA_GOLF_AND_COUNTRY RESORT": {
     shortName: "IPVGCR",
     fullName: "IOI Palm Villa Golf & Country Resort",
+    location: ["Puchong", "Selangor", "Malaysia"],
     pars: [5,4,3,4,4,4,3,4,5, 4,5,3,4,4,3,4,3,6],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "JAMES_COURSE": {
-    shortName: "JC",
-    fullName: "JAMES COURSE",
-    pars: [4,4,4,3,5,5,4,3,4, 4,4,4,3,5,5,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -340,6 +345,7 @@ const GOLF_COURSES = {
   "JOHOR_GOLF_AND_COUNTRY CLUB": {
     shortName: "JGCC",
     fullName: "Johor Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,4,4,3,5,5,4,3,4, 5,4,3,4,5,4,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -349,24 +355,17 @@ const GOLF_COURSES = {
   "KAJANG_HILL_GOLF_CLUB": {
     shortName: "KHGC",
     fullName: "Kajang Hill Golf Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [5,4,4,3,5,3,4,4,4, 4,3,4,5,3,4,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF": {
-    shortName: "KG",
-    fullName: "Kelab golf",
-    pars: [4,3,4,3,4,5,4,4,5, 4,4,3,5,4,4,5,3,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "KELAB_GOLF_BUKIT_BESI_KGBB": {
-    shortName: "KGBBK",
+  "KELAB_GOLF_BUKIT_BESI": {
+    shortName: "KGBB",
     fullName: "Kelab Golf Bukit Besi",
+    location: ["Bukit Besi", "Terengganu", "Malaysia"],
     pars: [4,5,4,3,4,3,4,5,4, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -376,6 +375,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DESA_DUNGUN": {
     shortName: "KGDD",
     fullName: "Kelab Golf Desa Dungun",
+    location: ["Dungun", "Terengganu", "Malaysia"],
     pars: [4,5,4,3,4,4,4,3,5, 4,5,5,4,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -385,6 +385,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DIRAJA_PEKAN": {
     shortName: "KGDP",
     fullName: "Kelab Golf Diraja Pekan",
+    location: ["Pekan", "Pahang", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -394,6 +395,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DIRAJA_SERI_MENANTI": {
     shortName: "KGDSM",
     fullName: "Kelab Golf Diraja Seri Menanti",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -403,6 +405,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_KINTA": {
     shortName: "KGK",
     fullName: "Kelab Golf Kinta",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,3,4,4,3,4,3,4,4, 4,4,5,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -412,6 +415,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_KUALA_KANGSAR": {
     shortName: "KGKK",
     fullName: "Kelab Golf Kuala Kangsar",
+    location: ["Kuala Kangsar", "Perak", "Malaysia"],
     pars: [4,3,4,4,5,3,4,4,4, 4,3,4,4,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -421,6 +425,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_MIRI": {
     shortName: "KGM",
     fullName: "Kelab Golf Miri",
+    location: ["Miri", "Sarawak", "Malaysia"],
     pars: [3,4,4,4,4,5,4,5,3, 4,4,3,4,4,4,3,5,5],
     blueTees: null,
     whiteTees: null,
@@ -430,6 +435,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_SERI_SELANGOR": {
     shortName: "KGSS",
     fullName: "Kelab Golf Seri Selangor",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,4,3,4,5,5,4,3,4, 4,4,3,5,3,4,4,4,5],
     blueTees: null,
     whiteTees: null,
@@ -439,42 +445,27 @@ const GOLF_COURSES = {
   "KELAB_GOLF_SIBU": {
     shortName: "KGS",
     fullName: "Kelab Golf Sibu",
+    location: ["Sibu", "Sarawak", "Malaysia"],
     pars: [4,5,3,4,5,5,3,3,4, 4,4,5,3,3,4,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
-    pars: [4,3,5,4,4,4,5,3,4, 4,3,4,4,5,3,4,4,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
-    pars: [4,3,4,4,5,3,4,4,5, 4,5,3,4,4,3,5,4,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
   "KELAB_GOLF_SULTAN_AHMAD_SHAH_CAMERON": {
-  shortName: "KGSAS-CH",
-  fullName: "Kelab Golf Sultan Ahmad Shah Cameron Highlands",
-  pars: [5,4,4,3,4,4,5,3,4, 4,4,3,5,4,3,4,3,5],
-  blueTees: [467,390,330,166,258,317,475,195,289, 340,375,170,485,385,130,310,150,475],
-  whiteTees: [428,341,309,135,228,271,450,142,265, 320,355,150,465,375,110,295,120,450],
-  redTees: [385,299,275,102,206,223,386,112,243, 300,340,130,420,345,95,275,110,400]
-},
+    shortName: "KGSAS-CH",
+    fullName: "Kelab Golf Sultan Ahmad Shah Cameron Highlands",
+    location: ["Cameron Highlands", "Pahang", "Malaysia"],
+    pars: [5,4,4,3,4,4,5,3,4, 4,4,3,5,4,3,4,3,5],
+    blueTees: [467,390,330,166,258,317,475,195,289, 340,375,170,485,385,130,310,150,475],
+    whiteTees: [428,341,309,135,228,271,450,142,265, 320,355,150,465,375,110,295,120,450],
+    redTees: [385,299,275,102,206,223,386,112,243, 300,340,130,420,345,95,275,110,400]
+  },
 
   "KELAB_GOLF_UNIVERSITI_UTARA_MALAYSIA": {
     shortName: "KGUUM",
     fullName: "Kelab Golf Universiti Utara Malaysia",
+    location: ["Sintok", "Kedah", "Malaysia"],
     pars: [5,4,5,3,4,3,4,4,4, 3,4,4,4,5,5,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -484,6 +475,7 @@ const GOLF_COURSES = {
   "KELAB_RAHMAN_PUTRA_MALAYSIA": {
     shortName: "KRPM",
     fullName: "Kelab Rahman Putra Malaysia",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
     pars: [4,4,4,3,5,3,5,4,4, 4,5,4,3,4,5,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -493,6 +485,7 @@ const GOLF_COURSES = {
   "KELAB_REKREASI_ANGKATAN_TENTERA": {
     shortName: "KRAT",
     fullName: "Kelab Rekreasi Angkatan Tentera",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,3,4,3,3,5,4,4,3, 4,3,4,3,3,5,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -502,6 +495,7 @@ const GOLF_COURSES = {
   "KELAB_REKREASI_TENTERA_UDARA": {
     shortName: "KRTU",
     fullName: "Kelab Rekreasi Tentera Udara",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,4,5,3,4,4,5,3,4, 4,4,5,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -511,6 +505,7 @@ const GOLF_COURSES = {
   "KELAB_REKREASI_TENTERA_UDARA SUBANG": {
     shortName: "KRTUS",
     fullName: "Kelab Rekreasi Tentera Udara Subang",
+    location: ["Subang", "Selangor", "Malaysia"],
     pars: [4,4,5,4,3,5,3,4,4, 5,3,4,4,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -520,6 +515,7 @@ const GOLF_COURSES = {
   "KELANTAN_GOLF_AND_COUNTRY CLUB": {
     shortName: "KGACC",
     fullName: "Kelantan Golf and Country Club",
+    location: ["Kota Bharu", "Kelantan", "Malaysia"],
     pars: [4,3,5,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -529,16 +525,8 @@ const GOLF_COURSES = {
   "KENINGAU_GOLF_AND_COUNTRY CLUB": {
     shortName: "KGCC",
     fullName: "Keningau Golf & Country Club",
+    location: ["Keningau", "Sabah", "Malaysia"],
     pars: [5,3,4,4,3,5,4,4,4, 4,5,3,4,4,3,4,4,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
-    pars: [4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -547,6 +535,7 @@ const GOLF_COURSES = {
   "KOTA_PERMAI_GOLF_AND_COUNTRY CLUB": {
     shortName: "KPGCC",
     fullName: "Kota Permai Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,3,5,4,4, 4,4,5,4,3,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -556,6 +545,7 @@ const GOLF_COURSES = {
   "KOTA_SERIEMAS_GOLF_AND_COUNTRY CLUB": {
     shortName: "KSGCC",
     fullName: "Kota Seriemas Golf & Country Club",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,4,4,4,3,5,3,4, 5,4,4,4,3,5,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -565,6 +555,7 @@ const GOLF_COURSES = {
   "KUALA_KUBU_BARU_GOLF_AND_COUNTRY CLUB": {
     shortName: "KKBGCC",
     fullName: "Kuala Kubu Baru Golf & Country Club",
+    location: ["Kuala Kubu Bharu", "Selangor", "Malaysia"],
     pars: [4,4,3,4,5,4,3,3,5, 4,3,4,4,3,4,4,5,4],
     blueTees: null,
     whiteTees: null,
@@ -574,6 +565,7 @@ const GOLF_COURSES = {
   "KUALA_TERENGGANU_GOLF_RESORT": {
     shortName: "KTGR",
     fullName: "Kuala Terengganu Golf Resort",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
     pars: [5,4,4,3,4,4,5,3,4, 5,3,4,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -583,6 +575,7 @@ const GOLF_COURSES = {
   "KUKUP_GOLF_RESORT": {
     shortName: "KGR",
     fullName: "Kukup Golf Resort",
+    location: ["Kukup", "Johor", "Malaysia"],
     pars: [4,4,5,4,3,4,4,3,5, 5,4,4,3,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -592,15 +585,17 @@ const GOLF_COURSES = {
   "KULIM_GOLF_AND_COUNTRY_RESORT": {
     shortName: "KGCR",
     fullName: "Kulim Golf & Country Resort",
+    location: ["Kulim", "Kedah", "Malaysia"],
     pars: [4,4,3,5,4,4,3,5,4, 4,4,4,3,5,3,4,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KUNDANG_LAKES": {
-    shortName: "KL",
-    fullName: "Kundang Lakes",
+  "Kundang_Lakes_Country_Club": {
+    shortName: "KLCC",
+    fullName: "Kundang Lakes Country Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [5,3,4,5,4,3,4,4,4, 5,3,4,5,4,3,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -610,16 +605,8 @@ const GOLF_COURSES = {
   "LABUAN_INTERNATIONAL_GOLF CLUB": {
     shortName: "LIGC",
     fullName: "Labuan International Golf Club",
+    location: ["Labuan", "Labuan", "Malaysia"],
     pars: [4,5,5,4,3,4,3,4,4, 5,4,4,3,5,4,3,4,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "LEDANG_GOLF_RESORT": {
-    shortName: "LGR",
-    fullName: "Ledang Golf Resort",
-    pars: [4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -628,6 +615,7 @@ const GOLF_COURSES = {
   "LEMBAH_BERINGIN_GOLF CLUB": {
     shortName: "LBGC",
     fullName: "Lembah Beringin Golf Club",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,5,4,3,4,4,5,3,4, 4,5,4,4,3,5,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -637,6 +625,7 @@ const GOLF_COURSES = {
   "MAHKOTA_GOLF_AND_COUNTRY CLUB": {
     shortName: "MGCC",
     fullName: "Mahkota Golf & Country Club",
+    location: ["Bandar Mahkota Cheras", "Selangor", "Malaysia"],
     pars: [4,3,4,4,5,4,4,3,5, 4,3,5,4,4,5,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -646,6 +635,7 @@ const GOLF_COURSES = {
   "MARAN_HILL_GOLF_RESORT": {
     shortName: "MHGR",
     fullName: "Maran Hill Golf Resort",
+    location: ["Maran", "Pahang", "Malaysia"],
     pars: [4,5,3,5,4,4,3,4,4, 5,4,4,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -655,6 +645,7 @@ const GOLF_COURSES = {
   "MONTEREZ_GOLF_AND_COUNTRY CLUB": {
     shortName: "MGCC",
     fullName: "Monterez Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,4,3,5,3,4,4,4,4, 5,4,3,5,4,3,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -664,6 +655,7 @@ const GOLF_COURSES = {
   "MOUNTAIN_VIEW_GOLF_RESORT": {
     shortName: "MVGR",
     fullName: "Mountain View Golf Resort",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,4,3,4,5, 4,5,4,3,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -673,6 +665,7 @@ const GOLF_COURSES = {
   "NEXUS_GOLF_RESORT_KARAMBUNAI": {
     shortName: "NGRK",
     fullName: "Nexus Golf Resort Karambunai",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
     pars: [5,4,3,4,3,4,4,4,5, 4,4,3,5,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -682,6 +675,7 @@ const GOLF_COURSES = {
   "OCTVILLE__CHRISTINE_RESORT": {
     shortName: "OCR",
     fullName: "Octville - Christine Resort",
+    location: ["Melaka", "Melaka", "Malaysia"],
     pars: [4,5,4,4,4,3,5,3,4, 4,4,5,3,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -689,8 +683,9 @@ const GOLF_COURSES = {
   },
 
   "ORCHARD_GOLF_AND_COUNTRY CLUB": {
-    shortName: "OGACC",
+    shortName: "OGCC",
     fullName: "Orchard Golf And Country Club",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
     pars: [5,4,4,4,3,5,4,3,4, 5,4,4,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -700,6 +695,7 @@ const GOLF_COURSES = {
   "PENANG_GOLF_CLUB": {
     shortName: "PGC",
     fullName: "Penang Golf Club",
+    location: ["George Town", "Penang", "Malaysia"],
     pars: [4,4,5,4,3,5,4,3,4, 4,4,5,3,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -709,6 +705,7 @@ const GOLF_COURSES = {
   "PENANG_TURF_CLUB_GOLF_SECTION": {
     shortName: "PTCGS",
     fullName: "Penang Turf Club Golf Section",
+    location: ["George Town", "Penang", "Malaysia"],
     pars: [4,4,4,3,4,4,4,4,3, 4,3,5,3,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -718,6 +715,7 @@ const GOLF_COURSES = {
   "PERANGSANG_TEMPLER_GOLF CLUB": {
     shortName: "PTGC",
     fullName: "Perangsang Templer Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [4,5,4,3,4,3,4,4,5, 4,3,4,4,4,5,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -727,6 +725,7 @@ const GOLF_COURSES = {
   "PERMAIPURA_GOLF_AND_COUNTRY CLUB": {
     shortName: "PGCC",
     fullName: "Permaipura Golf & Country Club",
+    location: ["Keningau", "Sabah", "Malaysia"],
     pars: [4,4,3,4,5,3,5,4,4, 4,4,4,3,4,3,5,4,5],
     blueTees: null,
     whiteTees: null,
@@ -736,6 +735,7 @@ const GOLF_COURSES = {
   "PONDEROSA_GOLF_AND_COUNTRY CLUB": {
     shortName: "PGCC",
     fullName: "Ponderosa Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,3,4,4,4,5,3,4,5, 4,5,3,4,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -745,6 +745,7 @@ const GOLF_COURSES = {
   "PORT_DICKSON_GOLF_AND_COUNTRY CLUB": {
     shortName: "PDGCC",
     fullName: "Port Dickson Golf & Country Club",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,4,4,3,4,3,5,4,5, 5,4,5,3,4,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -754,6 +755,7 @@ const GOLF_COURSES = {
   "PUTRA_GOLF_CLUB": {
     shortName: "PGC",
     fullName: "Putra Golf Club",
+    location: ["Seri Kembangan", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -763,6 +765,7 @@ const GOLF_COURSES = {
   "ROYAL_KAMPUNG_KUANTAN_GOLF CLUB": {
     shortName: "RKKGC",
     fullName: "Royal Kampung Kuantan Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,4,3,5,4, 4,3,5,3,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -772,6 +775,7 @@ const GOLF_COURSES = {
   "ROYAL_KEDAH_CLUB": {
     shortName: "RKC",
     fullName: "Royal Kedah Club",
+    location: ["Alor Setar", "Kedah", "Malaysia"],
     pars: [4,5,4,3,4,5,3,4,4, 4,5,4,3,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -781,6 +785,7 @@ const GOLF_COURSES = {
   "ROYAL_KG_KUANTAN_GOLF CLUB": {
     shortName: "RKKGC",
     fullName: "Royal Kg Kuantan Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,4,3,5,4, 4,3,5,3,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -790,6 +795,7 @@ const GOLF_COURSES = {
   "ROYAL_PAHANG_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Pahang Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
     pars: [5,4,4,4,3,5,4,3,4, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -799,6 +805,7 @@ const GOLF_COURSES = {
   "ROYAL_PALM_SPRINGS_GOLF_CLUBDICKSON_BAY_GOLF RESORT": {
     shortName: "RPSGCBGR",
     fullName: "Royal Palm Springs Golf Club/Dickson Bay Golf Resort",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -808,6 +815,7 @@ const GOLF_COURSES = {
   "ROYAL_PEKAN_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Pekan Golf Club",
+    location: ["Pekan", "Pahang", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -817,6 +825,7 @@ const GOLF_COURSES = {
   "ROYAL_PERAK_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Perak Golf Club",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,4,3,4,3,5,4,4,4, 5,4,4,3,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -826,6 +835,7 @@ const GOLF_COURSES = {
   "SABAH_GOLF_AND_COUNTRY CLUB": {
     shortName: "SGCC",
     fullName: "Sabah Golf & Country Club",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
     pars: [4,5,4,4,3,5,4,3,4, 4,4,3,4,5,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -835,16 +845,18 @@ const GOLF_COURSES = {
   "SAMARAHAN_COUNTRY_CLUB": {
     shortName: "SCC",
     fullName: "Samarahan Country Club",
+    location: ["Kota Samarahan", "Sarawak", "Malaysia"],
     pars: [4,4,3,5,3,4,4,5,4, 4,4,4,4,5,3,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "SEBANA_COVE": {
-    shortName: "SC",
-    fullName: "SEBANA COVE",
-    pars: [4,4,5,4,3,4,4,5,4, 4,5,4,4,3,4,3,4,5],
+  "Sebana_Cove_Golf_&_Marina_Resort ": {
+    shortName: "SCGMR",
+    fullName: "Sebana Cove Golf & Marina Resort ",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,3,5,4, 4,5,4,4,3,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -853,6 +865,7 @@ const GOLF_COURSES = {
   "SELESA_HILLHOMES_AND_GOLF_RESORT": {
     shortName: "SHGR",
     fullName: "Selesa Hillhomes & golf resort",
+    location: ["Hulu Langat", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,3,4,4,5, 4,3,5,3,4,5,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -862,6 +875,7 @@ const GOLF_COURSES = {
   "SENIBONG_GOLF_CLUB": {
     shortName: "SGC",
     fullName: "Senibong Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,3,4,4,3,4,5,3,5, 4,4,4,4,5,5,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -871,6 +885,7 @@ const GOLF_COURSES = {
   "SEREMBAN_INTERNATIONAL_GOLF CLUB": {
     shortName: "SIGC",
     fullName: "Seremban International Golf Club",
+    location: ["Seremban", "Negeri Sembilan", "Malaysia"],
     pars: [4,3,5,4,4,5,4,4,3, 4,5,3,4,4,3,4,4,5],
     blueTees: null,
     whiteTees: null,
@@ -880,6 +895,8 @@ const GOLF_COURSES = {
   "SUNGAI_LONG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SLGCC",
     fullName: "Sungai Long Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,5,4,4,3,4, 4,4,5,4,3,5,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -889,6 +906,7 @@ const GOLF_COURSES = {
   "SHANSHUI_GOLF_AND_COUNTRY CLUB": {
     shortName: "SGCC",
     fullName: "Shan-Shui Golf & Country Club",
+    location: ["Setia Alam", "Selangor", "Malaysia"],
     pars: [4,4,3,4,5,4,5,3,4, 5,4,4,5,3,4,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -898,6 +916,7 @@ const GOLF_COURSES = {
   "TAIPING_GOLF_RESORT": {
     shortName: "TGR",
     fullName: "Taiping Golf Resort",
+    location: ["Taiping", "Perak", "Malaysia"],
     pars: [5,4,4,3,4,4,4,3,5, 4,4,4,4,3,4,5,3,5],
     blueTees: null,
     whiteTees: null,
@@ -907,6 +926,7 @@ const GOLF_COURSES = {
   "TELUK_INTAN_GOLF_AND_COUNTRY CLUB": {
     shortName: "TIGCC",
     fullName: "Teluk Intan Golf & Country Club",
+    location: ["Teluk Intan", "Perak", "Malaysia"],
     pars: [4,4,4,5,3,5,3,4,4, 4,5,4,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -916,6 +936,7 @@ const GOLF_COURSES = {
   "TEMPLER_PARK_COUNTRY_AND_GOLF CLUB": {
     shortName: "TPCGC",
     fullName: "Templer Park Country & Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [5,3,4,4,4,4,5,3,4, 4,3,5,4,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -925,6 +946,7 @@ const GOLF_COURSES = {
   "THE_MINES_RESORT_AND_GOLF CLUB": {
     shortName: "TMRGC",
     fullName: "The MINES Resort & Golf Club",
+    location: ["Seri Kembangan", "Selangor", "Malaysia"],
     pars: [4,5,4,4,3,4,3,5,4, 4,3,5,4,4,4,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -934,16 +956,8 @@ const GOLF_COURSES = {
   "TIOMAN_ISLAND_GOLF_CLUB": {
     shortName: "TIGC",
     fullName: "Tioman Island Golf Club",
+    location: ["Pulau Tioman", "Pahang", "Malaysia"],
     pars: [4,3,5,4,4,4,3,4,5, 4,3,5,4,4,4,3,4,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "UNITEN": {
-    shortName: "U",
-    fullName: "Uniten",
-    pars: [4,4,3,3,4,3,5,3,4, 4,4,3,3,4,3,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -952,6 +966,7 @@ const GOLF_COURSES = {
   "UPM_GOLF_CLUB": {
     shortName: "UGC",
     fullName: "UPM Golf Club",
+    location: ["Serdang", "Selangor", "Malaysia"],
     pars: [5,4,4,4,5,3,4,3,4, 4,3,4,4,4,4,5,3,5],
     blueTees: null,
     whiteTees: null,
@@ -961,6 +976,7 @@ const GOLF_COURSES = {
   "VILLEA_ROMPIN_RESORT_& GOLF": {
     shortName: "VRRG",
     fullName: "Villea Rompin Resort & Golf",
+    location: ["Rompin", "Pahang", "Malaysia"],
     pars: [4,4,4,4,3,5,3,5,4, 4,5,3,4,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -970,6 +986,7 @@ const GOLF_COURSES = {
   "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY CLUB": {
     shortName: "RSMGCC",
     fullName: "Royal Seri Menanti Golf & Country Club",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
