@@ -214,7 +214,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "BLACK_FOREST_GOLF_AND_COUNTRY CLUB": {
+  "BLACK_FOREST_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BFGCC",
     fullName: "Black Forest Golf & Country Club",
     location: ["Rawang", "Selangor", "Malaysia"],
@@ -224,7 +224,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "BORNEO_GOLF&_COUNTRY CLUB": {
+  "BORNEO_GOLF&_COUNTRY_CLUB": {
     shortName: "BGCC",
     fullName: "Borneo Golf & Country Club",
     location: ["Kuching", "Sarawak", "Malaysia"],
@@ -234,10 +234,10 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "BUKIT_BANANG_GOLF_AND_COUNTRY CLUB": {
+  "BUKIT_BANANG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BBGCC",
     fullName: "Bukit Banang Golf & Country Club",
-    location: ["Banting", "Selangor", "Malaysia"],
+    location: ["Batu Pahat", "Johor", "Malaysia"],
     pars: [4,5,4,4,4,3,5,3,4, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -284,7 +284,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "BUKIT_TINGGI_GOLF_AND_COUNTRY CLUB": {
+  "BUKIT_TINGGI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BTGCC",
     fullName: "Bukit Tinggi Golf & Country Club",
     location: ["Bukit Tinggi", "Pahang", "Malaysia"],
@@ -294,7 +294,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "BUKIT_UNGGUL": {
+  "Bukit_Unggul_Country_Club": {
     shortName: "BUCC",
     fullName: "Bukit Unggul Country Club",
     location: ["Dengkil", "Selangor", "Malaysia"],
@@ -354,7 +354,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "DALIT_BAY_GOLF_AND_COUNTRY CLUB": {
+  "DALIT_BAY_GOLF_AND_COUNTRY_CLUB": {
     shortName: "DBGCC",
     fullName: "Dalit Bay Golf & Country Club",
     location: ["Tuaran", "Sabah", "Malaysia"],
@@ -364,7 +364,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "DAMAI_GOLF_AND_COUNTRY CLUB": {
+  "DAMAI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "DGCC",
     fullName: "Damai Golf And Country Club",
     location: ["Kuching", "Sarawak", "Malaysia"],
@@ -374,7 +374,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "DAMAI_LAUT_GOLF_AND_COUNTRY CLUB": {
+  "DAMAI_LAUT_GOLF_AND_COUNTRY_CLUB": {
     shortName: "DLGCC",
     fullName: "Damai Laut Golf & Country Club",
     location: ["Lumut", "Perak", "Malaysia"],
@@ -414,7 +414,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "EASTWOOD_VALLEY_GOLF_AND_COUNTRY CLUB": {
+  "EASTWOOD_VALLEY_GOLF_AND_COUNTRY_CLUB": {
     shortName: "EVGCC",
     fullName: "Eastwood valley golf and country club",
     location: ["Ipoh", "Perak", "Malaysia"],
@@ -564,7 +564,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "IMPIAN_EMAS_GOLF_AND_COUNTRY CLUB": {
+  "IMPIAN_EMAS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "IEGCC",
     fullName: "Impian Emas Golf & country club",
     location: ["Kajang", "Selangor", "Malaysia"],
@@ -574,7 +574,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "IMPIAN_GOLF_AND_COUNTRY CLUB": {
+  "IMPIAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "IGCC",
     fullName: "Impian Golf & Country Club",
     location: ["Kajang", "Selangor", "Malaysia"],
@@ -584,7 +584,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "IOI_PALM_VILLA_GOLF_AND_COUNTRY RESORT": {
+  "IOI_PALM_VILLA_GOLF_AND_COUNTRY_RESORT": {
     shortName: "IPVGCR",
     fullName: "IOI Palm Villa Golf & Country Resort",
     location: ["Puchong", "Selangor", "Malaysia"],
@@ -594,7 +594,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "JOHOR_GOLF_AND_COUNTRY CLUB": {
+  "JOHOR_GOLF_AND_COUNTRY_CLUB": {
     shortName: "JGCC",
     fullName: "Johor Golf & Country Club",
     location: ["Johor Bahru", "Johor", "Malaysia"],
@@ -874,7 +874,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KELAB_GOLF_TITIWANGSA PDRM": {
+  "KELAB_GOLF_TITIWANGSA_PDRM": {
     shortName: "KGTP",
     fullName: "Kelab Golf Titiwangsa PDRM",
     location: ["Setapak", "Kuala Lumpur", "Malaysia"],
@@ -984,7 +984,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KELAB_REKREASI_TENTERA_UDARA SUBANG": {
+  "KELAB_REKREASI_TENTERA_UDARA_SUBANG": {
     shortName: "KRTUS",
     fullName: "Kelab Rekreasi Tentera Udara Subang",
     location: ["Subang", "Selangor", "Malaysia"],
@@ -1014,7 +1014,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KELANTAN_GOLF_AND_COUNTRY CLUB": {
+  "KELANTAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KGACC",
     fullName: "Kelantan Golf and Country Club",
     location: ["Kota Bharu", "Kelantan", "Malaysia"],
@@ -1024,7 +1024,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KENINGAU_GOLF_AND_COUNTRY CLUB": {
+  "KENINGAU_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KGCC",
     fullName: "Keningau Golf & Country Club",
     location: ["Keningau", "Sabah", "Malaysia"],
@@ -1054,7 +1054,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KOTA_PERMAI_GOLF_AND_COUNTRY CLUB": {
+  "KOTA_PERMAI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KPGCC",
     fullName: "Kota Permai Golf & Country Club",
     location: ["Shah Alam", "Selangor", "Malaysia"],
@@ -1064,7 +1064,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KOTA_SERIEMAS_GOLF_AND_COUNTRY CLUB": {
+  "KOTA_SERIEMAS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KSGCC",
     fullName: "Kota Seriemas Golf & Country Club",
     location: ["Nilai", "Negeri Sembilan", "Malaysia"],
@@ -1074,7 +1074,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "KUALA_KUBU_BARU_GOLF_AND_COUNTRY CLUB": {
+  "KUALA_KUBU_BARU_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KKBGCC",
     fullName: "Kuala Kubu Baru Golf & Country Club",
     location: ["Kuala Kubu Bharu", "Selangor", "Malaysia"],
@@ -1154,7 +1154,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "LABUAN_INTERNATIONAL_GOLF CLUB": {
+  "LABUAN_INTERNATIONAL_GOLF_CLUB": {
     shortName: "LIGC",
     fullName: "Labuan International Golf Club",
     location: ["Labuan", "Labuan", "Malaysia"],
@@ -1184,7 +1184,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "LEMBAH_BERINGIN_GOLF CLUB": {
+  "LEMBAH_BERINGIN_GOLF_CLUB": {
     shortName: "LBGC",
     fullName: "Lembah Beringin Golf Club",
     location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
@@ -1194,7 +1194,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "MAHKOTA_GOLF_AND_COUNTRY CLUB": {
+  "MAHKOTA_GOLF_AND_COUNTRY_CLUB": {
     shortName: "MGCC",
     fullName: "Mahkota Golf & Country Club",
     location: ["Bandar Mahkota Cheras", "Selangor", "Malaysia"],
@@ -1244,7 +1244,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "MONTEREZ_GOLF_AND_COUNTRY CLUB": {
+  "MONTEREZ_GOLF_AND_COUNTRY_CLUB": {
     shortName: "MGCC",
     fullName: "Monterez Golf & Country Club",
     location: ["Shah Alam", "Selangor", "Malaysia"],
@@ -1324,7 +1324,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "ORCHARD_GOLF_AND_COUNTRY CLUB": {
+  "ORCHARD_GOLF_AND_COUNTRY_CLUB": {
     shortName: "OGCC",
     fullName: "Orchard Golf And Country Club",
     location: ["Kota Tinggi", "Johor", "Malaysia"],
@@ -1434,7 +1434,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "PERANGSANG_TEMPLER_GOLF CLUB": {
+  "PERANGSANG_TEMPLER_GOLF_CLUB": {
     shortName: "PTGC",
     fullName: "Perangsang Templer Golf Club",
     location: ["Rawang", "Selangor", "Malaysia"],
@@ -1444,7 +1444,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "PERMAIPURA_GOLF_AND_COUNTRY CLUB": {
+  "PERMAIPURA_GOLF_AND_COUNTRY_CLUB": {
     shortName: "PGCC",
     fullName: "Permaipura Golf & Country Club",
     location: ["Keningau", "Sabah", "Malaysia"],
@@ -1474,7 +1474,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "PONDEROSA_GOLF_AND_COUNTRY CLUB": {
+  "PONDEROSA_GOLF_AND_COUNTRY_CLUB": {
     shortName: "PGCC",
     fullName: "Ponderosa Golf & Country Club",
     location: ["Johor Bahru", "Johor", "Malaysia"],
@@ -1484,7 +1484,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "PORT_DICKSON_GOLF_AND_COUNTRY CLUB": {
+  "PORT_DICKSON_GOLF_AND_COUNTRY_CLUB": {
     shortName: "PDGCC",
     fullName: "Port Dickson Golf & Country Club",
     location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
@@ -1544,7 +1544,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "ROYAL_KAMPUNG_KUANTAN_GOLF CLUB": {
+  "ROYAL_KAMPUNG_KUANTAN_GOLF_CLUB": {
     shortName: "RKKGC",
     fullName: "Royal Kampung Kuantan Golf Club",
     location: ["Kuala Selangor", "Selangor", "Malaysia"],
@@ -1564,7 +1564,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "ROYAL_KG_KUANTAN_GOLF CLUB": {
+  "ROYAL_KG_KUANTAN_GOLF_CLUB": {
     shortName: "RKKGC",
     fullName: "Royal Kg Kuantan Golf Club",
     location: ["Kuantan", "Pahang", "Malaysia"],
@@ -1584,7 +1584,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "ROYAL_PALM_SPRINGS_GOLF_CLUBDICKSON_BAY_GOLF RESORT": {
+  "ROYAL_PALM_SPRINGS_GOLF_CLUBDICKSON_BAY_GOLF_RESORT": {
     shortName: "RPSGCBGR",
     fullName: "Royal Palm Springs Golf Club/Dickson Bay Golf Resort",
     location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
@@ -1614,7 +1614,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY CLUB": {
+  "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "RSMGCC",
     fullName: "Royal Seri Menanti Golf & Country Club",
     location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
@@ -1634,7 +1634,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "SABAH_GOLF_AND_COUNTRY CLUB": {
+  "SABAH_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SGCC",
     fullName: "Sabah Golf & Country Club",
     location: ["Kota Kinabalu", "Sabah", "Malaysia"],
@@ -1724,7 +1724,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "SEREMBAN_INTERNATIONAL_GOLF CLUB": {
+  "SEREMBAN_INTERNATIONAL_GOLF_CLUB": {
     shortName: "SIGC",
     fullName: "Seremban International Golf Club",
     location: ["Seremban", "Negeri Sembilan", "Malaysia"],
@@ -1734,7 +1734,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "SHANSHUI_GOLF_AND_COUNTRY CLUB": {
+  "SHANSHUI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SGCC",
     fullName: "Shan-Shui Golf & Country Club",
     location: ["Tawau", "Sabah", "Malaysia"],
@@ -1934,7 +1934,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "TELUK_INTAN_GOLF_AND_COUNTRY CLUB": {
+  "TELUK_INTAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "TIGCC",
     fullName: "Teluk Intan Golf & Country Club",
     location: ["Teluk Intan", "Perak", "Malaysia"],
@@ -1944,7 +1944,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "TEMPLER_PARK_COUNTRY_AND_GOLF CLUB": {
+  "TEMPLER_PARK_COUNTRY_AND_GOLF_CLUB": {
     shortName: "TPCGC",
     fullName: "Templer Park Country & Golf Club",
     location: ["Rawang", "Selangor", "Malaysia"],
@@ -1994,7 +1994,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "THE_MINES_RESORT_AND_GOLF CLUB": {
+  "THE_MINES_RESORT_AND_GOLF_CLUB": {
     shortName: "TMRGC",
     fullName: "The MINES Resort & Golf Club",
     location: ["Seri Kembangan", "Selangor", "Malaysia"],
@@ -2084,7 +2084,7 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "VILLEA_ROMPIN_RESORT_& GOLF": {
+  "VILLEA_ROMPIN_RESORT_&_GOLF": {
     shortName: "VRRG",
     fullName: "Villea Rompin Resort & Golf",
     location: ["Rompin", "Pahang", "Malaysia"],
