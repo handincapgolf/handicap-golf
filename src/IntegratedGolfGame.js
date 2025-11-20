@@ -22,8 +22,6 @@ import {
 
 // 球场数据库
 const GOLF_COURSES = {
-{
-{
   "99_East_Golf_Club": {
     shortName: "99EGC",
     fullName: "99 East Golf Club",
@@ -698,7 +696,7 @@ const GOLF_COURSES = {
     shortName: "KGGM",
     fullName: "Kelab Golf Gua Musang",
     location: ["Gua Musang", "Kelantan", "Malaysia"],
-    pars: [0,0,0,0,0,0,0,0,0,],
+    pars: [0,0,0,0,0,0,0,0,0],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -1444,21 +1442,11 @@ const GOLF_COURSES = {
     redTees: null
   },
 
-  "PERMAIPURA_GOLF_AND_COUNTRY_CLUB": {
-    shortName: "PGCC",
-    fullName: "Permaipura Golf & Country Club",
-    location: ["Keningau", "Sabah", "Malaysia"],
-    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,3,4,3,5,4,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
   "PERMAIPURA_GOLF_&_COUNTRY_CLUB": {
     shortName: "PGCC",
     fullName: "Permaipura Golf & Country Club",
     location: ["Bedong", "Kedah", "Malaysia"],
-    pars: [4,5,3,4,4,4,3,4,4, 4,3,4,5,4,4,4,4,4],
+    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,3,4,3,5,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
