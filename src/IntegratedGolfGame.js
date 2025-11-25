@@ -13,28 +13,51 @@ import {
   Users,
   Settings,
   BarChart3,
-  ArrowLeft,
   Target,
   Camera,
   CircleDollarSign,
-  Search
+  Search,
+  MapPin,
+  Edit2
 } from 'lucide-react';
 
 // 球场数据库
 const GOLF_COURSES = {
-  "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
-    shortName: "BJGCR",
-    fullName: "Bukit Jalil Golf & Country Resort",
-    pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
+  "99_East_Golf_Club": {
+    shortName: "99EGC",
+    fullName: "99 East Golf Club",
+    location: ["Langkawi", "Kedah", "Malaysia"],
+    pars: [5,3,4,4,4,5,4,4,3, 5,3,4,4,4,5,4,4,3],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "99_EAST_LANGKAWI": {
-    shortName: "EL",
-    fullName: "99 East langkawi",
-    pars: [5,3,4,4,4,5,4,4,3, 5,3,4,4,4,5,4,4,3],
+  "AFAMOSA_GOLF_RESORT_CROCODILE_PALM": {
+    shortName: "AGR-CP",
+    fullName: "A'Famosa Golf Resort (Crocodile + Palm)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,5,4, 4,4,4,5,3,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AFAMOSA_GOLF_RESORT_ROCKY_CROCODILE": {
+    shortName: "AGR-RC",
+    fullName: "A'Famosa Golf Resort (Rocky + Crocodile)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,3,5,4,4, 4,4,3,5,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AFAMOSA_GOLF_RESORT_ROCKY_PALM": {
+    shortName: "AGR-RP",
+    fullName: "A'Famosa Golf Resort (Rocky + Palm)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,3,5,4,4, 4,4,4,5,3,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -43,7 +66,38 @@ const GOLF_COURSES = {
   "AMVERTON_COVE_GOLF_AND_ISLAND_RESORT": {
     shortName: "ACGIR",
     fullName: "Amverton Cove Golf & Island Resort",
+    location: ["Carey Island", "Selangor", "Malaysia"],
     pars: [4,5,4,4,3,4,3,5,4, 5,4,3,4,5,4,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AUSTIN_HEIGHTS_GOLF_RESORT_AUSTIN_HILLS": {
+    shortName: "AHGR-AH",
+    fullName: "Austin Heights Golf & Country Resort (Austin + Hills)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,5,4,3,4,5,4,4, 5,4,5,3,4,4,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AUSTIN_HEIGHTS_GOLF_RESORT_AUSTIN_RESORT": {
+    shortName: "AHGR-AR",
+    fullName: "Austin Heights Golf & Country Resort (Austin + Resort)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,5,4,3,4,5,4,4, 4,3,5,4,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AUSTIN_HEIGHTS_GOLF_RESORT_RESORT_HILLS": {
+    shortName: "AHGR-RH",
+    fullName: "Austin Heights Golf & Country Resort (Resort + Hills)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,5,4,4,4,5,3,4, 5,4,5,3,4,4,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -52,16 +106,78 @@ const GOLF_COURSES = {
   "AWANA_GENTING_HIGHLANDS": {
     shortName: "AGH",
     fullName: "Awana Genting Highlands",
+    location: ["Genting Highlands", "Pahang", "Malaysia"],
     pars: [4,4,4,3,5,3,4,5,3, 4,4,5,5,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "AWANA_KIJAL": {
-    shortName: "AK",
-    fullName: "Awana Kijal",
+  "Awana_Kijal_Golf_Beach_&_Spa_Resort": {
+    shortName: "AKGBSR",
+    fullName: "Awana Kijal Golf Beach & Spa Resort",
+    location: ["Kijal", "Terengganu", "Malaysia"],
     pars: [4,4,5,3,4,4,3,4,5, 4,4,3,5,3,5,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_GHAFFAR_GOVERNOR": {
+    shortName: "AKCC-GG",
+    fullName: "Ayer Keroh Country Club (Ghaffar's + Governor's)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,4,4,3,4,5,3,4,5, 5,3,4,4,4,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_TUNKU_GHAFFAR": {
+    shortName: "AKCC-TG",
+    fullName: "Ayer Keroh Country Club (Tunku's + Ghaffar's)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,3,4,4,4,5,5,3,4, 4,4,4,3,4,5,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_TUNKU_GOVERNOR": {
+    shortName: "AKCC-TGov",
+    fullName: "Ayer Keroh Country Club (Tunku's + Governor's)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,3,4,4,4,5,5,3,4, 5,3,4,4,4,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "BANGI_GOLF_RESORT_KAJANG_BANGI": {
+    shortName: "BGR-KB",
+    fullName: "Bangi Golf Resort (Kajang + Bangi)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,3,5,3,5,4,4,3,5, 4,3,5,4,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "BANGI_GOLF_RESORT_KAJANG_PUTRAJAYA": {
+    shortName: "BGR-KP",
+    fullName: "Bangi Golf Resort (Kajang + Putrajaya)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,3,5,3,5,4,4,3,5, 4,4,3,5,3,4,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "BANGI_GOLF_RESORT_PUTRAJAYA_BANGI": {
+    shortName: "BGR-PB",
+    fullName: "Bangi Golf Resort (Putrajaya + Bangi)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,3,4,4,4,4, 4,3,5,4,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -70,6 +186,7 @@ const GOLF_COURSES = {
   "BENTONG_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Bentong Golf Club",
+    location: ["Bentong", "Pahang", "Malaysia"],
     pars: [4,4,4,3,4,3,5,4,5, 3,4,4,4,5,3,4,4,5],
     blueTees: null,
     whiteTees: null,
@@ -79,16 +196,8 @@ const GOLF_COURSES = {
   "BERJAYA_HILLS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BHGCC",
     fullName: "Berjaya Hills Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "BGCC": {
-    shortName: "B",
-    fullName: "BGCC",
-    pars: [5,4,4,3,4,4,4,3,5, 4,4,4,4,3,4,5,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -97,34 +206,48 @@ const GOLF_COURSES = {
   "BINTULU_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Bintulu Golf Club",
+    location: ["Bintulu", "Sarawak", "Malaysia"],
     pars: [5,4,3,4,4,4,3,4,5, 4,3,4,4,4,5,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "BLACK_FOREST_GOLF_AND_COUNTRY CLUB": {
+  "BLACK_FOREST_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BFGCC",
-    fullName: "Black Forest Golf & Country Club",
+    fullName: "Black Forest Golf & Country Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,5,3,4,4, 4,5,3,4,5,4,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "BORNEO_GOLF&_COUNTRY CLUB": {
+  "BORNEO_GOLF&_COUNTRY_CLUB": {
     shortName: "BGCC",
-    fullName: "Borneo Golf & Country Club",
+    fullName: "Borneo Golf & Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
     pars: [4,4,5,4,3,5,4,3,4, 4,5,4,4,3,4,3,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "BUKIT_BANANG_GOLF_AND_COUNTRY CLUB": {
+  "BUKIT_BANANG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BBGCC",
-    fullName: "Bukit Banang Golf & Country Club",
+    fullName: "Bukit Banang Golf & Country Club",
+    location: ["Batu Pahat", "Johor", "Malaysia"],
     pars: [4,5,4,4,4,3,5,3,4, 4,5,4,3,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "BUKIT_BERUNTUNG_GOLF_&_COUNTRY_CLUB": {
+    shortName: "BBGCC",
+    fullName: "Bukit Beruntung Golf & Country Club",
+    location: ["Bukit Beruntung", "Selangor", "Malaysia"],
+    pars: [5,3,4,3,4,5,4,4,4, 4,4,5,5,3,4,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -133,7 +256,18 @@ const GOLF_COURSES = {
   "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
     shortName: "BJGCR",
     fullName: "Bukit Jalil Golf & Country Resort",
+    location: ["Bukit Jalil", "Kuala Lumpur", "Malaysia"],
     pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "BUKIT_JAWI_GOLF_RESORT": {
+    shortName: "BJGR",
+    fullName: "Bukit Jawi Golf Resort",
+    location: ["Bukit Mertajam", "Penang", "Malaysia"],
+    pars: [4,3,4,4,4,5,4,3,5, 5,4,3,4,3,5,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -142,34 +276,28 @@ const GOLF_COURSES = {
   "BUKIT_KEMUNING_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BKGCC",
     fullName: "Bukit Kemuning Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,3,4,4,5, 4,4,5,3,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "BUKIT_TINGGI_GOLF_AND_COUNTRY CLUB": {
+  "BUKIT_TINGGI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BTGCC",
-    fullName: "Bukit Tinggi Golf & Country Club",
+    fullName: "Bukit Tinggi Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "BUKIT_UNGGUL": {
-    shortName: "BU",
-    fullName: "Bukit Unggul",
+  "Bukit_Unggul_Country_Club": {
+    shortName: "BUCC",
+    fullName: "Bukit Unggul Country Club",
+    location: ["Dengkil", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,4,3,4,4, 5,4,4,4,3,5,4,3,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "BUKIT_UTAMA": {
-    shortName: "BU",
-    fullName: "Bukit Utama",
-    pars: [4,3,4,3,4,4,5,3,4, 3,4,3,4,3,4,4,5,3],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -178,7 +306,18 @@ const GOLF_COURSES = {
   "BUTTERWORTH_GOLF_CLUB": {
     shortName: "BGC",
     fullName: "Butterworth Golf Club",
+    location: ["Butterworth", "Penang", "Malaysia"],
     pars: [4,4,5,3,4,4,5,3,4, 4,4,4,4,4,4,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "CAREY_ISLAND_GOLF_&_COUNTRY_CLUB": {
+    shortName: "CIGCC",
+    fullName: "Carey Island Golf & Country Club",
+    location: ["Carey Island", "Selangor", "Malaysia"],
+    pars: [4,4,3,4,5,4,4,3,5, 3,4,4,4,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -187,6 +326,7 @@ const GOLF_COURSES = {
   "CINTA_SAYANG_GOLF_RESORT": {
     shortName: "CSGR",
     fullName: "Cinta Sayang Golf Resort",
+    location: ["Sungai Petani", "Kedah", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,4,5,3,5,4,3,4,4],
     blueTees: null,
     whiteTees: null,
@@ -196,6 +336,7 @@ const GOLF_COURSES = {
   "CLEARWATER_SANCTUARY_GOLF_RESORT": {
     shortName: "CSGR",
     fullName: "Clearwater Sanctuary Golf Resort",
+    location: ["Batu Gajah", "Perak", "Malaysia"],
     pars: [4,4,3,5,4,5,3,4,4, 4,3,4,5,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -205,43 +346,58 @@ const GOLF_COURSES = {
   "DAIMAN_18_GOLF_CLUB": {
     shortName: "DGC",
     fullName: "Daiman 18 Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,5,3,4,5,3,4,4,4, 4,5,3,5,4,4,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "DALIT_BAY_GOLF_AND_COUNTRY CLUB": {
+  "DALIT_BAY_GOLF_AND_COUNTRY_CLUB": {
     shortName: "DBGCC",
-    fullName: "Dalit Bay Golf & Country Club",
+    fullName: "Dalit Bay Golf & Country Club",
+    location: ["Tuaran", "Sabah", "Malaysia"],
     pars: [4,4,5,3,5,4,4,3,4, 4,3,5,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "DAMAI_GOLF_AND_COUNTRY CLUB": {
-    shortName: "DGACC",
-    fullName: "Damai Golf And Country Club",
+  "DAMAI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "DGCC",
+    fullName: "Damai Golf And Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
     pars: [5,4,3,4,4,3,4,5,4, 4,5,4,4,3,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "DAMAI_LAUT_GOLF_AND_COUNTRY CLUB": {
+  "DAMAI_LAUT_GOLF_AND_COUNTRY_CLUB": {
     shortName: "DLGCC",
-    fullName: "Damai Laut Golf & Country Club",
+    fullName: "Damai Laut Golf & Country Club",
+    location: ["Lumut", "Perak", "Malaysia"],
     pars: [4,5,3,4,5,4,3,4,4, 4,5,4,3,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "MEN	TEES	LADIES": {
-    shortName: "MTL",
-    fullName: "Men	Tees	Ladies",
-    pars: [4,4,3,5,4,3,4,4,5, 4,4,4,3,4,5,3,4,4],
+  "DANAU_GOLF_CLUB": {
+    shortName: "DGC",
+    fullName: "Danau Golf Club",
+    location: ["Kota Kemuning", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,3,4,4,5, 4,4,5,3,4,5,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "DARULAMAN_GOLF_&_COUNTRY_CLUB": {
+    shortName: "DGCC",
+    fullName: "Darulaman Golf & Country Club",
+    location: ["Jitra", "Kedah", "Malaysia"],
+    pars: [5,4,3,4,5,3,4,4,4, 5,3,4,4,3,4,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -250,16 +406,38 @@ const GOLF_COURSES = {
   "DICKSON_BAY": {
     shortName: "DB",
     fullName: "Dickson Bay",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "EASTWOOD_VALLEY_GOLF_AND_COUNTRY CLUB": {
-    shortName: "EVGACC",
-    fullName: "Eastwood valley golf and country club",
+  "EASTWOOD_VALLEY_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "EVGCC",
+    fullName: "Eastwood valley golf and country club",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,4,3,4,4,5,4,3,4, 5,4,4,3,4,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "FOREST_CITY_GOLF_RESORT_CLASSIC": {
+    shortName: "FCGR-C",
+    fullName: "Forest City Golf Resort (Classic Course)",
+    location: ["Gelang Patah", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,5,3,4, 4,4,5,3,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "FOREST_CITY_GOLF_RESORT_LEGACY": {
+    shortName: "FCGR-L",
+    fullName: "Forest City Golf Resort (Legacy Course)",
+    location: ["Gelang Patah", "Johor", "Malaysia"],
+    pars: [4,5,3,4,4,3,4,5,4, 4,3,4,5,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -268,7 +446,68 @@ const GOLF_COURSES = {
   "FRASER_HILL_GOLF_COURSE": {
     shortName: "FHGC",
     fullName: "Fraser hill Golf Course",
+    location: ["Fraser's Hill", "Pahang", "Malaysia"],
     pars: [4,3,5,4,3,3,4,3,3, 4,4,4,4,4,4,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GEMAS_GOLF_RESORT": {
+    shortName: "GGR",
+    fullName: "Gemas Golf Resort",
+    location: ["Gemas", "Negeri Sembilan", "Malaysia"],
+    pars: [4,4,5,3,4,4,5,3,4, 4,4,5,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GLENMARIE_GOLF_AND_COUNTRY_CLUB_GARDEN": {
+    shortName: "GGCC-G",
+    fullName: "Glenmarie Golf & Country Club (Garden Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,3,5,4,4,4, 4,5,3,4,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GLENMARIE_GOLF_AND_COUNTRY_CLUB_VALLEY": {
+    shortName: "GGCC-V",
+    fullName: "Glenmarie Golf & Country Club (Valley Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,5,4,4,3,4, 4,4,3,4,5,3,4,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_HILLS_FOREST": {
+    shortName: "GKGPA-HF",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Hills + Forest)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,5,3,3,5, 4,4,5,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_HILLS_LAKES": {
+    shortName: "GKGPA-HL",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Hills + Lakes)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,5,3,3,5, 4,3,5,4,4,3,4,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_LAKES_FOREST": {
+    shortName: "GKGPA-LF",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Lakes + Forest)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,5,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -277,16 +516,28 @@ const GOLF_COURSES = {
   "GREEN_ACRES_GOLF_AND_COUNTRY_RESORT": {
     shortName: "GAGCR",
     fullName: "Green Acres Golf & Country Resort",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,4,4,3,5, 4,4,4,3,5,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "GUNUNG_RAYA": {
+  "Gunung_Raya_Golf_Resort": {
     shortName: "GR",
-    fullName: "Gunung Raya",
+    fullName: "Gunung Raya Golf Resort",
+    location: ["Langkawi", "Kedah", "Malaysia"],
     pars: [4,5,4,3,4,4,3,5,4, 5,3,4,4,4,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "Harvard_Golf_&_Country_Club": {
+    shortName: "HGCC",
+    fullName: "Harvard Golf & Country Club",
+    location: ["Gurun", "Kedah", "Malaysia"],
+    pars: [4,3,5,3,4,4,4,4,5, 4,3,4,5,3,4,4,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -295,51 +546,57 @@ const GOLF_COURSES = {
   "HORIZON_HILLS": {
     shortName: "HH",
     fullName: "Horizon Hills",
+    location: ["Iskandar Puteri", "Johor", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 4,4,3,5,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "IMPIAN_EMAS_GOLF_AND_COUNTRY CLUB": {
+  "ILSAS_RECREATIONAL_GOLF_CLUB": {
+    shortName: "IRGC",
+    fullName: "ILSAS Recreational Golf Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
+    pars: [4,4,3,3,4,3,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "IMPIAN_EMAS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "IEGCC",
-    fullName: "Impian Emas Golf & country club",
+    fullName: "Impian Emas Golf & country club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,3,5,4,4, 4,5,3,4,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "IMPIAN_GOLF_AND_COUNTRY CLUB": {
+  "IMPIAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "IGCC",
-    fullName: "Impian Golf & Country Club",
+    fullName: "Impian Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,3,5,4,5,4,3,4,4, 4,4,3,4,5,4,3,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "IOI_PALM_VILLA_GOLF_AND_COUNTRY RESORT": {
+  "IOI_PALM_VILLA_GOLF_AND_COUNTRY_RESORT": {
     shortName: "IPVGCR",
-    fullName: "IOI Palm Villa Golf & Country Resort",
+    fullName: "IOI Palm Villa Golf & Country Resort",
+    location: ["Puchong", "Selangor", "Malaysia"],
     pars: [5,4,3,4,4,4,3,4,5, 4,5,3,4,4,3,4,3,6],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "JAMES_COURSE": {
-    shortName: "JC",
-    fullName: "JAMES COURSE",
-    pars: [4,4,4,3,5,5,4,3,4, 4,4,4,3,5,5,4,3,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
-  },
-
-  "JOHOR_GOLF_AND_COUNTRY CLUB": {
+  "JOHOR_GOLF_AND_COUNTRY_CLUB": {
     shortName: "JGCC",
-    fullName: "Johor Golf & Country Club",
+    fullName: "Johor Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,4,4,3,5,5,4,3,4, 5,4,3,4,5,4,4,4,3],
     blueTees: null,
     whiteTees: null,
@@ -349,24 +606,47 @@ const GOLF_COURSES = {
   "KAJANG_HILL_GOLF_CLUB": {
     shortName: "KHGC",
     fullName: "Kajang Hill Golf Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [5,4,4,3,5,3,4,4,4, 4,3,4,5,3,4,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF": {
-    shortName: "KG",
-    fullName: "Kelab golf",
-    pars: [4,3,4,3,4,5,4,4,5, 4,4,3,5,4,4,5,3,4],
+  "KELAB_DARUL_EHSAN": {
+    shortName: "KDE",
+    fullName: "Kelab Darul Ehsan",
+    location: ["Ampang", "Selangor", "Malaysia"],
+    pars: [4,3,4,3,5,5,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF_BUKIT_BESI_KGBB": {
-    shortName: "KGBBK",
+  "KELAB_GOLF_BATU_PAHAT": {
+    shortName: "KGBP",
+    fullName: "Kelab Golf Batu Pahat",
+    location: ["Batu Pahat", "Johor", "Malaysia"],
+    pars: [5,3,4,4,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_BRIGED_UTARA": {
+    shortName: "KGBU",
+    fullName: "Kelab Golf Briged Utara",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,5,3,4,5,3,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_BUKIT_BESI": {
+    shortName: "KGBB",
     fullName: "Kelab Golf Bukit Besi",
+    location: ["Bukit Besi", "Terengganu", "Malaysia"],
     pars: [4,5,4,3,4,3,4,5,4, 4,5,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -376,6 +656,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DESA_DUNGUN": {
     shortName: "KGDD",
     fullName: "Kelab Golf Desa Dungun",
+    location: ["Dungun", "Terengganu", "Malaysia"],
     pars: [4,5,4,3,4,4,4,3,5, 4,5,5,4,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -385,6 +666,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DIRAJA_PEKAN": {
     shortName: "KGDP",
     fullName: "Kelab Golf Diraja Pekan",
+    location: ["Pekan", "Pahang", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -394,7 +676,28 @@ const GOLF_COURSES = {
   "KELAB_GOLF_DIRAJA_SERI_MENANTI": {
     shortName: "KGDSM",
     fullName: "Kelab Golf Diraja Seri Menanti",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_DIRAJA_TERENGGANU": {
+    shortName: "KGDT",
+    fullName: "Kelab Golf Diraja Terengganu",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
+    pars: [4,5,4,3,4,4,5,4,3, 4,5,3,4,4,4,5,4,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_GUA_MUSANG": {
+    shortName: "KGGM",
+    fullName: "Kelab Golf Gua Musang",
+    location: ["Gua Musang", "Kelantan", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -403,6 +706,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_KINTA": {
     shortName: "KGK",
     fullName: "Kelab Golf Kinta",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,3,4,4,3,4,3,4,4, 4,4,5,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -412,6 +716,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_KUALA_KANGSAR": {
     shortName: "KGKK",
     fullName: "Kelab Golf Kuala Kangsar",
+    location: ["Kuala Kangsar", "Perak", "Malaysia"],
     pars: [4,3,4,4,5,3,4,4,4, 4,3,4,4,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -421,7 +726,78 @@ const GOLF_COURSES = {
   "KELAB_GOLF_MIRI": {
     shortName: "KGM",
     fullName: "Kelab Golf Miri",
+    location: ["Miri", "Sarawak", "Malaysia"],
     pars: [3,4,4,4,4,5,4,5,3, 4,4,3,4,4,4,3,5,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_NEGARA_SUBANG_KELANA": {
+    shortName: "KGNS-K",
+    fullName: "Kelab Golf Negara Subang (Kelana Course)",
+    location: ["Subang", "Selangor", "Malaysia"],
+    pars: [5,4,4,3,4,5,3,4,4, 4,5,4,3,4,3,4,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_NEGARA_SUBANG_PUTRA": {
+    shortName: "KGNS-P",
+    fullName: "Kelab Golf Negara Subang (Putra Course)",
+    location: ["Subang", "Selangor", "Malaysia"],
+    pars: [4,4,4,3,5,4,4,3,4, 4,3,5,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_PUTRA": {
+    shortName: "KGP",
+    fullName: "Kelab Golf Putra",
+    location: ["Kangar", "Perlis", "Malaysia"],
+    pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_SAMUDERA": {
+    shortName: "KGS",
+    fullName: "Kelab Golf Samudera",
+    location: ["Lumut", "Perak", "Malaysia"],
+    pars: [4,4,5,3,4,4,3,5,3, 4,4,5,3,4,4,3,5,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_SARAWAK_MATANG_SANTUBONG": {
+    shortName: "KGS-MS",
+    fullName: "Kelab Golf Sarawak (Matang/Santubong Course)",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [4,4,3,4,5,4,4,3,5, 4,4,4,5,3,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_SARAWAK_SIOL_DEMAK": {
+    shortName: "KGS-SD",
+    fullName: "Kelab Golf Sarawak (Siol/Demak Course)",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [5,4,4,3,4,3,5,4,4, 5,4,4,4,3,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_SERI_DELIMA": {
+    shortName: "KGSD",
+    fullName: "Kelab Golf Seri Delima",
+    location: ["Kluang", "Johor", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -430,6 +806,7 @@ const GOLF_COURSES = {
   "KELAB_GOLF_SERI_SELANGOR": {
     shortName: "KGSS",
     fullName: "Kelab Golf Seri Selangor",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,4,3,4,5,5,4,3,4, 4,4,3,5,3,4,4,4,5],
     blueTees: null,
     whiteTees: null,
@@ -439,24 +816,37 @@ const GOLF_COURSES = {
   "KELAB_GOLF_SIBU": {
     shortName: "KGS",
     fullName: "Kelab Golf Sibu",
+    location: ["Sibu", "Sarawak", "Malaysia"],
     pars: [4,5,3,4,5,5,3,3,4, 4,4,5,3,3,4,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_PRESIDENT_ALAM_SHAH": {
+    shortName: "KGSAAS-PAS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (President + Alam Shah)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,4,4,5,3,4, 4,5,3,4,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_PRESIDENT_SULTAN": {
+    shortName: "KGSAAS-PS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (President + Sultan)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,4,5,3,4, 4,3,4,4,5,3,4,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_SULTAN_ALAM_SHAH": {
+    shortName: "KGSAAS-SAS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (Sultan + Alam Shah)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,3,4,4,5,3,4,4,5, 4,5,3,4,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -464,18 +854,50 @@ const GOLF_COURSES = {
   },
 
   "KELAB_GOLF_SULTAN_AHMAD_SHAH_CAMERON": {
-  shortName: "KGSAS-CH",
-  fullName: "Kelab Golf Sultan Ahmad Shah Cameron Highlands",
-  pars: [5,4,4,3,4,4,5,3,4, 4,4,3,5,4,3,4,3,5],
-  blueTees: [467,390,330,166,258,317,475,195,289, 340,375,170,485,385,130,310,150,475],
-  whiteTees: [428,341,309,135,228,271,450,142,265, 320,355,150,465,375,110,295,120,450],
-  redTees: [385,299,275,102,206,223,386,112,243, 300,340,130,420,345,95,275,110,400]
-},
+    shortName: "KGSAS-CH",
+    fullName: "Kelab Golf Sultan Ahmad Shah Cameron Highlands",
+    location: ["Cameron Highlands", "Pahang", "Malaysia"],
+    pars: [5,4,4,3,4,4,5,3,4, 4,4,3,5,4,3,4,3,5],
+    blueTees: [467,390,330,166,258,317,475,195,289, 340,375,170,485,385,130,310,150,475],
+    whiteTees: [428,341,309,135,228,271,450,142,265, 320,355,150,465,375,110,295,120,450],
+    redTees: [385,299,275,102,206,223,386,112,243, 300,340,130,420,345,95,275,110,400]
+  },
+
+  "KELAB_GOLF_TANJONG_EMAS": {
+    shortName: "KGTE",
+    fullName: "Kelab Golf Tanjong Emas",
+    location: ["Tanjung Emas", "Johor", "Malaysia"],
+    pars: [3,4,4,4,3,4,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_TITIWANGSA_PDRM": {
+    shortName: "KGTP",
+    fullName: "Kelab Golf Titiwangsa PDRM",
+    location: ["Setapak", "Kuala Lumpur", "Malaysia"],
+    pars: [3,4,5,3,4,5,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
 
   "KELAB_GOLF_UNIVERSITI_UTARA_MALAYSIA": {
     shortName: "KGUUM",
     fullName: "Kelab Golf Universiti Utara Malaysia",
+    location: ["Sintok", "Kedah", "Malaysia"],
     pars: [5,4,5,3,4,3,4,4,4, 3,4,4,4,5,5,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_GOLF_&_REKREASI_PETRONAS": {
+    shortName: "KGRP",
+    fullName: "Kelab Golf & Rekreasi Petronas",
+    location: ["Kerteh", "Terengganu", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,4,5,4,3,5,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -484,16 +906,68 @@ const GOLF_COURSES = {
   "KELAB_RAHMAN_PUTRA_MALAYSIA": {
     shortName: "KRPM",
     fullName: "Kelab Rahman Putra Malaysia",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
     pars: [4,4,4,3,5,3,5,4,4, 4,5,4,3,4,5,4,4,3],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_REKREASI_ANGKATAN_TENTERA": {
-    shortName: "KRAT",
-    fullName: "Kelab Rekreasi Angkatan Tentera",
+  "KELAB_REKREASI_ANGKATAN_TENTERA_KL": {
+    shortName: "KRAT-KL",
+    fullName: "Kelab Rekreasi Angkatan Tentera (Kuala Lumpur)",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,3,4,3,3,5,4,4,3, 4,3,4,3,3,5,4,4,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_REKREASI_ANGKATAN_TENTERA_NS": {
+    shortName: "KRAT-NS",
+    fullName: "Kelab Rekreasi Angkatan Tentera (Seremban)",
+    location: ["Seremban", "Negeri Sembilan", "Malaysia"],
+    pars: [4,3,4,3,3,5,4,4,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_REKREASI_INDERA_KUANTAN": {
+    shortName: "KRIK",
+    fullName: "Kelab Rekreasi Indera Kuantan",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,5,3,5,4,3,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_REKREASI_PUGK": {
+    shortName: "KRPUGK",
+    fullName: "Kelab Rekreasi Pangkalan Udara Gong Kedak",
+    location: ["Jerteh", "Terengganu", "Malaysia"],
+    pars: [4,4,5,3,3,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_REKREASI_SRI_MAHKOTA": {
+    shortName: "KRSM",
+    fullName: "Kelab Rekreasi Sri Mahkota",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,4,4,3,5,3,4,5,4, 5,4,4,3,5,3,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_REKREASI_TENTERA_DARAT_DESA_PAHLAWAN": {
+    shortName: "KRTDDP",
+    fullName: "Kelab Rekreasi Tentera Darat Desa Pahlawan",
+    location: ["Kota Bharu", "Kelantan", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -502,70 +976,128 @@ const GOLF_COURSES = {
   "KELAB_REKREASI_TENTERA_UDARA": {
     shortName: "KRTU",
     fullName: "Kelab Rekreasi Tentera Udara",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,4,5,3,4,4,5,3,4, 4,4,5,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_REKREASI_TENTERA_UDARA SUBANG": {
+  "KELAB_REKREASI_TENTERA_UDARA_SUBANG": {
     shortName: "KRTUS",
-    fullName: "Kelab Rekreasi Tentera Udara Subang",
+    fullName: "Kelab Rekreasi Tentera Udara Subang",
+    location: ["Subang", "Selangor", "Malaysia"],
     pars: [4,4,5,4,3,5,3,4,4, 5,3,4,4,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELANTAN_GOLF_AND_COUNTRY CLUB": {
+  "KELAB_REKREASI_TUDM_KUANTAN": {
+    shortName: "KRTK",
+    fullName: "Kelab Rekreasi TUDM Kuantan",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,4,3,4,5,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELAB_SUNGAI_PETANI": {
+    shortName: "KSP",
+    fullName: "Kelab Sungai Petani",
+    location: ["Sungai Petani", "Kedah", "Malaysia"],
+    pars: [3,5,3,4,4,4,4,4,4, 4,5,3,4,3,5,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KELANTAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KGACC",
-    fullName: "Kelantan Golf and Country Club",
+    fullName: "Kelantan Golf and Country Club",
+    location: ["Kota Bharu", "Kelantan", "Malaysia"],
     pars: [4,3,5,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KENINGAU_GOLF_AND_COUNTRY CLUB": {
+  "KENINGAU_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KGCC",
-    fullName: "Keningau Golf & Country Club",
+    fullName: "Keningau Golf & Country Club",
+    location: ["Keningau", "Sabah", "Malaysia"],
     pars: [5,3,4,4,3,5,4,4,4, 4,5,3,4,4,3,4,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH": {
-    shortName: "KGSAAS",
-    fullName: "Kelab Golf Sultan Abdul Aziz Shah",
-    pars: [4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4],
+  "KINRARA_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kinrara Golf Club",
+    location: ["Puchong", "Selangor", "Malaysia"],
+    pars: [4,3,4,4,3,4,5,4,4, 5,4,3,4,3,4,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KOTA_PERMAI_GOLF_AND_COUNTRY CLUB": {
+  "KLUANG_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kluang Golf Club",
+    location: ["Kluang", "Johor", "Malaysia"],
+    pars: [3,5,3,4,5,4,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KOTA_PERMAI_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KPGCC",
-    fullName: "Kota Permai Golf & Country Club",
+    fullName: "Kota Permai Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,3,5,4,4, 4,4,5,4,3,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KOTA_SERIEMAS_GOLF_AND_COUNTRY CLUB": {
+  "KOTA_SERIEMAS_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KSGCC",
-    fullName: "Kota Seriemas Golf & Country Club",
+    fullName: "Kota Seriemas Golf & Country Club",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,4,4,4,3,5,3,4, 5,4,4,4,3,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KUALA_KUBU_BARU_GOLF_AND_COUNTRY CLUB": {
+  "KUALA_KUBU_BARU_GOLF_AND_COUNTRY_CLUB": {
     shortName: "KKBGCC",
-    fullName: "Kuala Kubu Baru Golf & Country Club",
+    fullName: "Kuala Kubu Baru Golf & Country Club",
+    location: ["Kuala Kubu Bharu", "Selangor", "Malaysia"],
     pars: [4,4,3,4,5,4,3,3,5, 4,3,4,4,3,4,4,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KUALA_LUMPUR_GOLF_AND_COUNTRY_CLUB_EAST": {
+    shortName: "KLGCC-E",
+    fullName: "Kuala Lumpur Golf & Country Club (East Course)",
+    location: ["Bukit Kiara", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,4,4,3,5,3,4,4, 4,4,5,4,4,3,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KUALA_LUMPUR_GOLF_AND_COUNTRY_CLUB_WEST": {
+    shortName: "KLGCC-W",
+    fullName: "Kuala Lumpur Golf & Country Club (West Course)",
+    location: ["Bukit Kiara", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,5,3,5,4,4,3,4, 5,3,4,4,4,3,4,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -574,7 +1106,18 @@ const GOLF_COURSES = {
   "KUALA_TERENGGANU_GOLF_RESORT": {
     shortName: "KTGR",
     fullName: "Kuala Terengganu Golf Resort",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
     pars: [5,4,4,3,4,4,5,3,4, 5,3,4,4,5,4,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "KUDAT_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kudat Golf Club",
+    location: ["Kudat", "Sabah", "Malaysia"],
+    pars: [4,4,4,5,3,4,4,3,5, 4,3,5,4,3,4,4,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -583,6 +1126,7 @@ const GOLF_COURSES = {
   "KUKUP_GOLF_RESORT": {
     shortName: "KGR",
     fullName: "Kukup Golf Resort",
+    location: ["Kukup", "Johor", "Malaysia"],
     pars: [4,4,5,4,3,4,4,3,5, 5,4,4,3,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
@@ -592,51 +1136,67 @@ const GOLF_COURSES = {
   "KULIM_GOLF_AND_COUNTRY_RESORT": {
     shortName: "KGCR",
     fullName: "Kulim Golf & Country Resort",
+    location: ["Kulim", "Kedah", "Malaysia"],
     pars: [4,4,3,5,4,4,3,5,4, 4,4,4,3,5,3,4,5,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "KUNDANG_LAKES": {
-    shortName: "KL",
-    fullName: "Kundang Lakes",
+  "Kundang_Lakes_Country_Club": {
+    shortName: "KLCC",
+    fullName: "Kundang Lakes Country Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [5,3,4,5,4,3,4,4,4, 5,3,4,5,4,3,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "LABUAN_INTERNATIONAL_GOLF CLUB": {
+  "LABUAN_INTERNATIONAL_GOLF_CLUB": {
     shortName: "LIGC",
-    fullName: "Labuan International Golf Club",
+    fullName: "Labuan International Golf Club",
+    location: ["Labuan", "Labuan", "Malaysia"],
     pars: [4,5,5,4,3,4,3,4,4, 5,4,4,3,5,4,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "LEDANG_GOLF_RESORT": {
-    shortName: "LGR",
-    fullName: "Ledang Golf Resort",
-    pars: [4,4,4,4,4,4,4,4,4, 4,4,4,4,4,4,4,4,4],
+  "LAHAD_DATU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "LDGCC",
+    fullName: "Lahad Datu Golf & Country Club",
+    location: ["Lahad Datu", "Sabah", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,4,5,3,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "LEMBAH_BERINGIN_GOLF CLUB": {
+  "LEGENDS_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "LGCR",
+    fullName: "The Legends Golf & Country Resort",
+    location: ["Kulai", "Johor", "Malaysia"],
+    pars: [4,3,4,4,4,5,3,4,4, 4,4,3,4,4,4,5,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "LEMBAH_BERINGIN_GOLF_CLUB": {
     shortName: "LBGC",
-    fullName: "Lembah Beringin Golf Club",
+    fullName: "Lembah Beringin Golf Club",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,5,4,3,4,4,5,3,4, 4,5,4,4,3,5,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "MAHKOTA_GOLF_AND_COUNTRY CLUB": {
+  "MAHKOTA_GOLF_AND_COUNTRY_CLUB": {
     shortName: "MGCC",
-    fullName: "Mahkota Golf & Country Club",
+    fullName: "Mahkota Golf & Country Club",
+    location: ["Bandar Mahkota Cheras", "Selangor", "Malaysia"],
     pars: [4,3,4,4,5,4,4,3,5, 4,3,5,4,4,5,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -646,15 +1206,47 @@ const GOLF_COURSES = {
   "MARAN_HILL_GOLF_RESORT": {
     shortName: "MHGR",
     fullName: "Maran Hill Golf Resort",
+    location: ["Maran", "Pahang", "Malaysia"],
     pars: [4,5,3,5,4,4,3,4,4, 5,4,4,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "MONTEREZ_GOLF_AND_COUNTRY CLUB": {
+  "MERU_VALLEY_GOLF_RESORT_VALLEY_RIVER": {
+    shortName: "MVGR-VR",
+    fullName: "Meru Valley Golf Resort (Valley + River)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,5,3,4,4,5,4,3,4, 4,4,3,4,5,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "MERU_VALLEY_GOLF_RESORT_VALLEY_WATERFALL": {
+    shortName: "MVGR-VW",
+    fullName: "Meru Valley Golf Resort (Valley + Waterfall)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,5,3,4,4,5,4,3,4, 4,3,5,3,4,4,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "MERU_VALLEY_GOLF_RESORT_WATERFALL_RIVER": {
+    shortName: "MVGR-WR",
+    fullName: "Meru Valley Golf Resort (Waterfall + River)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,3,5,3,4,4,5,4,4, 4,4,3,4,5,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "MONTEREZ_GOLF_AND_COUNTRY_CLUB": {
     shortName: "MGCC",
-    fullName: "Monterez Golf & Country Club",
+    fullName: "Monterez Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
     pars: [4,4,3,5,3,4,4,4,4, 5,4,3,5,4,3,4,4,4],
     blueTees: null,
     whiteTees: null,
@@ -664,7 +1256,18 @@ const GOLF_COURSES = {
   "MOUNTAIN_VIEW_GOLF_RESORT": {
     shortName: "MVGR",
     fullName: "Mountain View Golf Resort",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,3,5,4,4,4,3,4,5, 4,5,4,3,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "MOUNT_KINABALU_GOLF_CLUB": {
+    shortName: "MKGC",
+    fullName: "Mount Kinabalu Golf Club",
+    location: ["Ranau", "Sabah", "Malaysia"],
+    pars: [5,4,4,3,5,4,4,3,4, 4,4,4,5,3,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -673,7 +1276,38 @@ const GOLF_COURSES = {
   "NEXUS_GOLF_RESORT_KARAMBUNAI": {
     shortName: "NGRK",
     fullName: "Nexus Golf Resort Karambunai",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
     pars: [5,4,3,4,3,4,4,4,5, 4,4,3,5,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_ISLAND_PINES": {
+    shortName: "NSGCC-IP",
+    fullName: "Nilai Springs Golf & Country Club (Island + Pines)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [4,5,3,4,5,4,4,3,4, 5,4,3,4,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_ISLAND": {
+    shortName: "NSGCC-MI",
+    fullName: "Nilai Springs Golf & Country Club (Mango + Island)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,3,4,4,3,5,4, 4,5,3,4,5,4,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_PINES": {
+    shortName: "NSGCC-MP",
+    fullName: "Nilai Springs Golf & Country Club (Mango + Pines)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,3,4,4,3,5,4, 5,4,3,4,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -682,16 +1316,88 @@ const GOLF_COURSES = {
   "OCTVILLE__CHRISTINE_RESORT": {
     shortName: "OCR",
     fullName: "Octville - Christine Resort",
+    location: ["Melaka", "Melaka", "Malaysia"],
     pars: [4,5,4,4,4,3,5,3,4, 4,4,5,3,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "ORCHARD_GOLF_AND_COUNTRY CLUB": {
-    shortName: "OGACC",
-    fullName: "Orchard Golf And Country Club",
+  "ORCHARD_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "OGCC",
+    fullName: "Orchard Golf And Country Club",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
     pars: [5,4,4,4,3,5,4,3,4, 5,4,4,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_EAST_NORTH": {
+    shortName: "OGCC-EN",
+    fullName: "Orna Golf & Country Club (East + North)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,5,3,4,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_EAST_WEST": {
+    shortName: "OGCC-EW",
+    fullName: "Orna Golf & Country Club (East + West)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,3,5,3,4,4,4,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_WEST_NORTH": {
+    shortName: "OGCC-WN",
+    fullName: "Orna Golf & Country Club (West + North)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,3,5,3,4,4,4,5,4, 4,5,3,4,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PALM_GARDEN_GOLF_CLUB": {
+    shortName: "PGGC",
+    fullName: "Palm Garden Golf Club",
+    location: ["Putrajaya", "Selangor", "Malaysia"],
+    pars: [4,3,4,5,5,4,3,4,4, 5,4,3,5,3,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PALM_RESORT_GOLF_ALLAMANDA": {
+    shortName: "PRGCC-A",
+    fullName: "Palm Resort Golf & Country Club (Allamanda Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,3,5,4,4,4,5,3,4, 4,5,3,4,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PALM_RESORT_GOLF_CEMPAKA": {
+    shortName: "PRGCC-C",
+    fullName: "Palm Resort Golf & Country Club (Cempaka Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,4,3,5,4,3,4,5,4, 4,5,4,4,4,3,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PALM_RESORT_GOLF_MELATI": {
+    shortName: "PRGCC-M",
+    fullName: "Palm Resort Golf & Country Club (Melati Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,3,5,4,4,4,3,4,5, 5,4,4,3,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -700,7 +1406,18 @@ const GOLF_COURSES = {
   "PENANG_GOLF_CLUB": {
     shortName: "PGC",
     fullName: "Penang Golf Club",
+    location: ["George Town", "Penang", "Malaysia"],
     pars: [4,4,5,4,3,5,4,3,4, 4,4,5,3,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PENANG_GOLF_RESORT": {
+    shortName: "PGR",
+    fullName: "Penang Golf Resort",
+    location: ["Seberang Perai", "Penang", "Malaysia"],
+    pars: [4,5,4,4,3,4,3,4,5, 5,4,3,4,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -709,43 +1426,88 @@ const GOLF_COURSES = {
   "PENANG_TURF_CLUB_GOLF_SECTION": {
     shortName: "PTCGS",
     fullName: "Penang Turf Club Golf Section",
+    location: ["George Town", "Penang", "Malaysia"],
     pars: [4,4,4,3,4,4,4,4,3, 4,3,5,3,4,3,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "PERANGSANG_TEMPLER_GOLF CLUB": {
+  "PERANGSANG_TEMPLER_GOLF_CLUB": {
     shortName: "PTGC",
-    fullName: "Perangsang Templer Golf Club",
+    fullName: "Perangsang Templer Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [4,5,4,3,4,3,4,4,5, 4,3,4,4,4,5,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "PERMAIPURA_GOLF_AND_COUNTRY CLUB": {
+  "PERMAIPURA_GOLF_&_COUNTRY_CLUB": {
     shortName: "PGCC",
-    fullName: "Permaipura Golf & Country Club",
+    fullName: "Permaipura Golf & Country Club",
+    location: ["Bedong", "Kedah", "Malaysia"],
     pars: [4,4,3,4,5,3,5,4,4, 4,4,4,3,4,3,5,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "PONDEROSA_GOLF_AND_COUNTRY CLUB": {
+  "PERMAS_JAYA_GOLF_CLUB": {
+    shortName: "PJGC",
+    fullName: "Permas Jaya Golf Club",
+    location: ["Permas Jaya", "Johor", "Malaysia"],
+    pars: [4,3,5,4,3,4,5,4,4, 4,3,5,4,3,4,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PONDEROSA_GOLF_AND_COUNTRY_CLUB": {
     shortName: "PGCC",
-    fullName: "Ponderosa Golf & Country Club",
+    fullName: "Ponderosa Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,3,4,4,4,5,3,4,5, 4,5,3,4,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "PORT_DICKSON_GOLF_AND_COUNTRY CLUB": {
+  "PORT_DICKSON_GOLF_AND_COUNTRY_CLUB": {
     shortName: "PDGCC",
-    fullName: "Port Dickson Golf & Country Club",
+    fullName: "Port Dickson Golf & Country Club",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,4,4,3,4,3,5,4,5, 5,4,5,3,4,4,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PORT_KLANG_GOLF_RESORT": {
+    shortName: "PKGR",
+    fullName: "Port Klang Golf Resort",
+    location: ["Klang", "Selangor", "Malaysia"],
+    pars: [5,4,3,5,3,4,4,4,4, 4,4,5,3,5,4,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PULAI_SPRINGS_RESORT_MELANA": {
+    shortName: "PSR-M",
+    fullName: "Pulai Springs Resort (Melana Course)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [5,4,3,4,4,3,4,4,5, 4,4,3,4,3,5,4,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "PULAI_SPRINGS_RESORT_PULAI": {
+    shortName: "PSR-P",
+    fullName: "Pulai Springs Resort (Pulai Course)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [5,3,4,3,4,4,4,4,5, 4,5,4,3,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -754,15 +1516,27 @@ const GOLF_COURSES = {
   "PUTRA_GOLF_CLUB": {
     shortName: "PGC",
     fullName: "Putra Golf Club",
+    location: ["Seri Kembangan", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "ROYAL_KAMPUNG_KUANTAN_GOLF CLUB": {
+  "RANAU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "RGCC",
+    fullName: "Ranau Golf & Country Club",
+    location: ["Ranau", "Sabah", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,5,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "ROYAL_KAMPUNG_KUANTAN_GOLF_CLUB": {
     shortName: "RKKGC",
-    fullName: "Royal Kampung Kuantan Golf Club",
+    fullName: "Royal Kampung Kuantan Golf Club",
+    location: ["Kuala Selangor", "Selangor", "Malaysia"],
     pars: [4,5,3,4,4,4,3,5,4, 4,3,5,3,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -772,15 +1546,17 @@ const GOLF_COURSES = {
   "ROYAL_KEDAH_CLUB": {
     shortName: "RKC",
     fullName: "Royal Kedah Club",
+    location: ["Alor Setar", "Kedah", "Malaysia"],
     pars: [4,5,4,3,4,5,3,4,4, 4,5,4,3,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "ROYAL_KG_KUANTAN_GOLF CLUB": {
+  "ROYAL_KG_KUANTAN_GOLF_CLUB": {
     shortName: "RKKGC",
-    fullName: "Royal Kg Kuantan Golf Club",
+    fullName: "Royal Kg Kuantan Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
     pars: [4,5,3,4,4,4,3,5,4, 4,3,5,3,5,4,4,3,4],
     blueTees: null,
     whiteTees: null,
@@ -790,15 +1566,17 @@ const GOLF_COURSES = {
   "ROYAL_PAHANG_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Pahang Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
     pars: [5,4,4,4,3,5,4,3,4, 5,3,4,4,4,4,3,4,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "ROYAL_PALM_SPRINGS_GOLF_CLUBDICKSON_BAY_GOLF RESORT": {
+  "ROYAL_PALM_SPRINGS_GOLF_CLUBDICKSON_BAY_GOLF_RESORT": {
     shortName: "RPSGCBGR",
-    fullName: "Royal Palm Springs Golf Club/Dickson Bay Golf Resort",
+    fullName: "Royal Palm Springs Golf Club/Dickson Bay Golf Resort",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
     blueTees: null,
     whiteTees: null,
@@ -808,6 +1586,7 @@ const GOLF_COURSES = {
   "ROYAL_PEKAN_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Pekan Golf Club",
+    location: ["Pekan", "Pahang", "Malaysia"],
     pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
     blueTees: null,
     whiteTees: null,
@@ -817,15 +1596,37 @@ const GOLF_COURSES = {
   "ROYAL_PERAK_GOLF_CLUB": {
     shortName: "RPGC",
     fullName: "Royal Perak Golf Club",
+    location: ["Ipoh", "Perak", "Malaysia"],
     pars: [5,4,3,4,3,5,4,4,4, 5,4,4,3,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "SABAH_GOLF_AND_COUNTRY CLUB": {
+  "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "RSMGCC",
+    fullName: "Royal Seri Menanti Golf & Country Club",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "RURAL_COUNTRY_GOLF_CLUB": {
+    shortName: "RCGC",
+    fullName: "Rural Country Golf Club",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,4,5,3,5,5,3,4,4, 4,4,5,3,4,3,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SABAH_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SGCC",
-    fullName: "Sabah Golf & Country Club",
+    fullName: "Sabah Golf & Country Club",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
     pars: [4,5,4,4,3,5,4,3,4, 4,4,3,4,5,4,4,3,5],
     blueTees: null,
     whiteTees: null,
@@ -835,16 +1636,58 @@ const GOLF_COURSES = {
   "SAMARAHAN_COUNTRY_CLUB": {
     shortName: "SCC",
     fullName: "Samarahan Country Club",
+    location: ["Kota Samarahan", "Sarawak", "Malaysia"],
     pars: [4,4,3,5,3,4,4,5,4, 4,4,4,4,5,3,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "SEBANA_COVE": {
-    shortName: "SC",
-    fullName: "SEBANA COVE",
-    pars: [4,4,5,4,3,4,4,5,4, 4,5,4,4,3,4,3,4,5],
+  "SANDAKAN_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Sandakan Golf & Country Club",
+    location: ["Sandakan", "Sabah", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,3,4,5,3,5,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SAUJANA_GOLF_AND_COUNTRY_CLUB_BUNGA_RAYA": {
+    shortName: "SGCC-BR",
+    fullName: "Saujana Golf & Country Club (Bunga Raya Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [5,4,4,4,4,3,5,4,4, 5,4,3,4,5,3,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SAUJANA_GOLF_AND_COUNTRY_CLUB_PALM": {
+    shortName: "SGCC-P",
+    fullName: "Saujana Golf & Country Club (Palm Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,3,4,4,5,4, 4,4,3,5,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "Sebana_Cove_Golf_&_Marina_Resort ": {
+    shortName: "SCGMR",
+    fullName: "Sebana Cove Golf & Marina Resort ",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,3,5,4, 4,5,4,4,3,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SEGAMAT_COUNTRY_CLUB": {
+    shortName: "SCC",
+    fullName: "Segamat Country Club",
+    location: ["Segamat", "Johor", "Malaysia"],
+    pars: [4,5,4,4,4,4,3,5,3, 4,4,4,5,3,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -853,6 +1696,7 @@ const GOLF_COURSES = {
   "SELESA_HILLHOMES_AND_GOLF_RESORT": {
     shortName: "SHGR",
     fullName: "Selesa Hillhomes & golf resort",
+    location: ["Hulu Langat", "Selangor", "Malaysia"],
     pars: [5,4,4,3,4,3,4,4,5, 4,3,5,3,4,5,5,3,4],
     blueTees: null,
     whiteTees: null,
@@ -862,16 +1706,98 @@ const GOLF_COURSES = {
   "SENIBONG_GOLF_CLUB": {
     shortName: "SGC",
     fullName: "Senibong Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
     pars: [4,3,4,4,3,4,5,3,5, 4,4,4,4,5,5,4,4,3],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "SEREMBAN_INTERNATIONAL_GOLF CLUB": {
+  "SEREMBAN_INTERNATIONAL_GOLF_CLUB": {
     shortName: "SIGC",
-    fullName: "Seremban International Golf Club",
+    fullName: "Seremban International Golf Club",
+    location: ["Seremban", "Negeri Sembilan", "Malaysia"],
     pars: [4,3,5,4,4,5,4,4,3, 4,5,3,4,4,3,4,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SHANSHUI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Shan-Shui Golf & Country Club",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,4,3,4,5,4,5,3,4, 5,4,4,5,3,4,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SIBUGA_GOLF_CLUB": {
+    shortName: "SGC",
+    fullName: "Sibuga Golf Club",
+    location: ["Sandakan", "Sabah", "Malaysia"],
+    pars: [5,4,4,3,4,4,4,3,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SIGALONG_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Sigalong Golf & Country Club",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,5,4,5,3,4,3],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_SOUTHERN_NORTHERN": {
+    shortName: "SCR-SN",
+    fullName: "Staffield Country Resort (Southern + Northern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,4,5,3,4,3,4, 5,3,4,4,4,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_WESTERN_NORTHERN": {
+    shortName: "SCR-WN",
+    fullName: "Staffield Country Resort (Western + Northern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [4,4,5,3,4,4,3,4,5, 5,3,4,4,4,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_WESTERN_SOUTHERN": {
+    shortName: "SCR-WS",
+    fullName: "Staffield Country Resort (Western + Southern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [4,4,5,3,4,4,3,4,5, 5,4,4,4,5,3,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "STARHILL_GOLF_AND_COUNTRY_CLUB_BINTANG": {
+    shortName: "StGCC-Bi",
+    fullName: "Starhill Golf & Country Club (Bintang Course)",
+    location: ["Kempas Lama", "Johor", "Malaysia"],
+    pars: [4,5,4,3,5,4,3,4,4, 4,5,3,4,4,4,3,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "STARHILL_GOLF_AND_COUNTRY_CLUB_BUKIT": {
+    shortName: "StGCC-B",
+    fullName: "Starhill Golf & Country Club (Bukit Course)",
+    location: ["Kempas Lama", "Johor", "Malaysia"],
+    pars: [4,5,4,3,4,4,3,5,4, 4,5,3,4,5,3,4,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -880,16 +1806,38 @@ const GOLF_COURSES = {
   "SUNGAI_LONG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SLGCC",
     fullName: "Sungai Long Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
     pars: [4,5,3,4,5,4,4,3,4, 4,4,5,4,3,5,4,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "SHANSHUI_GOLF_AND_COUNTRY CLUB": {
-    shortName: "SGCC",
-    fullName: "Shan-Shui Golf & Country Club",
-    pars: [4,4,3,4,5,4,5,3,4, 5,4,4,5,3,4,3,4,4],
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_HERITAGE_GARDEN": {
+    shortName: "SHGCC-HG",
+    fullName: "Sutera Harbour Golf & Country Club (Heritage + Garden)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [4,5,4,4,4,3,4,3,5, 5,3,4,3,4,4,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_LAKES_GARDEN": {
+    shortName: "SHGCC-LG",
+    fullName: "Sutera Harbour Golf & Country Club (Lakes + Garden)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [5,3,4,4,4,5,3,4,4, 5,3,4,3,4,4,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_LAKES_HERITAGE": {
+    shortName: "SHGCC-LH",
+    fullName: "Sutera Harbour Golf & Country Club (Lakes + Heritage)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [5,3,4,4,4,5,3,4,4, 4,5,4,4,4,3,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -898,34 +1846,188 @@ const GOLF_COURSES = {
   "TAIPING_GOLF_RESORT": {
     shortName: "TGR",
     fullName: "Taiping Golf Resort",
+    location: ["Taiping", "Perak", "Malaysia"],
     pars: [5,4,4,3,4,4,4,3,5, 4,4,4,4,3,4,5,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "TELUK_INTAN_GOLF_AND_COUNTRY CLUB": {
+  "TAMBUNAN_GOLF_CLUB": {
+    shortName: "TGC",
+    fullName: "Tambunan Golf Club",
+    location: ["Tambunan", "Sabah", "Malaysia"],
+    pars: [5,4,5,4,3,4,4,4,3, 4,4,4,5,4,4,3,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TANJONG_PUTERI_GOLF_RESORT": {
+    shortName: "TPGR",
+    fullName: "Tanjong Puteri Golf Resort",
+    location: ["Pasir Gudang", "Johor", "Malaysia"],
+    pars: [5,4,3,4,4,5,4,3,4, 5,4,4,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERA_TASIK": {
+    shortName: "TPGCC-PT",
+    fullName: "Tasik Puteri Golf & Country Club (Putera + Tasik)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,4,5,3,4,5,3,4, 4,5,4,3,4,3,4,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERI_PUTERA": {
+    shortName: "TPGCC-PP",
+    fullName: "Tasik Puteri Golf & Country Club (Puteri + Putera)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,4,5,3,4, 4,4,4,5,3,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERI_TASIK": {
+    shortName: "TPGCC-PuT",
+    fullName: "Tasik Puteri Golf & Country Club (Puteri + Tasik)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,4,5,3,4, 4,5,4,3,4,3,4,4,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TAWAU_GOLF_CLUB_HOT_SPRING": {
+    shortName: "TGC-HS",
+    fullName: "Tawau Golf Club (Hot Spring Course)",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,4,4,3,5,3,4,5,4, 4,4,3,5,4,4,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TAWAU_GOLF_CLUB_KUKUSAN": {
+    shortName: "TGC-K",
+    fullName: "Tawau Golf Club (Kukusan Course)",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,3,5,4,5,3,4,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TELUK_INTAN_GOLF_AND_COUNTRY_CLUB": {
     shortName: "TIGCC",
-    fullName: "Teluk Intan Golf & Country Club",
+    fullName: "Teluk Intan Golf & Country Club",
+    location: ["Teluk Intan", "Perak", "Malaysia"],
     pars: [4,4,4,5,3,5,3,4,4, 4,5,4,3,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "TEMPLER_PARK_COUNTRY_AND_GOLF CLUB": {
+  "TEMPLER_PARK_COUNTRY_AND_GOLF_CLUB": {
     shortName: "TPCGC",
-    fullName: "Templer Park Country & Golf Club",
+    fullName: "Templer Park Country & Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
     pars: [5,3,4,4,4,4,5,3,4, 4,3,5,4,4,5,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "THE_MINES_RESORT_AND_GOLF CLUB": {
+  "THE_CLUB_AT_BUKIT_UTAMA": {
+    shortName: "TCBU",
+    fullName: "The Club @ Bukit Utama",
+    location: ["Bandar Utama", "Selangor", "Malaysia"],
+    pars: [4,3,4,3,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "THE_ELS_CLUB_DESARU_COAST": {
+    shortName: "TECDC",
+    fullName: "The Els Club Desaru Coast",
+    location: ["Desaru", "Johor", "Malaysia"],
+    pars: [4,3,4,4,5,3,4,5,4, 5,4,4,3,5,4,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "THE_ELS_CLUB_TELUK_DATAI": {
+    shortName: "TECTD",
+    fullName: "The Els Club Teluk Datai",
+    location: ["Langkawi", "Kedah", "Malaysia"],
+    pars: [4,4,3,4,3,4,5,4,4, 4,4,5,4,4,3,4,3,5],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "THE_KINABALU_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "The Kinabalu Golf Club",
+    location: ["Tanjung Aru", "Sabah", "Malaysia"],
+    pars: [4,4,4,4,3,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "THE_MINES_RESORT_AND_GOLF_CLUB": {
     shortName: "TMRGC",
-    fullName: "The MINES Resort & Golf Club",
+    fullName: "The MINES Resort & Golf Club",
+    location: ["Seri Kembangan", "Selangor", "Malaysia"],
     pars: [4,5,4,4,3,4,3,5,4, 4,3,5,4,4,4,3,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "THE_ROYAL_SELANGOR_GOLF_CLUB": {
+    shortName: "RSGC",
+    fullName: "The Royal Selangor Golf Club",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,5,3,5,3,4,4,4, 4,4,3,5,4,5,4,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_LAKE_MEADOW": {
+    shortName: "TMGCC-LM",
+    fullName: "Tiara Melaka Golf & Country Club (Lake + Meadow)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,4,5, 4,5,4,3,4,3,5,4,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_LAKE_WOODLAND": {
+    shortName: "TMGCC-LW",
+    fullName: "Tiara Melaka Golf & Country Club (Lake + Woodland)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,4,5, 4,3,4,5,4,4,5,3,4],
+    blueTees: null,
+    whiteTees: null,
+    redTees: null
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_MEADOW_WOODLAND": {
+    shortName: "TMGCC-MW",
+    fullName: "Tiara Melaka Golf & Country Club (Meadow + Woodland)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,5,4,3,4,3,5,4,4, 4,3,4,5,4,4,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -934,16 +2036,18 @@ const GOLF_COURSES = {
   "TIOMAN_ISLAND_GOLF_CLUB": {
     shortName: "TIGC",
     fullName: "Tioman Island Golf Club",
+    location: ["Pulau Tioman", "Pahang", "Malaysia"],
     pars: [4,3,5,4,4,4,3,4,5, 4,3,5,4,4,4,3,4,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "UNITEN": {
-    shortName: "U",
-    fullName: "Uniten",
-    pars: [4,4,3,3,4,3,5,3,4, 4,4,3,3,4,3,5,3,4],
+  "TROPICANA_GOLF_COUNTRY_RESORT": {
+    shortName: "TGCR",
+    fullName: "Tropicana Golf Country Resort",
+    location: ["Petaling Jaya", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,5,4,3,4, 4,4,4,3,5,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -952,25 +2056,28 @@ const GOLF_COURSES = {
   "UPM_GOLF_CLUB": {
     shortName: "UGC",
     fullName: "UPM Golf Club",
+    location: ["Serdang", "Selangor", "Malaysia"],
     pars: [5,4,4,4,5,3,4,3,4, 4,3,4,4,4,4,5,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "VILLEA_ROMPIN_RESORT_& GOLF": {
-    shortName: "VRRG",
-    fullName: "Villea Rompin Resort & Golf",
-    pars: [4,4,4,4,3,5,3,5,4, 4,5,3,4,4,4,4,3,5],
+  "VALENCIA_CLUB": {
+    shortName: "VC",
+    fullName: "Valencia Club",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,3,4,4,4,3,5,3,4],
     blueTees: null,
     whiteTees: null,
     redTees: null
   },
 
-  "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY CLUB": {
-    shortName: "RSMGCC",
-    fullName: "Royal Seri Menanti Golf & Country Club",
-    pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
+  "VILLEA_ROMPIN_RESORT_&_GOLF": {
+    shortName: "VRRG",
+    fullName: "Villea Rompin Resort & Golf",
+    location: ["Rompin", "Pahang", "Malaysia"],
+    pars: [4,4,4,4,3,5,3,5,4, 4,5,3,4,4,4,4,3,5],
     blueTees: null,
     whiteTees: null,
     redTees: null
@@ -1148,6 +2255,150 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
   );
 });
 
+// 洞号选择弹窗
+const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect, t }) => {
+  if (!isOpen || !completedHoles || completedHoles.length === 0) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-5 max-w-xs w-full shadow-2xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900">
+            {t('selectHoleToEdit')}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="grid grid-cols-5 gap-2 mb-4">
+          {completedHoles.map(hole => (
+            <button
+              key={hole}
+              onClick={() => { onSelect(hole); onClose(); }}
+              className="w-12 h-12 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-bold text-lg transition"
+            >
+              {hole}
+            </button>
+          ))}
+        </div>
+        
+        <button 
+          onClick={onClose} 
+          className="w-full px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+        >
+          {t('cancel')}
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// 编辑洞成绩弹窗
+const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, pars = {}, onSave, t, gameMode }) => {
+  const [editScores, setEditScores] = useState({});
+  const [editUps, setEditUps] = useState({});
+
+  useEffect(() => {
+    if (isOpen && hole && players.length > 0) {
+      const initialScores = {};
+      const initialUps = {};
+      players.forEach(p => {
+        initialScores[p] = allScores[p]?.[hole] || pars[hole] || 4;
+        initialUps[p] = allUps[p]?.[hole] || false;
+      });
+      setEditScores(initialScores);
+      setEditUps(initialUps);
+    }
+  }, [isOpen, hole, players, allScores, allUps, pars]);
+
+  if (!isOpen || !hole || !players || players.length === 0) return null;
+
+  const par = pars[hole] || 4;
+
+  const changeScore = (player, delta) => {
+    setEditScores(prev => ({
+      ...prev,
+      [player]: Math.max(1, (prev[player] || par) + delta)
+    }));
+  };
+
+  const toggleUp = (player) => {
+    setEditUps(prev => ({
+      ...prev,
+      [player]: !prev[player]
+    }));
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl max-h-[80vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900">
+            {t('editHole')} {hole} (PAR {par})
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+        
+        <div className="space-y-3 mb-4">
+          {players.map(player => (
+            <div key={player} className="bg-gray-50 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <span className="font-medium text-gray-900">{player}</span>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => changeScore(player, -1)}
+                    className="w-9 h-9 bg-gray-400 hover:bg-gray-500 text-white rounded-full flex items-center justify-center"
+                  >
+                    <Minus className="w-4 h-4" />
+                  </button>
+                  <span className="text-2xl font-bold w-10 text-center">{editScores[player]}</span>
+                  <button
+                    onClick={() => changeScore(player, 1)}
+                    className="w-9 h-9 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </button>
+                  {gameMode === 'win123' && (
+                    <button
+                      onClick={() => toggleUp(player)}
+                      className={`ml-2 px-3 py-1.5 rounded-md font-medium text-xs transition ${
+                        editUps[player]
+                          ? 'bg-yellow-400 text-yellow-900'
+                          : 'bg-gray-200 text-gray-600'
+                      }`}
+                    >
+                      UP
+                    </button>
+                  )}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+          >
+            {t('cancel')}
+          </button>
+          <button
+            onClick={() => { onSave(hole, editScores, editUps); onClose(); }}
+            className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center justify-center gap-2"
+          >
+            <CheckCircle className="w-4 h-4" />
+            {t('save')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
+
 const PlayerInput = memo(({ index, value, placeholder, onChange }) => {
   const handleChange = useCallback((e) => {
     onChange(index, e.target.value);
@@ -1237,11 +2488,20 @@ const courses = {
 };
 
 function IntegratedGolfGame() {
-  const [lang, setLang] = useState('zh');
+  const [lang, setLang] = useState(() => {
+    try {
+      const savedLang = localStorage.getItem('handincap_lang');
+      return savedLang || 'en';
+    } catch {
+      return 'en';
+    }
+  });
   const [currentSection, setCurrentSection] = useState('home');
   const [toast, setToast] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', action: null, showScreenshotHint: false });
   const [holeConfirmDialog, setHoleConfirmDialog] = useState({ isOpen: false, action: null });
+  const [holeSelectDialog, setHoleSelectDialog] = useState(false);
+  const [editHoleDialog, setEditHoleDialog] = useState({ isOpen: false, hole: null });
   
   const [setupMode, setSetupMode] = useState('auto');
   const [searchQuery, setSearchQuery] = useState('');
@@ -1285,13 +2545,13 @@ function IntegratedGolfGame() {
       setHasSavedGame(true);
     }
   }, []);
-useEffect(() => {
-  if (currentSection === 'course') {
-    setSearchQuery('');
-    setSelectedCourse(null);
-    setCourseApplied(false);
-  }
-}, [currentSection]);
+  useEffect(() => {
+    if (currentSection === 'course') {
+      setSearchQuery('');
+      setSelectedCourse(null);
+      setCourseApplied(false);
+    }
+  }, [currentSection]);
   // 清除已保存的游戏
   const clearSavedGame = useCallback(() => {
     localStorage.removeItem('golfGameState');
@@ -1387,38 +2647,69 @@ useEffect(() => {
     }
   }, [currentSection]);
 
+  // ========== 修改后的精准搜索逻辑 ==========
 const filteredCourses = useMemo(() => {
   if (!searchQuery.trim()) return [];
   
-  // 将搜索词拆分成多个关键词
-  const keywords = searchQuery.toLowerCase().trim().split(/\s+/);
+  const query = searchQuery.toLowerCase().trim();
+  const allCourses = Object.values(GOLF_COURSES);
   
-  // 过滤并评分
-  const coursesWithScore = Object.values(GOLF_COURSES)
+  // 调试输出（确认代码已更新后可删除）
+  console.log("🔍 搜索词:", query);
+  
+  // ===== 第一步：shortName 完全匹配 =====
+  const exactMatch = allCourses.filter(course => 
+    course.shortName.toLowerCase() === query
+  );
+  
+  if (exactMatch.length > 0) {
+    console.log("✅ 完全匹配:", exactMatch.map(c => c.shortName));
+    return exactMatch;
+  }
+  
+  // ===== 第二步：shortName 以搜索词开头 =====
+  const startsWithMatch = allCourses.filter(course => {
+    const shortNameLower = course.shortName.toLowerCase();
+    const shortNameNoHyphen = shortNameLower.replace(/-/g, '');
+    const queryNoHyphen = query.replace(/-/g, '');
+    return shortNameLower.startsWith(query) || shortNameNoHyphen.startsWith(queryNoHyphen);
+  });
+  
+  if (startsWithMatch.length > 0) {
+    console.log("✅ 开头匹配:", startsWithMatch.map(c => c.shortName));
+    return startsWithMatch;
+  }
+  
+  // ===== 第三步：shortName 包含搜索词 =====
+  const containsMatch = allCourses.filter(course => 
+    course.shortName.toLowerCase().includes(query)
+  );
+  
+  if (containsMatch.length > 0) {
+    console.log("✅ 包含匹配:", containsMatch.map(c => c.shortName));
+    return containsMatch;
+  }
+  
+  // ===== 第四步：fullName 或 location 匹配 =====
+  const keywords = query.split(/\s+/).filter(k => k.length > 0);
+  
+  const keywordMatches = allCourses
     .map(course => {
       const fullNameLower = course.fullName.toLowerCase();
-      const shortNameLower = course.shortName.toLowerCase();
+      const locationStr = course.location ? course.location.join(' ').toLowerCase() : '';
       
-      // 确保所有关键词都匹配
-      const allKeywordsMatch = keywords.every(keyword => 
-        fullNameLower.includes(keyword) || shortNameLower.includes(keyword)
+      // 所有关键词都必须在 fullName 或 location 中出现
+      const allMatch = keywords.every(keyword =>
+        fullNameLower.includes(keyword) || locationStr.includes(keyword)
       );
       
-      if (!allKeywordsMatch) return null;
+      if (!allMatch) return null;
       
       // 计算匹配分数
       let score = 0;
-      
-      if (fullNameLower === searchQuery.toLowerCase()) score += 100;
-      if (shortNameLower === searchQuery.toLowerCase()) score += 100;
-      if (fullNameLower.startsWith(searchQuery.toLowerCase())) score += 50;
-      if (shortNameLower.startsWith(searchQuery.toLowerCase())) score += 50;
-      
       keywords.forEach(keyword => {
         if (fullNameLower.includes(keyword)) score += 10;
-        if (shortNameLower.includes(keyword)) score += 5;
-        if (fullNameLower.startsWith(keyword)) score += 5;
-        if (shortNameLower.startsWith(keyword)) score += 3;
+        if (locationStr.includes(keyword)) score += 5;
       });
       
       return { course, score };
@@ -1427,7 +2718,8 @@ const filteredCourses = useMemo(() => {
     .sort((a, b) => b.score - a.score)
     .map(item => item.course);
   
-  return coursesWithScore;
+  console.log("✅ 关键词匹配:", keywordMatches.length, "个结果");
+  return keywordMatches;
 }, [searchQuery]);
 
   const getParColorClass = useCallback((par) => {
@@ -1493,7 +2785,6 @@ const filteredCourses = useMemo(() => {
         finishRound: '确认并结束',
         confirmHoleScore: '确认第{hole}洞成绩',
         holeScoresSummary: '各玩家成绩：',
-        confirmPrev: '确定要返回上一洞吗？',
         cancel: '取消',
         yes: '确定',
         confirm: '确认',
@@ -1530,7 +2821,11 @@ const filteredCourses = useMemo(() => {
         birdie: '小鸟',
         parLabel: '标准杆',
         bogey: '柏忌',
-        doubleplus: '双柏忌+'
+        doubleplus: '双柏忌+',
+        selectHoleToEdit: '选择要修改的洞',
+        editHole: '修改',
+        save: '保存',
+        scoreUpdated: '成绩已更新，金额已重算'
       },
       en: {
         title: 'HandinCap',
@@ -1586,7 +2881,6 @@ const filteredCourses = useMemo(() => {
         finishRound: 'Confirm & Finish',
         confirmHoleScore: 'Confirm Hole {hole} Scores',
         holeScoresSummary: 'Player Scores:',
-        confirmPrev: 'Go back to previous hole?',
         cancel: 'Cancel',
         yes: 'Yes',
         confirm: 'Confirm',
@@ -1623,7 +2917,11 @@ const filteredCourses = useMemo(() => {
         birdie: 'Birdie',
         parLabel: 'Par',
         bogey: 'Bogey',
-        doubleplus: 'Double+'
+        doubleplus: 'Double+',
+        selectHoleToEdit: 'Select Hole to Edit',
+        editHole: 'Edit Hole',
+        save: 'Save',
+        scoreUpdated: 'Scores updated, money recalculated'
       }
     };
     return translations[lang][key] || key;
@@ -1636,8 +2934,8 @@ const filteredCourses = useMemo(() => {
     
     if (selectedCourse) {
       const newPars = {};
-      newHoles.forEach((hole, index) => {
-        newPars[hole] = selectedCourse.pars[index] || 4;
+      newHoles.forEach((hole) => {
+        newPars[hole] = selectedCourse.pars[hole - 1] || 4;
       });
       setPars(newPars);
     } else {
@@ -1655,21 +2953,39 @@ const filteredCourses = useMemo(() => {
   }, [showToast, t]);
 
   const selectAndApplyCourse = useCallback((course) => {
-    setSelectedCourse(course);
-    setCourseApplied(false);
+  setSelectedCourse(course);
+  setCourseApplied(false);
+  
+  setCourseType('f18');
+  const newHoles = courses.f18;
+  setHoles(newHoles);
+  
+  const newPars = {};
+  newHoles.forEach((hole, index) => {
+    newPars[hole] = course.pars[index] || 4;
+  });
+  setPars(newPars);
+  setCourseApplied(true);
+  
+setSearchQuery('');
     
-    setCourseType('f18');
-    const newHoles = courses.f18;
-    setHoles(newHoles);
-    
-    const newPars = {};
-    newHoles.forEach((hole, index) => {
-      newPars[hole] = course.pars[index] || 4;
-    });
-    setPars(newPars);
-    setCourseApplied(true);
-    
-    setSearchQuery('');
+    // 移动端兼容的自动滚动
+    setTimeout(() => {
+      // 找到滚动容器并滚动
+      const scrollContainer = document.querySelector('.overflow-auto') || 
+                              document.querySelector('.overflow-y-auto') ||
+                              document.documentElement;
+      
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      }
+      
+      // 同时也尝试 window 滚动
+      window.scrollTo({
+        top: document.body.scrollHeight,
+        behavior: 'smooth'
+      });
+    }, 200);
   }, []);
 
   const getVerticalArrangedHoles = useCallback(() => {
@@ -1910,30 +3226,51 @@ const filteredCourses = useMemo(() => {
     
     const uniqueScores = [...new Set(playerScores.map(p => p.netScore))];
     const rankings = [...playerScores];
+    const playerCount = activePlayers.length;
     
     if (uniqueScores.length === 1) {
+      // 全部同分 → 全部第1名，不罚款
       rankings.forEach(r => r.finalRank = 1);
-    } else if (uniqueScores.length === 2) {
-      const firstScore = uniqueScores[0];
-      rankings.forEach(r => {
-        r.finalRank = r.netScore === firstScore ? 1 : 4;
-      });
-    } else if (uniqueScores.length === 3) {
-      const firstScore = uniqueScores[0];
-      const secondScore = uniqueScores[1];
-      const firstCount = rankings.filter(r => r.netScore === firstScore).length;
-      
-      rankings.forEach(r => {
-        if (r.netScore === firstScore) {
-          r.finalRank = 1;
-        } else if (r.netScore === secondScore) {
-          r.finalRank = firstCount >= 3 ? 4 : 3;
-        } else {
-          r.finalRank = 4;
-        }
-      });
+    } else if (playerCount <= 4) {
+      // ===== 原4人规则 =====
+      if (uniqueScores.length === 2) {
+        const firstScore = uniqueScores[0];
+        rankings.forEach(r => {
+          r.finalRank = r.netScore === firstScore ? 1 : 4;
+        });
+      } else if (uniqueScores.length === 3) {
+        const firstScore = uniqueScores[0];
+        const secondScore = uniqueScores[1];
+        const firstCount = rankings.filter(r => r.netScore === firstScore).length;
+        
+        rankings.forEach(r => {
+          if (r.netScore === firstScore) {
+            r.finalRank = 1;
+          } else if (r.netScore === secondScore) {
+            r.finalRank = firstCount >= 3 ? 4 : 3;
+          } else {
+            r.finalRank = 4;
+          }
+        });
+      } else {
+        rankings.forEach((r, i) => r.finalRank = i + 1);
+      }
     } else {
-      rankings.forEach((r, i) => r.finalRank = i + 1);
+      // ===== Jumbo (5+人) A改版：并列取差名次 =====
+      let currentIndex = 0;
+      while (currentIndex < rankings.length) {
+        const currentScore = rankings[currentIndex].netScore;
+        let lastIndex = currentIndex;
+        while (lastIndex < rankings.length - 1 && 
+               rankings[lastIndex + 1].netScore === currentScore) {
+          lastIndex++;
+        }
+        const rank = lastIndex + 1;
+        for (let i = currentIndex; i <= lastIndex; i++) {
+          rankings[i].finalRank = rank;
+        }
+        currentIndex = lastIndex + 1;
+      }
     }
     
     const results = {};
@@ -1947,9 +3284,10 @@ const filteredCourses = useMemo(() => {
       rankings.forEach(r => {
         let penalty = 0;
         
-        if (r.finalRank === 2) penalty = stakeValue;
-        else if (r.finalRank === 3) penalty = stakeValue * 2;
-        else if (r.finalRank === 4) penalty = stakeValue * 3;
+        // 支持 Jumbo 人数：罚金 = stake × (名次 - 1)
+        if (r.finalRank > 1) {
+          penalty = stakeValue * (r.finalRank - 1);
+        }
         
         if (r.up) {
           if (r.finalRank === 1) {
@@ -2135,136 +3473,106 @@ const filteredCourses = useMemo(() => {
     });
   }, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
-  const prevHole = useCallback(() => {
-    if (currentHole === 0) return;
+  // 编辑洞成绩并重新计算金额
+  const handleEditHoleSave = useCallback((hole, newScores, newUps) => {
+    // 1. 更新 allScores 和 allUps
+    const updatedAllScores = { ...allScores };
+    const updatedAllUps = { ...allUps };
     
-    showConfirm(t('confirmPrev'), () => {
-      const prevHoleIndex = currentHole - 1;
-      const prevHoleNum = holes[prevHoleIndex];
-      
-      const prevScores = {};
-      const prevUps = {};
-      
-      activePlayers.forEach(player => {
-        if (allScores[player] && allScores[player][prevHoleNum]) {
-          prevScores[player] = allScores[player][prevHoleNum];
-        }
-        if (allUps[player] && allUps[player][prevHoleNum]) {
-          prevUps[player] = allUps[player][prevHoleNum];
+    activePlayers.forEach(player => {
+      if (!updatedAllScores[player]) updatedAllScores[player] = {};
+      if (!updatedAllUps[player]) updatedAllUps[player] = {};
+      updatedAllScores[player][hole] = newScores[player];
+      updatedAllUps[player][hole] = newUps[player] || false;
+    });
+    
+    setAllScores(updatedAllScores);
+    setAllUps(updatedAllUps);
+    
+    // 2. 重新计算所有已完成洞的金额
+    const stakeValue = Number(stake) || 0;
+    
+    const newTotalMoney = {};
+    const newDetails = {};
+    const newSpent = {};
+    let newPrizePool = 0;
+    
+    activePlayers.forEach(player => {
+      newTotalMoney[player] = 0;
+      newSpent[player] = 0;
+      newDetails[player] = { fromPool: 0, fromPlayers: {} };
+      activePlayers.forEach(other => {
+        if (other !== player) {
+          newDetails[player].fromPlayers[other] = 0;
         }
       });
-      
-      setScores(prevScores);
-      setUps(prevUps);
-      
-      const stakeValue = Number(stake) || 0;
-      const newTotalMoney = {};
-      const newDetails = {};
-      const newSpent = {};
-      let newPrizePool = 0;
-      
-      activePlayers.forEach(player => {
-        newTotalMoney[player] = 0;
-        newSpent[player] = 0;
-        newDetails[player] = { fromPool: 0, fromPlayers: {} };
-        activePlayers.forEach(other => {
-          if (other !== player) {
-            newDetails[player].fromPlayers[other] = 0;
-          }
+    });
+    
+    if (stakeValue > 0 || gameMode === 'skins') {
+      completedHoles.forEach(holeNum => {
+        const holeScores = {};
+        const holeUps = {};
+        
+        activePlayers.forEach(player => {
+          holeScores[player] = updatedAllScores[player]?.[holeNum] || (pars[holeNum] || 4);
+          holeUps[player] = updatedAllUps[player]?.[holeNum] || false;
         });
-      });
-      
-      if (stakeValue > 0 || gameMode === 'skins') {
-        for (let i = 0; i < prevHoleIndex; i++) {
-          const holeNum = holes[i];
-          const holeScores = {};
-          const holeUps = {};
+        
+        if (gameMode === 'matchPlay') {
+          const settlement = calculateMatchPlay(holeScores, holeNum);
+          activePlayers.forEach(player => {
+            newTotalMoney[player] += settlement[player].money;
+          });
+        } else if (gameMode === 'skins') {
+          const par = pars[holeNum] || 4;
+          const playerScoresList = activePlayers.map(p => ({
+            player: p,
+            score: holeScores[p] || par,
+            netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+          }));
+          
+          playerScoresList.sort((a, b) => a.netScore - b.netScore);
+          const minScore = playerScoresList[0].netScore;
+          const winners = playerScoresList.filter(p => p.netScore === minScore);
+          
+          const holeStake = stakeValue * activePlayers.length;
           
           activePlayers.forEach(player => {
-            holeScores[player] = allScores[player]?.[holeNum] || (pars[holeNum] || 4);
-            holeUps[player] = allUps[player]?.[holeNum] || false;
+            newSpent[player] += stakeValue;
+            newTotalMoney[player] -= stakeValue;
           });
           
-          if (gameMode === 'matchPlay') {
-            const settlement = calculateMatchPlay(holeScores, holeNum);
-            activePlayers.forEach(player => {
-              newTotalMoney[player] += settlement[player].money;
-            });
-          } else if (gameMode === 'skins') {
-            const calculateSkinsForPrevHole = (holeScores, holeNum, currentPool) => {
-              const stakeValue = Number(stake) || 0;
-              const par = pars[holeNum] || 4;
-              
-              const playerScores = activePlayers.map(p => ({
-                player: p,
-                score: holeScores[p] || par,
-                netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
-              }));
-              
-              playerScores.sort((a, b) => a.netScore - b.netScore);
-              const minScore = playerScores[0].netScore;
-              const winners = playerScores.filter(p => p.netScore === minScore);
-              
-              const results = {};
-              let poolChange = 0;
-              
-              activePlayers.forEach(player => {
-                results[player] = { 
-                  money: -stakeValue,
-                  fromPool: 0,
-                  spent: stakeValue
-                };
-              });
-              
-              const holeStake = stakeValue * activePlayers.length;
-              
-              if (winners.length === 1) {
-                const winner = winners[0].player;
-                const winAmount = currentPool + holeStake;
-                results[winner].money = winAmount - stakeValue;
-                results[winner].fromPool = currentPool;
-                poolChange = -currentPool;
-              } else {
-                poolChange = holeStake;
-              }
-              
-              return { results, poolChange };
-            };
-            
-            const { results, poolChange } = calculateSkinsForPrevHole(holeScores, holeNum, newPrizePool);
-            activePlayers.forEach(player => {
-              newSpent[player] += results[player].spent || 0;
-              newTotalMoney[player] += results[player].money;
-              newDetails[player].fromPool += results[player].fromPool;
-            });
-            newPrizePool += poolChange;
-          } else if (gameMode === 'win123') {
-            const { results, poolChange } = calculateWin123(holeScores, holeUps, holeNum);
-            activePlayers.forEach(player => {
-              newTotalMoney[player] += results[player].money;
-              if (results[player].fromPool) {
-                newDetails[player].fromPool += results[player].fromPool;
-              }
-            });
-            newPrizePool += poolChange;
+          if (winners.length === 1) {
+            const winner = winners[0].player;
+            const winAmount = newPrizePool + holeStake;
+            newTotalMoney[winner] += winAmount;
+            newDetails[winner].fromPool += newPrizePool;
+            newPrizePool = 0;
+          } else {
+            newPrizePool += holeStake;
           }
+        } else if (gameMode === 'win123') {
+          const { results, poolChange } = calculateWin123(holeScores, holeUps, holeNum);
+          activePlayers.forEach(player => {
+            newTotalMoney[player] += results[player].money;
+            if (results[player].fromPool) {
+              newDetails[player].fromPool += results[player].fromPool;
+            }
+          });
+          newPrizePool += poolChange;
         }
-      }
-      
-      setTotalMoney(newTotalMoney);
-      setMoneyDetails(newDetails);
-      setTotalSpent(newSpent);
-      if (gameMode === 'win123' || gameMode === 'skins') {
-        setPrizePool(newPrizePool);
-      }
-      
-      setCompletedHoles(completedHoles.filter(h => h !== prevHoleNum));
-      setCurrentHole(prevHoleIndex);
-      setCurrentHoleSettlement(null);
-      
-      setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
-    });
-  }, [currentHole, holes, activePlayers, allScores, allUps, completedHoles, gameMode, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showConfirm, t, getHandicapForHole]);
+      });
+    }
+    
+    setTotalMoney(newTotalMoney);
+    setMoneyDetails(newDetails);
+    setTotalSpent(newSpent);
+    if (gameMode === 'win123' || gameMode === 'skins') {
+      setPrizePool(newPrizePool);
+    }
+    
+    showToast(t('scoreUpdated'));
+  }, [allScores, allUps, activePlayers, stake, gameMode, completedHoles, pars, calculateMatchPlay, calculateWin123, getHandicapForHole, showToast, t]);
 
   const goHome = useCallback(() => {
     const resetGame = () => {
@@ -2316,7 +3624,13 @@ const filteredCourses = useMemo(() => {
       {currentSection === 'home' && (
         <div className="flex justify-end items-center p-3 bg-white border-b border-gray-200">
           <button
-            onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+            onClick={() => {
+              const newLang = lang === 'zh' ? 'en' : 'zh';
+              setLang(newLang);
+              try {
+                localStorage.setItem('handincap_lang', newLang);
+              } catch {}
+            }}
             className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium shadow-sm"
           >
             {t('switchLang')}
@@ -2428,29 +3742,36 @@ const filteredCourses = useMemo(() => {
                     </div>
 
                     {searchQuery.trim() && (
-                      <div className="space-y-2 max-h-96 overflow-y-auto">
+                      <div className="space-y-3 max-h-96 overflow-y-auto">
                         {filteredCourses.length > 0 ? (
-                          filteredCourses.map((course) => {
+                          filteredCourses.map((course, index) => {
                             const coursePar = course.pars.reduce((sum, par) => sum + par, 0);
                             
                             return (
+                              // ========== 修改后的徽章风格卡片 ==========
                               <div
-                                key={course.shortName}
-                                className="border border-gray-200 bg-white hover:border-green-300 hover:shadow-sm rounded-lg p-3 cursor-pointer transition"
+                                key={`${course.shortName}-${index}`}
+                                className="border border-gray-200 bg-white hover:border-green-400 hover:shadow-lg rounded-xl p-4 cursor-pointer transition-all"
                                 onClick={() => selectAndApplyCourse(course)}
                               >
-                                <div className="flex items-start justify-between">
-                                  <div className="flex-1">
-                                    <h4 className="font-semibold text-sm text-gray-900 mb-0.5">
+                                <div className="flex gap-4">
+                                  <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
+                                    <span className="text-xl font-bold">{coursePar}</span>
+                                    <span className="text-xs uppercase tracking-wide opacity-90">Par</span>
+                                  </div>
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="font-semibold text-sm text-gray-900 mb-1">
                                       {course.fullName}
                                     </h4>
-                                    <p className="text-xs text-gray-500">
-                                      {course.shortName}
-                                    </p>
-                                  </div>
-                                  <div className="text-right ml-3">
-                                    <div className="text-xs text-gray-500">{t('totalPar')}</div>
-                                    <div className="text-lg font-bold text-green-600">{coursePar}</div>
+                                    <div className="border-t border-gray-100 pt-2 mt-2">
+                                      {course.location && (
+                                        <div className="flex items-center gap-1 text-xs text-gray-600">
+                                          <MapPin className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                          <span>{course.location[0]}, {course.location[1]}</span>
+                                        </div>
+                                      )}
+                                      <p className="text-xs text-gray-400 mt-1">{course.shortName}</p>
+                                    </div>
                                   </div>
                                 </div>
                               </div>
@@ -3213,12 +4534,22 @@ const filteredCourses = useMemo(() => {
 
               <div className="flex gap-3">
                 {!gameComplete ? (
-                  <button
-                    onClick={() => setCurrentSection('game')}
-                    className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
-                  >
-                    {t('resume')}
-                  </button>
+                  <>
+                    <button
+                      onClick={() => setCurrentSection('game')}
+                      className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
+                    >
+                      {t('resume')}
+                    </button>
+                    {completedHoles.length > 0 && (
+                      <button
+                        onClick={() => setHoleSelectDialog(true)}
+                        className="w-14 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex items-center justify-center transition"
+                      >
+                        <Edit2 className="w-5 h-5" />
+                      </button>
+                    )}
+                  </>
                 ) : (
                   <div className="w-full">
                     <button
@@ -3500,13 +4831,6 @@ const filteredCourses = useMemo(() => {
               >
                 <BarChart3 className="w-5 h-5" />
               </button>
-              <button
-                onClick={prevHole}
-                disabled={currentHole === 0}
-                className="bg-orange-600 hover:bg-orange-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white p-3 rounded-lg transition"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
             </div>
           </div>
         </div>
@@ -3551,6 +4875,27 @@ const filteredCourses = useMemo(() => {
         stake={stake}
         prizePool={prizePool}
         activePlayers={activePlayers}
+      />
+
+      <HoleSelectDialog
+        isOpen={holeSelectDialog}
+        onClose={() => setHoleSelectDialog(false)}
+        completedHoles={completedHoles}
+        onSelect={(hole) => setEditHoleDialog({ isOpen: true, hole })}
+        t={t}
+      />
+
+      <EditHoleDialog
+        isOpen={editHoleDialog.isOpen}
+        onClose={() => setEditHoleDialog({ isOpen: false, hole: null })}
+        hole={editHoleDialog.hole}
+        players={activePlayers}
+        allScores={allScores}
+        allUps={allUps}
+        pars={pars}
+        onSave={handleEditHoleSave}
+        t={t}
+        gameMode={gameMode}
       />
     </div>
   );
