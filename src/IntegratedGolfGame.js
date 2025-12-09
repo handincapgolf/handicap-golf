@@ -2947,10 +2947,17 @@ const filteredCourses = useMemo(() => {
     setPars(prev => ({ ...prev, [hole]: par }));
   }, []);
 
-  const confirmCourse = useCallback(() => {
-    showToast(t('saved'));
-    setCurrentSection('players');
-  }, [showToast, t]);
+const confirmCourse = useCallback(() => {
+  showToast(t('saved'));
+  setCurrentSection('players');
+  setTimeout(() => {
+    const scrollContainer = document.querySelector('.overflow-auto');
+    if (scrollContainer) {
+      scrollContainer.scrollTop = 0;
+    }
+    window.scrollTo({ top: 0 });
+  }, 100);
+}, [showToast, t]);
 
   const selectAndApplyCourse = useCallback((course) => {
   setSelectedCourse(course);
@@ -3810,52 +3817,41 @@ setSearchQuery('');
                           </div>
                         </div>
                         
-                        <div className="flex rounded-lg border-2 border-green-600 overflow-hidden mb-4">
-                          <button
-                            onClick={() => {
-                              setCourseType('f18');
-                              const newHoles = courses.f18;
-                              setHoles(newHoles);
-                              const newPars = {};
-                              newHoles.forEach((hole, index) => {
-                                newPars[hole] = selectedCourse.pars[index] || 4;
-                              });
-                              setPars(newPars);
-                            }}
-                            className={`flex-1 px-4 py-2 font-semibold text-sm transition ${
-                              courseType === 'f18'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-green-50'
-                            }`}
-                          >
-                            {t('f18')}
-                          </button>
-                          <button
-                            onClick={() => {
-                              setCourseType('b18');
-                              const newHoles = courses.b18;
-                              setHoles(newHoles);
-                              const newPars = {};
-                              newHoles.forEach((hole, index) => {
-                                if (index < 9) {
-                                  newPars[hole] = selectedCourse.pars[hole - 1] || 4;
-                                } else {
-                                  newPars[hole] = selectedCourse.pars[hole - 1] || 4;
-                                }
-                              });
-                              setPars(newPars);
-                            }}
-                            className={`flex-1 px-4 py-2 font-semibold text-sm transition ${
-                              courseType === 'b18'
-                                ? 'bg-green-600 text-white'
-                                : 'bg-white text-gray-700 hover:bg-green-50'
-                            }`}
-                          >
-                            {t('b18')}
-                          </button>
-                        </div>
+<div className="bg-white rounded-lg p-4 shadow-sm mb-4">
+  <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
+    <Target className="w-4 h-4" />
+    {t('gameType')}
+  </h3>
+  <div className="grid grid-cols-2 gap-3">
+    {Object.keys(courses).map(type => (
+      <button
+        key={type}
+        onClick={() => {
+          setCourseType(type);
+          const newHoles = courses[type];
+          setHoles(newHoles);
+          const newPars = {};
+          newHoles.forEach((hole, index) => {
+            newPars[hole] = selectedCourse.pars[hole - 1] || 4;
+          });
+          setPars(newPars);
+        }}
+        className={`p-2 rounded-lg border transition transform hover:scale-105 ${
+          courseType === type
+            ? 'bg-green-600 text-white border-green-600 shadow-md'
+            : 'bg-gray-50 text-gray-900 border-gray-200 hover:border-green-300 hover:shadow-sm'
+        }`}
+      >
+        <h4 className="font-semibold text-xs">{t(type)}</h4>
+        <p className="text-xs opacity-80" style={{ fontSize: '10px' }}>
+          {t(`${type}Desc`)}
+        </p>
+      </button>
+    ))}
+  </div>
+</div>
                         
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className={`grid gap-2 ${(courseType === 'f9' || courseType === 'b9') ? 'grid-cols-1 max-w-[200px] mx-auto' : 'grid-cols-2'}`}>
                           <div className="border-2 border-green-600 rounded-lg overflow-hidden">
                             <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
                               {t('front9')}
@@ -3910,31 +3906,6 @@ setSearchQuery('');
 
               {setupMode === 'manual' && (
                 <>
-                  <div className="bg-white rounded-lg p-3 shadow-sm">
-                    <h3 className="text-base font-semibold text-gray-900 mb-2 flex items-center gap-2">
-                      <Target className="w-4 h-4" />
-                      {t('gameType')}
-                    </h3>
-                    <div className="grid grid-cols-2 gap-3">
-                      {Object.keys(courses).map(type => (
-                        <button
-                          key={type}
-                          onClick={() => setCourse(type)}
-                          className={`p-2 rounded-lg border transition transform hover:scale-105 ${
-                            courseType === type
-                              ? 'bg-green-600 text-white border-green-600 shadow-md'
-                              : 'bg-gray-50 text-gray-900 border-gray-200 hover:border-green-300 hover:shadow-sm'
-                          }`}
-                        >
-                          <h4 className="font-semibold text-xs">{t(type)}</h4>
-                          <p className="text-xs opacity-80" style={{ fontSize: '10px' }}>
-                            {t(`${type}Desc`)}
-                          </p>
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-
                   <div className="bg-white rounded-lg p-4 shadow-sm">
                     <h3 className="text-sm font-semibold text-gray-900 mb-3">{t('setPar')}</h3>
                     
@@ -3948,7 +3919,7 @@ setSearchQuery('');
                                   {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
                                 </span>
                                 <div className="flex gap-1">
-                                  {[3, 4, 5, 6].map(par => (
+                                  {[3, 4, 5].map(par => (
                                     <button
                                       key={par}
                                       onClick={() => setPar(pair[0], par)}
@@ -3971,7 +3942,7 @@ setSearchQuery('');
                                   {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
                                 </span>
                                 <div className="flex gap-1">
-                                  {[3, 4, 5, 6].map(par => (
+                                  {[3, 4, 5].map(par => (
                                     <button
                                       key={par}
                                       onClick={() => setPar(pair[1], par)}
@@ -4000,7 +3971,7 @@ setSearchQuery('');
                               {t('hole')} {hole}
                             </span>
                             <div className="flex gap-1">
-                              {[3, 4, 5, 6].map(par => (
+                              {[3, 4, 5].map(par => (
                                 <button
                                   key={par}
                                   onClick={() => setPar(hole, par)}
