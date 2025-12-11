@@ -2256,7 +2256,7 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
 });
 
 // 洞号选择弹窗
-const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect, t }) => {
+const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect, t, pars = {} }) => {
   if (!isOpen || !completedHoles || completedHoles.length === 0) return null;
 
   return (
@@ -2271,17 +2271,26 @@ const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect,
           </button>
         </div>
         
-        <div className="grid grid-cols-5 gap-2 mb-4">
-          {completedHoles.map(hole => (
-            <button
-              key={hole}
-              onClick={() => { onSelect(hole); onClose(); }}
-              className="w-12 h-12 bg-green-100 hover:bg-green-200 text-green-800 rounded-lg font-bold text-lg transition"
-            >
-              {hole}
-            </button>
-          ))}
-        </div>
+<div className="grid grid-cols-5 gap-2 mb-4">
+  {completedHoles.map(hole => {
+    const par = pars[hole] || 4;
+    const colorClass = par === 3 
+      ? 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900' 
+      : par === 5 
+        ? 'bg-orange-300 hover:bg-orange-400 text-orange-900' 
+        : 'bg-gray-300 hover:bg-gray-400 text-gray-900';
+    
+    return (
+      <button
+        key={hole}
+        onClick={() => { onSelect(hole); onClose(); }}
+        className={`w-12 h-12 ${colorClass} rounded-lg font-bold text-lg transition`}
+      >
+        {hole}
+      </button>
+    );
+  })}
+</div>
         
         <button 
           onClick={onClose} 
@@ -2808,7 +2817,6 @@ const filteredCourses = useMemo(() => {
         b9Desc: '10-18洞',
         f18Desc: '1-18洞标准',
         b18Desc: '10-18,1-9洞',
-        saved: '已保存！',
         duplicateNames: '玩家名不可重复',
         screenshotHint: '建议您先截图保存成绩记录',
         totalLoss: '累计',
@@ -2829,7 +2837,7 @@ const filteredCourses = useMemo(() => {
       },
       en: {
         title: 'HandinCap',
-        subtitle: 'Just a Game',
+        subtitle: 'Just a ScoreCard',
         create: 'Create New Game',
         courseTitle: 'Course Setup',
         autoMode: 'Auto Search',
@@ -2904,7 +2912,6 @@ const filteredCourses = useMemo(() => {
         b9Desc: 'Holes 10-18',
         f18Desc: 'Standard 1-18',
         b18Desc: '10-18, 1-9',
-        saved: 'Saved!',
         duplicateNames: 'Player names must be unique',
         screenshotHint: 'We recommend taking a screenshot to save your scores',
         totalLoss: 'Total',
@@ -2948,7 +2955,6 @@ const filteredCourses = useMemo(() => {
   }, []);
 
 const confirmCourse = useCallback(() => {
-  showToast(t('saved'));
   setCurrentSection('players');
   setTimeout(() => {
     const scrollContainer = document.querySelector('.overflow-auto');
@@ -2959,12 +2965,16 @@ const confirmCourse = useCallback(() => {
   }, 100);
 }, [showToast, t]);
 
-  const selectAndApplyCourse = useCallback((course) => {
+const selectAndApplyCourse = useCallback((course) => {
   setSelectedCourse(course);
   setCourseApplied(false);
   
-  setCourseType('f18');
-  const newHoles = courses.f18;
+  // 根据球场数据自动选择洞数
+  const holeCount = course.pars.length;
+  const autoType = holeCount <= 9 ? 'f9' : 'f18';
+  
+  setCourseType(autoType);
+  const newHoles = courses[autoType];
   setHoles(newHoles);
   
   const newPars = {};
@@ -3446,8 +3456,9 @@ setSearchQuery('');
     
     if (currentHole >= holes.length - 1) {
       setGameComplete(true);
-      showToast(t('gameOver'));
-      setCurrentSection('scorecard');
+	showToast(t('gameOver'));
+	setCurrentSection('scorecard');
+	triggerConfetti();
     } else {
       setCurrentHole(currentHole + 1);
       setScores({});
@@ -3625,6 +3636,60 @@ setSearchQuery('');
     if (rank === 3) return '🥉';
     return '';
   }, []);
+
+// 彩纸庆祝效果
+const triggerConfetti = useCallback(() => {
+  if (!document.getElementById('confetti-style')) {
+    const style = document.createElement('style');
+    style.id = 'confetti-style';
+    style.textContent = `
+      .confetti {
+        position: fixed;
+        width: 10px;
+        height: 10px;
+        top: -10px;
+        z-index: 100;
+        pointer-events: none;
+        animation: confettiFall linear forwards;
+      }
+      @keyframes confettiFall {
+        0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+        100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+      }
+      .confetti-container {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 50;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  const container = document.createElement('div');
+  container.className = 'confetti-container';
+  document.body.appendChild(container);
+  
+  const colors = ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6', '#ec4899', '#06b6d4'];
+  
+  for (let i = 0; i < 100; i++) {
+    const confetti = document.createElement('div');
+    confetti.className = 'confetti';
+    confetti.style.left = Math.random() * 100 + 'vw';
+    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+    confetti.style.animationDuration = (Math.random() * 2 + 2) + 's';
+    confetti.style.animationDelay = Math.random() * 1.5 + 's';
+    confetti.style.borderRadius = Math.random() > 0.5 ? '50%' : '2px';
+    confetti.style.width = (Math.random() * 8 + 6) + 'px';
+    confetti.style.height = (Math.random() * 8 + 6) + 'px';
+    container.appendChild(confetti);
+  }
+  
+  setTimeout(() => {
+    container.remove();
+  }, 6000);
+}, []);
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -4617,8 +4682,9 @@ setSearchQuery('');
                     : 'End the game now?\nIncomplete holes will not be counted';
                   showConfirm(message, () => {
                     setGameComplete(true);
-                    showToast(t('gameOver'));
-                    setCurrentSection('scorecard');
+					showToast(t('gameOver'));
+					setCurrentSection('scorecard');
+					triggerConfetti();
                   }, true);
                 }}
                 className="absolute top-4 right-4 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition"
@@ -4854,6 +4920,7 @@ setSearchQuery('');
         completedHoles={completedHoles}
         onSelect={(hole) => setEditHoleDialog({ isOpen: true, hole })}
         t={t}
+		pars={pars}
       />
 
       <EditHoleDialog
