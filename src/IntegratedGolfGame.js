@@ -2143,6 +2143,63 @@ const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreen
     </div>
   );
 });
+const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, scores, pars, holes, currentHole, t, lang }) => {
+  if (!isOpen || !players || players.length === 0) return null;
+
+  const holeNum = holes[currentHole];
+  const par = pars[holeNum] || 4;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-6 h-6 text-yellow-600" />
+          </div>
+          <h3 className="text-lg font-bold text-gray-900">{t('confirmPutts')}</h3>
+        </div>
+        
+        <p className="text-sm text-gray-600 mb-3">{t('zeroPuttsWarning')}</p>
+        
+        <div className="space-y-2 mb-4">
+          {players.map(player => {
+            const playerScore = scores[player] || par;
+            return (
+              <div key={player} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">⚠️</span>
+                  <span className="font-semibold text-gray-900">{player}</span>
+                </div>
+                <div className="text-sm text-gray-600">
+                  {t('puttsScore')}: <span className="font-bold text-gray-900">{playerScore}</span>{t('puttsStrokes')}{lang === 'zh' ? '，' : ', '}{t('puttsPutts')}: <span className="font-bold text-red-600">0</span>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+        
+        <p className="text-xs text-gray-500 mb-4">
+          💡 {t('puttsTip')}
+        </p>
+        
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+          >
+            {t('puttsGoBack')}
+          </button>
+          <button
+            onClick={onConfirm}
+            className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+          >
+            {t('puttsConfirm')}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+});
 
 const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
   if (!isOpen || !players) return null;
@@ -3000,6 +3057,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [advanceMode, setAdvanceMode] = useState('off');
   const [advancePlayers, setAdvancePlayers] = useState({});
+  const [puttsWarningDialog, setPuttsWarningDialog] = useState({ isOpen: false, players: [] });
   // 新增：展开说明的状态
 const [showHandicapInfo, setShowHandicapInfo] = useState(false);
 const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
@@ -3356,7 +3414,15 @@ const filteredCourses = useMemo(() => {
 		strokes: '杆',
 		putt: '推',
 		water: '水障',
-		clickNameToView: '点击名字查看详情'
+		clickNameToView: '点击名字查看详情',
+		confirmPutts: '确认推杆数',
+		zeroPuttsWarning: '以下玩家推杆数为 0：',
+		puttsScore: '成绩',
+		puttsStrokes: '杆',
+		puttsPutts: '推杆',
+		puttsTip: '提示：除非是切杆进洞(chip-in)，否则推杆数通常不为 0',
+		puttsGoBack: '返回修改',
+		puttsConfirm: '确认无误'
       },
       en: {
         title: 'HandinCap',
@@ -3476,7 +3542,15 @@ const filteredCourses = useMemo(() => {
 		strokes: ' strokes',
 		putt: 'Putt',
 		water: 'Water',
-		clickNameToView: 'Tap name to view details'
+		clickNameToView: 'Tap name to view details',
+		confirmPutts: 'Confirm Putts',
+		zeroPuttsWarning: 'The following players have 0 putts:',
+		puttsScore: 'Score',
+		puttsStrokes: '',
+		puttsPutts: 'Putts',
+		puttsTip: "Tip: Unless it's a chip-in, putts are usually not 0",
+		puttsGoBack: 'Go Back',
+		puttsConfirm: 'Confirm'
       }
     };
     return translations[lang][key] || key;
@@ -4071,26 +4145,65 @@ setSearchQuery('');
     setPendingRankings(null);
   }, [currentHole, holes, scores, ups, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, totalSpent]);
 
-  const nextHole = useCallback(() => {
-    if (gameMode === 'win123') {
-      const holeNum = holes[currentHole];
-      const par = pars[holeNum] || 4;
-      const currentHoleScores = {};
-      const currentHoleUps = {};
-      
-      activePlayers.forEach(player => {
-        currentHoleScores[player] = scores[player] || par;
-        currentHoleUps[player] = ups[player] || false;
-      });
-      
-      const { rankings } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
-      setPendingRankings(rankings);
-    }
-    setHoleConfirmDialog({ 
-      isOpen: true, 
-      action: proceedToNextHole
+const nextHole = useCallback(() => {
+  const holeNum = holes[currentHole];
+  const par = pars[holeNum] || 4;
+
+  // 检查 Advance 玩家推杆数
+  const playersWithZeroPutts = activePlayers.filter(player => 
+    advanceMode === 'on' && 
+    advancePlayers[player] && 
+    (putts[player] || 0) === 0 && 
+    (scores[player] || par) > 1
+  );
+
+  if (playersWithZeroPutts.length > 0) {
+    setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
+    return;
+  }
+
+  // 原有逻辑继续
+  if (gameMode === 'win123') {
+    const currentHoleScores = {};
+    const currentHoleUps = {};
+    
+    activePlayers.forEach(player => {
+      currentHoleScores[player] = scores[player] || par;
+      currentHoleUps[player] = ups[player] || false;
     });
-  }, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
+    
+    const { rankings } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
+    setPendingRankings(rankings);
+  }
+  setHoleConfirmDialog({ 
+    isOpen: true, 
+    action: proceedToNextHole
+  });
+}, [gameMode, currentHole, holes, scores, ups, putts, activePlayers, pars, calculateWin123, proceedToNextHole, advanceMode, advancePlayers]);
+
+const handlePuttsWarningConfirm = useCallback(() => {
+  setPuttsWarningDialog({ isOpen: false, players: [] });
+  
+  const holeNum = holes[currentHole];
+  const par = pars[holeNum] || 4;
+
+  if (gameMode === 'win123') {
+    const currentHoleScores = {};
+    const currentHoleUps = {};
+    
+    activePlayers.forEach(player => {
+      currentHoleScores[player] = scores[player] || par;
+      currentHoleUps[player] = ups[player] || false;
+    });
+    
+    const { rankings } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
+    setPendingRankings(rankings);
+  }
+  setHoleConfirmDialog({ 
+    isOpen: true, 
+    action: proceedToNextHole
+  });
+}, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
   // 编辑洞成绩并重新计算金额
   const handleEditHoleSave = useCallback((hole, newScores, newUps) => {
@@ -5974,6 +6087,18 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         t={t}
         gameMode={gameMode}
       />
+	  <PuttsWarningDialog
+  isOpen={puttsWarningDialog.isOpen}
+  onClose={() => setPuttsWarningDialog({ isOpen: false, players: [] })}
+  onConfirm={handlePuttsWarningConfirm}
+  players={puttsWarningDialog.players}
+  scores={scores}
+  pars={pars}
+  holes={holes}
+  currentHole={currentHole}
+  t={t}
+  lang={lang}
+/>
     </div>
   );
 }
