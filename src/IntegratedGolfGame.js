@@ -19,7 +19,10 @@ import {
   Search,
   MapPin,
   Edit2,
-  Droplets
+  Droplets,
+  ChevronDown,
+  ChevronUp,
+  HelpCircle
 } from 'lucide-react';
 
 // 球场数据库
@@ -2780,7 +2783,7 @@ const HandicapRow = memo(({ playerName, handicaps, onChange }) => {
   const handleParChange = useCallback((parType, value) => {
     onChange(playerName, parType, value);
   }, [playerName, onChange]);
-
+  
   return (
     <div className="bg-gray-50 rounded-md p-3 mb-3">
       <div className="text-sm font-semibold text-green-600 mb-2">
@@ -2824,6 +2827,27 @@ const HandicapRow = memo(({ playerName, handicaps, onChange }) => {
           />
         </div>
       </div>
+    </div>
+  );
+});
+
+// 展开式说明组件
+const ExpandableInfo = memo(({ children, isOpen, onToggle, lang }) => {
+  return (
+    <div className="mt-2">
+      <button
+        onClick={onToggle}
+        className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition"
+      >
+        <HelpCircle className="w-3.5 h-3.5" />
+        <span>{isOpen ? (lang === 'zh' ? '收起说明' : 'Hide') : (lang === 'zh' ? '了解更多' : 'Learn more')}</span>
+        {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
+      </button>
+      {isOpen && (
+        <div className="mt-2 p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-gray-700 leading-relaxed animate-fadeIn">
+          {children}
+        </div>
+      )}
     </div>
   );
 });
@@ -2975,6 +2999,10 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [advanceMode, setAdvanceMode] = useState('off');
+  const [advancePlayers, setAdvancePlayers] = useState({});
+  // 新增：展开说明的状态
+const [showHandicapInfo, setShowHandicapInfo] = useState(false);
+const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   
   const [currentHole, setCurrentHole] = useState(1);
   const [scores, setScores] = useState({});  
@@ -3061,6 +3089,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
         setSelectedCourse(gameState.selectedCourse || null);
         setSetupMode(gameState.setupMode || 'auto');
         setJumboMode(gameState.jumboMode || false);
+		setAdvancePlayers(gameState.advancePlayers || {});
         setCurrentSection('game');
       } catch (error) {
         console.error('Failed to resume game:', error);
@@ -3103,7 +3132,8 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
         totalSpent,
         selectedCourse,
         setupMode,
-        jumboMode
+        jumboMode,
+		advancePlayers
       };
       localStorage.setItem('golfGameState', JSON.stringify(gameState));
       setHasSavedGame(true);
@@ -3303,6 +3333,10 @@ const filteredCourses = useMemo(() => {
         editHole: '修改',
         save: '保存',
         scoreUpdated: '成绩已更新，金额已重算',
+		// 游戏模式说明
+		matchPlayDesc: '每洞最低净杆者赢，输家付底注',
+		win123Desc: '按名次罚款入池，可喊UP赌大',
+		skinsDesc: '每洞投注，唯一低杆者通吃',
 		reportTitle: '的比赛报告',
 		scoreDistribution: '成绩分布',
 		puttingAnalysis: '推杆分析',
@@ -3419,6 +3453,10 @@ const filteredCourses = useMemo(() => {
         editHole: 'Edit Hole',
         save: 'Save',
         scoreUpdated: 'Scores updated, money recalculated',
+		// Game mode descriptions
+		matchPlayDesc: 'Lowest net wins, losers pay stake',
+		win123Desc: 'Ranked penalty to pool, UP for risk/reward',
+		skinsDesc: 'All-in each hole, sole low takes pot',
 		reportTitle: "'s Report",
 		scoreDistribution: 'Score Distribution',
 		puttingAnalysis: 'Putting Analysis',
@@ -4745,7 +4783,47 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         <span style={{ fontSize: '12px' }}>{t('skins')}</span>
                       </button>
                     </div>
-                  </div>
+					</div>
+
+{/* 模式说明卡片 - 方案 E */}
+<div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+  <div className="flex items-start gap-2">
+    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+      gameMode === 'matchPlay' ? 'bg-blue-100 text-blue-600' :
+      gameMode === 'win123' ? 'bg-green-100 text-green-600' :
+      'bg-purple-100 text-purple-600'
+    }`}>
+      {gameMode === 'matchPlay' && <Trophy className="w-3.5 h-3.5" />}
+      {gameMode === 'win123' && <DollarSign className="w-3.5 h-3.5" />}
+      {gameMode === 'skins' && <CircleDollarSign className="w-3.5 h-3.5" />}
+    </div>
+    <div className="flex-1">
+      <div className="font-semibold text-sm text-gray-900">{t(gameMode)}</div>
+      <div className="text-xs text-gray-600 mt-0.5">{t(`${gameMode}Desc`)}</div>
+      <div className="mt-2 text-xs text-gray-500 space-y-1">
+        {gameMode === 'matchPlay' && (
+          <>
+            <div>• {lang === 'zh' ? '净杆 = 实际杆数 − 让杆' : 'Net = Gross − Handicap'}</div>
+            <div>• {lang === 'zh' ? '同杆数平局，无输赢' : 'Tie = no money exchanged'}</div>
+          </>
+        )}
+        {gameMode === 'win123' && (
+          <>
+            <div>• {lang === 'zh' ? '第2名罚1倍 | 第3名罚2倍 | 第4名罚3倍' : '2nd: 1x | 3rd: 2x | 4th: 3x penalty'}</div>
+            <div>• {lang === 'zh' ? 'UP成功：从池中拿6倍底注' : 'UP win: Take 6x from pool'}</div>
+            <div>• {lang === 'zh' ? 'UP失败：双倍罚款' : 'UP lose: Double penalty'}</div>
+          </>
+        )}
+        {gameMode === 'skins' && (
+          <>
+            <div>• {lang === 'zh' ? '每洞每人投入1倍底注' : 'Each player antes 1x per hole'}</div>
+            <div>• {lang === 'zh' ? '平局时奖池累积到下一洞' : 'Ties carry over to next hole'}</div>
+          </>
+        )}
+      </div>
+    </div>
+  </div>
+</div>
                   
                   <div className="space-y-1">
                     <label className="block text-xs font-medium text-gray-700">
@@ -4787,6 +4865,20 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </button>
                     </div>
                   </div>
+				  
+				  {/* 差点说明 - 方案 B */}
+<ExpandableInfo isOpen={showHandicapInfo} onToggle={() => setShowHandicapInfo(!showHandicapInfo)} lang={lang}>
+  <div className="space-y-2">
+    <div className="font-semibold text-gray-800">⛳ {lang === 'zh' ? '差点系统' : 'Handicap System'}</div>
+    <div>{lang === 'zh' ? '根据不同 PAR 值的洞，分别设置让杆数。' : 'Set strokes given for each PAR type.'}</div>
+    <div className="bg-white rounded p-2 space-y-1">
+      <div>• <strong>PAR 3</strong>: {lang === 'zh' ? '短洞让杆' : 'Short hole strokes'}</div>
+      <div>• <strong>PAR 4</strong>: {lang === 'zh' ? '标准洞让杆' : 'Regular hole strokes'}</div>
+      <div>• <strong>PAR 5</strong>: {lang === 'zh' ? '长洞让杆' : 'Long hole strokes'}</div>
+    </div>
+    <div className="text-gray-600">{lang === 'zh' ? '净杆 = 实际杆数 − 让杆数' : 'Net = Gross − Handicap'}</div>
+  </div>
+</ExpandableInfo>
 
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-medium text-gray-700">
@@ -4812,9 +4904,59 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         }`}
                       >
                         {t('on')}
-                      </button>
+</button>
                     </div>
                   </div>
+                  {/* 高级模式说明 - 方案 B */}
+                  <ExpandableInfo isOpen={showAdvanceInfo} onToggle={() => setShowAdvanceInfo(!showAdvanceInfo)} lang={lang}>
+                    <div className="space-y-2">
+                      <div className="font-semibold text-gray-800">📊 {lang === 'zh' ? '高级统计模式' : 'Advanced Stats Mode'}</div>
+                      <div>{lang === 'zh' ? '开启后，每洞可额外记录：' : 'When enabled, track extra data:'}</div>
+                      <div className="bg-white rounded p-2 space-y-1">
+                        <div>• 🏌️ <strong>{lang === 'zh' ? '推杆数' : 'Putts'}</strong></div>
+                        <div>• 💧 <strong>{lang === 'zh' ? '水障碍' : 'Water Hazards'}</strong></div>
+                        <div>• 🚫 <strong>OB</strong> ({lang === 'zh' ? '出界' : 'Out of Bounds'})</div>
+                      </div>
+                      <div className="text-gray-600">{lang === 'zh' ? '赛后自动生成详细统计报告！' : 'Get detailed stats report after round!'}</div>
+                    </div>
+                  </ExpandableInfo>
+				  {/* Advance 玩家选择 */}
+                  {advanceMode === 'on' && activePlayers.length > 0 && (
+                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                      <div className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
+                        <BarChart3 className="w-4 h-4" />
+                        {lang === 'zh' ? '选择使用高级统计的玩家' : 'Select players for advanced stats'}
+                      </div>
+                      <div className="space-y-2">
+                        {activePlayers.map(player => (
+                          <label key={player} className="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition">
+                            <input
+                              type="checkbox"
+                              checked={advancePlayers[player] || false}
+                              onChange={(e) => {
+                                setAdvancePlayers(prev => ({
+                                  ...prev,
+                                  [player]: e.target.checked
+                                }));
+                              }}
+                              className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
+                            />
+                            <span className="font-medium text-gray-900">{player}</span>
+                            {advancePlayers[player] && (
+                              <span className="ml-auto text-xs text-green-600 font-medium">
+                                {lang === 'zh' ? '📊 高级' : '📊 Advanced'}
+                              </span>
+                            )}
+                          </label>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-500 mt-2">
+                        {lang === 'zh' 
+                          ? '勾选的玩家将记录推杆、水障碍、OB等详细数据' 
+                          : 'Selected players will track putts, water, OB details'}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -4869,8 +5011,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               {advanceMode === 'on' && completedHoles.length > 0 ? (
                 // ===== Advance Mode Scorecard =====
                 <>
-                  {/* 提示文字 */}
-                  <p className="text-xs text-gray-400 text-center mb-2">💡 {t('clickNameToView')}</p>
+                  {/* 提示文字 - 只在有 Advance 玩家时显示 */}
+{Object.values(advancePlayers).some(v => v) && (
+  <p className="text-xs text-gray-400 text-center mb-2">💡 {t('clickNameToView')}</p>
+)}
 
                   {/* 总成绩摘要 - 可点击查看详情 */}
                   {(() => {
@@ -4914,13 +5058,22 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             
                             return (
                               <div 
-                                key={player} 
-                                className="text-center p-2 bg-gray-50 rounded-lg cursor-pointer hover:bg-gray-100 active:scale-98 transition"
-                                onClick={() => handleAdvancePlayerClick(player)}
-                              >
-                                <div className="text-sm font-medium text-blue-600 underline flex items-center justify-center gap-1">
-                                  {player} {medal}
-                                </div>
+  key={player} 
+  className={`text-center p-2 bg-gray-50 rounded-lg transition ${
+    advancePlayers[player] 
+      ? 'cursor-pointer hover:bg-gray-100 active:scale-98' 
+      : ''
+  }`}
+  onClick={() => advancePlayers[player] && handleAdvancePlayerClick(player)}
+>
+                                <div className={`text-sm font-medium flex items-center justify-center gap-1 ${
+  advancePlayers[player] 
+    ? 'text-blue-600 underline' 
+    : 'text-gray-700'
+}`}>
+  {player} {medal}
+  {advancePlayers[player] && <span className="text-xs">📊</span>}
+</div>
                                 <div className="flex items-baseline justify-center gap-1">
                                   <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
                                   {total > 0 && (
@@ -5497,19 +5650,23 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
             )}
           </div>
 
-          <div className="bg-white text-gray-900 p-3">
-            <div className="grid gap-3">
-              {advanceMode === 'on' ? (
-                // 高级模式 - v15 final 的 AdvancedPlayerCard
-                activePlayers.map(player => {
-                  const holeNum = holes[currentHole];
-                  const par = pars[holeNum] || 4;
-                  const playerScore = scores[player] || par;
-                  const playerPutts = putts[player] || 0;
-                  const playerWater = water[player] || 0;
-                  const playerOb = ob[player] || 0;
-                  const playerUp = ups[player] || false;
-                  
+          <div className="bg-white text-gray-900 p-3"> 
+		  <div className="grid gap-3">
+              {activePlayers.map(player => {
+                const holeNum = holes[currentHole];
+                const par = pars[holeNum] || 4;
+                const playerScore = scores[player] || par;
+                const playerPutts = putts[player] || 0;
+                const playerWater = water[player] || 0;
+                const playerOb = ob[player] || 0;
+                const playerUp = ups[player] || false;
+                const playerHandicapValue = getHandicapForHole(player, par);
+                const netScore = playerScore - playerHandicapValue;
+                const scoreLabel = getScoreLabel(netScore, par);
+                const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
+                
+                if (isAdvancePlayer) {
+                  // Advance 玩家 - 显示高级卡片
                   return (
                     <AdvancedPlayerCard
                       key={player}
@@ -5531,18 +5688,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       getScoreLabel={getScoreLabel}
                     />
                   );
-                })
-              ) : (
-                // 标准模式 - 原有的输入方式
-                activePlayers.map(player => {
-                  const holeNum = holes[currentHole];
-                  const par = pars[holeNum] || 4;
-                  const playerScore = scores[player] || par;
-                  const playerUp = ups[player] || false;
-                  const playerHandicapValue = getHandicapForHole(player, par);
-                  const netScore = playerScore - playerHandicapValue;
-                  const scoreLabel = getScoreLabel(netScore, par);
-                  
+                } else {
+                  // Classic 玩家 - 显示简单卡片
                   return (
                     <div key={player} className="bg-gray-50 rounded-lg p-3 shadow-sm">
                       <div className="flex items-center justify-between">
@@ -5598,8 +5745,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </div>
                     </div>
                   );
-                })
-              )}
+                }
+              })}
             </div>
           </div>
 
