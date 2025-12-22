@@ -2153,45 +2153,52 @@ const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, scores, 
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
       <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-6 h-6 text-yellow-600" />
+          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-7 h-7 text-yellow-600" />
           </div>
-          <h3 className="text-lg font-bold text-gray-900">{t('confirmPutts')}</h3>
+          <h3 className="text-xl font-bold text-gray-900">{t('confirmPutts')}</h3>
         </div>
         
-        <p className="text-sm text-gray-600 mb-3">{t('zeroPuttsWarning')}</p>
+        <p className="text-base text-gray-600 mb-3">{t('zeroPuttsWarning')}</p>
         
-        <div className="space-y-2 mb-4">
+        <div className="space-y-3 mb-4">
           {players.map(player => {
             const playerScore = scores[player] || par;
             return (
-              <div key={player} className="flex items-center justify-between p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <div className="flex items-center gap-2">
-                  <span className="text-lg">⚠️</span>
-                  <span className="font-semibold text-gray-900">{player}</span>
+              <div key={player} className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-2xl">⚠️</span>
+                  <span className="text-xl font-bold text-gray-900">{player}</span>
                 </div>
-                <div className="text-sm text-gray-600">
-                  {t('puttsScore')}: <span className="font-bold text-gray-900">{playerScore}</span>{t('puttsStrokes')}{lang === 'zh' ? '，' : ', '}{t('puttsPutts')}: <span className="font-bold text-red-600">0</span>
+                <div className="grid grid-cols-2 gap-3">
+                  <div className="bg-white rounded-lg p-3 text-center border border-gray-200">
+                    <div className="text-sm text-gray-500 mb-1">{lang === 'zh' ? '成绩' : 'Score'}</div>
+                    <div className="text-3xl font-bold text-gray-900">{playerScore}</div>
+                  </div>
+                  <div className="bg-red-50 rounded-lg p-3 text-center border-2 border-red-300">
+                    <div className="text-sm text-gray-500 mb-1">{lang === 'zh' ? '推杆' : 'Putts'}</div>
+                    <div className="text-3xl font-bold text-red-600">0</div>
+                  </div>
                 </div>
               </div>
             );
           })}
         </div>
         
-        <p className="text-xs text-gray-500 mb-4">
+        <p className="text-sm text-gray-500 mb-4 text-center">
           💡 {t('puttsTip')}
         </p>
         
         <div className="flex gap-3">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+            className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition text-base font-semibold"
           >
             {t('puttsGoBack')}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-medium"
+            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-base font-semibold"
           >
             {t('puttsConfirm')}
           </button>
@@ -4318,6 +4325,7 @@ const handlePuttsWarningConfirm = useCallback(() => {
       setHandicap('off');
       setPlayerHandicaps({});
       setAdvanceMode('off');
+	  setAdvancePlayers({});
       setCourseType('f18');
       setHoles(courses.f18);
       setPars(courses.f18.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
