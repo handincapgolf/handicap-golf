@@ -2151,54 +2151,45 @@ const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, scores, 
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-7 h-7 text-yellow-600" />
+      <div className="bg-white rounded-xl p-4 max-w-xs w-full shadow-2xl">
+        <div className="flex items-center gap-2 mb-3">
+          <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+            <AlertCircle className="w-5 h-5 text-yellow-600" />
           </div>
-          <h3 className="text-xl font-bold text-gray-900">{t('confirmPutts')}</h3>
+          <h3 className="text-base font-bold text-gray-900">{t('confirmPutts')}</h3>
         </div>
         
-        <p className="text-base text-gray-600 mb-3">{t('zeroPuttsWarning')}</p>
+        <p className="text-sm text-gray-600 mb-2">{t('zeroPuttsWarning')}</p>
         
-        <div className="space-y-3 mb-4">
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-2 mb-3">
           {players.map(player => {
             const playerScore = scores[player] || par;
             return (
-              <div key={player} className="p-4 bg-yellow-50 border-2 border-yellow-300 rounded-xl">
-                <div className="flex items-center gap-2 mb-3">
-                  <span className="text-2xl">⚠️</span>
-                  <span className="text-xl font-bold text-gray-900">{player}</span>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="bg-white rounded-lg p-3 text-center border border-gray-200">
-                    <div className="text-sm text-gray-500 mb-1">{lang === 'zh' ? '成绩' : 'Score'}</div>
-                    <div className="text-3xl font-bold text-gray-900">{playerScore}</div>
-                  </div>
-                  <div className="bg-red-50 rounded-lg p-3 text-center border-2 border-red-300">
-                    <div className="text-sm text-gray-500 mb-1">{lang === 'zh' ? '推杆' : 'Putts'}</div>
-                    <div className="text-3xl font-bold text-red-600">0</div>
-                  </div>
+              <div key={player} className="flex items-center justify-between py-1.5 border-b border-yellow-100 last:border-b-0">
+                <span className="font-semibold text-gray-900">{player}</span>
+                <div className="flex items-center gap-3 text-sm">
+                  <span className="text-gray-600">{lang === 'zh' ? '成绩' : 'Score'}: <span className="font-bold text-gray-900">{playerScore}</span></span>
+                  <span className="text-red-600 font-bold">{lang === 'zh' ? '推' : 'Putts'}: 0</span>
                 </div>
               </div>
             );
           })}
         </div>
         
-        <p className="text-sm text-gray-500 mb-4 text-center">
+        <p className="text-xs text-gray-500 mb-3">
           💡 {t('puttsTip')}
         </p>
         
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-3 bg-gray-200 text-gray-800 rounded-xl hover:bg-gray-300 transition text-base font-semibold"
+            className="flex-1 px-3 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition text-sm font-semibold"
           >
             {t('puttsGoBack')}
           </button>
           <button
             onClick={onConfirm}
-            className="flex-1 px-4 py-3 bg-green-600 text-white rounded-xl hover:bg-green-700 transition text-base font-semibold"
+            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-sm font-semibold"
           >
             {t('puttsConfirm')}
           </button>
@@ -2208,7 +2199,7 @@ const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, scores, 
   );
 });
 
-const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
+const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, putts, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
   if (!isOpen || !players) return null;
 
   let skinsWinner = null;
@@ -2269,7 +2260,9 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
           <div className="space-y-2">
             {(gameMode === 'matchPlay' || gameMode === 'skins') ? (
               players.map(player => {
-                const score = scores[player] || (pars[hole] || 4);
+                const playerOn = scores[player] || (pars[hole] || 4);
+                const playerPutts = putts?.[player] || 0;
+                const score = playerOn + playerPutts;
                 const handicap = getHandicapForHole(player, pars[hole] || 4);
                 const netScore = score - handicap;
                 
@@ -2372,22 +2365,27 @@ const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect,
 });
 
 // 编辑洞成绩弹窗
-const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, pars = {}, onSave, t, gameMode }) => {
+// 编辑洞成绩弹窗 - iPhone优化版
+const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, allPutts = {}, pars = {}, onSave, t, gameMode }) => {
   const [editScores, setEditScores] = useState({});
   const [editUps, setEditUps] = useState({});
+  const [editPutts, setEditPutts] = useState({});
 
   useEffect(() => {
     if (isOpen && hole && players.length > 0) {
       const initialScores = {};
       const initialUps = {};
+      const initialPutts = {};
       players.forEach(p => {
         initialScores[p] = allScores[p]?.[hole] || pars[hole] || 4;
         initialUps[p] = allUps[p]?.[hole] || false;
+        initialPutts[p] = allPutts[p]?.[hole] || 0;
       });
       setEditScores(initialScores);
       setEditUps(initialUps);
+      setEditPutts(initialPutts);
     }
-  }, [isOpen, hole, players, allScores, allUps, pars]);
+  }, [isOpen, hole, players, allScores, allUps, allPutts, pars]);
 
   if (!isOpen || !hole || !players || players.length === 0) return null;
 
@@ -2400,6 +2398,13 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
     }));
   };
 
+  const changePutts = (player, delta) => {
+    setEditPutts(prev => ({
+      ...prev,
+      [player]: Math.max(0, (prev[player] || 0) + delta)
+    }));
+  };
+
   const toggleUp = (player) => {
     setEditUps(prev => ({
       ...prev,
@@ -2407,65 +2412,119 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
     }));
   };
 
+  const getScoreLabel = (stroke, par) => {
+    const diff = stroke - par;
+    if (diff <= -2) return { text: 'Eagle', numClass: 'bg-purple-500 text-white', labelClass: 'bg-purple-500 text-white' };
+    if (diff === -1) return { text: 'Birdie', numClass: 'bg-blue-500 text-white', labelClass: 'bg-blue-500 text-white' };
+    if (diff === 0) return { text: 'Par', numClass: 'bg-gray-100 text-gray-800', labelClass: 'bg-gray-200 text-gray-600' };
+    if (diff === 1) return { text: 'Bogey', numClass: 'bg-orange-500 text-white', labelClass: 'bg-orange-500 text-white' };
+    return { text: 'Dbl+', numClass: 'bg-red-500 text-white', labelClass: 'bg-red-500 text-white' };
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl max-h-[80vh] overflow-y-auto">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-2">
+      <div className="bg-white rounded-xl p-3 w-full max-w-sm shadow-2xl">
+        <div className="flex justify-between items-center mb-2">
+          <h3 className="text-base font-bold text-gray-900">
             {t('editHole')} {hole} (PAR {par})
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
             <X className="w-5 h-5" />
           </button>
         </div>
         
-        <div className="space-y-3 mb-4">
-          {players.map(player => (
-            <div key={player} className="bg-gray-50 rounded-lg p-3">
-              <div className="flex items-center justify-between">
-                <span className="font-medium text-gray-900">{player}</span>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => changeScore(player, -1)}
-                    className="w-9 h-9 bg-gray-400 hover:bg-gray-500 text-white rounded-full flex items-center justify-center"
-                  >
-                    <Minus className="w-4 h-4" />
-                  </button>
-                  <span className="text-2xl font-bold w-10 text-center">{editScores[player]}</span>
-                  <button
-                    onClick={() => changeScore(player, 1)}
-                    className="w-9 h-9 bg-green-500 hover:bg-green-600 text-white rounded-full flex items-center justify-center"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </button>
-                  {gameMode === 'win123' && (
-                    <button
-                      onClick={() => toggleUp(player)}
-                      className={`ml-2 px-3 py-1.5 rounded-md font-medium text-xs transition ${
-                        editUps[player]
-                          ? 'bg-yellow-400 text-yellow-900'
-                          : 'bg-gray-200 text-gray-600'
-                      }`}
-                    >
-                      UP
-                    </button>
-                  )}
+        <div className="space-y-2 mb-3">
+          {players.map(player => {
+            const playerOn = editScores[player] || par;
+            const playerPutts = editPutts[player] || 0;
+            const stroke = playerOn + playerPutts;
+            const label = getScoreLabel(stroke, par);
+            const playerUp = editUps[player] || false;
+
+            return (
+              <div key={player} className={`rounded-lg px-2.5 py-2 transition-all ${
+                playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
+              }`}>
+                <div className="flex items-center">
+                  <div className="w-14 flex-shrink-0">
+                    {gameMode === 'win123' && (
+                      <button
+                        onClick={() => toggleUp(player)}
+                        className={`w-8 h-8 rounded-md font-bold text-xs btn-press flex flex-col items-center justify-center transition mb-0.5 ${
+                          playerUp 
+                            ? 'bg-yellow-400 text-yellow-900 shadow' 
+                            : 'bg-gray-200 text-gray-500'
+                        }`}
+                      >
+                        <TrendingUp className="w-3 h-3" />
+                        <span style={{fontSize: '7px', lineHeight: 1}}>UP</span>
+                      </button>
+                    )}
+                    <div className="font-bold text-sm text-gray-900 truncate">{player}</div>
+                  </div>
+
+                  <div className="flex flex-col items-center mx-2">
+                    <div className={`w-10 h-10 rounded-lg flex items-center justify-center text-xl font-extrabold shadow ${label.numClass}`}>{stroke}</div>
+                    <div className={`px-1.5 py-0.5 rounded mt-0.5 text-xs font-bold ${label.labelClass}`} style={{fontSize: '9px'}}>{label.text}</div>
+                  </div>
+
+                  <div className="flex-1 space-y-1">
+                    <div className="flex items-center justify-end">
+                      <span className="text-xs font-semibold text-gray-500 w-8">On</span>
+                      <button
+                        onClick={() => changeScore(player, -1)}
+                        disabled={playerOn <= 1}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center btn-press ${
+                          playerOn > 1 ? 'bg-gray-400 text-white' : 'bg-gray-200 text-gray-400'
+                        }`}
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-xl font-bold w-8 text-center text-gray-900">{playerOn}</span>
+                      <button
+                        onClick={() => changeScore(player, 1)}
+                        className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center btn-press"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                    
+                    <div className="flex items-center justify-end">
+                      <span className="text-xs font-semibold text-gray-500 w-8">Putts</span>
+                      <button
+                        onClick={() => changePutts(player, -1)}
+                        disabled={playerPutts <= 0}
+                        className={`w-8 h-8 rounded-full flex items-center justify-center btn-press ${
+                          playerPutts > 0 ? 'bg-gray-400 text-white' : 'bg-gray-200 text-gray-400'
+                        }`}
+                      >
+                        <Minus className="w-3.5 h-3.5" />
+                      </button>
+                      <span className="text-xl font-bold w-8 text-center text-blue-600">{playerPutts}</span>
+                      <button
+                        onClick={() => changePutts(player, 1)}
+                        className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center btn-press"
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
         
-        <div className="flex gap-3">
+        <div className="flex gap-2">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+            className="flex-1 px-3 py-2 bg-gray-200 text-gray-800 rounded-lg font-medium text-sm"
           >
             {t('cancel')}
           </button>
           <button
-            onClick={() => { onSave(hole, editScores, editUps); onClose(); }}
-            className="flex-1 px-4 py-2.5 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 flex items-center justify-center gap-2"
+            onClick={() => { onSave(hole, editScores, editUps, editPutts); onClose(); }}
+            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1"
           >
             <CheckCircle className="w-4 h-4" />
             {t('save')}
@@ -2479,7 +2538,7 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
 // ========== 在 EditHoleDialog 组件之后添加以下两个组件 ==========
 
 // ========== Advance Mode 报告卡片组件 ==========
-const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal }) => {
+const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal, isAdvancePlayer }) => {
   const details = completedHoles.map(hole => ({
     hole,
     par: pars[hole] || 4,
@@ -2602,20 +2661,22 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             )}
           </div>
 
-          {/* 罚杆统计 */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-2">⚠️ {t('penaltyStats')}</div>
-            <div className="grid grid-cols-2 gap-2">
-              <div className="bg-cyan-50 rounded-lg p-2 flex items-center justify-between">
-                <div className="text-cyan-600 text-sm">💧 {t('waterHazard')}</div>
-                <div className="text-xl font-bold text-cyan-600">{totalWater}</div>
-              </div>
-              <div className="bg-yellow-50 rounded-lg p-2 flex items-center justify-between">
-                <div className="text-yellow-600 text-sm">OB</div>
-                <div className="text-xl font-bold text-yellow-600">{totalOb}</div>
+{/* 罚杆统计 */}
+          {isAdvancePlayer && (
+            <div className="bg-white border border-gray-200 rounded-xl p-3">
+              <div className="text-sm font-semibold text-gray-500 mb-2">⚠️ {t('penaltyStats')}</div>
+              <div className="grid grid-cols-2 gap-2">
+                <div className="bg-cyan-50 rounded-lg p-2 flex items-center justify-between">
+                  <div className="text-cyan-600 text-sm">💧 {t('waterHazard')}</div>
+                  <div className="text-xl font-bold text-cyan-600">{totalWater}</div>
+                </div>
+                <div className="bg-yellow-50 rounded-lg p-2 flex items-center justify-between">
+                  <div className="text-yellow-600 text-sm">OB</div>
+                  <div className="text-xl font-bold text-yellow-600">{totalOb}</div>
+                </div>
               </div>
             </div>
-          </div>
+          )}
 
           {/* UP统计 - 仅Win123显示 */}
           {isWin123 && (
@@ -2673,7 +2734,7 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
 });
 
 // ========== Advance Mode 完整明细弹窗 ==========
-const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal }) => {
+const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal, isAdvancePlayer }) => {
   const details = completedHoles.map(hole => ({
     hole,
     par: pars[hole] || 4,
@@ -2739,8 +2800,8 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('strokes')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
                     {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
                   </tr>
                 </thead>
@@ -2753,8 +2814,8 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                         <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.score, d.par)}`}>{d.score}</span>
                       </td>
                       <td className="py-2 px-2 text-center text-gray-700">{d.putts}</td>
-                      <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>
-                      <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>
+                      {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>}
+                      {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <span className="text-green-600 font-bold">✓</span> : <span className="text-gray-300">-</span>}</td>}
                     </tr>
                   ))}
@@ -2774,8 +2835,8 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('strokes')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
                     {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
                   </tr>
                 </thead>
@@ -2788,8 +2849,8 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                         <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.score, d.par)}`}>{d.score}</span>
                       </td>
                       <td className="py-2 px-2 text-center text-gray-700">{d.putts}</td>
-                      <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>
-                      <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>
+                      {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>}
+                      {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <span className="text-green-600 font-bold">✓</span> : <span className="text-gray-300">-</span>}</td>}
                     </tr>
                   ))}
@@ -2799,21 +2860,25 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
           )}
         </div>
 
-        {/* 底部统计 */}
+{/* 底部统计 */}
         <div className="flex-shrink-0 bg-gray-100 p-3 border-t" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div className={`grid ${isWin123 ? 'grid-cols-4' : 'grid-cols-3'} gap-2 text-center`}>
+          <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${1 + (isAdvancePlayer ? 2 : 0) + (isWin123 ? 1 : 0)}, 1fr)` }}>
             <div className="bg-white rounded-lg p-2 shadow-sm">
               <div className="text-gray-500 text-xs">{t('putt')}</div>
               <div className="font-bold text-xl text-gray-800">{totalPutts}</div>
             </div>
-            <div className="bg-white rounded-lg p-2 shadow-sm">
-              <div className="text-gray-500 text-xs">💧{t('water')}</div>
-              <div className="font-bold text-xl text-cyan-600">{totalWater}</div>
-            </div>
-            <div className="bg-white rounded-lg p-2 shadow-sm">
-              <div className="text-gray-500 text-xs">OB</div>
-              <div className="font-bold text-xl text-yellow-600">{totalOb}</div>
-            </div>
+            {isAdvancePlayer && (
+              <div className="bg-white rounded-lg p-2 shadow-sm">
+                <div className="text-gray-500 text-xs">💧{t('water')}</div>
+                <div className="font-bold text-xl text-cyan-600">{totalWater}</div>
+              </div>
+            )}
+            {isAdvancePlayer && (
+              <div className="bg-white rounded-lg p-2 shadow-sm">
+                <div className="text-gray-500 text-xs">OB</div>
+                <div className="font-bold text-xl text-yellow-600">{totalOb}</div>
+              </div>
+            )}
             {isWin123 && (
               <div className="bg-white rounded-lg p-2 shadow-sm">
                 <div className="text-gray-500 text-xs">UP</div>
@@ -2929,92 +2994,146 @@ const ScoreDisplay = memo(({ score, par }) => {
   return <span className={`font-semibold ${colorClass}`}>{score}</span>;
 });
 
-// 高级模式玩家卡片 - 来自v15 final
-const AdvancedPlayerCard = memo(({ player, playerScore, playerPutts, playerWater, playerOb, playerUp, par, showUp, onChangeScore, onChangePutts, onChangeWater, onChangeOb, onResetWater, onResetOb, onToggleUp, getScoreLabel }) => {
-  const label = getScoreLabel(playerScore, par);
-
-  const WaterButton = ({ value, onInc, onReset }) => (
-    <div className="relative">
-      {value > 0 && (
-        <button onClick={onReset} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold z-10 shadow active:scale-95">−</button>
-      )}
-      <button onClick={onInc} className={`w-8 h-8 rounded-lg flex items-center justify-center active:scale-95 transition ${value > 0 ? 'bg-cyan-500 text-white shadow' : 'bg-gray-200 text-gray-400 hover:bg-gray-300'}`}>
-        <Droplets className="w-4 h-4" />
-      </button>
-      {value > 0 && (
-        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-700 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">{value}</span>
-      )}
-    </div>
-  );
-
-  const OBButton = ({ value, onInc, onReset }) => (
-    <div className="relative">
-      {value > 0 && (
-        <button onClick={onReset} className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white rounded-full flex items-center justify-center text-xs font-bold z-10 shadow active:scale-95">−</button>
-      )}
-      <button onClick={onInc} className={`w-8 h-8 rounded-lg flex items-center justify-center active:scale-95 transition font-bold text-xs ${value > 0 ? 'bg-yellow-500 text-white shadow' : 'bg-gray-200 text-gray-400 hover:bg-gray-300'}`}>
-        OB
-      </button>
-      {value > 0 && (
-        <span className="absolute -bottom-1 -right-1 w-4 h-4 bg-gray-700 text-white text-xs font-bold rounded-full flex items-center justify-center shadow">{value}</span>
-      )}
-    </div>
-  );
+// 高级模式玩家卡片 - 方案3 布局
+const AdvancedPlayerCard = memo(({ 
+  player, 
+  playerOn,
+  playerPutts, 
+  playerWater, 
+  playerOb, 
+  playerUp, 
+  par, 
+  showUp, 
+  onChangeOn, 
+  onChangePutts, 
+  onChangeWater, 
+  onChangeOb, 
+  onResetWater, 
+  onResetOb, 
+  onToggleUp, 
+  getScoreLabel 
+}) => {
+  const stroke = playerOn + playerPutts;
+  const label = getScoreLabel(stroke, par);
 
   return (
-    <div className="bg-gray-50 rounded-lg p-3 shadow-sm">
-      <div className="flex items-start justify-between">
-        <div className="pt-1">
-          <h3 className="font-bold text-xl text-gray-900">{player}</h3>
-          <span className={`inline-block px-3 py-1 rounded-full text-sm font-semibold mt-1 ${label.class}`}>{label.text}</span>
-        </div>
+    <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
+      playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
+    }`}>
+      <div className="flex items-center">
         
-        <div className="flex items-start gap-3">
-          {/* Score */}
-          <div className="flex flex-col items-center">
-            <span className="text-xs text-gray-400 mb-1">Score</span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => onChangeScore(-1)} disabled={playerScore <= 1} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm active:scale-95 ${playerScore > 1 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'}`}>
-                <span className="text-lg font-bold">−</span>
-              </button>
-              <div className="w-8 text-center">
-                <span className="text-2xl font-bold text-gray-900">{playerScore}</span>
-              </div>
-              <button onClick={() => onChangeScore(1)} className="w-9 h-9 bg-green-500 text-white rounded-full flex items-center justify-center shadow-sm active:scale-95">
-                <span className="text-lg font-bold">+</span>
-              </button>
-            </div>
-            <div className="mt-2 h-8 flex items-center justify-center">
-              <WaterButton value={playerWater} onInc={onChangeWater} onReset={onResetWater} />
-            </div>
-          </div>
-          
-          {/* Putts */}
-          <div className="flex flex-col items-center">
-            <span className="text-xs text-gray-400 mb-1">Putts</span>
-            <div className="flex items-center gap-1">
-              <button onClick={() => onChangePutts(-1)} disabled={playerPutts <= 0} className={`w-9 h-9 rounded-full flex items-center justify-center shadow-sm active:scale-95 ${playerPutts > 0 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'}`}>
-                <span className="text-lg font-bold">−</span>
-              </button>
-              <div className="w-8 text-center">
-                <span className="text-2xl font-bold text-gray-900">{playerPutts}</span>
-              </div>
-              <button onClick={() => onChangePutts(1)} className="w-9 h-9 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-sm active:scale-95">
-                <span className="text-lg font-bold">+</span>
-              </button>
-            </div>
-            <div className="mt-2 h-8 flex items-center justify-center">
-              <OBButton value={playerOb} onInc={onChangeOb} onReset={onResetOb} />
-            </div>
-          </div>
-          
-          {/* UP按钮 */}
+        {/* 左侧：UP按钮 + 玩家名 */}
+        <div className="w-14 flex-shrink-0 flex flex-col items-start">
           {showUp && (
-            <button onClick={onToggleUp} className={`px-3 py-2 rounded-md font-medium text-sm transition active:scale-95 mt-5 ${playerUp ? 'bg-yellow-400 text-yellow-900' : 'bg-gray-200 text-gray-600'}`}>
-              <TrendingUp className="inline w-3 h-3 mr-1" />UP
+            <button 
+              onClick={onToggleUp}
+              className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${
+                playerUp 
+                  ? 'bg-yellow-400 text-yellow-900 shadow' 
+                  : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-[8px] leading-none mt-0.5">UP</span>
             </button>
           )}
+          <div className="font-bold text-lg text-gray-900">{player}</div>
         </div>
+
+        {/* Water/OB 按钮 */}
+        <div className="flex flex-col gap-2 mx-2">
+          <div className="relative">
+            <button 
+              onClick={onChangeWater}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center btn-press transition ${
+                playerWater > 0 
+                  ? 'bg-cyan-500 text-white shadow' 
+                  : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+              }`}
+            >
+              <Droplets className="w-5 h-5" />
+            </button>
+            {playerWater > 0 && (
+              <>
+                <span className="badge-count">{playerWater}</span>
+                <button onClick={onResetWater} className="reset-btn-mini btn-press">−</button>
+              </>
+            )}
+          </div>
+          <div className="relative">
+            <button 
+              onClick={onChangeOb}
+              className={`w-10 h-10 rounded-lg flex items-center justify-center btn-press font-bold text-xs transition ${
+                playerOb > 0 
+                  ? 'bg-yellow-500 text-white shadow' 
+                  : 'bg-gray-200 text-gray-400 hover:bg-gray-300'
+              }`}
+            >
+              OB
+            </button>
+            {playerOb > 0 && (
+              <>
+                <span className="badge-count">{playerOb}</span>
+                <button onClick={onResetOb} className="reset-btn-mini btn-press">−</button>
+              </>
+            )}
+          </div>
+        </div>
+
+        {/* 中间：Stroke 显示（方案3 双层分离） */}
+        <div className="flex-1 flex justify-center">
+          <div className="stroke-display">
+            <div className={`stroke-number ${label.numClass}`}>
+              {stroke}
+            </div>
+            <div className={`stroke-label ${label.class}`}>
+              {label.text}
+            </div>
+          </div>
+        </div>
+
+        {/* 右侧：On + Putts 控制器 */}
+        <div className="flex flex-col gap-2 ml-2">
+          <div className="flex items-center">
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">On</span>
+            <button 
+              onClick={() => onChangeOn(-1)} 
+              disabled={playerOn <= 1}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
+                playerOn > 1 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
+              }`}
+            >
+              −
+            </button>
+            <span className="text-[32px] font-extrabold w-11 text-center text-gray-900">{playerOn}</span>
+            <button 
+              onClick={() => onChangeOn(1)}
+              className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+            >
+              +
+            </button>
+          </div>
+          <div className="flex items-center">
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">Putts</span>
+            <button 
+              onClick={() => onChangePutts(-1)} 
+              disabled={playerPutts <= 0}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
+                playerPutts > 0 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
+              }`}
+            >
+              −
+            </button>
+            <span className="text-[32px] font-extrabold w-11 text-center text-blue-700">{playerPutts}</span>
+            <button 
+              onClick={() => onChangePutts(1)}
+              className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        
       </div>
     </div>
   );
@@ -3028,6 +3147,89 @@ const courses = {
 };
 
 function IntegratedGolfGame() {
+// ========== 注入样式 ==========
+  useEffect(() => {
+    if (!document.getElementById('up-active-style')) {
+      const style = document.createElement('style');
+      style.id = 'up-active-style';
+      style.textContent = `
+        .card-up-active {
+          background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%) !important;
+          border: 2px solid #eab308 !important;
+          animation: pulse-glow 1.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+          0%, 100% { box-shadow: 0 0 5px rgba(234, 179, 8, 0.3); }
+          50% { box-shadow: 0 0 20px rgba(234, 179, 8, 0.6), 0 0 30px rgba(234, 179, 8, 0.3); }
+        }
+        
+        .btn-press:active {
+          transform: scale(0.95);
+        }
+        
+        .badge-count {
+          position: absolute;
+          bottom: -2px;
+          right: -2px;
+          width: 16px;
+          height: 16px;
+          background: #374151;
+          color: white;
+          border-radius: 50%;
+          font-size: 10px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        
+        .reset-btn-mini {
+          position: absolute;
+          top: -4px;
+          right: -4px;
+          width: 16px;
+          height: 16px;
+          background: #ef4444;
+          color: white;
+          border-radius: 50%;
+          font-size: 11px;
+          font-weight: 700;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          z-index: 10;
+        }
+        
+        /* 方案3: Stroke 双层分离显示 */
+        .stroke-display {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 2px;
+        }
+        .stroke-number {
+          width: 56px;
+          height: 56px;
+          border-radius: 12px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 36px;
+          font-weight: 800;
+          box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+        .stroke-label {
+          padding: 2px 10px;
+          border-radius: 10px;
+          font-size: 11px;
+          font-weight: 700;
+        }
+      `;
+      document.head.appendChild(style);
+    }
+  }, []);
+  // ========== 结束样式注入 ==========
   const [lang, setLang] = useState(() => {
     try {
       const savedLang = localStorage.getItem('handincap_lang');
@@ -3688,28 +3890,29 @@ setSearchQuery('');
     }));
   }, []);
 
-  const getScoreLabel = useCallback((netScore, par) => {
-    const diff = netScore - par;
-    let textKey, className;
+// ========== 计算 Stroke = On + Putts ==========
+  const getStroke = useCallback((player) => {
+    const holeNum = holes[currentHole];
+    const par = pars[holeNum] || 4;
+    const on = scores[player] ?? par;
+    const playerPutts = putts[player] ?? 0;
+    return on + playerPutts;
+  }, [holes, currentHole, pars, scores, putts]);
+  
+const getScoreLabel = useCallback((stroke, par) => {
+    const diff = stroke - par;
     
     if (diff <= -2) {
-      textKey = 'eagle';
-      className = 'bg-purple-100 text-purple-700';
+      return { text: t('eagle'), class: 'bg-purple-500 text-white', numClass: 'bg-purple-500 text-white' };
     } else if (diff === -1) {
-      textKey = 'birdie';
-      className = 'bg-blue-100 text-blue-700';
+      return { text: t('birdie'), class: 'bg-blue-500 text-white', numClass: 'bg-blue-500 text-white' };
     } else if (diff === 0) {
-      textKey = 'parLabel';
-      className = 'bg-gray-100 text-gray-700';
+      return { text: t('parLabel'), class: 'bg-gray-200 text-gray-600', numClass: 'bg-gray-100 text-gray-800' };
     } else if (diff === 1) {
-      textKey = 'bogey';
-      className = 'bg-orange-100 text-orange-700';
+      return { text: t('bogey'), class: 'bg-orange-500 text-white', numClass: 'bg-orange-500 text-white' };
     } else {
-      textKey = 'doubleplus';
-      className = 'bg-red-100 text-red-700';
+      return { text: t('doubleplus'), class: 'bg-red-500 text-white', numClass: 'bg-red-500 text-white' };
     }
-    
-    return { text: t(textKey), class: className };
   }, [t]);
 
   const startGame = useCallback(() => {
@@ -3870,13 +4073,15 @@ setSearchQuery('');
     return { results, poolChange, isTied: winners.length > 1, winner: winners.length === 1 ? winners[0].player : null, winAmount: winners.length === 1 ? currentPrizePool + holeStake : 0 };
   }, [activePlayers, stake, pars, getHandicapForHole, prizePool]);
 
-  const calculateWin123 = useCallback((holeScores, holeUps, holeNum) => {
+  const calculateWin123 = useCallback((holeScores, holePutts, holeUps, holeNum) => {
     const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
     const playerScores = activePlayers.map(p => ({
       player: p,
-      score: holeScores[p] || par,
-      netScore: (holeScores[p] || par) - getHandicapForHole(p, par),
+      on: holeScores[p] || par,
+      putts: holePutts[p] || 0,
+      stroke: (holeScores[p] || par) + (holePutts[p] || 0),
+      netScore: (holeScores[p] || par) + (holePutts[p] || 0) - getHandicapForHole(p, par),
       up: holeUps[p] || false
     }));
     
@@ -3887,10 +4092,8 @@ setSearchQuery('');
     const playerCount = activePlayers.length;
     
     if (uniqueScores.length === 1) {
-      // 全部同分 → 全部第1名，不罚款
       rankings.forEach(r => r.finalRank = 1);
     } else if (playerCount <= 4) {
-      // ===== 原4人规则 =====
       if (uniqueScores.length === 2) {
         const firstScore = uniqueScores[0];
         rankings.forEach(r => {
@@ -3914,7 +4117,6 @@ setSearchQuery('');
         rankings.forEach((r, i) => r.finalRank = i + 1);
       }
     } else {
-      // ===== Jumbo (5+人) A改版：并列取差名次 =====
       let currentIndex = 0;
       while (currentIndex < rankings.length) {
         const currentScore = rankings[currentIndex].netScore;
@@ -3942,7 +4144,6 @@ setSearchQuery('');
       rankings.forEach(r => {
         let penalty = 0;
         
-        // 支持 Jumbo 人数：罚金 = stake × (名次 - 1)
         if (r.finalRank > 1) {
           penalty = stakeValue * (r.finalRank - 1);
         }
@@ -3968,6 +4169,15 @@ setSearchQuery('');
     return { results, poolChange, rankings };
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
+// ========== 修改 On (上果岭杆数) ==========
+  const changeOn = useCallback((player, delta) => {
+    const holeNum = holes[currentHole];
+    const par = pars[holeNum] || 4;
+    const current = scores[player] ?? par;
+    const newOn = Math.max(1, current + delta);
+    setScores(prev => ({ ...prev, [player]: newOn }));
+  }, [currentHole, holes, pars, scores]);
+
   const changeScore = useCallback((player, delta) => {
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
@@ -3978,10 +4188,12 @@ setSearchQuery('');
     const newScores = { ...scores, [player]: newScore };
     const holeScores = {};
     const holeUps = {};
+	const holePutts = {};
     
     activePlayers.forEach(p => {
       holeScores[p] = newScores[p] || par;
       holeUps[p] = ups[p] || false;
+	  holePutts[p] = putts[p] || 0;
     });
     
     if (gameMode === 'matchPlay') {
@@ -3991,10 +4203,10 @@ setSearchQuery('');
       const { results } = calculateSkins(holeScores, holeNum);
       setCurrentHoleSettlement(results);
     } else if (gameMode === 'win123') {
-      const { results } = calculateWin123(holeScores, holeUps, holeNum);
+      const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
       setCurrentHoleSettlement(results);
     }
-  }, [scores, currentHole, holes, pars, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+  }, [scores, currentHole, holes, pars, ups, putts, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
   const changePutts = useCallback((player, delta) => {
     setPutts(prev => ({ ...prev, [player]: Math.max(0, (prev[player] || 0) + delta) }));
@@ -4022,14 +4234,16 @@ setSearchQuery('');
     const holeNum = holes[currentHole];
     const par = pars[holeNum] || 4;
     const holeScores = {};
+	const holePutts = {};
     const newUps = { ...ups, [player]: !ups[player] };
     
     activePlayers.forEach(p => {
       holeScores[p] = scores[p] || par;
+	  holePutts[p] = putts[p] || 0;
     });
     
     if (gameMode === 'win123') {
-      const { results } = calculateWin123(holeScores, newUps, holeNum);
+      const { results } = calculateWin123(holeScores, holePutts, newUps, holeNum);
       setCurrentHoleSettlement(results);
     }
   }, [ups, currentHole, holes, pars, scores, activePlayers, gameMode, calculateWin123]);
@@ -4112,7 +4326,7 @@ setSearchQuery('');
         setPrizePool(finalPrizePool);
         
       } else if (gameMode === 'win123') {
-        const { results, poolChange } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
+        const { results, poolChange } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
         
         const newTotalMoney = { ...totalMoney };
         const newDetails = { ...moneyDetails };
@@ -4157,12 +4371,10 @@ const nextHole = useCallback(() => {
   const par = pars[holeNum] || 4;
 
   // 检查 Advance 玩家推杆数
-  const playersWithZeroPutts = activePlayers.filter(player => 
-    advanceMode === 'on' && 
-    advancePlayers[player] && 
-    (putts[player] || 0) === 0 && 
-    (scores[player] || par) > 1
-  );
+const playersWithZeroPutts = activePlayers.filter(player => 
+  (putts[player] || 0) === 0 && 
+  (scores[player] || par) > 1
+);
 
   if (playersWithZeroPutts.length > 0) {
     setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
@@ -4172,14 +4384,16 @@ const nextHole = useCallback(() => {
   // 原有逻辑继续
   if (gameMode === 'win123') {
     const currentHoleScores = {};
-    const currentHoleUps = {};
+	const currentHolePutts = {};
+	const currentHoleUps = {};
+
+activePlayers.forEach(player => {
+  currentHoleScores[player] = scores[player] || par;
+  currentHolePutts[player] = putts[player] || 0;
+  currentHoleUps[player] = ups[player] || false;
+});
     
-    activePlayers.forEach(player => {
-      currentHoleScores[player] = scores[player] || par;
-      currentHoleUps[player] = ups[player] || false;
-    });
-    
-    const { rankings } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
+    const { rankings } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
     setPendingRankings(rankings);
   }
   setHoleConfirmDialog({ 
@@ -4196,14 +4410,16 @@ const handlePuttsWarningConfirm = useCallback(() => {
 
   if (gameMode === 'win123') {
     const currentHoleScores = {};
-    const currentHoleUps = {};
+	const currentHolePutts = {};
+	const currentHoleUps = {};
+
+activePlayers.forEach(player => {
+  currentHoleScores[player] = scores[player] || par;
+  currentHolePutts[player] = putts[player] || 0;
+  currentHoleUps[player] = ups[player] || false;
+});
     
-    activePlayers.forEach(player => {
-      currentHoleScores[player] = scores[player] || par;
-      currentHoleUps[player] = ups[player] || false;
-    });
-    
-    const { rankings } = calculateWin123(currentHoleScores, currentHoleUps, holeNum);
+    const { rankings } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
     setPendingRankings(rankings);
   }
   setHoleConfirmDialog({ 
@@ -4213,20 +4429,24 @@ const handlePuttsWarningConfirm = useCallback(() => {
 }, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
   // 编辑洞成绩并重新计算金额
-  const handleEditHoleSave = useCallback((hole, newScores, newUps) => {
-    // 1. 更新 allScores 和 allUps
+const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
+    // 1. 更新 allScores, allUps, allPutts
     const updatedAllScores = { ...allScores };
     const updatedAllUps = { ...allUps };
+    const updatedAllPutts = { ...allPutts };
     
     activePlayers.forEach(player => {
       if (!updatedAllScores[player]) updatedAllScores[player] = {};
       if (!updatedAllUps[player]) updatedAllUps[player] = {};
+      if (!updatedAllPutts[player]) updatedAllPutts[player] = {};
       updatedAllScores[player][hole] = newScores[player];
       updatedAllUps[player][hole] = newUps[player] || false;
+      updatedAllPutts[player][hole] = newPutts[player] || 0;
     });
     
     setAllScores(updatedAllScores);
     setAllUps(updatedAllUps);
+    setAllPutts(updatedAllPutts);
     
     // 2. 重新计算所有已完成洞的金额
     const stakeValue = Number(stake) || 0;
@@ -4291,7 +4511,11 @@ const handlePuttsWarningConfirm = useCallback(() => {
             newPrizePool += holeStake;
           }
         } else if (gameMode === 'win123') {
-          const { results, poolChange } = calculateWin123(holeScores, holeUps, holeNum);
+          const holePutts = {};
+          activePlayers.forEach(p => {
+            holePutts[p] = allPutts[p]?.[holeNum] || 0;
+          });
+          const { results, poolChange } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
           activePlayers.forEach(player => {
             newTotalMoney[player] += results[player].money;
             if (results[player].fromPool) {
@@ -5129,13 +5353,11 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               )}
 
               {/* ========== 条件渲染：Advance Mode ON 或 OFF ========== */}
-              {advanceMode === 'on' && completedHoles.length > 0 ? (
+              {completedHoles.length > 0 ? (
                 // ===== Advance Mode Scorecard =====
                 <>
                   {/* 提示文字 - 只在有 Advance 玩家时显示 */}
-{Object.values(advancePlayers).some(v => v) && (
-  <p className="text-xs text-gray-400 text-center mb-2">💡 {t('clickNameToView')}</p>
-)}
+<p className="text-xs text-gray-400 text-center mb-2">💡 {t('clickNameToView')}</p>
 
                   {/* 总成绩摘要 - 可点击查看详情 */}
                   {(() => {
@@ -5180,20 +5402,11 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             return (
                               <div 
   key={player} 
-  className={`text-center p-2 bg-gray-50 rounded-lg transition ${
-    advancePlayers[player] 
-      ? 'cursor-pointer hover:bg-gray-100 active:scale-98' 
-      : ''
-  }`}
-  onClick={() => advancePlayers[player] && handleAdvancePlayerClick(player)}
+  className="text-center p-2 bg-gray-50 rounded-lg transition cursor-pointer hover:bg-gray-100 active:scale-98"
+  onClick={() => handleAdvancePlayerClick(player)}
 >
-                                <div className={`text-sm font-medium flex items-center justify-center gap-1 ${
-  advancePlayers[player] 
-    ? 'text-blue-600 underline' 
-    : 'text-gray-700'
-}`}>
-  {player} {medal}
-  {advancePlayers[player] && <span className="text-xs">📊</span>}
+                                <div className="text-sm font-medium flex items-center justify-center gap-1 text-blue-600 underline">
+  {player} {medal} <span className="text-xs">📊</span>
 </div>
                                 <div className="flex items-baseline justify-center gap-1">
                                   <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
@@ -5790,83 +6003,112 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   // Advance 玩家 - 显示高级卡片
                   return (
                     <AdvancedPlayerCard
-                      key={player}
-                      player={player}
-                      playerScore={playerScore}
-                      playerPutts={playerPutts}
-                      playerWater={playerWater}
-                      playerOb={playerOb}
-                      playerUp={playerUp}
-                      par={par}
-                      showUp={gameMode === 'win123' && Number(stake) > 0}
-                      onChangeScore={(delta) => changeScore(player, delta)}
-                      onChangePutts={(delta) => changePutts(player, delta)}
-                      onChangeWater={() => changeWater(player)}
-                      onChangeOb={() => changeOb(player)}
-                      onResetWater={() => resetWater(player)}
-                      onResetOb={() => resetOb(player)}
-                      onToggleUp={() => toggleUp(player)}
-                      getScoreLabel={getScoreLabel}
-                    />
+  key={player}
+  player={player}
+  playerOn={playerScore}
+  playerPutts={playerPutts}
+  playerWater={playerWater}
+  playerOb={playerOb}
+  playerUp={playerUp}
+  par={par}
+  showUp={gameMode === 'win123' && Number(stake) > 0}
+  onChangeOn={(delta) => changeOn(player, delta)}
+  onChangePutts={(delta) => changePutts(player, delta)}
+  onChangeWater={() => changeWater(player)}
+  onChangeOb={() => changeOb(player)}
+  onResetWater={() => resetWater(player)}
+  onResetOb={() => resetOb(player)}
+  onToggleUp={() => toggleUp(player)}
+  getScoreLabel={getScoreLabel}
+/>
                   );
-                } else {
-                  // Classic 玩家 - 显示简单卡片
-                  return (
-                    <div key={player} className="bg-gray-50 rounded-lg p-3 shadow-sm">
-                      <div className="flex items-center justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-base text-gray-900">{player}</h3>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-medium ${scoreLabel.class}`}>
-                              {scoreLabel.text}
-                            </span>
-                            {handicap === 'on' && playerHandicapValue > 0 && (
-                              <span className="text-xs text-green-600">
-                                {t('netScore')}: {netScore}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => changeScore(player, -1)}
-                            className="w-10 h-10 bg-gray-500 hover:bg-gray-600 text-white rounded-full flex items-center justify-center shadow-sm transition"
-                          >
-                            <Minus className="w-5 h-5" />
-                          </button>
-                          
-                          <div className="text-center min-w-[60px]">
-                            <div className="text-3xl font-bold text-gray-900">{playerScore}</div>
-                          </div>
-                          
-                          <button
-                            onClick={() => changeScore(player, 1)}
-                            className="w-10 h-10 bg-green-600 hover:bg-green-700 text-white rounded-full flex items-center justify-center shadow-sm transition"
-                          >
-                            <Plus className="w-5 h-5" />
-                          </button>
-                        </div>
-                        
-                        {gameMode === 'win123' && Number(stake) > 0 && (
-                          <div className="ml-3">
-                            <button
-                              onClick={() => toggleUp(player)}
-                              className={`px-4 py-2 rounded-md font-medium text-sm relative transition ${
-                                playerUp
-                                  ? 'bg-yellow-400 text-yellow-900'
-                                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                              }`}
-                            >
-                              <TrendingUp className="inline w-3 h-3 mr-1" />
-                              UP
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                }
+} else {
+  // Classic 玩家 - 方案3 布局（无 Water/OB）
+  const stroke = playerScore + playerPutts;
+  const strokeLabel = getScoreLabel(stroke, par);
+  
+  return (
+    <div key={player} className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
+      playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
+    }`}>
+      <div className="flex items-center">
+        
+        {/* 左侧：UP按钮 + 玩家名 */}
+        <div className="w-14 flex-shrink-0 flex flex-col items-start">
+          {gameMode === 'win123' && Number(stake) > 0 && (
+            <button 
+              onClick={() => toggleUp(player)}
+              className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${
+                playerUp 
+                  ? 'bg-yellow-400 text-yellow-900 shadow' 
+                  : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
+              }`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-[8px] leading-none mt-0.5">UP</span>
+            </button>
+          )}
+          <div className="font-bold text-lg text-gray-900">{player}</div>
+        </div>
+
+        {/* 中间：Stroke 显示（方案3 双层分离） */}
+        <div className="flex-1 flex justify-center">
+          <div className="stroke-display">
+            <div className={`stroke-number ${strokeLabel.numClass}`}>
+              {stroke}
+            </div>
+            <div className={`stroke-label ${strokeLabel.class}`}>
+              {strokeLabel.text}
+            </div>
+          </div>
+        </div>
+
+        {/* 右侧：On + Putts 控制器 */}
+        <div className="flex flex-col gap-2 ml-2">
+          <div className="flex items-center">
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">On</span>
+            <button
+              onClick={() => changeOn(player, -1)}
+              disabled={playerScore <= 1}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
+                playerScore > 1 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
+              }`}
+            >
+              −
+            </button>
+            <span className="text-[32px] font-extrabold w-11 text-center text-gray-900">{playerScore}</span>
+            <button
+              onClick={() => changeOn(player, 1)}
+              className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+            >
+              +
+            </button>
+          </div>
+          <div className="flex items-center">
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">Putts</span>
+            <button
+              onClick={() => changePutts(player, -1)}
+              disabled={playerPutts <= 0}
+              className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
+                playerPutts > 0 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
+              }`}
+            >
+              −
+            </button>
+            <span className="text-[32px] font-extrabold w-11 text-center text-blue-700">{playerPutts}</span>
+            <button
+              onClick={() => changePutts(player, 1)}
+              className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+            >
+              +
+            </button>
+          </div>
+        </div>
+        
+      </div>
+    </div>
+  );
+}
               })}
             </div>
           </div>
@@ -6004,6 +6246,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           gameMode={gameMode}
           t={t}
           getMedal={getMedal}
+          isAdvancePlayer={advancePlayers[advanceReportPlayer] || false}
         />
       )}
 
@@ -6030,6 +6273,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           gameMode={gameMode}
           t={t}
           getMedal={getMedal}
+          isAdvancePlayer={advancePlayers[advanceReportPlayer] || false}
         />
       )}
 
@@ -6064,6 +6308,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         hole={holes[currentHole]}
         players={activePlayers}
         scores={scores}
+        putts={putts}
         rankings={pendingRankings}
         gameMode={gameMode}
         getHandicapForHole={getHandicapForHole}
@@ -6084,17 +6329,18 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
       />
 
       <EditHoleDialog
-        isOpen={editHoleDialog.isOpen}
-        onClose={() => setEditHoleDialog({ isOpen: false, hole: null })}
-        hole={editHoleDialog.hole}
-        players={activePlayers}
-        allScores={allScores}
-        allUps={allUps}
-        pars={pars}
-        onSave={handleEditHoleSave}
-        t={t}
-        gameMode={gameMode}
-      />
+  isOpen={editHoleDialog.isOpen}
+  onClose={() => setEditHoleDialog({ isOpen: false, hole: null })}
+  hole={editHoleDialog.hole}
+  players={activePlayers}
+  allScores={allScores}
+  allUps={allUps}
+  allPutts={allPutts}
+  pars={pars}
+  onSave={handleEditHoleSave}
+  t={t}
+  gameMode={gameMode}
+/>
 	  <PuttsWarningDialog
   isOpen={puttsWarningDialog.isOpen}
   onClose={() => setPuttsWarningDialog({ isOpen: false, players: [] })}
