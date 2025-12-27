@@ -2698,14 +2698,14 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             {front9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('front9')} OUT</div>
-                <div className="flex flex-wrap gap-2 mb-1">
+                <div className="flex justify-between mb-0.5">
                   {front9Details.map(d => (
                     <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
                       {d.hole}
                     </div>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2 mb-2">
+                <div className="flex justify-between mb-3">
                   {front9Details.map(d => (
                     <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
@@ -2717,14 +2717,14 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             {back9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('back9')} IN</div>
-                <div className="flex flex-wrap gap-2 mb-1">
+                <div className="flex justify-between mb-0.5">
                   {back9Details.map(d => (
                     <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
                       {d.hole}
                     </div>
                   ))}
                 </div>
-                <div className="flex flex-wrap gap-2">
+                <div className="flex justify-between">
                   {back9Details.map(d => (
                     <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
