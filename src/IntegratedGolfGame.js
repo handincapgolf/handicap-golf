@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 
 // 球场数据库
+// 球场数据库
 const GOLF_COURSES = {
   "99_East_Golf_Club": {
     shortName: "99EGC",
@@ -2540,10 +2541,10 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
 // ========== Advance Mode 报告卡片组件 ==========
 const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal, isAdvancePlayer }) => {
   const details = completedHoles.map(hole => ({
-    hole,
-    par: pars[hole] || 4,
-    score: allScores[player]?.[hole] || (pars[hole] || 4),
-    putts: allPutts[player]?.[hole] || 0,
+  hole,
+  par: pars[hole] || 4,
+  score: (allScores[player]?.[hole] || (pars[hole] || 4)) + (allPutts[player]?.[hole] || 0),
+  putts: allPutts[player]?.[hole] || 0,
     water: allWater[player]?.[hole] || 0,
     ob: allOb[player]?.[hole] || 0,
     up: allUps[player]?.[hole] || false
@@ -2574,13 +2575,16 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
 
   const isWin123 = gameMode === 'win123';
 
-  const getScoreBgColor = (score, par) => {
+  const getPgaScoreClass = (score, par) => {
     const diff = score - par;
-    if (diff <= -2) return 'bg-purple-500';
-    if (diff === -1) return 'bg-blue-500';
-    if (diff === 0) return 'bg-gray-400';
-    if (diff === 1) return 'bg-orange-500';
-    return 'bg-red-500';
+    const doublePar = par * 2;
+    if (diff <= -2) return 'pga-eagle';
+    if (diff === -1) return 'pga-birdie';
+    if (diff === 0) return 'pga-par';
+    if (diff === 1) return 'pga-bogey';
+    if (diff === 2) return 'pga-double';
+    if (score <= doublePar) return 'pga-triple';
+    return 'pga-quad';
   };
 
   return (
@@ -2695,9 +2699,9 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             {front9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('front9')} OUT</div>
-                <div className="grid grid-cols-9 gap-1 mb-2">
+                <div className="flex flex-wrap gap-1 mb-2">
                   {front9Details.map(d => (
-                    <div key={d.hole} className={`aspect-square ${getScoreBgColor(d.score, d.par)} text-white rounded flex items-center justify-center text-xs font-bold`}>
+                    <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
                     </div>
                   ))}
@@ -2707,9 +2711,9 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             {back9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('back9')} IN</div>
-                <div className="grid grid-cols-9 gap-1">
+                <div className="flex flex-wrap gap-1">
                   {back9Details.map(d => (
-                    <div key={d.hole} className={`aspect-square ${getScoreBgColor(d.score, d.par)} text-white rounded flex items-center justify-center text-xs font-bold`}>
+                    <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
                     </div>
                   ))}
@@ -2736,10 +2740,10 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
 // ========== Advance Mode 完整明细弹窗 ==========
 const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal, isAdvancePlayer }) => {
   const details = completedHoles.map(hole => ({
-    hole,
-    par: pars[hole] || 4,
-    score: allScores[player]?.[hole] || (pars[hole] || 4),
-    putts: allPutts[player]?.[hole] || 0,
+  hole,
+  par: pars[hole] || 4,
+  score: allScores[player]?.[hole] || (pars[hole] || 4),
+  putts: allPutts[player]?.[hole] || 0,
     water: allWater[player]?.[hole] || 0,
     ob: allOb[player]?.[hole] || 0,
     up: allUps[player]?.[hole] || false
@@ -3153,6 +3157,154 @@ function IntegratedGolfGame() {
       const style = document.createElement('style');
       style.id = 'up-active-style';
       style.textContent = `
+        /* PGA 经典双圈双框样式 */
+        .pga-eagle {
+          position: relative;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: #92400e;
+          background: #fef3c7;
+          border-radius: 50%;
+        }
+        .pga-eagle::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 2px solid #f59e0b;
+          border-radius: 50%;
+        }
+        .pga-eagle::after {
+          content: '';
+          position: absolute;
+          inset: 3px;
+          border: 2px solid #f59e0b;
+          border-radius: 50%;
+        }
+        .pga-birdie {
+          width: 32px;
+          height: 32px;
+          border: 2px solid #f43f5e;
+          border-radius: 50%;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: #be123c;
+          background: #fff1f2;
+        }
+        .pga-par {
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: #374151;
+          background: #f3f4f6;
+          border-radius: 2px;
+        }
+        .pga-bogey {
+          width: 32px;
+          height: 32px;
+          border: 2px solid #38bdf8;
+          border-radius: 2px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: #0369a1;
+          background: #f0f9ff;
+        }
+        .pga-double {
+          position: relative;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: #1e40af;
+          background: #dbeafe;
+          border-radius: 2px;
+        }
+        .pga-double::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 2px solid #1e40af;
+          border-radius: 2px;
+        }
+        .pga-double::after {
+          content: '';
+          position: absolute;
+          inset: 3px;
+          border: 2px solid #1e40af;
+          border-radius: 2px;
+        }
+        .pga-triple {
+          position: relative;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: white;
+          background: #8b5cf6;
+          border-radius: 2px;
+        }
+        .pga-triple::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 2px solid #6d28d9;
+          border-radius: 2px;
+        }
+        .pga-triple::after {
+          content: '';
+          position: absolute;
+          inset: 3px;
+          border: 2px solid #6d28d9;
+          border-radius: 2px;
+        }
+        .pga-quad {
+          position: relative;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-weight: 700;
+          font-size: 12px;
+          color: white;
+          background: #374151;
+          border-radius: 2px;
+        }
+        .pga-quad::before {
+          content: '';
+          position: absolute;
+          inset: 0;
+          border: 2px solid #1f2937;
+          border-radius: 2px;
+        }
+        .pga-quad::after {
+          content: '';
+          position: absolute;
+          inset: 3px;
+          border: 2px solid #1f2937;
+          border-radius: 2px;
+        }
+
         .card-up-active {
           background: linear-gradient(135deg, #fef9c3 0%, #fde047 100%) !important;
           border: 2px solid #eab308 !important;
@@ -5364,10 +5516,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
                     const playerTotals = {};
                     activePlayers.forEach(player => {
-                      playerTotals[player] = completedHoles.reduce((total, hole) => {
-                        return total + (allScores[player]?.[hole] || 0);
-                      }, 0);
-                    });
+  playerTotals[player] = completedHoles.reduce((total, hole) => {
+    return total + (allScores[player]?.[hole] || 0) + (allPutts[player]?.[hole] || 0);
+  }, 0);
+});
 
                     const scoreRankings = activePlayers
                       .map(player => ({ player, score: playerTotals[player] }))
@@ -5430,10 +5582,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     const backNine = completedHoles.filter(h => h > 9).sort((a, b) => a - b);
                     
                     const calculateTotal = (player, holesList) => {
-                      return holesList.reduce((total, hole) => {
-                        return total + (allScores[player]?.[hole] || 0);
-                      }, 0);
-                    };
+  return holesList.reduce((total, hole) => {
+    return total + (allScores[player]?.[hole] || 0) + (allPutts[player]?.[hole] || 0);
+  }, 0);
+};
                     
                     const calculateParTotal = (holesList) => {
                       return holesList.reduce((total, hole) => {
@@ -5478,11 +5630,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                                       {player}
                                     </td>
                                     {frontNine.map(h => {
-                                      const score = allScores[player]?.[h];
-                                      const par = pars[h] || 4;
-                                      return (
-                                        <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
-                                          {score || '-'}
+                                      const onScore = allScores[player]?.[h] || 0;
+const puttScore = allPutts[player]?.[h] || 0;
+const score = onScore + puttScore;
+const par = pars[h] || 4;
+return (
+  <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
+    {score || '-'}
                                         </td>
                                       );
                                     })}
@@ -5522,11 +5676,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                                       {player}
                                     </td>
                                     {backNine.map(h => {
-                                      const score = allScores[player]?.[h];
-                                      const par = pars[h] || 4;
-                                      return (
-                                        <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
-                                          {score || '-'}
+                                      const onScore = allScores[player]?.[h] || 0;
+const puttScore = allPutts[player]?.[h] || 0;
+const score = onScore + puttScore;
+const par = pars[h] || 4;
+return (
+  <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
+    {score || '-'}
                                         </td>
                                       );
                                     })}
@@ -5552,11 +5708,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     const backNine = holes.filter(h => h > 9 && completedHoles.includes(h));
                     
                     const calculateTotal = (player, holesList) => {
-                      return holesList.reduce((total, hole) => {
-                        const score = allScores[player]?.[hole];
-                        return total + (score || 0);
-                      }, 0);
-                    };
+  return holesList.reduce((total, hole) => {
+    return total + (allScores[player]?.[hole] || 0) + (allPutts[player]?.[hole] || 0);
+  }, 0);
+};
                     
                     const calculateParTotal = (holesList) => {
                       return holesList.reduce((total, hole) => {
@@ -5806,11 +5961,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     {(() => {
                       const playerTotals = {};
                       activePlayers.forEach(player => {
-                        playerTotals[player] = completedHoles.reduce((total, hole) => {
-                          const score = allScores[player]?.[hole];
-                          return total + (score || 0);
-                        }, 0);
-                      });
+  playerTotals[player] = completedHoles.reduce((total, hole) => {
+    return total + (allScores[player]?.[hole] || 0) + (allPutts[player]?.[hole] || 0);
+  }, 0);
+});
 
                       const moneyRankings = activePlayers
                         .map(player => ({ player, money: totalMoney[player] }))
