@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 
 // 球场数据库
-// 球场数据库
 const GOLF_COURSES = {
   "99_East_Golf_Club": {
     shortName: "99EGC",
@@ -2693,13 +2692,20 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             </div>
           )}
 
-          {/* 逐洞成绩格子 */}
+{/* 逐洞成绩格子 */}
           <div className="bg-white border border-gray-200 rounded-xl p-3">
             <div className="text-sm font-semibold text-gray-500 mb-2">📋 {t('holeByHole')}</div>
             {front9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('front9')} OUT</div>
-                <div className="flex flex-wrap gap-1 mb-2">
+                <div className="flex flex-wrap gap-2 mb-1">
+                  {front9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
+                      {d.hole}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2 mb-2">
                   {front9Details.map(d => (
                     <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
@@ -2711,7 +2717,14 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             {back9Details.length > 0 && (
               <>
                 <div className="text-xs text-gray-400 mb-1">{t('back9')} IN</div>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-2 mb-1">
+                  {back9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
+                      {d.hole}
+                    </div>
+                  ))}
+                </div>
+                <div className="flex flex-wrap gap-2">
                   {back9Details.map(d => (
                     <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
                       {d.score}
@@ -2739,18 +2752,23 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
 
 // ========== Advance Mode 完整明细弹窗 ==========
 const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores, allPutts, allWater, allOb, allUps, pars, completedHoles, gameMode, t, getMedal, isAdvancePlayer }) => {
-  const details = completedHoles.map(hole => ({
-  hole,
-  par: pars[hole] || 4,
-  score: allScores[player]?.[hole] || (pars[hole] || 4),
-  putts: allPutts[player]?.[hole] || 0,
-    water: allWater[player]?.[hole] || 0,
-    ob: allOb[player]?.[hole] || 0,
-    up: allUps[player]?.[hole] || false
-  }));
+  const details = completedHoles.map(hole => {
+    const on = allScores[player]?.[hole] || (pars[hole] || 4);
+    const putts = allPutts[player]?.[hole] || 0;
+    return {
+      hole,
+      par: pars[hole] || 4,
+      on: on,
+      putts: putts,
+      total: on + putts,
+      water: allWater[player]?.[hole] || 0,
+      ob: allOb[player]?.[hole] || 0,
+      up: allUps[player]?.[hole] || false
+    };
+  });
 
   const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
-  const playerTotal = details.reduce((sum, d) => sum + d.score, 0);
+  const playerTotal = details.reduce((sum, d) => sum + d.total, 0);
   const playerDiff = playerTotal - totalPar;
   const diffText = playerDiff > 0 ? `+${playerDiff}` : playerDiff === 0 ? 'E' : `${playerDiff}`;
   
@@ -2802,8 +2820,9 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                   <tr>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('hole')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('strokes')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">On</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Total</th>
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
                     {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
@@ -2814,10 +2833,11 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                     <tr key={d.hole} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="py-2 px-2 text-center font-semibold text-gray-700">{d.hole}</td>
                       <td className="py-2 px-2 text-center text-gray-500">{d.par}</td>
+                      <td className="py-2 px-2 text-center text-gray-700">{d.on}</td>
+                      <td className="py-2 px-2 text-center text-blue-600">{d.putts}</td>
                       <td className="py-2 px-2 text-center">
-                        <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.score, d.par)}`}>{d.score}</span>
+                        <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.total, d.par)}`}>{d.total}</span>
                       </td>
-                      <td className="py-2 px-2 text-center text-gray-700">{d.putts}</td>
                       {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <span className="text-green-600 font-bold">✓</span> : <span className="text-gray-300">-</span>}</td>}
@@ -2837,8 +2857,9 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                   <tr>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('hole')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('strokes')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">On</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Total</th>
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
                     {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
@@ -2849,10 +2870,11 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
                     <tr key={d.hole} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
                       <td className="py-2 px-2 text-center font-semibold text-gray-700">{d.hole}</td>
                       <td className="py-2 px-2 text-center text-gray-500">{d.par}</td>
+                      <td className="py-2 px-2 text-center text-gray-700">{d.on}</td>
+                      <td className="py-2 px-2 text-center text-blue-600">{d.putts}</td>
                       <td className="py-2 px-2 text-center">
-                        <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.score, d.par)}`}>{d.score}</span>
+                        <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.total, d.par)}`}>{d.total}</span>
                       </td>
-                      <td className="py-2 px-2 text-center text-gray-700">{d.putts}</td>
                       {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.water > 0 ? <span className="text-cyan-600 font-bold">{d.water}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isAdvancePlayer && <td className="py-2 px-2 text-center">{d.ob > 0 ? <span className="text-yellow-600 font-bold">{d.ob}</span> : <span className="text-gray-300">-</span>}</td>}
                       {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <span className="text-green-600 font-bold">✓</span> : <span className="text-gray-300">-</span>}</td>}
@@ -2866,10 +2888,14 @@ const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, allScores,
 
 {/* 底部统计 */}
         <div className="flex-shrink-0 bg-gray-100 p-3 border-t" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
-          <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${1 + (isAdvancePlayer ? 2 : 0) + (isWin123 ? 1 : 0)}, 1fr)` }}>
+          <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${2 + (isAdvancePlayer ? 2 : 0) + (isWin123 ? 1 : 0)}, 1fr)` }}>
+            <div className="bg-white rounded-lg p-2 shadow-sm">
+              <div className="text-gray-500 text-xs">Total</div>
+              <div className="font-bold text-xl text-gray-800">{playerTotal}</div>
+            </div>
             <div className="bg-white rounded-lg p-2 shadow-sm">
               <div className="text-gray-500 text-xs">{t('putt')}</div>
-              <div className="font-bold text-xl text-gray-800">{totalPutts}</div>
+              <div className="font-bold text-xl text-blue-600">{totalPutts}</div>
             </div>
             {isAdvancePlayer && (
               <div className="bg-white rounded-lg p-2 shadow-sm">
@@ -3188,15 +3214,15 @@ function IntegratedGolfGame() {
         .pga-birdie {
           width: 32px;
           height: 32px;
-          border: 2px solid #f43f5e;
+          border: 2px solid #3b82f6;
           border-radius: 50%;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 700;
           font-size: 12px;
-          color: #be123c;
-          background: #fff1f2;
+          color: #1d4ed8;
+          background: #dbeafe;
         }
         .pga-par {
           width: 32px;
@@ -3213,15 +3239,15 @@ function IntegratedGolfGame() {
         .pga-bogey {
           width: 32px;
           height: 32px;
-          border: 2px solid #38bdf8;
+          border: 2px solid #f97316;
           border-radius: 2px;
           display: flex;
           align-items: center;
           justify-content: center;
           font-weight: 700;
           font-size: 12px;
-          color: #0369a1;
-          background: #f0f9ff;
+          color: #c2410c;
+          background: #fff7ed;
         }
         .pga-double {
           position: relative;
@@ -3232,22 +3258,22 @@ function IntegratedGolfGame() {
           justify-content: center;
           font-weight: 700;
           font-size: 12px;
-          color: #1e40af;
-          background: #dbeafe;
+          color: #dc2626;
+          background: #fef2f2;
           border-radius: 2px;
         }
         .pga-double::before {
           content: '';
           position: absolute;
           inset: 0;
-          border: 2px solid #1e40af;
+          border: 2px solid #dc2626;
           border-radius: 2px;
         }
         .pga-double::after {
           content: '';
           position: absolute;
           inset: 3px;
-          border: 2px solid #1e40af;
+          border: 2px solid #dc2626;
           border-radius: 2px;
         }
         .pga-triple {
@@ -3260,21 +3286,21 @@ function IntegratedGolfGame() {
           font-weight: 700;
           font-size: 12px;
           color: white;
-          background: #8b5cf6;
+          background: #dc2626;
           border-radius: 2px;
         }
         .pga-triple::before {
           content: '';
           position: absolute;
           inset: 0;
-          border: 2px solid #6d28d9;
+          border: 2px solid #b91c1c;
           border-radius: 2px;
         }
         .pga-triple::after {
           content: '';
           position: absolute;
           inset: 3px;
-          border: 2px solid #6d28d9;
+          border: 2px solid #b91c1c;
           border-radius: 2px;
         }
         .pga-quad {
@@ -3287,21 +3313,21 @@ function IntegratedGolfGame() {
           font-weight: 700;
           font-size: 12px;
           color: white;
-          background: #374151;
+          background: #991b1b;
           border-radius: 2px;
         }
         .pga-quad::before {
           content: '';
           position: absolute;
           inset: 0;
-          border: 2px solid #1f2937;
+          border: 2px solid #7f1d1d;
           border-radius: 2px;
         }
         .pga-quad::after {
           content: '';
           position: absolute;
           inset: 3px;
-          border: 2px solid #1f2937;
+          border: 2px solid #7f1d1d;
           border-radius: 2px;
         }
 
