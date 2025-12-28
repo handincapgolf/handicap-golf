@@ -277,44 +277,46 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
           <div className="text-sm font-semibold text-gray-500 mb-2">📋 Hole by Hole</div>
           
           {front9.length > 0 && (
-            <div className="mb-3">
-              <div className="text-xs text-gray-400 mb-1">Front 9 OUT</div>
-              <div className="flex justify-between items-center mb-0.5">
-                {front9.map(d => (
-                  <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
-                ))}
-                <div className="w-8 text-center text-xs font-bold text-green-700">Tot</div>
-              </div>
-              <div className="flex justify-between items-center">
-                {front9.map(d => (
-                  <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
-                    {d.o + d.t}
-                  </div>
-                ))}
-                <div className="total-box">{front9Total}</div>
-              </div>
-            </div>
-          )}
+  <div className="mb-3">
+    <div className="flex justify-between items-center mb-1">
+      <span className="text-xs text-gray-400">Front 9 OUT</span>
+      <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Total}</span></span>
+    </div>
+    <div className="flex justify-between items-center mb-0.5">
+      {front9.map(d => (
+        <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+      ))}
+    </div>
+    <div className="flex justify-between items-center">
+      {front9.map(d => (
+        <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
+          {d.o + d.t}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
           
           {back9.length > 0 && (
-            <div>
-              <div className="text-xs text-gray-400 mb-1">Back 9 IN</div>
-              <div className="flex justify-between items-center mb-0.5">
-                {back9.map(d => (
-                  <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
-                ))}
-                <div className="w-8 text-center text-xs font-bold text-green-700">Tot</div>
-              </div>
-              <div className="flex justify-between items-center">
-                {back9.map(d => (
-                  <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
-                    {d.o + d.t}
-                  </div>
-                ))}
-                <div className="total-box">{back9Total}</div>
-              </div>
-            </div>
-          )}
+  <div>
+    <div className="flex justify-between items-center mb-1">
+      <span className="text-xs text-gray-400">Back 9 IN</span>
+      <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Total}</span></span>
+    </div>
+    <div className="flex justify-between items-center mb-0.5">
+      {back9.map(d => (
+        <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+      ))}
+    </div>
+    <div className="flex justify-between items-center">
+      {back9.map(d => (
+        <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
+          {d.o + d.t}
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         </div>
 
         {/* Score Distribution */}
