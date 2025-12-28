@@ -2604,17 +2604,68 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
         {/* 可滚动内容区 */}
         <div className="overflow-auto flex-1 p-3 space-y-3">
           {/* 总成绩 */}
-          <div className="flex items-center justify-between bg-gray-50 rounded-xl p-3">
+          <div className="flex items-center justify-center bg-gray-50 rounded-xl p-3">
             <div className="flex items-center gap-3">
               <span className="text-3xl font-bold text-gray-900">{playerTotal}</span>
               <span className={`px-2 py-1 rounded text-sm font-bold ${playerDiff > 0 ? 'bg-red-100 text-red-600' : playerDiff === 0 ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-600'}`}>
                 {diffText}
               </span>
             </div>
-            <div className="text-right text-sm text-gray-500">
-              {front9Details.length > 0 && <div>{t('front9')}: <span className="font-semibold text-gray-700">{front9Score}</span></div>}
-              {back9Details.length > 0 && <div>{t('back9')}: <span className="font-semibold text-gray-700">{back9Score}</span></div>}
-            </div>
+          </div>
+
+          {/* 逐洞成绩 - 新布局 */}
+          <div className="bg-white border border-gray-200 rounded-xl p-3">
+            <div className="text-sm font-semibold text-gray-500 mb-3">📋 {t('holeByHole')}</div>
+            
+            {front9Details.length > 0 && (
+              <div className="mb-4">
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">{t('front9')} OUT</span>
+                  <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Score}</span></span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  {front9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center">
+                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between">
+                  {front9Details.map(d => (
+                    <div key={d.hole} className="flex justify-center">
+                      <div className={getPgaScoreClass(d.score, d.par)}>
+                        {d.score}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {back9Details.length > 0 && (
+              <div>
+                <div className="flex justify-between items-center mb-2">
+                  <span className="text-xs text-gray-400">{t('back9')} IN</span>
+                  <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Score}</span></span>
+                </div>
+                <div className="flex justify-between mb-1">
+                  {back9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center">
+                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="flex justify-between">
+                  {back9Details.map(d => (
+                    <div key={d.hole} className="flex justify-center">
+                      <div className={getPgaScoreClass(d.score, d.par)}>
+                        {d.score}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           {/* 成绩分布 */}
@@ -2622,20 +2673,20 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
             <div className="grid grid-cols-4 gap-2">
               <div className="text-center p-2 bg-blue-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Birdie</div>
                 <div className="text-xl font-bold text-blue-600">{birdies}</div>
-                <div className="text-xs text-gray-500">Birdie</div>
               </div>
               <div className="text-center p-2 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Par</div>
                 <div className="text-xl font-bold text-gray-600">{parsCount}</div>
-                <div className="text-xs text-gray-500">Par</div>
               </div>
               <div className="text-center p-2 bg-orange-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Bogey</div>
                 <div className="text-xl font-bold text-orange-600">{bogeys}</div>
-                <div className="text-xs text-gray-500">Bogey</div>
               </div>
               <div className="text-center p-2 bg-red-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">Double+</div>
                 <div className="text-xl font-bold text-red-600">{doubles}</div>
-                <div className="text-xs text-gray-500">Double+</div>
               </div>
             </div>
           </div>
@@ -2645,16 +2696,16 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             <div className="text-sm font-semibold text-gray-500 mb-2">📊 {t('puttingAnalysis')}</div>
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center p-2 bg-gray-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">{t('totalPutts')}</div>
                 <div className="text-xl font-bold text-gray-800">{totalPutts}</div>
-                <div className="text-xs text-gray-500">{t('totalPutts')}</div>
               </div>
               <div className="text-center p-2 bg-blue-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">{t('avgPerHole')}</div>
                 <div className="text-xl font-bold text-blue-600">{avgPutts}</div>
-                <div className="text-xs text-gray-500">{t('avgPerHole')}</div>
               </div>
               <div className="text-center p-2 bg-green-50 rounded-lg">
+                <div className="text-xs text-gray-500 mb-1">{t('onePutt')}</div>
                 <div className="text-xl font-bold text-green-600">{onePutts}</div>
-                <div className="text-xs text-gray-500">{t('onePutt')}</div>
               </div>
             </div>
             {threePutts > 0 && (
@@ -2664,7 +2715,7 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             )}
           </div>
 
-{/* 罚杆统计 */}
+          {/* 罚杆统计 */}
           {isAdvancePlayer && (
             <div className="bg-white border border-gray-200 rounded-xl p-3">
               <div className="text-sm font-semibold text-gray-500 mb-2">⚠️ {t('penaltyStats')}</div>
@@ -2691,49 +2742,6 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
               </div>
             </div>
           )}
-
-{/* 逐洞成绩格子 */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-2">📋 {t('holeByHole')}</div>
-            {front9Details.length > 0 && (
-              <>
-                <div className="text-xs text-gray-400 mb-1">{t('front9')} OUT</div>
-                <div className="flex justify-between mb-0.5">
-                  {front9Details.map(d => (
-                    <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
-                      {d.hole}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between mb-3">
-                  {front9Details.map(d => (
-                    <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
-                      {d.score}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-            {back9Details.length > 0 && (
-              <>
-                <div className="text-xs text-gray-400 mb-1">{t('back9')} IN</div>
-                <div className="flex justify-between mb-0.5">
-                  {back9Details.map(d => (
-                    <div key={d.hole} className="w-8 text-center text-xs font-semibold text-gray-600">
-                      {d.hole}
-                    </div>
-                  ))}
-                </div>
-                <div className="flex justify-between">
-                  {back9Details.map(d => (
-                    <div key={d.hole} className={getPgaScoreClass(d.score, d.par)}>
-                      {d.score}
-                    </div>
-                  ))}
-                </div>
-              </>
-            )}
-          </div>
         </div>
 
         {/* 查看完整明细按钮 */}
@@ -3285,23 +3293,23 @@ function IntegratedGolfGame() {
           justify-content: center;
           font-weight: 700;
           font-size: 12px;
-          color: white;
-          background: #dc2626;
-          border-radius: 2px;
+          color: #dc2626;
+          background: #fef2f2;
+          border-radius: 4px;
         }
         .pga-triple::before {
           content: '';
           position: absolute;
           inset: 0;
-          border: 2px solid #b91c1c;
-          border-radius: 2px;
+          border: 2px solid #dc2626;
+          border-radius: 4px;
         }
         .pga-triple::after {
           content: '';
           position: absolute;
-          inset: 3px;
-          border: 2px solid #b91c1c;
-          border-radius: 2px;
+          inset: 4px;
+          border: 2px solid #dc2626;
+          border-radius: 4px;
         }
         .pga-quad {
           position: relative;
