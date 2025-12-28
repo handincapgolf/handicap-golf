@@ -140,61 +140,61 @@ const sharePageStyles = `
     border-radius: 4px;
   }
   .pga-eagle {
-    width: 28px; height: 28px;
+    width: 32px; height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     color: #92400e;
     background: #fef3c7;
     border-radius: 50%;
     border: 2px solid #f59e0b;
   }
   .pga-birdie {
-    width: 28px; height: 28px;
+    width: 32px; height: 32px;
     border: 2px solid #3b82f6;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     color: #1d4ed8;
     background: #dbeafe;
   }
   .pga-par {
-    width: 28px; height: 28px;
+    width: 32px; height: 32px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     color: #374151;
     background: #f3f4f6;
     border-radius: 2px;
   }
   .pga-bogey {
-    width: 28px; height: 28px;
+    width: 32px; height: 32px;
     border: 2px solid #f97316;
     border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     color: #c2410c;
     background: #fff7ed;
   }
   .pga-double {
-    width: 28px; height: 28px;
+    width: 32px; height: 32px;
     border: 2px solid #dc2626;
     border-radius: 2px;
     display: flex;
     align-items: center;
     justify-content: center;
     font-weight: 700;
-    font-size: 11px;
+    font-size: 12px;
     color: #dc2626;
     background: #fef2f2;
   }
@@ -277,41 +277,49 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
           <div className="text-sm font-semibold text-gray-500 mb-2">📋 Hole by Hole</div>
           
           {front9.length > 0 && (
-  <div className="mb-3">
-    <div className="flex justify-between items-center mb-1">
+  <div className="mb-4">
+    <div className="flex justify-between items-center mb-2">
       <span className="text-xs text-gray-400">Front 9 OUT</span>
       <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Total}</span></span>
     </div>
-    <div className="flex justify-between items-center mb-0.5">
+    <div className="flex justify-between mb-1">
       {front9.map(d => (
-        <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+        <div key={d.h} className="w-8 text-center">
+          <span className="text-xs font-semibold text-gray-500">{d.h}</span>
+        </div>
       ))}
     </div>
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between">
       {front9.map(d => (
-        <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
-          {d.o + d.t}
+        <div key={d.h} className="flex justify-center">
+          <div className={getShareScoreClass(d.o + d.t, d.p)}>
+            {d.o + d.t}
+          </div>
         </div>
       ))}
     </div>
   </div>
 )}
-          
-          {back9.length > 0 && (
+
+{back9.length > 0 && (
   <div>
-    <div className="flex justify-between items-center mb-1">
+    <div className="flex justify-between items-center mb-2">
       <span className="text-xs text-gray-400">Back 9 IN</span>
       <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Total}</span></span>
     </div>
-    <div className="flex justify-between items-center mb-0.5">
+    <div className="flex justify-between mb-1">
       {back9.map(d => (
-        <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+        <div key={d.h} className="w-8 text-center">
+          <span className="text-xs font-semibold text-gray-500">{d.h}</span>
+        </div>
       ))}
     </div>
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between">
       {back9.map(d => (
-        <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
-          {d.o + d.t}
+        <div key={d.h} className="flex justify-center">
+          <div className={getShareScoreClass(d.o + d.t, d.p)}>
+            {d.o + d.t}
+          </div>
         </div>
       ))}
     </div>
