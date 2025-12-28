@@ -244,7 +244,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
   const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto">
+  <div className="bg-white min-h-screen flex flex-col">
       {/* Header */}
       <div className="classic-header text-white relative">
         <div className="pt-5 pb-4 px-4 relative z-10">
@@ -271,7 +271,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       </div>
 
       {/* Content */}
-      <div className="p-4 space-y-3 max-h-[50vh] overflow-auto">
+      <div className="flex-1 p-4 space-y-3 overflow-auto">
         {/* Hole by Hole */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
           <div className="text-sm font-semibold text-gray-500 mb-2">📋 Hole by Hole</div>
@@ -364,7 +364,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       </div>
 
       {/* View Full Detail */}
-      <div className="p-4 border-t">
+      <div className="flex-shrink-0 p-4 border-t" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
         <button onClick={onViewFull} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition">
           View Full Detail →
         </button>
@@ -398,7 +398,7 @@ const ShareDetailPage = memo(({ data, onBack }) => {
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto">
+  <div className="bg-white min-h-screen flex flex-col">
       {/* Compact Header */}
       <div className="classic-header text-white relative">
         <div className="py-3 px-4 relative z-10">
@@ -420,7 +420,7 @@ const ShareDetailPage = memo(({ data, onBack }) => {
       </div>
 
       {/* Table */}
-      <div className="max-h-72 overflow-auto">
+      <div className="flex-1 overflow-auto">
         {front9.length > 0 && (
           <>
             <div className="px-3 py-2 bg-green-50 text-xs font-semibold text-green-700 sticky top-0 z-10">Front 9 OUT</div>
@@ -495,7 +495,7 @@ const ShareDetailPage = memo(({ data, onBack }) => {
       </div>
 
       {/* Bottom Stats */}
-      <div className="bg-gray-100 p-3 border-t">
+      <div className="flex-shrink-0 bg-gray-100 p-3 border-t" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className="grid grid-cols-4 gap-2 text-center">
           <div className="bg-white rounded-lg p-2 shadow-sm">
             <div className="text-gray-500 text-xs">Total</div>
@@ -557,16 +557,14 @@ const SharePage = memo(({ data }) => {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-700 to-gray-900 p-4">
-      <div className="max-w-md mx-auto">
-        {view === 'report' ? (
-          <ShareReportPage data={data} onViewFull={() => setView('detail')} />
-        ) : (
-          <ShareDetailPage data={data} onBack={() => setView('report')} />
-        )}
-      </div>
-    </div>
-  );
+  <div className="min-h-screen bg-gradient-to-b from-gray-700 to-gray-900">
+    {view === 'report' ? (
+      <ShareReportPage data={data} onViewFull={() => setView('detail')} />
+    ) : (
+      <ShareDetailPage data={data} onBack={() => setView('report')} />
+    )}
+  </div>
+);
 });
 
 // 球场数据库
