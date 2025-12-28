@@ -5346,10 +5346,9 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     if (isMobile && navigator.share) {
       // 移动端用原生分享
       navigator.share({
-        title: `${player}'s Golf Score`,
-        text: `${data.s} (${data.s - data.p > 0 ? '+' : ''}${data.s - data.p})`,
-        url: url
-      }).catch(() => {});
+  title: `${player}'s Golf Score - ${data.s} (${data.s - data.p > 0 ? '+' : ''}${data.s - data.p})`,
+  url: url
+}).catch(() => {});
     } else {
       // 桌面端直接复制链接
       navigator.clipboard.writeText(url).then(() => {
