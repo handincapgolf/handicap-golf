@@ -25,6 +25,550 @@ import {
   HelpCircle
 } from 'lucide-react';
 
+// ========== 分享功能：数据编码/解码 ==========
+
+// 压缩 JSON 并转为 URL 安全的 Base64
+const encodeShareData = (data) => {
+  try {
+    const jsonStr = JSON.stringify(data);
+    // 使用 btoa 编码，然后替换 URL 不安全字符
+    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+    return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+  } catch (e) {
+    console.error('Encode error:', e);
+    return null;
+  }
+};
+
+// 解码 URL 参数回 JSON
+const decodeShareData = (encoded) => {
+  try {
+    // 还原 URL 安全字符
+    let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    // 补齐 padding
+    while (base64.length % 4) base64 += '=';
+    const jsonStr = decodeURIComponent(escape(atob(base64)));
+    return JSON.parse(jsonStr);
+  } catch (e) {
+    console.error('Decode error:', e);
+    return null;
+  }
+};
+
+// 生成个人报告的分享数据
+const generatePlayerShareData = (player, course, holes, pars, allScores, allPutts, allWater, allOb, completedHoles) => {
+  // 计算统计数据
+  const holeDetails = completedHoles.map(hole => {
+    const on = allScores[player]?.[hole] || 0;
+    const putts = allPutts[player]?.[hole] || 0;
+    return {
+      h: hole,                          // hole number
+      p: pars[hole] || 4,               // par
+      o: on,                            // on green strokes
+      t: putts,                         // putts
+      w: allWater[player]?.[hole] || 0, // water
+      b: allOb[player]?.[hole] || 0     // OB
+    };
+  });
+
+  const totalScore = holeDetails.reduce((sum, h) => sum + h.o + h.t, 0);
+  const totalPar = holeDetails.reduce((sum, h) => sum + h.p, 0);
+  const totalPutts = holeDetails.reduce((sum, h) => sum + h.t, 0);
+
+  return {
+    v: 1,                               // version
+    n: player,                          // player name
+    c: course?.shortName || 'Custom',   // course short name
+    f: course?.fullName || '',          // course full name
+    d: new Date().toISOString().split('T')[0], // date
+    s: totalScore,                      // total score
+    p: totalPar,                        // total par
+    u: totalPutts,                      // total putts
+    h: holeDetails                      // hole details
+  };
+};
+
+// 生成分享链接
+const generateShareUrl = (data) => {
+  const encoded = encodeShareData(data);
+  if (!encoded) return null;
+  
+  // 获取当前域名
+  const baseUrl = window.location.origin;
+  return `${baseUrl}?p=${encoded}`;
+};
+
+// ========== 分享页面组件 ==========
+
+// 分享页面样式
+const sharePageStyles = `
+  .classic-header {
+    background: linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%);
+    position: relative;
+    overflow: hidden;
+  }
+  .classic-header::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    opacity: 0.5;
+  }
+  .gold-accent { color: #fbbf24; }
+  .logo-large {
+    width: 72px; height: 72px;
+    background: white;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3), 0 0 0 3px rgba(251,191,36,0.3);
+    font-size: 24px;
+    color: #166534;
+    font-weight: bold;
+  }
+  .total-box {
+    width: 32px; height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 12px;
+    color: #166534;
+    background: #dcfce7;
+    border: 2px solid #22c55e;
+    border-radius: 4px;
+  }
+  .pga-eagle {
+    width: 28px; height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #92400e;
+    background: #fef3c7;
+    border-radius: 50%;
+    border: 2px solid #f59e0b;
+  }
+  .pga-birdie {
+    width: 28px; height: 28px;
+    border: 2px solid #3b82f6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #1d4ed8;
+    background: #dbeafe;
+  }
+  .pga-par {
+    width: 28px; height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #374151;
+    background: #f3f4f6;
+    border-radius: 2px;
+  }
+  .pga-bogey {
+    width: 28px; height: 28px;
+    border: 2px solid #f97316;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #c2410c;
+    background: #fff7ed;
+  }
+  .pga-double {
+    width: 28px; height: 28px;
+    border: 2px solid #dc2626;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 11px;
+    color: #dc2626;
+    background: #fef2f2;
+  }
+`;
+
+// PGA 成绩样式
+const getShareScoreClass = (score, par) => {
+  const diff = score - par;
+  if (diff <= -2) return 'pga-eagle';
+  if (diff === -1) return 'pga-birdie';
+  if (diff === 0) return 'pga-par';
+  if (diff === 1) return 'pga-bogey';
+  return 'pga-double';
+};
+
+// 品牌 Footer
+const BrandFooter = memo(() => (
+  <div className="text-center py-3 bg-gray-50 border-t">
+    <div className="flex items-center justify-center gap-2">
+      <span className="text-green-600 text-lg">⛳</span>
+      <span className="text-sm font-semibold text-gray-600">
+        Powered by <span className="text-green-600">HandinCap.golf</span>
+      </span>
+    </div>
+  </div>
+));
+
+// 分享报告页面
+const ShareReportPage = memo(({ data, onViewFull }) => {
+  const holes = data.h || [];
+  const front9 = holes.filter(h => h.h <= 9);
+  const back9 = holes.filter(h => h.h > 9);
+  const front9Total = front9.reduce((sum, h) => sum + h.o + h.t, 0);
+  const back9Total = back9.reduce((sum, h) => sum + h.o + h.t, 0);
+  
+  const totalPutts = holes.reduce((sum, h) => sum + h.t, 0);
+  const avgPutts = holes.length > 0 ? (totalPutts / holes.length).toFixed(1) : '0';
+  const onePutts = holes.filter(h => h.t === 1).length;
+  const threePutts = holes.filter(h => h.t >= 3).length;
+  
+  const birdies = holes.filter(h => (h.o + h.t) - h.p === -1).length;
+  const pars = holes.filter(h => (h.o + h.t) - h.p === 0).length;
+  const bogeys = holes.filter(h => (h.o + h.t) - h.p === 1).length;
+  const doubles = holes.filter(h => (h.o + h.t) - h.p >= 2).length;
+  
+  const toPar = data.s - data.p;
+  const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
+
+  return (
+    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto">
+      {/* Header */}
+      <div className="classic-header text-white relative">
+        <div className="pt-5 pb-4 px-4 relative z-10">
+          <div className="flex justify-center mb-3">
+            <div className="logo-large"><span>⛳</span></div>
+          </div>
+          <div className="text-center mb-3">
+            <h1 className="font-bold text-xl leading-tight gold-accent">
+              {data.f || data.c}
+            </h1>
+            <p className="text-green-200 text-sm mt-1">{data.d}</p>
+          </div>
+          <div className="border-t border-green-500 border-opacity-50 my-3"></div>
+          <div className="text-center">
+            <div className="text-lg font-semibold mb-1">{data.n}</div>
+            <div className="flex items-center justify-center gap-3">
+              <span className="text-4xl font-extrabold">{data.s}</span>
+              <span className={`px-3 py-1 rounded-lg text-lg font-bold ${
+                toPar > 0 ? 'bg-red-500 text-white' : toPar === 0 ? 'bg-gray-200 text-gray-700' : 'bg-green-400 text-green-900'
+              }`}>{diffText}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Content */}
+      <div className="p-4 space-y-3 max-h-[50vh] overflow-auto">
+        {/* Hole by Hole */}
+        <div className="bg-white border border-gray-200 rounded-xl p-3">
+          <div className="text-sm font-semibold text-gray-500 mb-2">📋 Hole by Hole</div>
+          
+          {front9.length > 0 && (
+            <div className="mb-3">
+              <div className="text-xs text-gray-400 mb-1">Front 9 OUT</div>
+              <div className="flex justify-between items-center mb-0.5">
+                {front9.map(d => (
+                  <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+                ))}
+                <div className="w-8 text-center text-xs font-bold text-green-700">Tot</div>
+              </div>
+              <div className="flex justify-between items-center">
+                {front9.map(d => (
+                  <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
+                    {d.o + d.t}
+                  </div>
+                ))}
+                <div className="total-box">{front9Total}</div>
+              </div>
+            </div>
+          )}
+          
+          {back9.length > 0 && (
+            <div>
+              <div className="text-xs text-gray-400 mb-1">Back 9 IN</div>
+              <div className="flex justify-between items-center mb-0.5">
+                {back9.map(d => (
+                  <div key={d.h} className="w-7 text-center text-xs font-semibold text-gray-600">{d.h}</div>
+                ))}
+                <div className="w-8 text-center text-xs font-bold text-green-700">Tot</div>
+              </div>
+              <div className="flex justify-between items-center">
+                {back9.map(d => (
+                  <div key={d.h} className={getShareScoreClass(d.o + d.t, d.p)} style={{width: '28px', height: '28px', fontSize: '11px'}}>
+                    {d.o + d.t}
+                  </div>
+                ))}
+                <div className="total-box">{back9Total}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Score Distribution */}
+        <div className="bg-white border border-gray-200 rounded-xl p-3">
+          <div className="text-sm font-semibold text-gray-500 mb-2">🎯 Score Distribution</div>
+          <div className="grid grid-cols-4 gap-2">
+            <div className="text-center p-2 bg-blue-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Birdie</div>
+              <div className="text-xl font-bold text-blue-600">{birdies}</div>
+            </div>
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Par</div>
+              <div className="text-xl font-bold text-gray-600">{pars}</div>
+            </div>
+            <div className="text-center p-2 bg-orange-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Bogey</div>
+              <div className="text-xl font-bold text-orange-600">{bogeys}</div>
+            </div>
+            <div className="text-center p-2 bg-red-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Dbl+</div>
+              <div className="text-xl font-bold text-red-600">{doubles}</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Putting Analysis */}
+        <div className="bg-white border border-gray-200 rounded-xl p-3">
+          <div className="text-sm font-semibold text-gray-500 mb-2">📊 Putting Analysis</div>
+          <div className="grid grid-cols-3 gap-2">
+            <div className="text-center p-2 bg-gray-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Total</div>
+              <div className="text-xl font-bold text-gray-800">{totalPutts}</div>
+            </div>
+            <div className="text-center p-2 bg-blue-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">Avg</div>
+              <div className="text-xl font-bold text-blue-600">{avgPutts}</div>
+            </div>
+            <div className="text-center p-2 bg-green-50 rounded-lg">
+              <div className="text-xs text-gray-500 mb-1">1-Putt</div>
+              <div className="text-xl font-bold text-green-600">{onePutts}</div>
+            </div>
+          </div>
+          {threePutts > 0 && (
+            <div className="mt-2 text-center text-sm text-red-500">⚠️ 3-Putts: {threePutts}</div>
+          )}
+        </div>
+      </div>
+
+      {/* View Full Detail */}
+      <div className="p-4 border-t">
+        <button onClick={onViewFull} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition">
+          View Full Detail →
+        </button>
+      </div>
+      
+      <BrandFooter />
+    </div>
+  );
+});
+
+// 分享完整明细页面
+const ShareDetailPage = memo(({ data, onBack }) => {
+  const holes = data.h || [];
+  const front9 = holes.filter(h => h.h <= 9);
+  const back9 = holes.filter(h => h.h > 9);
+  
+  const totalPutts = holes.reduce((sum, h) => sum + h.t, 0);
+  const totalWater = holes.reduce((sum, h) => sum + (h.w || 0), 0);
+  const totalOb = holes.reduce((sum, h) => sum + (h.b || 0), 0);
+  
+  const toPar = data.s - data.p;
+  const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
+
+  const getScoreStyle = (total, par) => {
+    const diff = total - par;
+    if (diff <= -2) return 'text-purple-600 bg-purple-100';
+    if (diff === -1) return 'text-blue-600 bg-blue-100';
+    if (diff === 0) return 'text-gray-700 bg-gray-100';
+    if (diff === 1) return 'text-orange-600 bg-orange-100';
+    return 'text-red-600 bg-red-100';
+  };
+
+  return (
+    <div className="bg-white rounded-2xl shadow-2xl overflow-hidden max-w-sm mx-auto">
+      {/* Compact Header */}
+      <div className="classic-header text-white relative">
+        <div className="py-3 px-4 relative z-10">
+          <div className="flex items-center gap-3">
+            <button onClick={onBack} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg">←</button>
+            <div className="flex-1 min-w-0">
+              <h1 className="font-bold text-sm gold-accent truncate">{data.c}</h1>
+              <p className="text-green-200 text-xs">{data.d}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-sm">{data.n}</span>
+              <span className="text-2xl font-extrabold">{data.s}</span>
+              <span className={`px-2 py-0.5 rounded text-sm font-bold ${
+                toPar > 0 ? 'bg-red-500' : toPar === 0 ? 'bg-gray-200 text-gray-700' : 'bg-green-400 text-green-900'
+              }`}>{diffText}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="max-h-72 overflow-auto">
+        {front9.length > 0 && (
+          <>
+            <div className="px-3 py-2 bg-green-50 text-xs font-semibold text-green-700 sticky top-0 z-10">Front 9 OUT</div>
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Hole</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Par</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">On</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Putt</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Tot</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>
+                </tr>
+              </thead>
+              <tbody>
+                {front9.map((d, idx) => (
+                  <tr key={d.h} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="py-2 px-2 text-center font-semibold text-gray-700">{d.h}</td>
+                    <td className="py-2 px-2 text-center text-gray-500">{d.p}</td>
+                    <td className="py-2 px-2 text-center text-gray-700">{d.o}</td>
+                    <td className="py-2 px-2 text-center text-blue-600">{d.t}</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreStyle(d.o + d.t, d.p)}`}>
+                        {d.o + d.t}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-center">{d.w > 0 ? <span className="text-cyan-600 font-bold">{d.w}</span> : <span className="text-gray-300">-</span>}</td>
+                    <td className="py-2 px-2 text-center">{d.b > 0 ? <span className="text-yellow-600 font-bold">{d.b}</span> : <span className="text-gray-300">-</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+
+        {back9.length > 0 && (
+          <>
+            <div className="px-3 py-2 bg-blue-50 text-xs font-semibold text-blue-700 sticky top-0 z-10">Back 9 IN</div>
+            <table className="w-full text-sm">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Hole</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Par</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">On</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Putt</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Tot</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>
+                </tr>
+              </thead>
+              <tbody>
+                {back9.map((d, idx) => (
+                  <tr key={d.h} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
+                    <td className="py-2 px-2 text-center font-semibold text-gray-700">{d.h}</td>
+                    <td className="py-2 px-2 text-center text-gray-500">{d.p}</td>
+                    <td className="py-2 px-2 text-center text-gray-700">{d.o}</td>
+                    <td className="py-2 px-2 text-center text-blue-600">{d.t}</td>
+                    <td className="py-2 px-2 text-center">
+                      <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreStyle(d.o + d.t, d.p)}`}>
+                        {d.o + d.t}
+                      </span>
+                    </td>
+                    <td className="py-2 px-2 text-center">{d.w > 0 ? <span className="text-cyan-600 font-bold">{d.w}</span> : <span className="text-gray-300">-</span>}</td>
+                    <td className="py-2 px-2 text-center">{d.b > 0 ? <span className="text-yellow-600 font-bold">{d.b}</span> : <span className="text-gray-300">-</span>}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
+      </div>
+
+      {/* Bottom Stats */}
+      <div className="bg-gray-100 p-3 border-t">
+        <div className="grid grid-cols-4 gap-2 text-center">
+          <div className="bg-white rounded-lg p-2 shadow-sm">
+            <div className="text-gray-500 text-xs">Total</div>
+            <div className="font-bold text-xl text-gray-800">{data.s}</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 shadow-sm">
+            <div className="text-gray-500 text-xs">Putt</div>
+            <div className="font-bold text-xl text-blue-600">{totalPutts}</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 shadow-sm">
+            <div className="text-gray-500 text-xs">💧</div>
+            <div className="font-bold text-xl text-cyan-600">{totalWater}</div>
+          </div>
+          <div className="bg-white rounded-lg p-2 shadow-sm">
+            <div className="text-gray-500 text-xs">OB</div>
+            <div className="font-bold text-xl text-yellow-600">{totalOb}</div>
+          </div>
+        </div>
+      </div>
+      
+      <BrandFooter />
+    </div>
+  );
+});
+
+// 主分享页面容器
+const SharePage = memo(({ data }) => {
+  const [view, setView] = useState('report');
+  const [error, setError] = useState(null);
+
+  // 注入样式
+  useEffect(() => {
+    try {
+      if (!document.getElementById('share-page-styles')) {
+        const style = document.createElement('style');
+        style.id = 'share-page-styles';
+        style.textContent = sharePageStyles;
+        document.head.appendChild(style);
+      }
+    } catch (e) {
+      console.error('Style injection error:', e);
+    }
+  }, []);
+
+  // 数据验证
+  if (!data || !data.h || !Array.isArray(data.h)) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-xl p-6 text-center shadow-lg">
+          <div className="text-4xl mb-3">❌</div>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">Invalid Link</h2>
+          <p className="text-gray-600 text-sm">This share link is invalid or expired.</p>
+          <a href="/" className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
+            Go to HandinCap
+          </a>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-gray-700 to-gray-900 p-4">
+      <div className="max-w-md mx-auto">
+        {view === 'report' ? (
+          <ShareReportPage data={data} onViewFull={() => setView('detail')} />
+        ) : (
+          <ShareDetailPage data={data} onBack={() => setView('report')} />
+        )}
+      </div>
+    </div>
+  );
+});
+
 // 球场数据库
 const GOLF_COURSES = {
   "99_East_Golf_Club": {
@@ -2590,7 +3134,7 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
     <div className="fixed inset-0 z-50 flex flex-col">
       <div className="absolute inset-0 bg-black bg-opacity-50" onClick={onClose}></div>
       
-      <div className="relative flex flex-col bg-white m-3 mt-10 mb-3 rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: 'calc(100vh - 52px)', animation: 'cardAppear 0.25s ease-out' }}>
+      <div className="relative flex flex-col bg-white m-3 mt-4 mb-3 rounded-2xl shadow-2xl overflow-hidden" style={{ maxHeight: 'calc(100vh - 52px)', animation: 'cardAppear 0.25s ease-out' }}>
         
         {/* Header */}
         <div className="bg-green-600 text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
@@ -2603,19 +3147,16 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
 
         {/* 可滚动内容区 */}
         <div className="overflow-auto flex-1 p-3 space-y-3">
-          {/* 总成绩 */}
-          <div className="flex items-center justify-center bg-gray-50 rounded-xl p-3">
-            <div className="flex items-center gap-3">
-              <span className="text-3xl font-bold text-gray-900">{playerTotal}</span>
-              <span className={`px-2 py-1 rounded text-sm font-bold ${playerDiff > 0 ? 'bg-red-100 text-red-600' : playerDiff === 0 ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-600'}`}>
-                {diffText}
-              </span>
-            </div>
+          {/* 总成绩 - 紧凑版 */}
+          <div className="flex items-center justify-center gap-2 py-1">
+            <span className="text-xl font-bold text-gray-900">{playerTotal}</span>
+            <span className={`px-1.5 py-0.5 rounded text-xs font-bold ${playerDiff > 0 ? 'bg-red-100 text-red-600' : playerDiff === 0 ? 'bg-gray-200 text-gray-600' : 'bg-green-100 text-green-600'}`}>
+              {diffText}
+            </span>
           </div>
 
           {/* 逐洞成绩 - 新布局 */}
           <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-3">📋 {t('holeByHole')}</div>
             
             {front9Details.length > 0 && (
               <div className="mb-4">
@@ -3185,6 +3726,7 @@ const courses = {
 };
 
 function IntegratedGolfGame() {
+
 // ========== 注入样式 ==========
   useEffect(() => {
     if (!document.getElementById('up-active-style')) {
@@ -3295,21 +3837,21 @@ function IntegratedGolfGame() {
           font-size: 12px;
           color: #dc2626;
           background: #fef2f2;
-          border-radius: 4px;
+          border-radius: 2px;
         }
         .pga-triple::before {
           content: '';
           position: absolute;
           inset: 0;
           border: 2px solid #dc2626;
-          border-radius: 4px;
+          border-radius: 2px;
         }
         .pga-triple::after {
           content: '';
           position: absolute;
-          inset: 4px;
+          inset: 3px;
           border: 2px solid #dc2626;
-          border-radius: 4px;
+          border-radius: 2px;
         }
         .pga-quad {
           position: relative;
@@ -3320,22 +3862,22 @@ function IntegratedGolfGame() {
           justify-content: center;
           font-weight: 700;
           font-size: 12px;
-          color: white;
-          background: #991b1b;
+          color: #dc2626;
+          background: #fef2f2;
           border-radius: 2px;
         }
         .pga-quad::before {
           content: '';
           position: absolute;
           inset: 0;
-          border: 2px solid #7f1d1d;
+          border: 2px solid #dc2626;
           border-radius: 2px;
         }
         .pga-quad::after {
           content: '';
           position: absolute;
           inset: 3px;
-          border: 2px solid #7f1d1d;
+          border: 2px solid #dc2626;
           border-radius: 2px;
         }
 
@@ -3480,6 +4022,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
+  
 
   // 从localStorage加载游戏状态
   useEffect(() => {
@@ -4776,6 +5319,37 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     return '';
   }, []);
 
+// ========== 分享功能 ==========
+  const handleSharePlayer = useCallback((player) => {
+    const data = generatePlayerShareData(
+      player, selectedCourse, completedHoles, pars,
+      allScores, allPutts, allWater || {}, allOb || {}, completedHoles
+    );
+    const url = generateShareUrl(data);
+    
+    if (!url) {
+      showToast(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
+      return;
+    }
+    
+    // 检测是否是移动设备
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    if (isMobile && navigator.share) {
+      // 移动端用原生分享
+      navigator.share({
+        title: `${player}'s Golf Score`,
+        text: `${data.s} (${data.s - data.p > 0 ? '+' : ''}${data.s - data.p})`,
+        url: url
+      }).catch(() => {});
+    } else {
+      // 桌面端直接复制链接
+      navigator.clipboard.writeText(url).then(() => {
+        showToast(lang === 'zh' ? '链接已复制！' : 'Link copied!');
+      }).catch(() => showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error'));
+    }
+  }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast]);
+
 // 彩纸庆祝效果
 const triggerConfetti = useCallback(() => {
   if (!document.getElementById('confetti-style')) {
@@ -4835,6 +5409,16 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
   setAdvanceReportPlayer(playerName);
   setShowAdvanceFullDetail(false);
 }, []);
+
+// ========== 检测分享链接 ==========
+  const urlParams = new URLSearchParams(window.location.search);
+  const shareParam = urlParams.get('p');
+  if (shareParam) {
+    const decoded = decodeShareData(shareParam);
+    if (decoded) {
+      return <SharePage data={decoded} />;
+    }
+  }
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
@@ -5586,23 +6170,32 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             const medal = getMedal(rank);
                             
                             return (
-                              <div 
-  key={player} 
-  className="text-center p-2 bg-gray-50 rounded-lg transition cursor-pointer hover:bg-gray-100 active:scale-98"
-  onClick={() => handleAdvancePlayerClick(player)}
->
-                                <div className="text-sm font-medium flex items-center justify-center gap-1 text-blue-600 underline">
-  {player} {medal} <span className="text-xs">📊</span>
+                              <div key={player} className="text-center p-2 bg-gray-50 rounded-lg">
+  <div 
+    className="cursor-pointer hover:bg-gray-100 rounded p-1 -m-1"
+    onClick={() => handleAdvancePlayerClick(player)}
+  >
+    <div className="text-sm font-medium flex items-center justify-center gap-1 text-blue-600 underline">
+      {player} {medal} <span className="text-xs">📊</span>
+    </div>
+    <div className="flex items-baseline justify-center gap-1">
+      <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
+      {total > 0 && (
+        <span className={`text-xs font-semibold ${diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600'}`}>
+          ({diffStr})
+        </span>
+      )}
+    </div>
+  </div>
+  {gameComplete && (
+    <button
+      onClick={(e) => { e.stopPropagation(); handleSharePlayer(player); }}
+      className="mt-1.5 px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium flex items-center justify-center gap-1 mx-auto"
+    >
+      <span>📤</span> Share
+    </button>
+  )}
 </div>
-                                <div className="flex items-baseline justify-center gap-1">
-                                  <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
-                                  {total > 0 && (
-                                    <span className={`text-xs font-semibold ${diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600'}`}>
-                                      ({diffStr})
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
                             );
                           })}
                         </div>
