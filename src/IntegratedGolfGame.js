@@ -140,17 +140,31 @@ const sharePageStyles = `
     border-radius: 4px;
   }
   .pga-eagle {
-    width: 32px; height: 32px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 12px;
-    color: #92400e;
-    background: #fef3c7;
-    border-radius: 50%;
-    border: 2px solid #f59e0b;
-  }
+  position: relative;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #92400e;
+  background: #fef3c7;
+  border-radius: 50%;
+}
+.pga-eagle::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #f59e0b;
+  border-radius: 50%;
+}
+.pga-eagle::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 2px solid #f59e0b;
+  border-radius: 50%;
+}
   .pga-birdie {
     width: 32px; height: 32px;
     border: 2px solid #3b82f6;
@@ -187,17 +201,31 @@ const sharePageStyles = `
     background: #fff7ed;
   }
   .pga-double {
-    width: 32px; height: 32px;
-    border: 2px solid #dc2626;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 12px;
-    color: #dc2626;
-    background: #fef2f2;
-  }
+  position: relative;
+  width: 32px; height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 12px;
+  color: #dc2626;
+  background: #fef2f2;
+  border-radius: 2px;
+}
+.pga-double::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border: 2px solid #dc2626;
+  border-radius: 2px;
+}
+.pga-double::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  border: 2px solid #dc2626;
+  border-radius: 2px;
+}
 `;
 
 // PGA 成绩样式
