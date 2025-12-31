@@ -3783,9 +3783,9 @@ const PWAInstallPrompt = ({ lang = 'en' }) => {
     zh: {
       install: '安装 HandinCap',
       domain: 'handincap.golf',
-      fastLaunch: '快速启动',
-      offlineUse: '离线可用',
-      fullScreen: '全屏体验',
+      fastLaunch: '记分卡',
+		offlineUse: '球友对战',
+		fullScreen: '一键分享',
       installNow: '立即安装',
       later: '暂不安装',
       gotIt: '我知道了',
@@ -3798,9 +3798,9 @@ const PWAInstallPrompt = ({ lang = 'en' }) => {
     en: {
       install: 'Install HandinCap',
       domain: 'handincap.golf',
-      fastLaunch: 'Fast Launch',
-      offlineUse: 'Offline Ready',
-      fullScreen: 'Full Screen',
+      fastLaunch: 'Scorecard',
+		offlineUse: 'Play Together',
+		fullScreen: 'Share',
       installNow: 'Install Now',
       later: 'Maybe Later',
       gotIt: 'Got It',
@@ -3881,25 +3881,31 @@ const PWAInstallPrompt = ({ lang = 'en' }) => {
             </div>
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-4 mb-4">
               <div className="flex justify-around">
-                <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 bg-green-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">{t.fastLaunch}</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 bg-blue-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5"><path d="M2 20h.01M7 20v-4M12 20v-8M17 20V8M22 4v16"/></svg>
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">{t.offlineUse}</span>
-                </div>
-                <div className="flex flex-col items-center">
-                  <div className="w-11 h-11 bg-amber-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#d97706" strokeWidth="2.5"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
-                  </div>
-                  <span className="text-xs text-gray-600 font-medium">{t.fullScreen}</span>
-                </div>
-              </div>
+  <div className="flex flex-col items-center">
+    <div className="w-11 h-11 bg-green-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#16a34a" strokeWidth="2.5">
+        <rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M9 3v18"/>
+      </svg>
+    </div>
+    <span className="text-xs text-gray-600 font-medium">{t.fastLaunch}</span>
+  </div>
+  <div className="flex flex-col items-center">
+    <div className="w-11 h-11 bg-orange-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#ea580c" strokeWidth="2.5">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>
+      </svg>
+    </div>
+    <span className="text-xs text-gray-600 font-medium">{t.offlineUse}</span>
+  </div>
+  <div className="flex flex-col items-center">
+    <div className="w-11 h-11 bg-blue-100 rounded-full flex items-center justify-center mb-1.5 shadow-sm">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#2563eb" strokeWidth="2.5">
+        <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/>
+      </svg>
+    </div>
+    <span className="text-xs text-gray-600 font-medium">{t.fullScreen}</span>
+  </div>
+</div>
             </div>
             {isIOS ? (
               <div className="space-y-3">
