@@ -610,6 +610,7 @@ const SharePage = memo(({ data }) => {
     ) : (
       <ShareDetailPage data={data} onBack={() => setView('report')} />
     )}
+    <PWAInstallPrompt lang="en" />
   </div>
 );
 });
