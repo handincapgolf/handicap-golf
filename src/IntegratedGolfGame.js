@@ -319,6 +319,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       {front9.map(d => (
         <div key={d.h} className="w-8 text-center">
           <span className="text-xs font-semibold text-gray-500">{d.h}</span>
+          <div className="text-[10px] text-gray-400">P{d.p}</div>
         </div>
       ))}
     </div>
@@ -344,6 +345,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       {back9.map(d => (
         <div key={d.h} className="w-8 text-center">
           <span className="text-xs font-semibold text-gray-500">{d.h}</span>
+          <div className="text-[10px] text-gray-400">P{d.p}</div>
         </div>
       ))}
     </div>
@@ -3211,12 +3213,13 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
                   <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
-                  {front9Details.map(d => (
-                    <div key={d.hole} className="w-8 text-center">
-                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
-                    </div>
-                  ))}
-                </div>
+  {front9Details.map(d => (
+    <div key={d.hole} className="w-8 text-center">
+      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+      <div className="text-[10px] text-gray-400">P{d.par}</div>
+    </div>
+  ))}
+</div>
                 <div className="flex justify-between">
                   {front9Details.map(d => (
                     <div key={d.hole} className="flex justify-center">
@@ -3236,12 +3239,13 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
                   <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
-                  {back9Details.map(d => (
-                    <div key={d.hole} className="w-8 text-center">
-                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
-                    </div>
-                  ))}
-                </div>
+  {back9Details.map(d => (
+    <div key={d.hole} className="w-8 text-center">
+      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+      <div className="text-[10px] text-gray-400">P{d.par}</div>
+    </div>
+  ))}
+</div>
                 <div className="flex justify-between">
                   {back9Details.map(d => (
                     <div key={d.hole} className="flex justify-center">
@@ -5131,12 +5135,34 @@ const getScoreLabel = useCallback((stroke, par) => {
 
 // ========== 修改 On (上果岭杆数) ==========
   const changeOn = useCallback((player, delta) => {
-    const holeNum = holes[currentHole];
-    const par = pars[holeNum] || 4;
-    const current = scores[player] ?? par;
-    const newOn = Math.max(1, current + delta);
-    setScores(prev => ({ ...prev, [player]: newOn }));
-  }, [currentHole, holes, pars, scores]);
+  const holeNum = holes[currentHole];
+  const par = pars[holeNum] || 4;
+  const current = scores[player] ?? par;
+  const newOn = Math.max(1, current + delta);
+  setScores(prev => ({ ...prev, [player]: newOn }));
+
+  // 实时更新 Hole Settlement
+  const newScores = { ...scores, [player]: newOn };
+  const holeScores = {};
+  const holePutts = {};
+  const holeUps = {};
+  activePlayers.forEach(p => {
+    holeScores[p] = newScores[p] || par;
+    holePutts[p] = putts[p] || 0;
+    holeUps[p] = ups[p] || false;
+  });
+
+  if (gameMode === 'matchPlay') {
+    const settlement = calculateMatchPlay(holeScores, holeNum);
+    setCurrentHoleSettlement(settlement);
+  } else if (gameMode === 'skins') {
+    const { results } = calculateSkins(holeScores, holeNum);
+    setCurrentHoleSettlement(results);
+  } else if (gameMode === 'win123') {
+    const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
+    setCurrentHoleSettlement(results);
+  }
+}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
   const changeScore = useCallback((player, delta) => {
     const holeNum = holes[currentHole];
@@ -5169,8 +5195,33 @@ const getScoreLabel = useCallback((stroke, par) => {
   }, [scores, currentHole, holes, pars, ups, putts, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
   const changePutts = useCallback((player, delta) => {
-    setPutts(prev => ({ ...prev, [player]: Math.max(0, (prev[player] || 0) + delta) }));
-  }, []);
+  const holeNum = holes[currentHole];
+  const par = pars[holeNum] || 4;
+  const newPutts = Math.max(0, (putts[player] || 0) + delta);
+  setPutts(prev => ({ ...prev, [player]: newPutts }));
+
+  // 实时更新 Hole Settlement
+  const newPuttsAll = { ...putts, [player]: newPutts };
+  const holeScores = {};
+  const holePutts = {};
+  const holeUps = {};
+  activePlayers.forEach(p => {
+    holeScores[p] = scores[p] || par;
+    holePutts[p] = newPuttsAll[p] || 0;
+    holeUps[p] = ups[p] || false;
+  });
+
+  if (gameMode === 'matchPlay') {
+    const settlement = calculateMatchPlay(holeScores, holeNum);
+    setCurrentHoleSettlement(settlement);
+  } else if (gameMode === 'skins') {
+    const { results } = calculateSkins(holeScores, holeNum);
+    setCurrentHoleSettlement(results);
+  } else if (gameMode === 'win123') {
+    const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
+    setCurrentHoleSettlement(results);
+  }
+}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
   const changeWater = useCallback((player) => {
     setWater(prev => ({ ...prev, [player]: (prev[player] || 0) + 1 }));
@@ -5337,9 +5388,13 @@ const playersWithZeroPutts = activePlayers.filter(player =>
 );
 
   if (playersWithZeroPutts.length > 0) {
-    setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
-    return;
+  // 触发手机震动提醒
+  if (navigator.vibrate) {
+    navigator.vibrate([200, 100, 200]);
   }
+  setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
+  return;
+}
 
   // 原有逻辑继续
   if (gameMode === 'win123') {
