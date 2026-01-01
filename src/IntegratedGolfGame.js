@@ -27,14 +27,87 @@ import {
 
 import { GOLF_COURSES, searchCourses } from './data/courses';
 import { useTranslation } from './locales';
-// ========== 分享功能：数据编码/解码 ==========
 
-// 压缩 JSON 并转为 URL 安全的 Base64
+// ========== 超紧凑分享链接 V3 (二进制压缩 + fullName) ==========
+
+const packBits = (values, bitSizes) => {
+  let bits = '';
+  values.forEach((val, i) => {
+    bits += val.toString(2).padStart(bitSizes[i], '0');
+  });
+  while (bits.length % 8 !== 0) bits += '0';
+  const bytes = [];
+  for (let i = 0; i < bits.length; i += 8) {
+    bytes.push(parseInt(bits.slice(i, i + 8), 2));
+  }
+  return bytes;
+};
+
+const unpackBits = (bytes, bitSizes, count) => {
+  let bits = bytes.map(b => b.toString(2).padStart(8, '0')).join('');
+  const values = [];
+  let pos = 0;
+  for (let i = 0; i < count; i++) {
+    const size = bitSizes[i % bitSizes.length];
+    values.push(parseInt(bits.slice(pos, pos + size), 2));
+    pos += size;
+  }
+  return values;
+};
+
+const bytesToBase64 = (bytes) => {
+  const binary = String.fromCharCode(...bytes);
+  const base64 = btoa(binary);
+  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+};
+
+const base64ToBytes = (str) => {
+  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
+  while (base64.length % 4) base64 += '=';
+  const binary = atob(base64);
+  return Array.from(binary, c => c.charCodeAt(0));
+};
+
 const encodeShareData = (data) => {
   try {
-    const jsonStr = JSON.stringify(data);
-    // 使用 btoa 编码，然后替换 URL 不安全字符
-    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
+    const dateCompact = data.d.slice(2).replace(/-/g, '');
+    const startHole = data.h[0]?.h || 1;
+    const holeCount = data.h.length;
+    const isAdvance = data.a ? 1 : 0;
+    
+    const holeValues = [];
+    const bitSizes = isAdvance ? [2, 4, 3, 2, 2] : [2, 4, 3];
+    
+    data.h.forEach(h => {
+      holeValues.push(h.p - 3);
+      holeValues.push(Math.min(h.o, 15));
+      holeValues.push(Math.min(h.t, 7));
+      if (isAdvance) {
+        holeValues.push(Math.min(h.w || 0, 3));
+        holeValues.push(Math.min(h.b || 0, 3));
+      }
+    });
+    
+    const allBitSizes = [];
+    for (let i = 0; i < holeCount; i++) {
+      allBitSizes.push(...bitSizes);
+    }
+    
+    const holeBytes = packBits(holeValues, allBitSizes);
+    const holeData = bytesToBase64(holeBytes);
+    
+    const parts = [
+      data.n,
+      data.f || data.c || 'X',
+      dateCompact,
+      isAdvance,
+      startHole,
+      holeCount,
+      holeData
+    ];
+    
+    const compact = parts.join('|');
+    const base64 = btoa(unescape(encodeURIComponent(compact)));
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   } catch (e) {
     console.error('Encode error:', e);
@@ -42,15 +115,60 @@ const encodeShareData = (data) => {
   }
 };
 
-// 解码 URL 参数回 JSON
 const decodeShareData = (encoded) => {
   try {
-    // 还原 URL 安全字符
     let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
-    // 补齐 padding
     while (base64.length % 4) base64 += '=';
-    const jsonStr = decodeURIComponent(escape(atob(base64)));
-    return JSON.parse(jsonStr);
+    
+    const compact = decodeURIComponent(escape(atob(base64)));
+    const parts = compact.split('|');
+    
+    const name = parts[0];
+    const fullName = parts[1];
+    const dateRaw = parts[2];
+    const date = `20${dateRaw.slice(0,2)}-${dateRaw.slice(2,4)}-${dateRaw.slice(4,6)}`;
+    const isAdvance = parts[3] === '1';
+    const startHole = Number(parts[4]);
+    const holeCount = Number(parts[5]);
+    const holeData = parts[6];
+    
+    const holeBytes = base64ToBytes(holeData);
+    const bitSizes = isAdvance ? [2, 4, 3, 2, 2] : [2, 4, 3];
+    const valuesPerHole = bitSizes.length;
+    const holeValues = unpackBits(holeBytes, bitSizes, holeCount * valuesPerHole);
+    
+    const holesData = [];
+    for (let i = 0; i < holeCount; i++) {
+      const base = i * valuesPerHole;
+      const hole = {
+        h: startHole + i,
+        p: holeValues[base] + 3,
+        o: holeValues[base + 1],
+        t: holeValues[base + 2]
+      };
+      if (isAdvance) {
+        hole.w = holeValues[base + 3];
+        hole.b = holeValues[base + 4];
+      }
+      holesData.push(hole);
+    }
+    
+    const totalScore = holesData.reduce((sum, h) => sum + h.o + h.t, 0);
+    const totalPar = holesData.reduce((sum, h) => sum + h.p, 0);
+    const totalPutts = holesData.reduce((sum, h) => sum + h.t, 0);
+    
+    return {
+      v: 3,
+      n: name,
+      c: fullName,
+      f: fullName,
+      d: date,
+      s: totalScore,
+      p: totalPar,
+      u: totalPutts,
+      a: isAdvance,
+      h: holesData
+    };
   } catch (e) {
     console.error('Decode error:', e);
     return null;
