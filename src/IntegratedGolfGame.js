@@ -2281,7 +2281,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [jumboMode, setJumboMode] = useState(false);
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
-  const [prizePool, setPrizePool] = useState('');
+  const [prizePool, setPrizePool] = useState(0);
   const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [advanceMode, setAdvanceMode] = useState('off');
@@ -2353,7 +2353,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
         setGameMode(gameState.gameMode || 'matchPlay');
         setPlayerNames(gameState.playerNames || ['', '', '', '']);
         setStake(gameState.stake || '');
-        setPrizePool(gameState.prizePool || '');
+        setPrizePool(gameState.prizePool ?? 0);
         setHandicap(gameState.handicap || 'off');
         setPlayerHandicaps(gameState.playerHandicaps || {});
         setAdvanceMode(gameState.advanceMode || 'off');
@@ -3558,9 +3558,14 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   <Play className="w-5 h-5" />
                   {t('create')}
                 </button>
-              </div>
-            </div>
-          )}
+             </div>
+            
+            {/* 页脚版权 */}
+            <footer className="absolute bottom-4 text-center text-gray-400 text-xs">
+              © 2025 HandinCap. All rights reserved. {window.APP_VERSION}
+            </footer>
+          </div>
+        )}
 
           {currentSection === 'course' && (
             <div className="space-y-4 py-3">
