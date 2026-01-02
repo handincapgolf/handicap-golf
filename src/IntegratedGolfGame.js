@@ -25,89 +25,14 @@ import {
   HelpCircle
 } from 'lucide-react';
 
-import { GOLF_COURSES, searchCourses } from './data/courses';
-import { useTranslation } from './locales';
+// ========== 分享功能：数据编码/解码 ==========
 
-// ========== 超紧凑分享链接 V3 (二进制压缩 + fullName) ==========
-
-const packBits = (values, bitSizes) => {
-  let bits = '';
-  values.forEach((val, i) => {
-    bits += val.toString(2).padStart(bitSizes[i], '0');
-  });
-  while (bits.length % 8 !== 0) bits += '0';
-  const bytes = [];
-  for (let i = 0; i < bits.length; i += 8) {
-    bytes.push(parseInt(bits.slice(i, i + 8), 2));
-  }
-  return bytes;
-};
-
-const unpackBits = (bytes, bitSizes, count) => {
-  let bits = bytes.map(b => b.toString(2).padStart(8, '0')).join('');
-  const values = [];
-  let pos = 0;
-  for (let i = 0; i < count; i++) {
-    const size = bitSizes[i % bitSizes.length];
-    values.push(parseInt(bits.slice(pos, pos + size), 2));
-    pos += size;
-  }
-  return values;
-};
-
-const bytesToBase64 = (bytes) => {
-  const binary = String.fromCharCode(...bytes);
-  const base64 = btoa(binary);
-  return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
-};
-
-const base64ToBytes = (str) => {
-  let base64 = str.replace(/-/g, '+').replace(/_/g, '/');
-  while (base64.length % 4) base64 += '=';
-  const binary = atob(base64);
-  return Array.from(binary, c => c.charCodeAt(0));
-};
-
+// 压缩 JSON 并转为 URL 安全的 Base64
 const encodeShareData = (data) => {
   try {
-    const dateCompact = data.d.slice(2).replace(/-/g, '');
-    const startHole = data.h[0]?.h || 1;
-    const holeCount = data.h.length;
-    const isAdvance = data.a ? 1 : 0;
-    
-    const holeValues = [];
-    const bitSizes = isAdvance ? [2, 4, 3, 2, 2] : [2, 4, 3];
-    
-    data.h.forEach(h => {
-      holeValues.push(h.p - 3);
-      holeValues.push(Math.min(h.o, 15));
-      holeValues.push(Math.min(h.t, 7));
-      if (isAdvance) {
-        holeValues.push(Math.min(h.w || 0, 3));
-        holeValues.push(Math.min(h.b || 0, 3));
-      }
-    });
-    
-    const allBitSizes = [];
-    for (let i = 0; i < holeCount; i++) {
-      allBitSizes.push(...bitSizes);
-    }
-    
-    const holeBytes = packBits(holeValues, allBitSizes);
-    const holeData = bytesToBase64(holeBytes);
-    
-    const parts = [
-      data.n,
-      data.f || data.c || 'X',
-      dateCompact,
-      isAdvance,
-      startHole,
-      holeCount,
-      holeData
-    ];
-    
-    const compact = parts.join('|');
-    const base64 = btoa(unescape(encodeURIComponent(compact)));
+    const jsonStr = JSON.stringify(data);
+    // 使用 btoa 编码，然后替换 URL 不安全字符
+    const base64 = btoa(unescape(encodeURIComponent(jsonStr)));
     return base64.replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
   } catch (e) {
     console.error('Encode error:', e);
@@ -115,60 +40,15 @@ const encodeShareData = (data) => {
   }
 };
 
+// 解码 URL 参数回 JSON
 const decodeShareData = (encoded) => {
   try {
+    // 还原 URL 安全字符
     let base64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    // 补齐 padding
     while (base64.length % 4) base64 += '=';
-    
-    const compact = decodeURIComponent(escape(atob(base64)));
-    const parts = compact.split('|');
-    
-    const name = parts[0];
-    const fullName = parts[1];
-    const dateRaw = parts[2];
-    const date = `20${dateRaw.slice(0,2)}-${dateRaw.slice(2,4)}-${dateRaw.slice(4,6)}`;
-    const isAdvance = parts[3] === '1';
-    const startHole = Number(parts[4]);
-    const holeCount = Number(parts[5]);
-    const holeData = parts[6];
-    
-    const holeBytes = base64ToBytes(holeData);
-    const bitSizes = isAdvance ? [2, 4, 3, 2, 2] : [2, 4, 3];
-    const valuesPerHole = bitSizes.length;
-    const holeValues = unpackBits(holeBytes, bitSizes, holeCount * valuesPerHole);
-    
-    const holesData = [];
-    for (let i = 0; i < holeCount; i++) {
-      const base = i * valuesPerHole;
-      const hole = {
-        h: startHole + i,
-        p: holeValues[base] + 3,
-        o: holeValues[base + 1],
-        t: holeValues[base + 2]
-      };
-      if (isAdvance) {
-        hole.w = holeValues[base + 3];
-        hole.b = holeValues[base + 4];
-      }
-      holesData.push(hole);
-    }
-    
-    const totalScore = holesData.reduce((sum, h) => sum + h.o + h.t, 0);
-    const totalPar = holesData.reduce((sum, h) => sum + h.p, 0);
-    const totalPutts = holesData.reduce((sum, h) => sum + h.t, 0);
-    
-    return {
-      v: 3,
-      n: name,
-      c: fullName,
-      f: fullName,
-      d: date,
-      s: totalScore,
-      p: totalPar,
-      u: totalPutts,
-      a: isAdvance,
-      h: holesData
-    };
+    const jsonStr = decodeURIComponent(escape(atob(base64)));
+    return JSON.parse(jsonStr);
   } catch (e) {
     console.error('Decode error:', e);
     return null;
@@ -439,7 +319,6 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       {front9.map(d => (
         <div key={d.h} className="w-8 text-center">
           <span className="text-xs font-semibold text-gray-500">{d.h}</span>
-          <div className="text-[10px] text-gray-400">P{d.p}</div>
         </div>
       ))}
     </div>
@@ -465,7 +344,6 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       {back9.map(d => (
         <div key={d.h} className="w-8 text-center">
           <span className="text-xs font-semibold text-gray-500">{d.h}</span>
-          <div className="text-[10px] text-gray-400">P{d.p}</div>
         </div>
       ))}
     </div>
@@ -736,6 +614,1627 @@ const SharePage = memo(({ data }) => {
   </div>
 );
 });
+
+// 球场数据库
+const GOLF_COURSES = {
+  "99_East_Golf_Club": {
+    shortName: "99EGC",
+    fullName: "99 East Golf Club",
+    location: ["Langkawi", "Kedah", "Malaysia"],
+    pars: [5,3,4,4,4,5,4,4,3],
+    index: [4,8,5,9,1,2,6,3,7],
+  },
+
+  "AFAMOSA_GOLF_RESORT_CROCODILE_PALM": {
+    shortName: "AGR-CP",
+    fullName: "A'Famosa Golf Resort (Crocodile + Palm)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,4,4,5,3,4,4,3,5, 4,4,3,5,4,4,3,5,4],
+    index: [12,4,18,14,8,10,2,16,6, 3,13,17,1,5,9,15,11,7],
+  },
+
+  "AFAMOSA_GOLF_RESORT_Crocodile_Rocky": {
+    shortName: "AGR-RC",
+    fullName: "A'Famosa Golf Resort (Crocodile + Rocky)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,4,4,5,3,4,4,3,5, 4,3,4,5,4,3,5,4,4],
+    index: [11,3,17,13,7,9,1,15,5 2,16,8,6,4,18,10,12,14],
+  },
+
+  "AFAMOSA_GOLF_RESORT_ROCKY_PALM": {
+    shortName: "AGR-RP",
+    fullName: "A'Famosa Golf Resort (Rocky + Palm)",
+    location: ["Alor Gajah", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,3,5,4,4, 4,4,3,5,4,4,3,5,4],
+    index: [5,1,7,17,3,13,15,9,11, 10,8,2,14,16,12,18,6,4],
+  },
+
+  "AMVERTON_COVE_GOLF_AND_ISLAND_RESORT": {
+    shortName: "ACGIR",
+    fullName: "Amverton Cove Golf & Island Resort",
+    location: ["Carey Island", "Selangor", "Malaysia"],
+    pars: [4,5,4,4,3,4,3,5,4, 5,4,3,4,5,4,4,3,4],
+    index: [5,1,7,13,15,11,17,3,9, 12,4,14,18,2,10,8,16,6],
+  },
+
+  "AUSTIN_HEIGHTS_GOLF_AND_HOTEL_RESORT": {
+    shortName: "AHGHR",
+    fullName: "Austin Heights Golf & Hotel Resort",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,5,4,3,4,5,4,4, 5,4,5,3,4,4,3,4,4],
+    index: [5,11,7,17,15,13,1,3,9, 2,4,8,14,6,10,18,16,12],
+  },
+
+  "AWANA_GENTING_HIGHLANDS_Golf_AND_COUNTRY_RESORT": {
+    shortName: "AGHGCR",
+    fullName: "Awana Genting Highlands Golf & Country Resort",
+    location: ["Genting Highlands", "Pahang", "Malaysia"],
+    pars: [4,4,4,3,5,3,4,5,3, 4,4,5,5,4,3,4,3,4],
+    index: [1,17,7,15,5,13,9,3,11, 4,14,12,6,16,10,2,18,8],
+  },
+
+  "Awana_Kijal_Golf_Beach_&_Spa_Resort": {
+    shortName: "AKGBSR",
+    fullName: "Awana Kijal Golf Beach & Spa Resort",
+    location: ["Kijal", "Terengganu", "Malaysia"],
+    pars: [4,4,5,3,4,4,3,4,5, 4,4,3,5,3,5,4,4,4],
+    index: [13,7,3,15,1,5,17,9,10, 4,4,3,5,3,5,4,4,4],
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_GOVERNOR_GHAFFAR": {
+    shortName: "AKCC-GG",
+    fullName: "Ayer Keroh Country Club (Governor + Ghaffar)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,3,4,4,4,5,5,3,4, 5,3,4,4,4,4,4,3,5],
+    index: [15,17,5,9,3,1,13,11,7, 8,18,4,2,6,14,12,16,10],
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_Governor_Tunku": {
+    shortName: "AKCC-TG",
+    fullName: "Ayer Keroh Country Club (Governor + Tunku)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,3,4,4,4,5,5,3,4, 4,4,4,3,4,5,3,4,5],
+    index: [15,17,5,9,3,1,13,11,7, 18,6,4,12,8,10,16,14,2],
+  },
+
+  "AYER_KEROH_COUNTRY_CLUB_TUNKU_Ghaffar": {
+    shortName: "AKCC-Tunku + Ghaffar",
+    fullName: "Ayer Keroh Country Club (Tunku + Ghaffar)",
+    location: ["Ayer Keroh", "Melaka", "Malaysia"],
+    pars: [4,4,4,3,4,5,3,4,5, 5,3,4,4,4,4,4,3,5],
+    index: [17,5,3,11,7,9,15,13,1, 8,18,4,2,6,14,12,16,10],
+  },
+
+  "BANGI_GOLF_RESORT_BANGI_KAJANG": {
+    shortName: "BGR-BK",
+    fullName: "Bangi Golf Resort (Bangi + Kajang)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,3,4,4,4,4, 4,3,5,3,5,4,4,3,5],
+    index: [18,4,14,8,12,2,16,10,6, 7,17,13,15,5,1,3,9,11],
+  },
+
+  "BANGI_GOLF_RESORT_KAJANG_PUTRAJAYA": {
+    shortName: "BGR-KP",
+    fullName: "Bangi Golf Resort (Kajang + Putrajaya)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,3,5,3,5,4,4,3,5, 4,3,5,4,4,4,3,5,4],
+    index: [7,17,13,15,5,1,3,9,11, 12,8,14,16,4,2,18,10,6],
+  },
+
+  "BANGI_GOLF_RESORT_BANGI_PUTRAJAYA": {
+    shortName: "BGR-BP",
+    fullName: "Bangi Golf Resort (Bangi + Putrajaya)",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,3,4,4,4,4, 4,3,5,4,4,4,3,5,4],
+    index: [18,4,14,8,12,2,16,10,6, 11,7,13,15,3,1,17,9,5],
+  },
+
+  },
+  "BENTONG_GOLF_CLUB": {
+    shortName: "BGC",
+    fullName: "Bentong Golf Club",
+    location: ["Bentong", "Pahang", "Malaysia"],
+    pars: [4,4,4,3,4,3,5,4,5, 3,4,4,4,5,3,4,4,5],
+    index: [13,15,5,7,1,17,9,11,3, 12,16,14,8,6,18,2,4,10],
+  },
+
+  "BERJAYA_HILLS_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "BHGCC",
+    fullName: "Berjaya Hills Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
+    pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
+    index: [11,3,17,1,5,13,15,7,9, 8,10,12,6,16,2,18,4,14],
+  },
+
+  "BINTULU_GOLF_CLUB": {
+    shortName: "BGC",
+    fullName: "Bintulu Golf Club",
+    location: ["Bintulu", "Sarawak", "Malaysia"],
+    pars: [5,4,3,4,4,4,3,4,5, 4,3,4,4,4,5,3,4,5],
+    index: [11,1,15,5,13,9,17,7,3, 12,18,14,6,16,10,8,2,4],
+  },
+
+  "BLACK_FOREST_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "BFGCC",
+    fullName: "Black Forest Golf & Country Club",
+    location: ["Bukit Kayu Hitam", "Kedah", "Malaysia"],
+    pars: [4,5,3,4,4,5,3,4,4, 4,5,3,4,5,4,3,4,4],
+    index: [11,7,17,5,1,9,15,3,13, 14,6,16,4,8,12,18,2,10],
+  },
+
+  "BORNEO_GOLF&_COUNTRY_CLUB": {
+    shortName: "BGCC",
+    fullName: "Borneo Golf & Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,5,4,4,3,4,3,5,4],
+    index: [13,3,11,5,17,1,7,15,9, 12,4,16,2,8,10,18,6,14],
+  },
+
+  "BUKIT_BANANG_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "BBGCC",
+    fullName: "Bukit Banang Golf & Country Club",
+    location: ["Batu Pahat", "Johor", "Malaysia"],
+    pars: [4,5,4,4,4,3,5,3,4, 4,5,4,3,4,4,3,5,4],
+    index: [5,1,7,17,3,13,15,9,11, 10,8,2,14,16,12,18,6,4],
+  },
+
+  "BUKIT_BERUNTUNG_GOLF_&_COUNTRY_CLUB": {
+    shortName: "BBGCC",
+    fullName: "Bukit Beruntung Golf & Country Club",
+    location: ["Bukit Beruntung", "Selangor", "Malaysia"],
+    pars: [5,3,4,3,4,5,4,4,4, 4,4,5,5,3,4,3,4,4],
+    index: [5,11,15,17,13,9,3,7,1, 8,2,10,6,18,16,12,4,14],
+  },
+
+  "BUKIT_JALIL_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "BJGCR",
+    fullName: "Bukit Jalil Golf & Country Resort",
+    location: ["Bukit Jalil", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,5,3,4,4,4,3,5, 4,5,4,3,4,4,3,5,4],
+    index: [5,1,7,17,3,13,15,9,11, 10,8,2,14,16,12,18,6,4],
+  },
+
+  "BUKIT_JAWI_GOLF_RESORT": {
+    shortName: "BJGR",
+    fullName: "Bukit Jawi Golf Resort",
+    location: ["Bukit Mertajam", "Penang", "Malaysia"],
+    pars: [4,3,4,4,4,5,4,3,5, 5,4,3,4,3,5,3,4,5],
+    index: [7,15,3,17,1,11,9,13,5, 10,14,16,4,18,2,12,8,6],
+  },
+
+  "BUKIT_KEMUNING_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "BKGCC",
+    fullName: "Bukit Kemuning Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,4,3,4,4,5, 4,4,5,3,4,3,5,4,4],
+    index: [3,7,15,1,5,13,17,9,11, 12,8,6,18,16,10,4,14,2],
+  },
+
+  "BUKIT_TINGGI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "BTGCC",
+    fullName: "Bukit Tinggi Golf & Country Club",
+    location: ["Bukit Tinggi", "Pahang", "Malaysia"],
+    pars: [4,5,3,4,4,3,4,5,4, 5,3,4,4,4,4,3,4,5],
+    index: [11,3,17,1,5,13,15,7,9, 8,10,12,6,16,2,18,4,14],
+  },
+
+  "Bukit_Unggul_Country_Club": {
+    shortName: "BUCC",
+    fullName: "Bukit Unggul Country Club",
+    location: ["Dengkil", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,4,4,3,4,4, 5,4,4,4,3,5,4,3,4],
+    index: [17,15,5,9,11,7,13,1,3, 10,2,14,6,18,8,12,16,4],
+  },
+
+  "BUTTERWORTH_GOLF_CLUB": {
+    shortName: "BGC",
+    fullName: "Butterworth Golf Club",
+    location: ["Butterworth", "Penang", "Malaysia"],
+    pars: [4,4,5,3,4,4,5,3,4],
+  },
+
+  "CAREY_ISLAND_GOLF_CLUB": {
+    shortName: "CIGC",
+    fullName: "Carey Island Golf Club",
+    location: ["Carey Island", "Selangor", "Malaysia"],
+    pars: [4,4,3,4,5,4,4,3,5, 3,4,4,4,5,3,4,4,4],
+    index: [18,12,16,8,2,14,10,4,6, 5,1,9,7,15,3,11,13,17],
+  },
+
+  "CINTA_SAYANG_GOLF_RESORT": {
+    shortName: "CSGR",
+    fullName: "Cinta Sayang Golf Resort",
+    location: ["Sungai Petani", "Kedah", "Malaysia"],
+    pars: [4,5,4,4,3,5,3,4,4, 4,4,5,3,5,4,3,4,4],
+    index: [11,1,5,3,17,9,13,15,7, 4,14,6,8,2,16,18,12,10],
+  },
+
+  "CLEARWATER_SANCTUARY_GOLF_RESORT": {
+    shortName: "CSGR",
+    fullName: "Clearwater Sanctuary Golf Resort",
+    location: ["Batu Gajah", "Perak", "Malaysia"],
+    pars: [4,4,3,5,4,5,3,4,4, 4,3,4,5,4,4,4,3,5],
+    index: [15,7,13,9,3,11,17,5,1, 2,18,16,14,4,8,6,10,12],
+  },
+
+  "DAIMAN_18_GOLF_CLUB": {
+    shortName: "DGC",
+    fullName: "Daiman 18 Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,5,3,4,5,3,4,4,4, 4,5,3,5,4,4,4,3,4],
+    index: [13,3,15,5,1,17,11,9,7, 10,2,16,4,12,8,6,18,14],
+  },
+
+  "DALIT_BAY_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "DBGCC",
+    fullName: "Dalit Bay Golf & Country Club",
+    location: ["Tuaran", "Sabah", "Malaysia"],
+    pars: [4,4,5,3,5,4,4,3,4, 4,3,5,4,5,4,4,3,4],
+    index: [17,7,5,15,9,13,3,11,1, 16,18,8,2,6,4,14,12,10],
+  },
+
+  "DAMAI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "DGCC",
+    fullName: "Damai Golf And Country Club",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [5,4,3,4,4,3,4,5,4, 4,5,4,4,3,4,4,3,5],
+    index: [15,5,3,1,13,9,7,17,11, 6,12,16,10,2,18,8,4,14],
+  },
+
+  "DAMAI_LAUT_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "DLGCC",
+    fullName: "Damai Laut Golf & Country Club",
+    location: ["Lumut", "Perak", "Malaysia"],
+    pars: [4,5,3,4,5,4,3,4,4, 4,5,4,3,4,4,4,3,5],
+    index: [17,13,7,3,9,1,11,5,15, 16,8,6,18,4,12,2,10,14],
+  },
+
+  "DANAU_GOLF_CLUB": {
+    shortName: "DGC",
+    fullName: "Danau Golf Club",
+    location: ["Bangi", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,3,4,4,5, 4,4,5,3,4,5,3,4,4],
+    index: [3,9,15,1,7,17,5,11,13, 14,2,6,10,12,18,8,4,16],
+  },
+
+  "DARULAMAN_GOLF_&_COUNTRY_CLUB": {
+    shortName: "DGCC",
+    fullName: "Darulaman Golf & Country Club",
+    location: ["Jitra", "Kedah", "Malaysia"],
+    pars: [5,4,3,4,5,3,4,4,4, 5,3,4,4,3,4,5,4,4],
+    index: [9,5,11,13,1,17,15,7,3, 2,18,6,10,16,4,14,12,8],
+  },
+
+  "EASTWOOD_VALLEY_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "EVGCC",
+    fullName: "Eastwood valley golf and country club",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [5,4,3,4,4,5,4,3,4, 5,4,4,3,4,4,4,3,5],
+    index: [11,3,9,17,13,5,1,15,7, 14,6,16,8,2,10,18,12,4],
+  },
+
+  "FOREST_CITY_GOLF_RESORT_CLASSIC": {
+    shortName: "FCGR-C",
+    fullName: "Forest City Golf Resort (Classic Course)",
+    location: ["Gelang Patah", "Johor", "Malaysia"],
+    pars: [4,5,3,4,4,3,4,5,4, 4,3,4,5,4,4,4,3,5],
+    index: [18,2,8,12,14,6,16,4,10, 11,13,3,5,7,9,15,17,1],
+  },
+
+  "FOREST_CITY_GOLF_RESORT_LEGACY": {
+    shortName: "FCGR-L",
+    fullName: "Forest City Golf Resort (Legacy Course)",
+    location: ["Gelang Patah", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,5,3,4, 4,4,5,3,4,3,5,4,4],
+    index: [13,9,5,3,17,15,1,11,7, 8,14,2,16,12,18,4,6,10],
+  },
+
+  "FRASER_HILL_GOLF_ AND_COUNTRY_CLUB": {
+    shortName: "FHGCC",
+    fullName: "FRASER'S HILL GOLF & COUNTRY CLUB",
+    location: ["Fraser's Hill", "Pahang", "Malaysia"],
+    pars: [4,4,4,3,4,4,5,3,4, 4,5,3,5,4,3,3,4,4],
+    index: [11,7,2,15,17,14,4,10,6, 16,3,18,1,5,8,12,13,9],
+  },
+
+  "GEMAS_GOLF_RESORT": {
+    shortName: "GGR",
+    fullName: "Gemas Golf Resort",
+    location: ["Gemas", "Negeri Sembilan", "Malaysia"],
+    pars: [4,4,5,3,4,4,5,3,4, 4,4,5,3,4,4,5,3,4],
+    index: [9,5,3,17,11,7,1,13,15, 8,14,12,16,4,6,2,18,10],
+  },
+
+  "GLENMARIE_GOLF_AND_COUNTRY_CLUB_GARDEN": {
+    shortName: "GGCC-G",
+    fullName: "Glenmarie Golf & Country Club (Garden Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,3,5,4,4,4, 4,5,3,4,4,4,5,3,4],
+    index: [9,17,15,1,11,3,13,5,7, 12,16,14,2,4,10,6,18,8],
+  },
+
+  "GLENMARIE_GOLF_AND_COUNTRY_CLUB_VALLEY": {
+    shortName: "GGCC-V",
+    fullName: "Glenmarie Golf & Country Club (Valley Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,5,4,4,3,4, 4,4,3,4,5,3,4,4,5],
+    index: [1,15,13,17,7,3,5,9,11, 6,16,10,4,8,12,14,2,18],
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_HILLS_FOREST": {
+    shortName: "GKGPA-HF",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Hills + Forest)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,5,3,3,5, 4,4,5,3,4,4,5,3,4],
+    index: [4,10,14,18,6,2,12,8,16, 7,13,3,11,1,15,17,9,5],
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_HILLS_LAKES": {
+    shortName: "GKGPA-HL",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Hills + Lakes)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,5,3,3,5, 4,3,5,4,4,3,4,5,4],
+    index: [3,9,13,17,5,1,11,7,15, 14,6,2,16,4,12,10,18,8],
+  },
+
+  "GPA_KELAB_GOLF_PERKHIDMATAN_AWAM_LAKES_FOREST": {
+    shortName: "GKGPA-LF",
+    fullName: "GPA - Kelab Golf Perkhidmatan Awam (Lakes + Forest)",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,4,3,4,5,4, 4,4,5,3,4,4,5,3,4],
+    index: [13,5,1,15,3,11,9,17,7, 8,14,4,12,2,16,18,10,6],
+  },
+
+  "GREEN_ACRES_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "GAGCR",
+    fullName: "Green Acres Golf & Country Resort",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
+    pars: [4,5,3,4,4,4,4,3,5, 4,4,4,3,5,4,3,4,5],
+    index: [11,17,15,5,7,13,1,3,9, 18,16,8,10,2,4,6,12,14],
+  },
+
+  "Gunung_Raya_Golf_Resort": {
+    shortName: "GR",
+    fullName: "Gunung Raya Golf Resort",
+    location: ["Langkawi", "Kedah", "Malaysia"],
+    pars: [4,5,4,3,4,4,3,5,4, 5,3,4,4,4,5,4,3,4],
+    index: [11,5,7,13,3,17,9,15,1, 16,14,2,8,6,18,10,12,4],
+  },
+
+  "Harvard_Golf_&_Country_Club": {
+    shortName: "HGCC",
+    fullName: "Harvard Golf & Country Club",
+    location: ["Gurun", "Kedah", "Malaysia"],
+    pars: [4,3,5,3,4,4,4,4,5, 4,3,4,5,3,4,4,4,5],
+    index: [7,15,5,9,1,3,11,17,13, 4,18,14,6,16,10,2,8,12],
+  },
+
+  "HORIZON_HILLS_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "HHGCC",
+    fullName: "Horizon Hills Golf & Country Club",
+    location: ["Iskandar Puteri", "Johor", "Malaysia"],
+    pars: [4,5,3,4,4,5,4,3,4, 4,4,3,5,4,4,4,3,5],
+    index: [11,1,15,17,13,5,3,9,7, 10,6,14,16,2,8,18,12,4],
+  },
+
+  "ILSAS_RECREATIONAL_GOLF_COURSE": {
+    shortName: "IRGC",
+    fullName: "ILSAS Recreational Golf Course",
+    location: ["Kajang", "Selangor", "Malaysia"],
+    pars: [4,4,3,3,4,3,5,3,4],
+    index: [4,9,6,8,7,3,2,1,5],
+  },
+
+  "IMPIAN_EMAS_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "IEGCC",
+    fullName: "Impian Emas Golf & Country Club",
+    location: ["Skudai", "Johor", "Malaysia"],
+    pars: [4,5,3,4,4,3,5,4,4],
+    index: [8,4,7,5,6,9,1,3,2],
+  },
+
+  "IMPIAN_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "IGCC",
+    fullName: "Impian Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,5,4,3,4,4, 4,4,3,4,5,4,3,5,4],
+    index: [11,9,13,1,3,17,15,5,7, 12,10,14,4,8,2,18,16,6],
+  },
+
+  "IOI_PALM_VILLA_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "IPVGCR",
+    fullName: "IOI Palm Villa Golf & Country Resort",
+    location: ["Kulai", "Johor", "Malaysia"],
+    pars: [5,4,3,4,4,4,3,4,5, 4,5,3,4,4,3,4,3,6],
+    index: [11,7,17,5,1,3,15,9,13, 4,2,12,8,18,14,6,16,10],
+  },
+
+  "JOHOR_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "JGCC",
+    fullName: "Johor Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,4,4,3,5,5,4,3,4, 5,4,3,4,5,4,4,4,3],
+    index: [5,9,11,17,1,3,15,13,7, 6,18,16,4,10,8,2,12,14],
+  },
+
+  "KAJANG_HILL_GOLF_CLUB": {
+    shortName: "KHGC",
+    fullName: "Kajang Hill Golf Club",
+    location: ["Semenyih", "Selangor", "Malaysia"],
+    pars: [5,4,4,3,5,3,4,4,4, 4,3,4,5,3,4,5,4,4],
+    index: [7,15,5,13,9,17,1,11,3, 10,12,4,2,18,14,8,16,6],
+  },
+
+  "KELAB_DARUL_EHSAN": {
+    shortName: "KDE",
+    fullName: "Kelab Darul Ehsan",
+    location: ["Ampang", "Selangor", "Malaysia"],
+    pars: [4,3,4,3,5,5,4,3,5],
+    index: [2,9,4,3,5,1,6,8,7],
+  },
+
+  "KELAB_GOLF_BATU_PAHAT": {
+    shortName: "KGBP",
+    fullName: "Kelab Golf Batu Pahat",
+    location: ["Batu Pahat", "Johor", "Malaysia"],
+    pars: [5,3,4,4,4,3,5,4,4],
+    index: [3,8,1,6,7,9,4,5,2],
+  },
+
+  "KELAB_GOLF_BRIGED_UTARA": {
+    shortName: "KGBU",
+    fullName: "Kelab Golf Briged Utara",
+    location: ["Tanjung Rambutan", "Perak", "Malaysia"],
+    pars: [4,5,3,4,5,3,3,4,4],
+    index: [3,2,6,4,1,9,7,8,5],
+  },
+
+  "KELAB_GOLF_BUKIT_BESI": {
+    shortName: "KGBB",
+    fullName: "Kelab Golf Bukit Besi",
+    location: ["Bukit Besi", "Terengganu", "Malaysia"],
+    pars: [4,5,4,3,4,3,4,5,4, 4,5,4,3,4,4,3,5,4],
+    index: [15,3,1,17,11,13,9,5,7, 8,2,14,18,6,12,16,4,10],
+  },
+
+  "KELAB_GOLF_DESA_DUNGUN": {
+    shortName: "KGDD",
+    fullName: "Kelab Golf Desa Dungun",
+    location: ["Kuala Dungun", "Terengganu", "Malaysia"],
+    pars: [4,5,4,3,4,4,4,3,5, 4,5,5,4,4,3,4,3,4],
+    index: [5,1,13,17,9,11,7,15,3, 12,10,4,2,14,18,8,16,6],
+  },
+
+  "KELAB_GOLF_DIRAJA_PEKAN": {
+    shortName: "KGDP",
+    fullName: "Kelab Golf Diraja Pekan",
+    location: ["Pekan", "Pahang", "Malaysia"],
+    pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
+    index: [15,5,9,1,13,7,17,3,11, 10,14,12,4,2,18,6,16,8],
+  },
+
+  "Royal_Seri_Menanti_Golf_Club": {
+    shortName: "RSMGCC",
+    fullName: "Royal Seri Menanti Golf Club",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
+    index: [15,11,3,1,13,7,17,9,5, 2,18,4,16,12,8,14,6,10],
+  },
+
+  "Royal_Terengganu_Golf_Club": {
+    shortName: "RTGC",
+    fullName: "Royal Terengganu Golf Club",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
+    pars: [4,5,4,3,4,4,5,4,3, 4,5,3,4,4,4,5,4,3],
+    index: [1,7,9,15,5,17,3,11,13, 4,6,10,8,12,18,2,16,14],
+  },
+
+  "KELAB_GOLF_GUA_MUSANG": {
+    shortName: "KGGM",
+    fullName: "Kelab Golf Gua Musang",
+    location: ["Gua Musang", "Kelantan", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
+    index: [,,,,,,,,],
+  },
+
+  "KELAB_GOLF_KINTA": {
+    shortName: "KGK",
+    fullName: "Kelab Golf Kinta",
+    location: ["Batu Gajah", "Perak", "Malaysia"],
+    pars: [5,3,4,4,3,4,3,4,4, 4,4,5,3,4,4,5,3,4],
+    index: [3,15,7,9,13,5,17,1,11, 12,10,6,16,2,8,4,18,14],
+  },
+
+  "KELAB_GOLF_KUALA_KANGSAR": {
+    shortName: "KGKK",
+    fullName: "Kelab Golf Kuala Kangsar",
+    location: ["Kuala Kangsar", "Perak", "Malaysia"],
+    pars: [4,3,4,4,5,3,4,4,4],
+    index: [8,9,3,6,2,7,1,4,5],
+  },
+
+  "KELAB_GOLF_MIRI": {
+    shortName: "KGM",
+    fullName: "Kelab Golf Miri",
+    location: ["Miri", "Sarawak", "Malaysia"],
+    pars: [3,4,4,4,4,5,4,5,3, 4,4,3,4,4,4,3,5,5],
+    index: [13,3,11,9,5,1,7,17,15, 2,4,14,8,10,6,12,18,16],
+  },
+
+  "KELAB_GOLF_NEGARA_SUBANG_KELANA": {
+    shortName: "KGNS-K",
+    fullName: "Kelab Golf Negara Subang (Putra Course)",
+    location: ["Subang", "Selangor", "Malaysia"],
+    pars: [5,4,4,3,4,5,3,4,4, 4,5,4,3,4,3,4,5,4],
+    index: [7,1,13,11,3,9,15,17,5, 10,12,4,18,2,8,14,16,6],
+  },
+
+  "KELAB_GOLF_NEGARA_SUBANG_PUTRA": {
+    shortName: "KGNS-P",
+    fullName: "Kelab Golf Negara Subang (Kelana Course)",
+    location: ["Subang", "Selangor", "Malaysia"],
+    pars: [4,4,4,3,5,4,4,3,4, 4,3,5,3,4,4,5,3,4],
+    index: [5,13,3,15,1,11,9,17,7, 14,18,4,16,10,2,6,12,8],
+  },
+
+  "KELAB_GOLF_PUTRA": {
+    shortName: "KGP",
+    fullName: "Kelab Golf Putra",
+    location: ["Kangar", "Perlis", "Malaysia"],
+    pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
+    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6],
+  },
+
+  "KELAB_GOLF_SAMUDERA": {
+    shortName: "KGS",
+    fullName: "Kelab Golf Samudera",
+    location: ["Lumut", "Perak", "Malaysia"],
+    pars: [4,4,5,3,4,4,3,5,3, 4,4,5,3,4,4,3,5,3],
+    index: [11,9,3,15,7,1,17,5,13, 12,10,4,16,8,2,18,6,14],
+  },
+
+  "KELAB_GOLF_SARAWAK_MATANG_SANTUBONG": {
+    shortName: "KGS-MS",
+    fullName: "Kelab Golf Sarawak (Matang/Santubong Course)",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [4,4,3,4,5,4,4,3,5, 4,4,4,5,3,5,4,3,4],
+    index: [11,7,15,1,3,9,13,17,5, 12,8,16,10,18,4,2,14,6],
+  },
+
+  "KELAB_GOLF_SARAWAK_SIOL_DEMAK": {
+    shortName: "KGS-SD",
+    fullName: "Kelab Golf Sarawak (Siol/Demak Course)",
+    location: ["Kuching", "Sarawak", "Malaysia"],
+    pars: [5,4,4,3,4,3,5,4,4, 5,4,4,4,3,4,5,3,4],
+    index: [7,11,13,17,3,15,1,9,5, 14,6,12,2,18,10,4,16,8],
+  },
+
+  "KELAB_GOLF_SERI_DELIMA": {
+    shortName: "KGSD",
+    fullName: "Kelab Golf Seri Delima",
+    location: ["Kluang", "Johor", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
+    index: [,,,,,,,,],
+  },
+
+  "KELAB_GOLF_SERI_SELANGOR": {
+    shortName: "KGSS",
+    fullName: "Kelab Golf Seri Selangor",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,4,3,4,5,5,4,3,4, 4,4,3,5,3,4,4,4,5],
+    index: [9,1,7,5,15,13,3,17,11, 4,18,14,6,8,10,2,12,16],
+  },
+
+  "KELAB_GOLF_SIBU": {
+    shortName: "KGS",
+    fullName: "Kelab Golf Sibu",
+    location: ["Sibu", "Sarawak", "Malaysia"],
+    pars: [4,5,3,4,5,5,3,3,4, 4,4,5,3,3,4,4,3,4],
+    index: [14,2,10,12,6,4,18,16,8, 1,9,3,15,17,11,7,13,5],
+  },
+
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_PRESIDENT_ALAM_SHAH": {
+    shortName: "KGSAAS-PAS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (President + Alam Shah)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,4,4,5,3,4,4,5, 4,3,5,4,4,4,5,3,4],
+    index: [8,14,12,4,16,10,18,2,6, 17,13,7,3,9,11,1,15,5],
+  },
+
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_PRESIDENT_SULTAN": {
+    shortName: "KGSAAS-PS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (President + Sultan)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,4,4,5,3,4,4,5, 4,5,3,4,4,3,5,4,4],
+    index: [7,13,11,3,15,9,17,1,5, 14,2,10,16,12,18,8,4,6],
+  },
+
+  "KELAB_GOLF_SULTAN_ABDUL_AZIZ_SHAH_SULTAN_ALAM_SHAH": {
+    shortName: "KGSAAS-SAS",
+    fullName: "Kelab Golf Sultan Abdul Aziz Shah (Sultan + Alam Shah)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,5,3,4,4,3,5,4,4, 4,3,5,4,4,4,5,3,4],
+    index: [13,1,9,15,11,17,7,3,5, 18,14,8,4,10,12,2,16,6],
+  },
+
+  "KELAB_GOLF_SULTAN_AHMAD_SHAH_CAMERON": {
+    shortName: "KGSAS-CH",
+    fullName: "Kelab Golf Sultan Ahmad Shah Cameron Highlands",
+    location: ["Cameron Highlands", "Pahang", "Malaysia"],
+    pars: [5,4,4,3,4,4,5,3,4, 4,4,3,5,4,3,4,3,5],
+    index: [9,7,3,17,13,1,5,11,15, 4,6,14,2,10,18,12,16,8],
+  },
+
+  "KELAB_GOLF_TANJONG_EMAS": {
+    shortName: "KGTE",
+    fullName: "Kelab Golf Tanjong Emas",
+    location: ["Tanjung Emas", "Johor", "Malaysia"],
+    pars: [3,4,4,4,3,4,5,4,4],
+    index: [7,5,2,1,9,6,4,8,3],
+  },
+
+  "KELAB_GOLF_TITIWANGSA_PDRM": {
+    shortName: "KGTP",
+    fullName: "Kelab Golf Titiwangsa PDRM",
+    location: ["Setapak", "Kuala Lumpur", "Malaysia"],
+    pars: [3,4,5,3,4,5,4,4,4],
+    index: [8,2,5,9,3,1,6,7,4],
+  },
+
+  "KELAB_GOLF_UNIVERSITI_UTARA_MALAYSIA": {
+    shortName: "KGUUM",
+    fullName: "Kelab Golf Universiti Utara Malaysia",
+    location: ["Sintok", "Kedah", "Malaysia"],
+    pars: [5,4,5,3,4,3,4,4,4, 3,4,4,4,5,5,3,4,4],
+    index: [15,13,5,9,1,11,7,17,3, 18,10,4,2,14,8,12,6,16],
+  },
+
+  "KELAB_GOLF_&_REKREASI_PETRONAS": {
+    shortName: "KGRP",
+    fullName: "Kelab Golf & Rekreasi Petronas",
+    location: ["Kerteh", "Terengganu", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,4,5,4,3,5,4,3,4],
+    index: [11,17,1,5,15,3,13,9,7, 8,12,6,4,18,2,16,10,14],
+  },
+
+  "KELAB_RAHMAN_PUTRA_MALAYSIA": {
+    shortName: "KRPM",
+    fullName: "Kelab Rahman Putra Malaysia",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,4,4,3,5,3,5,4,4, 4,5,4,3,4,5,4,4,3],
+    index: [3,11,17,9,13,15,1,5,7, 6,2,16,14,4,8,12,10,18],
+  },
+
+  "KELAB_REKREASI_ANGKATAN_TENTERA_KL": {
+    shortName: "KRAT-KL",
+    fullName: "Kelab Rekreasi Angkatan Tentera (Kuala Lumpur)",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
+    pars: [4,3,4,3,3,5,4,4,3, 4,3,4,3,3,5,4,4,3],
+    index: [,,,,,,,,, ,,,,,,,,],
+  },
+
+  "KELAB_REKREASI_ANGKATAN_TENTERA_NS": {
+    shortName: "KRAT-NS",
+    fullName: "Kelab Rekreasi Angkatan Tentera (Seremban)",
+    location: ["Seremban", "Negeri Sembilan", "Malaysia"],
+    pars: [4,5,3,4,3,4,5,4,4],
+    index: [2,1,9,3,5,8,6,7,4],
+  },
+
+  "Indera_Kuantan_Golf_Club": {
+    shortName: "IKGC",
+    fullName: "Indera Kuantan Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,5,3,5,4,3,4,4,4],
+    index: [8,4,7,1,2,9,3,5,6],
+  },
+
+  "KELAB_REKREASI_PUGK": {
+    shortName: "KRPUGK",
+    fullName: "Kelab Rekreasi Pangkalan Udara Gong Kedak",
+    location: ["Jerteh", "Terengganu", "Malaysia"],
+    pars: [4,4,5,4,3,3,4,4,5],
+    index: [6,5,1,4,9,8,7,3,2],
+  },
+
+  "KELAB_REKREASI_SRI_MAHKOTA": {
+    shortName: "KRSM",
+    fullName: "Kelab Rekreasi Sri Mahkota",
+    location: ["Temerloh", "Pahang", "Malaysia"],
+    pars: [4,4,4,3,5,3,4,5,4, 5,4,4,3,5,3,4,4,4],
+    index: [1,13,9,17,3,15,5,7,11, 8,14,10,18,4,16,6,2,12],
+  },
+
+  "KELAB_REKREASI_TENTERA_DARAT_DESA_PAHLAWAN": {
+    shortName: "KRTDDP",
+    fullName: "Kelab Rekreasi Tentera Darat Desa Pahlawan",
+    location: ["Kota Bharu", "Kelantan", "Malaysia"],
+    pars: [0,0,0,0,0,0,0,0,0],
+    index: [,,,,,,,,],
+  },
+
+  "KELAB_REKREASI_TENTERA_UDARA": {
+    shortName: "KRTU",
+    fullName: "Kelab Rekreasi Tentera Udara",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,4,5,4,3,5,3,4,4, 5,3,4,4,4,4,5,3,4],
+    index: [13,3,11,1,17,15,9,7,5, 10,16,4,6,14,8,12,18,2],
+  },
+
+  "KELAB_REKREASI_TUDM_KUANTAN": {
+    shortName: "KRTK",
+    fullName: "Kelab Rekreasi TUDM Kuantan",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,4,3,4,5,4,3,5,4],
+    index: [4,3,5,6,1,7,9,2,8],
+  },
+
+  "Sungai_Petani_Golf_Club": {
+    shortName: "SPGC",
+    fullName: "Sungai Petani Golf Club",
+    location: ["Sungai Petani", "Kedah", "Malaysia"],
+    pars: [3,5,3,4,4,4,4,4,4, 4,5,3,4,3,5,4,4,4],
+    index: [1,3,5,7,9,11,13,15,17, 2,4,6,8,10,12,14,16,18],
+  },
+
+  "KELANTAN_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "KGCC",
+    fullName: "Kelantan Golf and Country Club",
+    location: ["Kota Bharu", "Kelantan", "Malaysia"],
+    pars: [4,3,5,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
+    index: [9,15,11,5,3,17,1,13,7, 8,12,14,2,10,18,4,16,6],
+  },
+
+  "KENINGAU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "KGCC",
+    fullName: "Keningau Golf & Country Club",
+    location: ["Keningau", "Sabah", "Malaysia"],
+    pars: [4,3,4,4,3,5,4,4,5, 4,5,3,4,4,3,4,4,5]
+    index: [2,18,14,12,16,8,6,4,10, 11,3,15,17,7,13,9,5,1],
+  },
+
+  "KINRARA_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kinrara Golf Club",
+    location: ["Puchong", "Selangor", "Malaysia"],
+    pars: [4,5,3,3,3,4,5,4,4, 5,4,3,4,5,4,4,3,5],
+    index: [5,1,13,17,9,15,7,11,3, 8,16,18,4,6,10,12,14,2],
+  },
+
+  "KLUANG_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kluang Golf Club",
+    location: ["Kluang", "Johor", "Malaysia"],
+    pars: [3,5,3,4,5,4,3,4,4],
+    index: [15,5,11,7,1,13,17,3,9],
+  },
+
+  "KOTA_PERMAI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "KPGCC",
+    fullName: "Kota Permai Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [5,4,4,3,4,3,5,4,4, 4,4,5,4,3,4,4,3,5],
+    index: [17,5,3,11,15,7,13,1,9, 12,16,14,4,18,2,6,10,8],
+  },
+
+  "KOTA_SERIEMAS_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "KSGCC",
+    fullName: "Kota Seriemas Golf & Country Club",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,4,4,3,5,3,4, 5,4,4,4,3,5,3,4,4],
+    index: [11,1,3,13,9,17,5,15,7, 12,6,4,14,18,16,10,8,2],
+  },
+
+  "KUALA_KUBU_BARU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "KKBGCC",
+    fullName: "Kuala Kubu Baru Golf & Country Club",
+    location: ["Kuala Kubu Bharu", "Selangor", "Malaysia"],
+    pars: [4,4,3,4,5,4,3,3,5, 4,3,4,4,3,4,4,5,4],
+    index: [5,7,13,15,1,11,17,9,3, 4,14,8,6,18,10,16,2,12],
+  },
+
+  "KUALA_LUMPUR_GOLF_AND_COUNTRY_CLUB_EAST": {
+    shortName: "KLGCC-E",
+    fullName: "Kuala Lumpur Golf & Country Club (East Course)",
+    location: ["Bukit Kiara", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,4,4,3,5,3,4,4, 4,4,5,4,4,3,5,3,4],
+    index: [15,3,7,11,17,1,13,5,9, 12,6,2,8,14,18,16,10,4],
+  },
+
+  "KUALA_LUMPUR_GOLF_AND_COUNTRY_CLUB_WEST": {
+    shortName: "KLGCC-W",
+    fullName: "Kuala Lumpur Golf & Country Club (West Course)",
+    location: ["Bukit Kiara", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,5,3,5,4,4,3,4, 5,3,4,4,4,3,4,4,5],
+    index: [5,3,1,17,7,11,9,15,13, 4,16,6,2,12,18,8,14,10],
+  },
+
+  "KUALA_TERENGGANU_GOLF_RESORT": {
+    shortName: "KTGR",
+    fullName: "Kuala Terengganu Golf Resort",
+    location: ["Kuala Terengganu", "Terengganu", "Malaysia"],
+    pars: [5,4,4,3,4,4,5,3,4, 5,3,4,4,5,4,4,3,4],
+    index: [13,15,1,11,3,5,7,17,9, 2,18,6,12,4,10,8,16,14],
+  },
+
+  "KUDAT_GOLF_AND_MARINA_RESORT": {
+    shortName: "KGMR",
+    fullName: "Kudat Golf & Marina Resort",
+    location: ["Kudat", "Sabah", "Malaysia"],
+    pars: [4,4,4,5,3,4,4,3,5, 4,3,5,4,3,4,4,4,5],
+    index: [10,8,2,14,16,4,6,18,12, 11,13,1,7,17,3,15,5,9],
+  },
+
+  "KUKUP_GOLF_RESORT": {
+    shortName: "KGR",
+    fullName: "Kukup Golf Resort",
+    location: ["Kukup", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,4,3,5, 5,4,4,3,4,4,3,4,5],
+    index: [5,15,13,1,11,9,7,17,3, 10,14,18,12,4,6,16,2,8],
+  },
+
+  "KULIM_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "KGCR",
+    fullName: "Kulim Golf & Country Resort",
+    location: ["Kulim", "Kedah", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,5,4, 4,4,4,3,5,3,4,5,4],
+    index: [13,3,17,11,9,1,5,7,15, 10,14,4,18,6,8,2,16,12],
+  },
+
+  "Kundang_Lakes_Country_Club": {
+    shortName: "KLCC",
+    fullName: "Kundang Lakes Country Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 5,3,4,5,4,3,4,4,4],
+    index: [17,15,3,11,7,9,5,13,1, 18,16,4,6,10,12,8,14,2],
+  },
+
+  "LABUAN_INTERNATIONAL_GOLF_CLUB": {
+    shortName: "LIGC",
+    fullName: "Labuan International Golf Club",
+    location: ["Labuan", "Labuan", "Malaysia"],
+    pars: [4,5,5,4,3,4,3,4,4, 5,4,4,3,5,4,3,4,4],
+    index: [9,3,1,13,17,11,15,5,7, 4,10,6,16,2,8,18,14,12],
+  },
+
+  "LAHAD_DATU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "LDGCC",
+    fullName: "Lahad Datu Golf & Country Club",
+    location: ["Lahad Datu", "Sabah", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,4,5,3,5,3,4,4,4],
+    index: [17,15,13,1,7,9,3,11,5, 10,16,4,18,2,12,6,8,14],
+  },
+
+  "THE_LEGENDS_GOLF_AND_COUNTRY_RESORT": {
+    shortName: "LGCR",
+    fullName: "The Legends Golf & Country Resort",
+    location: ["Kulai", "Johor", "Malaysia"],
+    pars: [4,3,4,4,4,5,3,4,4, 4,4,3,4,4,4,5,3,5],
+    index: [5,13,7,17,1,11,3,15,9, 14,4,18,8,12,16,6,2,10],
+  },
+
+  "LEMBAH_BERINGIN_GOLF_CLUB": {
+    shortName: "LBGC",
+    fullName: "Lembah Beringin Golf Club",
+    location: ["Kuala Kubu Baru", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,4,5,3,4, 4,5,4,4,3,5,4,3,4],
+    index: [9,5,7,17,1,3,11,13,15, 6,10,14,2,18,4,8,16,12],
+  },
+
+  "MAHKOTA_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "MGCC",
+    fullName: "Mahkota Golf & Country Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [4,3,4,4,5,4,4,3,5, 4,3,5,4,4,5,4,3,4],
+    index: [17,3,15,13,11,1,7,5,9, 4,18,14,8,16,10,12,2,6],
+  },
+
+  "MARAN_HILL_GOLF_RESORT": {
+    shortName: "MHGR",
+    fullName: "Maran Hill Golf Resort",
+    location: ["Maran", "Pahang", "Malaysia"],
+    pars: [4,5,3,5,4,4,3,4,4, 5,4,4,3,4,4,5,3,4],
+    index: [1,13,15,11,3,7,17,5,9, 10,2,18,16,14,4,8,6,12],
+  },
+
+  "MERU_VALLEY_GOLF_RESORT_VALLEY_RIVER": {
+    shortName: "MVGR-VR",
+    fullName: "Meru Valley Golf Resort (Valley + River)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,3,5,3,4,4,5,4,4, 4,5,3,4,4,5,4,3,4],
+    index: [7,15,9,17,3,13,1,11,5, 8,12,18,16,10,6,4,14,2],
+  },
+
+  "MERU_VALLEY_GOLF_RESORT_VALLEY_WATERFALL": {
+    shortName: "MVGR-VW",
+    fullName: "Meru Valley Golf Resort (Valley + Waterfall)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,3,5,3,4,4,5,4,4, 4,4,3,4,5,4,3,5,4],
+    index: [7,15,9,17,3,13,1,11,5, 12,2,16,4,8,14,10,18,6],
+  },
+
+  "MERU_VALLEY_GOLF_RESORT_WATERFALL_RIVER": {
+    shortName: "MVGR-WR",
+    fullName: "Meru Valley Golf Resort (Waterfall + River)",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [4,4,3,4,5,4,3,5,4, 4,5,3,4,4,5,4,3,4],
+    index: [11,1,15,3,7,13,9,17,5, 8,12,18,16,10,6,4,14,2],
+  },
+
+  "MONTEREZ_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "MGCC",
+    fullName: "Monterez Golf & Country Club",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,3,4,4,4,4, 5,4,3,5,4,3,4,4,4],
+    index: [5,1,13,3,9,17,7,15,11, 2,14,12,18,8,16,6,10,4],
+  },
+
+  "MOUNTAIN_VIEW_GOLF_RESORT": {
+    shortName: "MVGR",
+    fullName: "Mountain View Golf Resort",
+    location: ["Sungai Jawi", "Pulau Pinang", "Malaysia"],
+    pars: [4,3,5,4,4,4,3,4,5, 4,5,4,3,4,4,3,4,5],
+    index: [15,17,13,9,7,5,11,1,3, 18,12,8,16,6,2,10,14,4],
+  },
+
+  "MOUNT_KINABALU_GOLF_CLUB": {
+    shortName: "MKGC",
+    fullName: "Mount Kinabalu Golf Club",
+    location: ["Kundasang", "Sabah", "Malaysia"],
+    pars: [5,4,4,3,5,4,4,3,4, 4,4,4,5,3,5,3,4,4],
+    index: [16,14,2,18,10,12,6,8,4, 7,9,17,1,13,5,15,3,11],
+  },
+
+  "NEXUS_GOLF_RESORT_KARAMBUNAI": {
+    shortName: "NGRK",
+    fullName: "Nexus Golf Resort Karambunai",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [5,4,3,4,3,4,4,4,5, 4,4,3,5,4,4,3,5,4],
+    index: [2,10,18,6,14,16,12,4,8, 13,3,7,1,17,5,15,11,9],
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_ISLAND_PINES": {
+    shortName: "NSGCC-IP",
+    fullName: "Nilai Springs Golf & Country Club (Island + Pines)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,3,4,4,3,5,4, 4,5,3,4,5,4,4,3,4],
+    index: [1,15,7,9,3,17,11,13,5, 10,18,16,4,14,12,2,18,6],
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_ISLAND": {
+    shortName: "NSGCC-MI",
+    fullName: "Nilai Springs Golf & Country Club (Mango + Island)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,3,4,4,3,5,4,4, 5,4,4,3,4,4,3,5,4],
+    index: [3,13,7,5,11,15,9,17,1, 2,16,8,10,4,18,12,14,6],
+  },
+
+  "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_PINES": {
+    shortName: "NSGCC-MP",
+    fullName: "Nilai Springs Golf & Country Club (Mango + Pines)",
+    location: ["Nilai", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,3,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
+    index: [3,13,7,5,11,15,9,17,1, 10,18,16,4,14,12,2,18,6],
+  },
+
+  "OCTVILLE_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "OGCR",
+    fullName: "Octville Golf & Country Club",
+    location: ["Masai", "Johor", "Malaysia"],
+    pars: [4,5,4,4,4,3,5,3,4, 4,4,5,3,4,3,5,4,4],
+    index: [5,11,3,1,13,15,9,17,7, 16,12,6,18,2,14,8,4,10],
+  },
+
+  "ORCHARD_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "OGCC",
+    fullName: "Orchard Golf And Country Club",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
+    pars: [5,4,4,4,3,5,4,3,4, 5,4,4,3,4,4,5,3,4],
+    index: [11,1,7,5,17,3,13,9,15, 6,14,2,16,10,12,8,18,4],
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_EAST_NORTH": {
+    shortName: "OGCC-EN",
+    fullName: "Orna Golf & Country Club (East + North)",
+    location: ["Bemban", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,3,5,3,4,4,4,5,4],
+    index: [15,17,1,13,7,9,3,11,5, 6,10,4,14,18,12,8,2,16],
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_EAST_WEST": {
+    shortName: "OGCC-EW",
+    fullName: "Orna Golf & Country Club (East + West)",
+    location: ["Bemban", "Melaka", "Malaysia"],
+    pars: [4,3,4,5,4,4,5,3,4, 4,5,3,4,4,4,5,3,4],
+    index: [15,17,1,13,7,9,3,11,5, 16,14,8,12,2,10,4,18,6],
+  },
+
+  "ORNA_GOLF_AND_COUNTRY_CLUB_WEST_NORTH": {
+    shortName: "OGCC-WN",
+    fullName: "Orna Golf & Country Club (West + North)",
+    location: ["Bemban", "Melaka", "Malaysia"],
+    pars: [4,5,3,4,4,4,5,3,4, 4,3,5,3,4,4,4,5,4],
+    index: [16,14,8,12,2,10,4,18,6, 5,9,3,13,17,11,7,1,15],
+  },
+
+  "PALM_GARDEN_GOLF_CLUB": {
+    shortName: "PGGC",
+    fullName: "Palm Garden Golf Club",
+    location: ["Putrajaya", "Selangor", "Malaysia"],
+    pars: [4,3,4,5,5,4,3,4,4, 5,4,3,5,3,5,4,3,4],
+    index: [7,17,11,3,1,5,9,15,13, 10,14,18,2,8,6,16,12,4],
+  },
+
+  "PALM_RESORT_GOLF_ALLAMANDA": {
+    shortName: "PRGCC-A",
+    fullName: "Palm Resort Golf & Country Club (Allamanda Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,3,5,4,4,4,5,3,4, 4,5,3,4,4,4,5,3,4],
+    index: [7,11,15,3,5,13,1,9,17, 10,8,16,6,2,12,14,18,4],
+  },
+
+  "PALM_RESORT_GOLF_CEMPAKA": {
+    shortName: "PRGCC-C",
+    fullName: "Palm Resort Golf & Country Club (Cempaka Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,4,3,5,4,3,4,5,4, 4,5,4,4,4,3,4,3,5],
+    index: [7,15,17,11,3,13,5,9,1, 8,4,16,14,2,10,6,18,12],
+  },
+
+  "PALM_RESORT_GOLF_MELATI": {
+    shortName: "PRGCC-M",
+    fullName: "Palm Resort Golf & Country Club (Melati Course)",
+    location: ["Senai", "Johor", "Malaysia"],
+    pars: [4,3,5,4,4,4,3,4,5, 5,4,4,3,4,5,3,4,4],
+    index: [13,15,9,5,3,17,11,7,1, 10,4,12,6,14,2,16,18,8],
+  },
+
+  "PENANG_GOLF_CLUB": {
+    shortName: "PGC",
+    fullName: "Penang Golf Club",
+    location: ["George Town", "Penang", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,4,5,3,4,3,5,4,4],
+    index: [5,1,15,9,17,3,7,13,11, 6,10,4,14,12,18,2,8,16],
+  },
+
+  "PENANG_GOLF_RESORT": {
+    shortName: "PGR",
+    fullName: "Penang Golf Resort",
+    location: ["Kepala Batas", "Penang", "Malaysia"],
+    pars: [4,5,4,4,3,4,3,4,5, 5,4,3,4,4,4,5,3,4],
+    index: [17,1,13,3,9,15,11,5,7, 6,16,18,8,2,4,14,12,10],
+  },
+
+  "PENANG_TURF_CLUB_GOLF_SECTION": {
+    shortName: "PTCGS",
+    fullName: "Penang Turf Club Golf Section",
+    location: ["George Town", "Penang", "Malaysia"],
+    pars: [4,3,5,3,4,3,4,3,4],
+    index: [3,7,2,5,1,9,4,8,6],
+  },
+
+  "PERANGSANG_TEMPLER_GOLF_CLUB": {
+    shortName: "PTGC",
+    fullName: "Perangsang Templer Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,5,4,3,4,3,4,4,5, 4,3,4,4,4,5,4,3,5],
+    index: [7,15,3,17,11,13,1,9,5, 10,16,2,4,14,8,6,18,12],
+  },
+
+  "PERMAIPURA_GOLF_&_COUNTRY_CLUB": {
+    shortName: "PGCC",
+    fullName: "Permaipura Golf & Country Club",
+    location: ["Bedong", "Kedah", "Malaysia"],
+    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,3,4,3,5,4,5],
+    index: [7,5,17,15,3,9,1,13,11, 6,4,8,14,18,16,2,10,12],
+  },
+
+  "PERMAS_JAYA_GOLF_CLUB": {
+    shortName: "PJGC",
+    fullName: "Permas Jaya Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,5,4,3,4,5,4,4, 4,3,5,4,3,4,5,4,4],
+    index: [3,15,1,5,13,11,9,7,17, 4,16,2,6,14,12,10,8,18],
+  },
+
+  "PONDEROSA_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "PGCC",
+    fullName: "Ponderosa Golf & Country Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,4,4,4,5,3,4,5, 4,5,3,4,4,4,4,3,5],
+    index: [11,15,17,3,5,13,7,9,1, 16,10,12,4,6,14,2,18,8],
+  },
+
+  "PORT_DICKSON_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "PDGCC",
+    fullName: "Port Dickson Golf & Country Club",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
+    pars: [4,4,4,3,4,3,5,4,5, 5,4,5,3,4,4,4,3,4],
+    index: [9,1,11,15,13,17,5,3,7, 6,18,2,14,12,8,4,16,10],
+  },
+
+  "PORT_KLANG_GOLF_RESORT": {
+    shortName: "PKGR",
+    fullName: "Port Klang Golf Resort",
+    location: ["Klang", "Selangor", "Malaysia"],
+    pars: [5,4,3,5,3,4,4,4,4, 4,4,5,3,5,4,3,4,4],
+    index: [11,7,17,3,13,5,15,1,9, 8,2,6,16,4,14,12,18,10],
+  },
+
+  "PULAI_SPRINGS_RESORT_MELANA": {
+    shortName: "PSR-M",
+    fullName: "Pulai Springs Resort (Melana Course)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [5,4,3,4,4,3,4,4,5, 4,4,3,4,3,5,4,5,4],
+    index: [17,1,11,5,9,15,7,13,3, 10,2,16,4,18,14,12,6,8],
+  },
+
+  "PULAI_SPRINGS_RESORT_PULAI": {
+    shortName: "PSR-P",
+    fullName: "Pulai Springs Resort (Pulai Course)",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [5,3,4,3,4,4,4,4,5, 4,5,4,3,5,3,4,4,4],
+    index: [7,13,3,17,11,5,1,15,9, 14,8,2,16,10,18,12,6,4],
+  },
+
+  "PUTRA_GOLF_CLUB": {
+    shortName: "PGC",
+    fullName: "Putra Golf Club",
+    location: ["Kangar", "Perlis", "Malaysia"],
+    pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
+    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6],
+  },
+
+  "RANAU_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "RGCC",
+    fullName: "Ranau Golf & Country Club",
+    location: ["Ranau", "Sabah", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,5,4],
+    index: [7,2,9,6,5,4,8,1,3],
+  },
+
+  "ROYAL_KAMPUNG_KUANTAN_CLUB": {
+    shortName: "RKKC",
+    fullName: "Royal Kampung Kuantan Club",
+    location: ["Bukit Rotan", "Selangor", "Malaysia"],
+    pars: [4,5,3,4,4,4,3,5,4, 4,3,5,3,5,4,4,3,4],
+    index: [15,13,9,7,3,5,17,1,11, 2,16,8,6,12,4,14,18,10],
+  },
+
+  "ROYAL_KEDAH_CLUB": {
+    shortName: "RKC",
+    fullName: "Royal Kedah Club",
+    location: ["Alor Setar", "Kedah", "Malaysia"],
+    pars: [4,5,4,3,4,5,3,4,4],
+    index: [11,17,3,9,1,7,15,5,13],
+  },
+
+  "ROYAL_PAHANG_GOLF_CLUB": {
+    shortName: "RPGC",
+    fullName: "Royal Pahang Golf Club",
+    location: ["Kuantan", "Pahang", "Malaysia"],
+    pars: [5,4,4,4,3,5,4,3,4, 5,3,4,4,4,4,3,4,5],
+    index: [11,7,1,9,15,5,13,17,3, 14,16,6,4,8,2,18,10,12],
+  },
+
+  "DICKSON_BAY_GOLF_RESORT": {
+    shortName: "DBGR",
+    fullName: "Dickson Bay Golf Resort",
+    location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
+    pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
+    index: [17,3,9,5,1,7,11,15,13, 12,14,4,16,2,18,10,6,8],
+  },
+
+  "ROYAL_PEKAN_GOLF_CLUB": {
+    shortName: "RPGC",
+    fullName: "Royal Pekan Golf Club",
+    location: ["Pekan", "Pahang", "Malaysia"],
+    pars: [4,5,4,4,3,5,3,4,4, 4,3,4,5,4,3,5,4,4],
+    index: [15,5,9,1,13,7,17,3,11, 10,14,12,4,2,18,6,16,8],
+  },
+
+  "ROYAL_PERAK_GOLF_CLUB": {
+    shortName: "RPGC",
+    fullName: "Royal Perak Golf Club",
+    location: ["Ipoh", "Perak", "Malaysia"],
+    pars: [5,4,3,4,3,5,4,4,4, 5,4,4,3,4,4,4,3,5],
+    index: [11,5,15,3,17,9,13,1,7, 12,6,10,16,2,4,14,18,8],
+  },
+
+  "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "RSMGCC",
+    fullName: "Royal Seri Menanti Golf & Country Club",
+    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
+    index: [15,11,3,1,13,7,17,9,5, 2,18,4,16,12,8,14,6,10],
+  },
+
+  "SABAH_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Sabah Golf & Country Club",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [4,5,4,4,3,5,4,3,4, 4,4,3,4,5,4,4,3,5],
+    index: [8,2,14,12,18,6,4,16,10, 11,5,17,15,1,7,3,13,9],
+  },
+
+  "SAMARAHAN_COUNTRY_CLUB": {
+    shortName: "SCC",
+    fullName: "Samarahan Country Club",
+    location: ["Kota Samarahan", "Sarawak", "Malaysia"],
+    pars: [4,4,3,5,3,4,4,5,4, 4,4,4,4,5,3,4,3,5],
+    index: [12,4,16,2,10,18,14,6,8, 3,13,17,1,5,11,9,15,7],
+  },
+
+  "SANDAKAN_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Sandakan Golf & Country Club",
+    location: ["Sandakan", "Sabah", "Malaysia"],
+    pars: [4,4,5,4,3,5,4,3,4, 4,3,4,5,3,5,4,4,4],
+    index: [8,18,14,2,12,6,10,16,4, 9,17,1,7,15,11,3,13,5],
+  },
+
+  "SAUJANA_GOLF_AND_COUNTRY_CLUB_BUNGA_RAYA": {
+    shortName: "SGCC-BR",
+    fullName: "Saujana Golf & Country Club (Bunga Raya Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [5,4,4,4,4,3,5,4,4, 5,4,3,4,5,3,4,3,4],
+    index: [13,7,1,3,5,17,11,15,9, 2,18,14,6,8,10,16,12,4],
+  },
+
+  "SAUJANA_GOLF_AND_COUNTRY_CLUB_PALM": {
+    shortName: "SGCC-P",
+    fullName: "Saujana Golf & Country Club (Palm Course)",
+    location: ["Shah Alam", "Selangor", "Malaysia"],
+    pars: [4,3,5,4,3,4,4,5,4, 4,4,3,5,4,4,3,4,5],
+    index: [11,13,7,15,17,3,5,9,1, 10,6,16,18,2,4,14,12,8],
+  },
+
+  "SEBANA__GOLF_&_MARINA_RESORT ": {
+    shortName: "SGMR",
+    fullName: "Sebana Golf & Marina Resort ",
+    location: ["Kota Tinggi", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,3,5,4, 4,5,4,4,3,4,3,4,5],
+    index: [9,1,3,7,17,15,13,11,5, 4,12,16,10,18,2,14,8,6],
+  },
+
+  "SEGAMAT_COUNTRY_CLUB": {
+    shortName: "SCC",
+    fullName: "Segamat Country Club",
+    location: ["Segamat", "Johor", "Malaysia"],
+    pars: [4,5,4,4,4,4,3,5,3, 4,4,4,5,3,5,3,4,4],
+    index: [11,9,3,7,13,1,17,5,15, 8,6,12,2,14,10,18,4,16],
+  },
+
+  "SELESA_HILLHOMES_AND_GOLF_RESORT": {
+    shortName: "SHGR",
+    fullName: "Selesa Hillhomes & golf resort",
+    location: ["Bentong", "Pahang", "Malaysia"],
+    pars: [5,4,4,3,4,3,4,4,5, 4,3,5,3,4,5,5,3,4],
+    index: [3,9,13,15,7,17,11,5,1, 12,14,6,16,10,2,4,18,8],
+  },
+
+  "SENIBONG_GOLF_CLUB": {
+    shortName: "SGC",
+    fullName: "Senibong Golf Club",
+    location: ["Johor Bahru", "Johor", "Malaysia"],
+    pars: [4,3,4,4,3,4,5,3,5, 4,4,4,4,5,5,4,4,3],
+    index: [5,11,17,1,15,13,7,9,3, 12,18,16,2,6,8,4,10,14],
+  },
+
+  "SEREMBAN_INTERNATIONAL_GOLF_CLUB": {
+    shortName: "SIGC",
+    fullName: "Seremban International Golf Club",
+    location: ["Seremban", "Negeri Sembilan", "Malaysia"],
+    pars: [4,3,5,4,4,5,4,4,3, 4,5,3,4,4,3,4,4,5],
+    index: [15,13,9,3,7,5,1,11,17, 2,12,8,16,6,18,4,14,10],
+  },
+
+  "SHANSHUI_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Shan Shui Golf & Country Club",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,4,3,4,5,4,5,3,4, 5,4,4,5,3,4,3,4,4],
+    index: [17,13,15,3,5,11,9,7,1, 4,14,2,8,18,10,16,6,12],
+  },
+
+  "SIBUGA_GOLF_CLUB": {
+    shortName: "SGC",
+    fullName: "Sibuga Golf Club",
+    location: ["Sandakan", "Sabah", "Malaysia"],
+    pars: [5,4,4,3,4,4,4,3,3],
+    index: [,,,,,,,,, ,,,,,,,,],
+  },
+
+  "SIGALONG_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SGCC",
+    fullName: "Sigalong Golf & Country Club",
+    location: ["Semporna", "Sabah", "Malaysia"],
+    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,5,4,5,3,4,3],
+    index: [17,7,15,9,1,11,5,17,13, 8,4,12,6,2,4,14,16,10],
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_SOUTHERN_NORTHERN": {
+    shortName: "SCR-SN",
+    fullName: "Staffield Country Resort (Southern + Northern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [5,3,4,4,4,5,4,3,4, 4,4,5,3,4,4,3,4,5],
+    index: [5,17,9,13,15,7,11,3,1, 10,4,12,16,6,2,14,8,18],
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_WESTERN_NORTHERN": {
+    shortName: "SCR-WN",
+    fullName: "Staffield Country Resort (Western + Northern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,4,5,3,4,3,4, 4,4,5,3,4,4,3,4,5],
+    index: [14,16,8,2,6,10,12,18,4, 9,3,11,15,5,1,13,7,17],
+  },
+
+  "STAFFIELD_COUNTRY_RESORT_WESTERN_SOUTHERN": {
+    shortName: "SCR-WS",
+    fullName: "Staffield Country Resort (Western + Southern)",
+    location: ["Mantin", "Negeri Sembilan", "Malaysia"],
+    pars: [5,4,4,4,5,3,4,3,4, 5,3,4,4,4,5,4,3,4],
+    index: [13,15,7,1,5,9,11,17,3, 6,18,10,14,16,8,12,4,2],
+  },
+
+  "STARHILL_GOLF_AND_COUNTRY_CLUB_BINTANG": {
+    shortName: "StGCC-Bi",
+    fullName: "Starhill Golf & Country Club (Bintang Course)",
+    location: ["Kempas Lama", "Johor", "Malaysia"],
+    pars: [4,5,4,3,5,4,3,4,4, 4,5,3,4,4,4,3,4,5],
+    index: [15,11,3,13,7,17,5,1,9, 12,6,18,4,10,14,16,2,8],
+  },
+
+  "STARHILL_GOLF_AND_COUNTRY_CLUB_BUKIT": {
+    shortName: "StGCC-B",
+    fullName: "Starhill Golf & Country Club (Bukit Course)",
+    location: ["Kempas Lama", "Johor", "Malaysia"],
+    pars: [4,5,4,3,4,4,3,5,4, 4,5,3,4,5,3,4,4,4],
+    index: [17,9,13,15,3,7,11,5,1, 18,8,14,4,10,16,12,6,2],
+  },
+
+  "SUNGAI_LONG_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "SLGCC",
+    fullName: "Sungai Long Golf & Country Club",
+    location: ["Kajang", "Selangor", "Malaysia"],
+    pars: [4,5,3,4,5,4,4,3,4, 4,4,5,4,3,5,4,3,4],
+    index: [17,9,5,1,3,11,15,13,7, 18,8,12,2,16,6,10,4,14],
+  },
+
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_HERITAGE_GARDEN": {
+    shortName: "SHGCC-HG",
+    fullName: "Sutera Harbour Golf & Country Club (Heritage + Garden)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [4,5,4,4,4,3,4,3,5, 5,3,4,3,4,4,5,4,4],
+    index: [15,3,5,1,13,11,9,17,7, 4,16,2,18,14,12,8,10,6],
+  },
+
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_LAKES_GARDEN": {
+    shortName: "SHGCC-LG",
+    fullName: "Sutera Harbour Golf & Country Club (Lakes + Garden)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [5,3,4,4,4,5,3,4,4, 5,3,4,3,4,4,5,4,4],
+    index: [14,16,10,4,12,2,18,6,8, 3,15,1,17,13,11,7,9,5],
+  },
+
+  "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_LAKES_HERITAGE": {
+    shortName: "SHGCC-LH",
+    fullName: "Sutera Harbour Golf & Country Club (Lakes + Heritage)",
+    location: ["Kota Kinabalu", "Sabah", "Malaysia"],
+    pars: [5,3,4,4,4,5,3,4,4, 4,5,4,4,4,3,4,3,5],
+    index: [13,15,9,3,11,1,17,5,7, 16,4,6,2,14,12,10,18,8],
+  },
+
+  "TAIPING_GOLF_RESORT": {
+    shortName: "TGR",
+    fullName: "Taiping Golf Resort",
+    location: ["Taiping", "Perak", "Malaysia"],
+    pars: [5,4,4,3,4,4,4,3,5, 4,4,4,4,3,4,5,3,5],
+    index: [1,5,7,17,3,13,11,15,9, 6,12,14,10,18,8,4,16,2],
+  },
+
+  "TAMBUNAN_GOLF_CLUB": {
+    shortName: "TGC",
+    fullName: "Tambunan Golf Club",
+    location: ["Tambunan", "Sabah", "Malaysia"],
+    pars: [5,4,5,4,3,4,4,4,3, 4,4,4,5,4,4,3,3,5],
+    index: [12,14,2,4,18,8,10,6,16, 9,11,13,1,5,7,17,15,3],
+  },
+
+  "TANJONG_PUTERI_GOLF_RESORT_VILLAGE": {
+    shortName: "TPGR-V",
+    fullName: "Tanjong Puteri Golf Resort (Village)",
+    location: ["Pasir Gudang", "Johor", "Malaysia"],
+    pars: [4,4,5,4,3,4,4,3,5, 5,4,4,3,5,4,3,4,4],
+    index: [3,9,11,7,15,1,5,17,13, 6,8,12,16,10,14,18,4,2],
+  },
+
+  "TANJONG_PUTERI_GOLF_RESORT_PLANTATION": {
+    shortName: "TPGR-P",
+    fullName: "Tanjong Puteri Golf Resort (Plantation)",
+    location: ["Pasir Gudang", "Johor", "Malaysia"],
+    pars: [5,4,4,3,4,4,5,3,4, 4,3,4,4,5,3,4,5,4],
+    index: [11,1,7,17,5,15,9,13,3, 12,18,6,14,10,16,2,8,4],
+  },
+
+
+  "TANJONG_PUTERI_GOLF_RESORT_STRAITS": {
+    shortName: "TPGR-S",
+    fullName: "Tanjong Puteri Golf Resort (Straits)",
+    location: ["Pasir Gudang", "Johor", "Malaysia"],
+    pars: [5,4,3,4,4,5,4,3,4, 5,4,4,3,4,4,5,3,4],
+    index: [11,1,15,9,5,17,3,13,7, 18,6,12,4,10,8,16,14,2],
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERA_TASIK": {
+    shortName: "TPGCC-PT",
+    fullName: "Tasik Puteri Golf & Country Club (Putera + Tasik)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,4,5,3,4,5,3,4, 4,5,4,3,4,3,4,4,5],
+    index: [3,5,9,15,13,17,1,11,7, 12,6,2,10,14,18,16,4,8],
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERI_PUTERA": {
+    shortName: "TPGCC-PP",
+    fullName: "Tasik Puteri Golf & Country Club (Puteri + Putera)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,4,5,3,4, 4,4,4,5,3,4,5,3,4],
+    index: [5,1,17,9,11,13,15,3,7, 4,6,10,16,14,18,2,12,8],
+  },
+
+  "TASIK_PUTERI_GOLF_AND_COUNTRY_CLUB_PUTERI_TASIK": {
+    shortName: "TPGCC-PuT",
+    fullName: "Tasik Puteri Golf & Country Club (Puteri + Tasik)",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,4,5,3,4, 4,5,4,3,4,3,4,4,5],
+    index: [6,2,18,10,12,14,16,4,8, 11,5,1,9,13,17,15,3,7],
+  },
+
+  "TAWAU_GOLF_CLUB_HOT_SPRING": {
+    shortName: "TGC-HS",
+    fullName: "Tawau Golf Club (Hot Spring Course)",
+    location: ["Tawau", "Sabah", "Malaysia"],
+    pars: [4,4,4,3,5,3,4,5,4, 4,4,3,5,4,4,4,3,5],
+    index: [1,9,11,13,15,17,7,3,5, 6,8,12,4,10,16,18,14,2],
+  },
+
+
+  "TELUK_INTAN_GOLF_AND_COUNTRY_CLUB": {
+    shortName: "TIGCC",
+    fullName: "Teluk Intan Golf & Country Club",
+    location: ["Teluk Intan", "Perak", "Malaysia"],
+    pars: [4,4,4,5,3,5,3,4,4, 4,5,4,3,4,4,5,3,4],
+    index: [3,17,11,1,15,5,7,13,9, 2,6,10,18,16,14,4,12,8],
+  },
+
+  "TEMPLER_PARK_COUNTRY_AND_GOLF_CLUB": {
+    shortName: "TPCGC",
+    fullName: "Templer Park Country & Golf Club",
+    location: ["Rawang", "Selangor", "Malaysia"],
+    pars: [5,3,4,4,4,4,5,3,4, 4,3,5,4,4,5,3,4,4],
+    index: [11,15,1,7,5,17,13,9,3, 16,12,6,10,14,2,18,4,8],
+  },
+
+  "THE_CLUB_AT_BUKIT_UTAMA": {
+    shortName: "TCBU",
+    fullName: "The Club @ Bukit Utama",
+    location: ["Bandar Utama", "Selangor", "Malaysia"],
+    pars: [4,3,4,3,4,4,5,3,4],
+    index: [2,9,1,7,8,6,3,5,4],
+  },
+
+  "THE_ELS_CLUB_COAST_RIDGE": {
+    shortName: "TEC-CR",
+    fullName: "The Els Club Desaru Coast (Coast-Ridge)",
+    location: ["Bandar Penawar", "Johor", "Malaysia"],
+    pars: [4,3,4,4,5,3,4,5,4, 5,4,4,3,5,4,4,3,4],
+    index: [9,7,17,11,13,15,3,1,5, 10,8,2,12,18,6,14,16,4],
+  },
+
+  "THE_ELS_CLUB_LAKES_COAST": {
+    shortName: "TEC-LC",
+    fullName: "The Els Club Desaru Coast (Lakes-Coast)",
+    location: ["Bandar Penawar", "Johor", "Malaysia"],
+    pars: [4,4,3,4,3,4,5,4,4, 4,4,5,4,4,3,4,3,5],
+    index: [9,17,7,13,5,15,3,11,1, 10,8,18,12,14,16,4,2,6],
+  },
+  
+  "THE_ELS_CLUB_RIDGE_LAKES": {
+    shortName: "TEC-RL",
+    fullName: "The Els Club Desaru Coast (Ridge-Lakes)",
+    location: ["Bandar Penawar", "Johor", "Malaysia"],
+    pars: [4,4,3,4,3,4,5,4,4, 4,4,5,4,4,3,4,3,5],
+    index: [9,7,1,11,17,5,13,15,3, 10,18,8,14,6,16,4,12,2],
+  },
+
+  "KINABALU_GOLF_CLUB": {
+    shortName: "KGC",
+    fullName: "Kinabalu Golf Club",
+    location: ["Tanjung Aru", "Sabah", "Malaysia"],
+    pars: [4,4,4,4,3,4,5,3,4],
+    index: [5,7,6,2,8,3,1,4,9],
+  },
+
+  "THE_MINES_RESORT_AND_GOLF_CLUB": {
+    shortName: "TMRGC",
+    fullName: "The MINES Resort & Golf Club",
+    location: ["Seri Kembangan", "Selangor", "Malaysia"],
+    pars: [4,5,4,4,3,4,3,5,4, 4,3,5,4,4,4,3,4,4],
+    index: [16,4,2,8,12,18,10,14,6, 9,11,13,1,5,17,15,3,7],
+  },
+
+  "ROYAL_SELANGOR_GOLF_CLUB": {
+    shortName: "RSGC",
+    fullName: "Royal Selangor Golf Club",
+    location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
+    pars: [4,4,5,3,5,3,4,4,4, 4,4,3,5,4,5,4,3,4],
+    index: [3,7,13,11,17,5,9,15,1, 18,4,10,12,16,6,8,14,2],
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_LAKE_MEADOW": {
+    shortName: "TMGCC-LM",
+    fullName: "Tiara Melaka Golf & Country Club (Lake + Meadow)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,4,5, 4,5,4,3,4,3,5,4,4],
+    index: [18,4,12,8,14,16,10,2,6, 17,7,9,13,5,15,3,1,11],
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_LAKE_WOODLAND": {
+    shortName: "TMGCC-LW",
+    fullName: "Tiara Melaka Golf & Country Club (Lake + Woodland)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,4,3,5,4,4,3,4,5, 4,3,4,5,4,4,5,3,4],
+    index: [18,4,12,8,14,16,10,2,6, 17,13,5,1,15,3,7,9,11],
+  },
+
+  "TIARA_MELAKA_GOLF_AND_COUNTRY_CLUB_MEADOW_WOODLAND": {
+    shortName: "TMGCC-MW",
+    fullName: "Tiara Melaka Golf & Country Club (Meadow + Woodland)",
+    location: ["Melaka", "Melaka", "Malaysia"],
+    pars: [4,5,4,3,4,3,5,4,4, 4,3,4,5,4,4,5,3,4],
+    index: [17,7,9,13,5,15,3,1,11, 18,14,6,2,16,4,8,10,12],
+  },
+
+  "TIOMAN_ISLAND_GOLF_CLUB": {
+    shortName: "TIGC",
+    fullName: "Tioman Island Golf Club",
+    location: ["Pulau Tioman", "Pahang", "Malaysia"],
+    pars: [4,3,5,4,4,4,3,4,5, 4,3,5,4,4,4,3,4,4],
+    index: [13,15,5,17,3,9,7,11,1, 6,12,8,4,14,16,18,10,2],
+  },
+
+  "TROPICANA_GOLF_COUNTRY_RESORT": {
+    shortName: "TGCR",
+    fullName: "Tropicana Golf Country Resort",
+    location: ["Petaling Jaya", "Selangor", "Malaysia"],
+    pars: [4,4,3,5,4,5,4,3,4, 4,4,4,3,5,4,4,3,5],
+    index: [3,9,17,7,1,13,5,15,11, 10,8,14,18,6,2,4,12,16],
+  },
+
+  "UPM_GOLF_CLUB": {
+    shortName: "UGC",
+    fullName: "UPM Golf Club",
+    location: ["Serdang", "Selangor", "Malaysia"],
+    pars: [5,4,4,4,5,3,4,3,4, 4,3,4,4,4,4,5,3,5],
+    index: [11,13,15,1,5,7,3,17,9, 4,16,6,8,14,10,2,12,18],
+  },
+
+  "VALENCIA_GOLF_CLUB": {
+    shortName: "VGC",
+    fullName: "Valencia Golf Club",
+    location: ["Sungai Buloh", "Selangor", "Malaysia"],
+    pars: [4,3,4,4,4,3,5,3,4],
+    index: [2,8,9,3,4,6,7,5,1],
+  },
+
+  "VILLEA_ROMPIN_RESORT_&_GOLF": {
+    shortName: "VRRG",
+    fullName: "Villea Rompin Resort & Golf",
+    location: ["Rompin", "Pahang", "Malaysia"],
+    pars: [4,4,4,4,3,5,3,5,4, 4,5,3,4,4,4,4,3,5],
+    index: [17,7,1,3,13,15,11,9,5, 18,4,14,10,2,16,8,12,6],
+  }
+};
 
 const Toast = memo(({ message, type, onClose }) => {
   useEffect(() => {
@@ -1270,13 +2769,12 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
                   <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
-  {front9Details.map(d => (
-    <div key={d.hole} className="w-8 text-center">
-      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
-      <div className="text-[10px] text-gray-400">P{d.par}</div>
-    </div>
-  ))}
-</div>
+                  {front9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center">
+                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+                    </div>
+                  ))}
+                </div>
                 <div className="flex justify-between">
                   {front9Details.map(d => (
                     <div key={d.hole} className="flex justify-center">
@@ -1296,13 +2794,12 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
                   <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
-  {back9Details.map(d => (
-    <div key={d.hole} className="w-8 text-center">
-      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
-      <div className="text-[10px] text-gray-400">P{d.par}</div>
-    </div>
-  ))}
-</div>
+                  {back9Details.map(d => (
+                    <div key={d.hole} className="w-8 text-center">
+                      <span className="text-xs font-semibold text-gray-500">{d.hole}</span>
+                    </div>
+                  ))}
+                </div>
                 <div className="flex justify-between">
                   {back9Details.map(d => (
                     <div key={d.hole} className="flex justify-center">
@@ -2281,7 +3778,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [jumboMode, setJumboMode] = useState(false);
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
-  const [prizePool, setPrizePool] = useState(0);
+  const [prizePool, setPrizePool] = useState('');
   const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [advanceMode, setAdvanceMode] = useState('off');
@@ -2353,7 +3850,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
         setGameMode(gameState.gameMode || 'matchPlay');
         setPlayerNames(gameState.playerNames || ['', '', '', '']);
         setStake(gameState.stake || '');
-        setPrizePool(gameState.prizePool ?? 0);
+        setPrizePool(gameState.prizePool || '');
         setHandicap(gameState.handicap || 'off');
         setPlayerHandicaps(gameState.playerHandicaps || {});
         setAdvanceMode(gameState.advanceMode || 'off');
@@ -2524,7 +4021,267 @@ const filteredCourses = useMemo(() => {
     return 'bg-gray-300 text-black';
   }, []);
 
-const t = useTranslation(lang);
+  const t = useCallback((key) => {
+    const translations = {
+      zh: {
+        title: 'HandinCap',
+        subtitle: '让每一杆都算数',
+        create: '创建新局',
+        courseTitle: '球场设置',
+        autoMode: '自动搜索',
+        manualMode: '手动输入',
+        searchPlaceholder: '搜索球场名称...',
+        selectCourse: '选择球场',
+        gameType: '比赛类型',
+        setPar: '设置各洞PAR值',
+        confirmCourse: '确认设置',
+        playerTitle: '玩家设置',
+        players: '玩家',
+        player1: '玩家1',
+        player2: '玩家2',
+        player3: '玩家3',
+        player4: '玩家4',
+        player5: '玩家5',
+        player6: '玩家6',
+        player7: '玩家7',
+        player8: '玩家8',
+        enterName: '输入姓名',
+        gameMode: '游戏模式',
+        matchPlay: 'Match Play',
+        win123: 'Win123',
+        skins: 'Skins',
+        stake: '底注',
+        prizePool: '奖金池',
+        penaltyPot: '罚金池',
+        optional: '可选',
+        enterStake: '输入金额（可选）',
+        handicap: '差点',
+        handicapSettings: '差点设置',
+        advance: '高级',
+        off: '关',
+        on: '开',
+        back: '返回',
+        start: '开始比赛',
+        hole: '洞',
+        par: 'PAR',
+        nextHole: '确认成绩 →',
+        currentMoney: '实时战况',
+        poolBalance: '奖池余额',
+        holeTied: '本洞平局',
+        poolGrows: '下洞奖池',
+        skinsWinner: '{player}赢得Skins！',
+        holeSettlement: '该洞结算',
+        netScore: '净杆',
+        rank: '第{n}名',
+        winner: '胜利',
+        resume: '继续比赛',
+        finishRound: '确认并结束',
+        confirmHoleScore: '确认第{hole}洞成绩',
+        holeScoresSummary: '各玩家成绩：',
+        cancel: '取消',
+        yes: '确定',
+        confirm: '确认',
+        switchLang: 'English',
+        noStake: '请输入底注金额',
+        atLeast2: '请至少输入2名玩家',
+        gameOver: '比赛结束！',
+        backToHome: '回到首页',
+        out: '前九',
+        in: '后九',
+        total: '计',
+        totalScore: '总成绩',
+        standardPar: '标准杆',
+        finalSettlement: '最终结算',
+        noScoreData: '还没有开始记分',
+        f9: '前9洞',
+        b9: '后9洞',
+        f18: '前18洞',
+        b18: '后18洞',
+        f9Desc: '1-9洞',
+        b9Desc: '10-18洞',
+        f18Desc: '1-18洞标准',
+        b18Desc: '10-18,1-9洞',
+        duplicateNames: '玩家名不可重复',
+        screenshotHint: '建议您先截图保存成绩记录',
+        totalLoss: '累计',
+        totalPar: 'PAR',
+        noCourses: '未找到球场',
+        trySearch: '请尝试其他关键词',
+        front9: '前九',
+        back9: '后九',
+        eagle: '老鹰',
+        birdie: '小鸟',
+        parLabel: '标准杆',
+        bogey: '柏忌',
+        doubleplus: '双柏忌+',
+        selectHoleToEdit: '选择要修改的洞',
+        editHole: '修改',
+        save: '保存',
+        scoreUpdated: '成绩已更新，金额已重算',
+		// 游戏模式说明
+		matchPlayDesc: '每洞最低净杆者赢，输家付底注',
+		win123Desc: '按名次罚款入池，可喊UP赌大',
+		skinsDesc: '每洞投注，唯一低杆者通吃',
+		reportTitle: '的比赛报告',
+		scoreDistribution: '成绩分布',
+		puttingAnalysis: '推杆分析',
+		totalPutts: '总推杆',
+		avgPerHole: '平均/洞',
+		onePutt: '一推进洞',
+		threePutts: '三推及以上',
+		holes: '洞',
+		penaltyStats: '罚杆统计',
+		waterHazard: '水障碍',
+		stats: '统计',
+		attempts: '尝试',
+		times: '次',
+		holeByHole: '逐洞成绩',
+		viewFullDetail: '查看完整明细',
+		fullDetail: '完整明细',
+		strokes: '杆',
+		putt: '推',
+		water: '水障',
+		clickNameToView: '点击名字查看详情',
+		confirmPutts: '确认推杆数',
+		zeroPuttsWarning: '以下玩家推杆数为 0：',
+		puttsScore: '成绩',
+		puttsStrokes: '杆',
+		puttsPutts: '推杆',
+		puttsTip: '提示：除非是切杆进洞(chip-in)，否则推杆数通常不为 0',
+		puttsGoBack: '返回修改',
+		puttsConfirm: '确认无误'
+      },
+      en: {
+        title: 'HandinCap',
+        subtitle: 'Just a ScoreCard',
+        create: 'Create New Game',
+        courseTitle: 'Course Setup',
+        autoMode: 'Auto Search',
+        manualMode: 'Manual Input',
+        searchPlaceholder: 'Search course name...',
+        selectCourse: 'Select Course',
+        gameType: 'Game Type',
+        setPar: 'Set PAR Values',
+        confirmCourse: 'Confirm',
+        playerTitle: 'Player Setup',
+        players: 'Players',
+        player1: 'Player 1',
+        player2: 'Player 2',
+        player3: 'Player 3',
+        player4: 'Player 4',
+        player5: 'Player 5',
+        player6: 'Player 6',
+        player7: 'Player 7',
+        player8: 'Player 8',
+        enterName: 'Enter name',
+        gameMode: 'Game Mode',
+        matchPlay: 'Match Play',
+        win123: 'Win123',
+        skins: 'Skins',
+        stake: 'Stake',
+        prizePool: 'Prize Pool',
+        penaltyPot: 'Pot',
+        optional: 'Optional',
+        enterStake: 'Enter amount (optional)',
+        handicap: 'Handicap',
+        handicapSettings: 'Handicap Settings',
+        advance: 'Advance',
+        off: 'Off',
+        on: 'On',
+        back: 'Back',
+        start: 'Start Game',
+        hole: 'Hole',
+        par: 'PAR',
+        nextHole: 'Confirm & Next',
+        currentMoney: 'Live Standings',
+        poolBalance: 'Pool Balance',
+        holeTied: 'Hole Tied',
+        poolGrows: 'Next hole pool',
+        skinsWinner: '{player} wins the Skin!',
+        holeSettlement: 'Hole Settlement',
+        netScore: 'Net',
+        rank: 'Rank {n}',
+        winner: 'Winner',
+        resume: 'Resume Game',
+        finishRound: 'Confirm & Finish',
+        confirmHoleScore: 'Confirm Hole {hole} Scores',
+        holeScoresSummary: 'Player Scores:',
+        cancel: 'Cancel',
+        yes: 'Yes',
+        confirm: 'Confirm',
+        switchLang: '中文',
+        noStake: 'Please enter stake amount',
+        atLeast2: 'Please enter at least 2 players',
+        gameOver: 'Game Over!',
+        backToHome: 'Back to Home',
+        out: 'OUT',
+        in: 'IN',
+        total: 'Tot',
+        totalScore: 'Total Score',
+        standardPar: 'Par',
+        finalSettlement: 'Final Settlement',
+        noScoreData: 'No scores recorded yet',
+        f9: 'Front 9',
+        b9: 'Back 9',
+        f18: 'Front 18',
+        b18: 'Back 18',
+        f9Desc: 'Holes 1-9',
+        b9Desc: 'Holes 10-18',
+        f18Desc: 'Standard 1-18',
+        b18Desc: '10-18, 1-9',
+        duplicateNames: 'Player names must be unique',
+        screenshotHint: 'We recommend taking a screenshot to save your scores',
+        totalLoss: 'Total',
+        totalPar: 'PAR',
+        noCourses: 'No courses found',
+        trySearch: 'Try different keywords',
+        front9: 'Front 9',
+        back9: 'Back 9',
+        eagle: 'Eagle',
+        birdie: 'Birdie',
+        parLabel: 'Par',
+        bogey: 'Bogey',
+        doubleplus: 'Double+',
+        selectHoleToEdit: 'Select Hole to Edit',
+        editHole: 'Edit Hole',
+        save: 'Save',
+        scoreUpdated: 'Scores updated, money recalculated',
+		// Game mode descriptions
+		matchPlayDesc: 'Lowest net wins, losers pay stake',
+		win123Desc: 'Ranked penalty to pool, UP for risk/reward',
+		skinsDesc: 'All-in each hole, sole low takes pot',
+		reportTitle: "'s Report",
+		scoreDistribution: 'Score Distribution',
+		puttingAnalysis: 'Putting Analysis',
+		totalPutts: 'Total Putts',
+		avgPerHole: 'Avg/Hole',
+		onePutt: 'One-Putts',
+		threePutts: '3-Putts+',
+		holes: ' holes',
+		penaltyStats: 'Penalty Stats',
+		waterHazard: 'Water',
+		stats: ' Stats',
+		attempts: ' Attempts',
+		times: '',
+		holeByHole: 'Hole by Hole',
+		viewFullDetail: 'View Full Detail',
+		fullDetail: 'Full Detail',
+		strokes: ' strokes',
+		putt: 'Putt',
+		water: 'Water',
+		clickNameToView: 'Tap name to view details',
+		confirmPutts: 'Confirm Putts',
+		zeroPuttsWarning: 'The following players have 0 putts:',
+		puttsScore: 'Score',
+		puttsStrokes: '',
+		puttsPutts: 'Putts',
+		puttsTip: "Tip: Unless it's a chip-in, putts are usually not 0",
+		puttsGoBack: 'Go Back',
+		puttsConfirm: 'Confirm'
+      }
+    };
+    return translations[lang][key] || key;
+  }, [lang]);
 
   const setCourse = useCallback((type) => {
     setCourseType(type);
@@ -2932,34 +4689,12 @@ const getScoreLabel = useCallback((stroke, par) => {
 
 // ========== 修改 On (上果岭杆数) ==========
   const changeOn = useCallback((player, delta) => {
-  const holeNum = holes[currentHole];
-  const par = pars[holeNum] || 4;
-  const current = scores[player] ?? par;
-  const newOn = Math.max(1, current + delta);
-  setScores(prev => ({ ...prev, [player]: newOn }));
-
-  // 实时更新 Hole Settlement
-  const newScores = { ...scores, [player]: newOn };
-  const holeScores = {};
-  const holePutts = {};
-  const holeUps = {};
-  activePlayers.forEach(p => {
-    holeScores[p] = newScores[p] || par;
-    holePutts[p] = putts[p] || 0;
-    holeUps[p] = ups[p] || false;
-  });
-
-  if (gameMode === 'matchPlay') {
-    const settlement = calculateMatchPlay(holeScores, holeNum);
-    setCurrentHoleSettlement(settlement);
-  } else if (gameMode === 'skins') {
-    const { results } = calculateSkins(holeScores, holeNum);
-    setCurrentHoleSettlement(results);
-  } else if (gameMode === 'win123') {
-    const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
-    setCurrentHoleSettlement(results);
-  }
-}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+    const holeNum = holes[currentHole];
+    const par = pars[holeNum] || 4;
+    const current = scores[player] ?? par;
+    const newOn = Math.max(1, current + delta);
+    setScores(prev => ({ ...prev, [player]: newOn }));
+  }, [currentHole, holes, pars, scores]);
 
   const changeScore = useCallback((player, delta) => {
     const holeNum = holes[currentHole];
@@ -2992,33 +4727,8 @@ const getScoreLabel = useCallback((stroke, par) => {
   }, [scores, currentHole, holes, pars, ups, putts, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
 
   const changePutts = useCallback((player, delta) => {
-  const holeNum = holes[currentHole];
-  const par = pars[holeNum] || 4;
-  const newPutts = Math.max(0, (putts[player] || 0) + delta);
-  setPutts(prev => ({ ...prev, [player]: newPutts }));
-
-  // 实时更新 Hole Settlement
-  const newPuttsAll = { ...putts, [player]: newPutts };
-  const holeScores = {};
-  const holePutts = {};
-  const holeUps = {};
-  activePlayers.forEach(p => {
-    holeScores[p] = scores[p] || par;
-    holePutts[p] = newPuttsAll[p] || 0;
-    holeUps[p] = ups[p] || false;
-  });
-
-  if (gameMode === 'matchPlay') {
-    const settlement = calculateMatchPlay(holeScores, holeNum);
-    setCurrentHoleSettlement(settlement);
-  } else if (gameMode === 'skins') {
-    const { results } = calculateSkins(holeScores, holeNum);
-    setCurrentHoleSettlement(results);
-  } else if (gameMode === 'win123') {
-    const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
-    setCurrentHoleSettlement(results);
-  }
-}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+    setPutts(prev => ({ ...prev, [player]: Math.max(0, (prev[player] || 0) + delta) }));
+  }, []);
 
   const changeWater = useCallback((player) => {
     setWater(prev => ({ ...prev, [player]: (prev[player] || 0) + 1 }));
@@ -3185,13 +4895,9 @@ const playersWithZeroPutts = activePlayers.filter(player =>
 );
 
   if (playersWithZeroPutts.length > 0) {
-  // 触发手机震动提醒
-  if (navigator.vibrate) {
-    navigator.vibrate([200, 100, 200]);
+    setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
+    return;
   }
-  setPuttsWarningDialog({ isOpen: true, players: playersWithZeroPutts });
-  return;
-}
 
   // 原有逻辑继续
   if (gameMode === 'win123') {
@@ -3558,14 +5264,9 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   <Play className="w-5 h-5" />
                   {t('create')}
                 </button>
-             </div>
-            
-            {/* 页脚版权 */}
-            <footer className="absolute bottom-4 text-center text-gray-400 text-xs">
-              © 2025 HandinCap. All rights reserved. {window.APP_VERSION}
-            </footer>
-          </div>
-        )}
+              </div>
+            </div>
+          )}
 
           {currentSection === 'course' && (
             <div className="space-y-4 py-3">
