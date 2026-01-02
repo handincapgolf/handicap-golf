@@ -33,17 +33,48 @@
     </script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
-    <!-- Register Service Worker -->
+    <!-- Register Service Worker with Update Detection -->
     <script>
       if ('serviceWorker' in navigator) {
         window.addEventListener('load', () => {
           navigator.serviceWorker.register('/sw.js')
             .then((registration) => {
-              console.log('SW registered: ', registration);
+              console.log('SW registered:', registration.scope);
+              
+              // 检测到新版本正在安装
+              registration.addEventListener('updatefound', () => {
+                const newWorker = registration.installing;
+                console.log('New SW installing...');
+                
+                newWorker.addEventListener('statechange', () => {
+                  if (newWorker.state === 'activated') {
+                    // 新版本已激活
+                    console.log('New SW activated!');
+                    
+                    // 显示更新提示
+                    if (confirm('🎉 发现新版本！点击确定刷新页面加载最新内容')) {
+                      window.location.reload();
+                    }
+                  }
+                });
+              });
+              
+              // 每次打开页面检查更新
+              registration.update();
             })
             .catch((error) => {
-              console.log('SW registration failed: ', error);
+              console.log('SW registration failed:', error);
             });
+        });
+        
+        // 🔴 监听SW接管事件，自动刷新
+        let refreshing = false;
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          if (!refreshing) {
+            refreshing = true;
+            console.log('Controller changed, reloading...');
+            window.location.reload();
+          }
         });
       }
     </script>
