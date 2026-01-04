@@ -859,7 +859,7 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
     const playerScores = players.map(p => ({
       player: p,
       score: scores[p] || par,
-      netScore: (scores[p] || par) - getHandicapForHole(p, par)
+      netScore: (scores[p] || par) - getHandicapForHole(p, hole, par)
     }));
     
     playerScores.sort((a, b) => a.netScore - b.netScore);
@@ -912,7 +912,7 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
                 const playerOn = scores[player] || (pars[hole] || 4);
                 const playerPutts = putts?.[player] || 0;
                 const score = playerOn + playerPutts;
-                const handicap = getHandicapForHole(player, pars[hole] || 4);
+                const handicap = getHandicapForHole(player, hole, pars[hole] || 4);
                 const netScore = score - handicap;
                 
                 return (
@@ -1594,52 +1594,34 @@ const PlayerInput = memo(({ index, value, placeholder, onChange }) => {
   );
 });
 
-const HandicapRow = memo(({ playerName, handicaps, onChange }) => {
-  const handleParChange = useCallback((parType, value) => {
-    onChange(playerName, parType, value);
-  }, [playerName, onChange]);
-  
+const HandicapRow = memo(({ playerName, handicapValue, onChange, maxHoles = 18, lang = 'en' }) => {
   return (
     <div className="bg-gray-50 rounded-md p-3 mb-3">
-      <div className="text-sm font-semibold text-green-600 mb-2">
-        {playerName}
-      </div>
-      <div className="flex gap-2">
-        <div className="flex-1 text-center">
-          <div className="text-xs text-gray-600 mb-1">PAR 3</div>
-          <input
-            type="number"
-            min={0}
-            max={3}
-            value={handicaps.par3 ?? ''}
-            placeholder="0"
-            onChange={(e) => handleParChange('par3', e.target.value === '' ? '' : parseInt(e.target.value))}
-            className="w-full px-2 py-1 rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-green-500 focus:border-transparent text-sm"
-          />
+      <div className="flex items-center justify-between gap-3">
+        <div className="text-sm font-semibold text-green-600 flex-shrink-0">
+          {playerName}
         </div>
-        <div className="flex-1 text-center">
-          <div className="text-xs text-gray-600 mb-1">PAR 4</div>
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-500">
+            {lang === 'zh' ? '差点' : 'HCP'}
+          </span>
           <input
-            type="number"
-            min={0}
-            max={3}
-            value={handicaps.par4 ?? ''}
-            placeholder="0"
-            onChange={(e) => handleParChange('par4', e.target.value === '' ? '' : parseInt(e.target.value))}
-            className="w-full px-2 py-1 rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-green-500 focus:border-transparent text-sm"
-          />
-        </div>
-        <div className="flex-1 text-center">
-          <div className="text-xs text-gray-600 mb-1">PAR 5</div>
-          <input
-            type="number"
-            min={0}
-            max={3}
-            value={handicaps.par5 ?? ''}
-            placeholder="0"
-            onChange={(e) => handleParChange('par5', e.target.value === '' ? '' : parseInt(e.target.value))}
-            className="w-full px-2 py-1 rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-green-500 focus:border-transparent text-sm"
-          />
+  type="text"
+  inputMode="numeric"
+  pattern="[0-9]*"
+  maxLength={2}
+  value={handicapValue > 0 ? handicapValue : ''}
+  placeholder=""
+  onChange={(e) => {
+    const val = e.target.value.replace(/[^0-9]/g, '');
+    const num = val === '' ? 0 : Math.min(36, parseInt(val, 10));
+    onChange(playerName, num);
+  }}
+  className="w-16 px-2 py-1 rounded border border-gray-300 bg-white text-gray-900 focus:ring-1 focus:ring-green-500 focus:border-transparent text-sm text-center"
+/>
+          <span className="text-xs text-gray-400">
+            / {maxHoles * 2}
+          </span>
         </div>
       </div>
     </div>
@@ -2641,13 +2623,10 @@ setSearchQuery('');
     });
   }, []);
 
-  const updatePlayerHandicap = useCallback((playerName, parType, value) => {
+  const updatePlayerHandicap = useCallback((playerName, value) => {
     setPlayerHandicaps(prev => ({
       ...prev,
-      [playerName]: {
-        ...prev[playerName],
-        [parType]: value === '' ? undefined : value
-      }
+      [playerName]: Math.max(0, Math.min(36, value || 0))
     }));
   }, []);
 
@@ -2748,16 +2727,39 @@ const getScoreLabel = useCallback((stroke, par) => {
     setCurrentSection('game');
   }, [activePlayers, stake, gameMode, showToast, t]);
 
-  const getHandicapForHole = useCallback((player, par = 4) => {
+  // 基于 Index 的让杆计算
+  // holeNum: 实际洞号 (1-18)
+  // playerHandicap: 玩家差点数 (0-36)
+  // holeIndex: 该洞的难度排名 (1-18, 1=最难)
+  // 让杆规则: 差点 >= index 时放1杆, 差点 >= index+18 时放2杆
+  const getHandicapForHole = useCallback((player, holeNum, par = 4) => {
     if (handicap !== 'on') return 0;
-    const handicaps = playerHandicaps[player];
-    if (!handicaps) return 0;
     
-    if (par === 3) return handicaps.par3 || 0;
-    if (par === 4) return handicaps.par4 || 0;
-    if (par === 5) return handicaps.par5 || 0;
-    return 0;
-  }, [handicap, playerHandicaps]);
+    const playerHcp = playerHandicaps[player];
+    if (!playerHcp || playerHcp <= 0) return 0;
+    
+    // 获取该洞的 index
+    let holeIndex = null;
+    if (selectedCourse && selectedCourse.index && Array.isArray(selectedCourse.index)) {
+      holeIndex = selectedCourse.index[holeNum - 1];
+    }
+    
+    // 如果没有 index 数据，fallback: 按洞号顺序分配
+    if (!holeIndex) {
+      // Fallback: 前 playerHcp 个洞各放1杆
+      const totalHoles = holes.length;
+      if (playerHcp >= holeNum) return 1;
+      if (playerHcp >= holeNum + totalHoles) return 2;
+      return 0;
+    }
+    
+    // 基于 index 计算让杆
+    let strokes = 0;
+    if (playerHcp >= holeIndex) strokes += 1;        // 第一轮让杆
+    if (playerHcp >= holeIndex + 18) strokes += 1;  // 第二轮让杆 (差点 > 18)
+    
+    return strokes;
+  }, [handicap, playerHandicaps, selectedCourse, holes.length]);
 
   const calculateMatchPlay = useCallback((holeScores, holeNum) => {
     const stakeValue = Number(stake) || 0;
@@ -2765,7 +2767,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const playerScores = activePlayers.map(p => ({
       player: p,
       score: holeScores[p] || par,
-      netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+      netScore: (holeScores[p] || par) - getHandicapForHole(p, holeNum, par)
     }));
     
     playerScores.sort((a, b) => a.netScore - b.netScore);
@@ -2800,7 +2802,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const playerScores = activePlayers.map(p => ({
       player: p,
       score: holeScores[p] || par,
-      netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+      netScore: (holeScores[p] || par) - getHandicapForHole(p, holeNum, par)
     }));
     
     playerScores.sort((a, b) => a.netScore - b.netScore);
@@ -2842,7 +2844,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       on: holeScores[p] || par,
       putts: holePutts[p] || 0,
       stroke: (holeScores[p] || par) + (holePutts[p] || 0),
-      netScore: (holeScores[p] || par) + (holePutts[p] || 0) - getHandicapForHole(p, par),
+      netScore: (holeScores[p] || par) + (holePutts[p] || 0) - getHandicapForHole(p, holeNum, par),
       up: holeUps[p] || false
     }));
     
@@ -3299,7 +3301,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
           const playerScoresList = activePlayers.map(p => ({
             player: p,
             score: holeScores[p] || par,
-            netScore: (holeScores[p] || par) - getHandicapForHole(p, par)
+            netScore: (holeScores[p] || par) - getHandicapForHole(p, holeNum, par)
           }));
           
           playerScoresList.sort((a, b) => a.netScore - b.netScore);
@@ -4069,15 +4071,16 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     </div>
                   </div>
 				  
-				  {/* 差点说明 - 方案 B */}
+				  {/* 差点说明 - Index 系统 */}
 <ExpandableInfo isOpen={showHandicapInfo} onToggle={() => setShowHandicapInfo(!showHandicapInfo)} lang={lang}>
   <div className="space-y-2">
-    <div className="font-semibold text-gray-800">⛳ {lang === 'zh' ? '差点系统' : 'Handicap System'}</div>
-    <div>{lang === 'zh' ? '根据不同 PAR 值的洞，分别设置让杆数。' : 'Set strokes given for each PAR type.'}</div>
+    <div className="font-semibold text-gray-800">⛳ {lang === 'zh' ? '差点系统 (Index)' : 'Handicap System (Index)'}</div>
+    <div>{lang === 'zh' ? '基于球场难度指数(Index)自动分配让杆。' : 'Strokes allocated automatically by hole difficulty Index.'}</div>
     <div className="bg-white rounded p-2 space-y-1">
-      <div>• <strong>PAR 3</strong>: {lang === 'zh' ? '短洞让杆' : 'Short hole strokes'}</div>
-      <div>• <strong>PAR 4</strong>: {lang === 'zh' ? '标准洞让杆' : 'Regular hole strokes'}</div>
-      <div>• <strong>PAR 5</strong>: {lang === 'zh' ? '长洞让杆' : 'Long hole strokes'}</div>
+      <div>• {lang === 'zh' ? 'Index 1-18 表示该洞难度排名' : 'Index 1-18 = hole difficulty ranking'}</div>
+      <div>• {lang === 'zh' ? 'Index 越小 = 该洞越难' : 'Lower Index = harder hole'}</div>
+      <div>• {lang === 'zh' ? '差点 5 → Index 1-5 的洞各放1杆' : 'HCP 5 → 1 stroke on Index 1-5 holes'}</div>
+      <div>• {lang === 'zh' ? '差点 20 → 全部洞放1杆 + Index 1-2 放2杆' : 'HCP 20 → all holes +1, Index 1-2 +2'}</div>
     </div>
     <div className="text-gray-600">{lang === 'zh' ? '净杆 = 实际杆数 − 让杆数' : 'Net = Gross − Handicap'}</div>
   </div>
@@ -4169,12 +4172,20 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     <Settings className="w-4 h-4" />
                     {t('handicapSettings')}
                   </h3>
+                  <div className="text-xs text-gray-500 mb-3">
+                    {lang === 'zh' 
+                      ? `基于球场难度指数(Index)分配让杆 • ${selectedCourse?.index ? '✓ 已加载Index' : '⚠ 未加载Index，按洞号顺序分配'}`
+                      : `Strokes allocated by hole Index • ${selectedCourse?.index ? '✓ Index loaded' : '⚠ No Index, using hole order'}`
+                    }
+                  </div>
                   {activePlayers.map(playerName => (
                     <HandicapRow
                       key={playerName}
                       playerName={playerName}
-                      handicaps={playerHandicaps[playerName] || {}}
+                      handicapValue={playerHandicaps[playerName] || 0}
                       onChange={updatePlayerHandicap}
+                      maxHoles={holes.length}
+                      lang={lang}
                     />
                   ))}
                 </div>
@@ -4551,7 +4562,7 @@ return (
                                         {frontNine.map(hole => {
                                           const score = allScores[player]?.[hole];
                                           const par = pars[hole] || 4;
-                                          const handicapValue = getHandicapForHole(player, par);
+                                          const handicapValue = getHandicapForHole(player, hole, par);
                                           const netScore = score ? score - handicapValue : null;
                                           
                                           return (
@@ -4617,7 +4628,7 @@ return (
                                         {backNine.map(hole => {
                                           const score = allScores[player]?.[hole];
                                           const par = pars[hole] || 4;
-                                          const handicapValue = getHandicapForHole(player, par);
+                                          const handicapValue = getHandicapForHole(player, hole, par);
                                           const netScore = score ? score - handicapValue : null;
                                           
                                           return (
@@ -4766,8 +4777,16 @@ return (
         <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
             <h1 className="text-2xl font-bold mb-2">
-              {t('hole')} {holes[currentHole]} (PAR {pars[holes[currentHole]] || 4})
-            </h1>
+  {t('hole')} {holes[currentHole]}
+  <span className="ml-2 px-2 py-0.5 bg-white bg-opacity-20 rounded text-lg">
+    PAR {pars[holes[currentHole]] || 4}
+  </span>
+  {selectedCourse?.index && (
+    <span className="ml-2 px-2 py-0.5 bg-amber-400 text-amber-900 rounded text-sm font-bold">
+      IDX {selectedCourse.index[holes[currentHole] - 1] || '-'}
+    </span>
+  )}
+</h1>
             {Number(stake) > 0 && (
               <div className="text-base">
                 {t('stake')}: ${Number(stake)} 
@@ -4863,7 +4882,7 @@ return (
                 const playerWater = water[player] || 0;
                 const playerOb = ob[player] || 0;
                 const playerUp = ups[player] || false;
-                const playerHandicapValue = getHandicapForHole(player, par);
+                const playerHandicapValue = getHandicapForHole(player, holeNum, par);
                 const netScore = playerScore - playerHandicapValue;
                 const scoreLabel = getScoreLabel(netScore, par);
                 const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
