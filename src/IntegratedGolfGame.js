@@ -4941,14 +4941,19 @@ return (
 
         {/* 中间：Stroke 显示（方案3 双层分离） */}
         <div className="flex-1 flex justify-center">
-          <div className="stroke-display">
-            <div className={`stroke-number ${strokeLabel.numClass}`}>
-              {stroke}
-            </div>
-            <div className={`stroke-label ${strokeLabel.class}`}>
-              {strokeLabel.text}
-            </div>
-          </div>
+          <div className="stroke-display relative">
+  <div className={`stroke-number ${strokeLabel.numClass}`}>
+    {stroke}
+  </div>
+  <div className={`stroke-label ${strokeLabel.class}`}>
+    {strokeLabel.text}
+  </div>
+  {handicap === 'on' && getHandicapForHole(player, holes[currentHole]) > 0 && (
+    <div className="absolute -top-1 -right-3 bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow">
+      -{getHandicapForHole(player, holes[currentHole])}
+    </div>
+  )}
+</div>
         </div>
 
         {/* 右侧：On + Putts 控制器 */}
