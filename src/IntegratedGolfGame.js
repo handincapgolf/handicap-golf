@@ -5006,95 +5006,41 @@ return (
             </div>
           </div>
 
-          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'win123' && (
-            <div className="bg-orange-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = currentHoleSettlement[player]?.money || 0;
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md text-center">
-                      <div className="text-xs font-medium truncate">{player}</div>
-                      <div className={`text-sm font-bold ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* 方案C: 合并 Hole Settlement + Live Standings */}
+{Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
+  <div className="bg-orange-50 text-gray-900 p-3">
+    <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
+    <div className={`grid gap-2 ${
+      activePlayers.length <= 2 ? 'grid-cols-2' :
+      activePlayers.length === 3 ? 'grid-cols-3' :
+      'grid-cols-2'
+    }`}>
+      {activePlayers.map(player => {
+        const holeAmt = currentHoleSettlement?.[player]?.money || 0;
+        const totalAmt = totalMoney[player] || 0;
+        return (
+          <div key={player} className="bg-white p-2 rounded-md text-center">
+            <div className="text-xs font-medium truncate">{player}</div>
+            <div className={`text-sm font-bold ${
+              holeAmt > 0 ? 'text-green-600' : 
+              holeAmt < 0 ? 'text-red-600' : 
+              'text-gray-500'
+            }`}>
+              {holeAmt === 0 ? '$0' : holeAmt > 0 ? `+$${holeAmt.toFixed(1)}` : `-$${Math.abs(holeAmt).toFixed(1)}`}
             </div>
-          )}
-
-          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'matchPlay' && (
-            <div className="bg-orange-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = currentHoleSettlement[player]?.money || 0;
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md text-center">
-                      <div className="text-xs font-medium truncate">{player}</div>
-                      <div className={`text-sm font-bold ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className={`text-xs mt-1 ${
+              totalAmt > 0 ? 'text-green-500' : 
+              totalAmt < 0 ? 'text-red-400' : 
+              'text-gray-400'
+            }`}>
+              Total: {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
             </div>
-          )}
-
-          {Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
-            <div className="bg-blue-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('currentMoney')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = totalMoney[player] || 0;
-                  
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md">
-                      <div className="text-xs font-medium text-center truncate">{player}</div>
-                      <div className={`text-sm font-bold text-center ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {gameMode === 'win123' ? (
-                          <>
-                            {t('totalLoss')}: {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                          </>
-                        ) : (
-                          <>
-                            {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
           <div className="bg-white p-3">
             <div className="flex gap-2">
