@@ -362,6 +362,48 @@ const getShareScoreClass = (score, par) => {
   if (diff === 1) return 'pga-bogey';
   return 'pga-double';
 };
+// 球场 Logo 组件 - 自动识别 shortName
+const CourseLogo = memo(({ shortName, fullName }) => {
+  const [imgError, setImgError] = useState(false);
+  
+  // 尝试从 shortName 或 fullName 中提取简称
+  const getLogoName = () => {
+    // 如果是真正的 shortName（短，无空格或很少空格）
+    if (shortName && shortName.length <= 15 && !shortName.includes('Golf')) {
+      return shortName.toLowerCase();
+    }
+    // 否则从 fullName 提取首字母缩写
+    if (fullName || shortName) {
+      const name = fullName || shortName;
+      // 提取大写首字母作为缩写
+      const abbr = name.match(/\b[A-Z]/g)?.join('') || '';
+      if (abbr.length >= 2) {
+        return abbr.toLowerCase();
+      }
+    }
+    return null;
+  };
+  
+  const logoName = getLogoName();
+  const logoPath = logoName ? `/images/courses/${logoName}.png` : null;
+  
+  if (!logoPath || imgError) {
+    return (
+      <div className="logo-large"><span>⛳</span></div>
+    );
+  }
+  
+  return (
+    <div className="logo-large" style={{ padding: '4px' }}>
+      <img 
+        src={logoPath}
+        alt={shortName || fullName}
+        onError={() => setImgError(true)}
+        style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: '8px' }}
+      />
+    </div>
+  );
+});
 
 // 品牌 Footer
 const BrandFooter = memo(() => (
@@ -402,7 +444,7 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
       <div className="classic-header text-white relative">
         <div className="pt-5 pb-4 px-4 relative z-10">
           <div className="flex justify-center mb-3">
-            <div className="logo-large"><span>⛳</span></div>
+            <CourseLogo shortName={data.c} fullName={data.f} />
           </div>
           <div className="text-center mb-3">
             <h1 className="font-bold text-xl leading-tight gold-accent">
