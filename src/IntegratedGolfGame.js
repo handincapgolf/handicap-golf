@@ -2264,13 +2264,11 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
   const [prizePool, setPrizePool] = useState(0);
-  const [handicap, setHandicap] = useState('off');
   const [playerHandicaps, setPlayerHandicaps] = useState({});
   const [advanceMode, setAdvanceMode] = useState('off');
   const [advancePlayers, setAdvancePlayers] = useState({});
   const [puttsWarningDialog, setPuttsWarningDialog] = useState({ isOpen: false, players: [] });
   // 新增：展开说明的状态
-const [showHandicapInfo, setShowHandicapInfo] = useState(false);
 const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   
   const [currentHole, setCurrentHole] = useState(1);
@@ -2336,7 +2334,6 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
         setPlayerNames(gameState.playerNames || ['', '', '', '']);
         setStake(gameState.stake || '');
         setPrizePool(gameState.prizePool ?? 0);
-        setHandicap(gameState.handicap || 'off');
         setPlayerHandicaps(gameState.playerHandicaps || {});
         setAdvanceMode(gameState.advanceMode || 'off');
         setCurrentHole(gameState.currentHole || 0);
@@ -2380,7 +2377,6 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
         playerNames,
         stake,
         prizePool,
-        handicap,
         playerHandicaps,
         advanceMode,
         currentHole,
@@ -2409,7 +2405,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
       setHasSavedGame(true);
     }
   }, [currentSection, lang, courseType, holes, pars, gameMode, playerNames, stake, prizePool, 
-      handicap, playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
+      playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
       allScores, allUps, allPutts, allWater, allOb, totalMoney, 
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
       selectedCourse, setupMode, jumboMode, activePlayers.length]);
@@ -2733,7 +2729,6 @@ const getScoreLabel = useCallback((stroke, par) => {
   // holeIndex: 该洞的难度排名 (1-18, 1=最难)
   // 让杆规则: 差点 >= index 时放1杆, 差点 >= index+18 时放2杆
   const getHandicapForHole = useCallback((player, holeNum, par = 4) => {
-    if (handicap !== 'on') return 0;
     
     const playerHcp = playerHandicaps[player];
     if (!playerHcp || playerHcp <= 0) return 0;
@@ -2759,7 +2754,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     if (playerHcp >= holeIndex + 18) strokes += 1;  // 第二轮让杆 (差点 > 18)
     
     return strokes;
-  }, [handicap, playerHandicaps, selectedCourse, holes.length]);
+  }, [playerHandicaps, selectedCourse, holes.length]);
 
   const calculateMatchPlay = useCallback((holeScores, holeNum) => {
     const stakeValue = Number(stake) || 0;
@@ -3187,7 +3182,21 @@ const playersWithZeroPutts = activePlayers.filter(player =>
 );
 
   if (playersWithZeroPutts.length > 0) {
-  // 触发手机震动提醒
+  // 播放提示音（iOS/Android 都支持）
+  try {
+    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    const oscillator = audioCtx.createOscillator();
+    const gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+    oscillator.start(audioCtx.currentTime);
+    oscillator.stop(audioCtx.currentTime + 0.3);
+  } catch (e) {}
+  // Android 额外震动
   if (navigator.vibrate) {
     navigator.vibrate([200, 100, 200]);
   }
@@ -3360,7 +3369,6 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
       setPlayerNames(['', '', '', '']);
       setStake('');
       setPrizePool('');
-      setHandicap('off');
       setPlayerHandicaps({});
       setAdvanceMode('off');
 	  setAdvancePlayers({});
@@ -3932,16 +3940,37 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 
                 <div className="space-y-3">
                   {Array.from({ length: jumboMode ? 8 : 4 }, (_, i) => i).map(i => (
-                    <div key={i} className="space-y-1">
-                      <label className="block text-xs font-medium text-gray-700">
+                    <div key={i}>
+                      <label className="block text-xs font-medium text-gray-700 mb-1">
                         {t(`player${i + 1}`)}:
                       </label>
-                      <PlayerInput
-                        index={i}
-                        value={playerNames[i]}
-                        placeholder={t('enterName')}
-                        onChange={updatePlayerName}
-                      />
+                      <div className="flex gap-2">
+                        <input
+                          type="text"
+                          placeholder={t('enterName')}
+                          value={playerNames[i]}
+                          onChange={(e) => updatePlayerName(i, e.target.value)}
+                          className="flex-1 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
+                        />
+                        <div className="flex items-center gap-1">
+                          <span className="text-xs text-gray-500">HCP</span>
+                          <input
+                            type="text"
+                            inputMode="numeric"
+                            maxLength={2}
+                            placeholder=""
+                            value={(playerHandicaps[playerNames[i]] || 0) > 0 ? playerHandicaps[playerNames[i]] : ''}
+                            onChange={(e) => {
+                              const val = e.target.value.replace(/[^0-9]/g, '');
+                              const num = val === '' ? 0 : Math.min(36, parseInt(val, 10));
+                              if (playerNames[i]) {
+                                updatePlayerHandicap(playerNames[i], num);
+                              }
+                            }}
+                            className="w-12 px-2 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 text-sm text-center"
+                          />
+                        </div>
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -4045,49 +4074,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
 
                   <div className="flex items-center justify-between">
                     <label className="text-xs font-medium text-gray-700">
-                      {t('handicap')}:
-                    </label>
-                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
-                      <button
-                        onClick={() => setHandicap('off')}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          handicap === 'off'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('off')}
-                      </button>
-                      <button
-                        onClick={() => setHandicap('on')}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          handicap === 'on'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('on')}
-                      </button>
-                    </div>
-                  </div>
-				  
-				  {/* 差点说明 - Index 系统 */}
-<ExpandableInfo isOpen={showHandicapInfo} onToggle={() => setShowHandicapInfo(!showHandicapInfo)} lang={lang}>
-  <div className="space-y-2">
-    <div className="font-semibold text-gray-800">⛳ {lang === 'zh' ? '差点系统 (Index)' : 'Handicap System (Index)'}</div>
-    <div>{lang === 'zh' ? '基于球场难度指数(Index)自动分配让杆。' : 'Strokes allocated automatically by hole difficulty Index.'}</div>
-    <div className="bg-white rounded p-2 space-y-1">
-      <div>• {lang === 'zh' ? 'Index 1-18 表示该洞难度排名' : 'Index 1-18 = hole difficulty ranking'}</div>
-      <div>• {lang === 'zh' ? 'Index 越小 = 该洞越难' : 'Lower Index = harder hole'}</div>
-      <div>• {lang === 'zh' ? '差点 5 → Index 1-5 的洞各放1杆' : 'HCP 5 → 1 stroke on Index 1-5 holes'}</div>
-      <div>• {lang === 'zh' ? '差点 20 → 全部洞放1杆 + Index 1-2 放2杆' : 'HCP 20 → all holes +1, Index 1-2 +2'}</div>
-    </div>
-    <div className="text-gray-600">{lang === 'zh' ? '净杆 = 实际杆数 − 让杆数' : 'Net = Gross − Handicap'}</div>
-  </div>
-</ExpandableInfo>
-
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-gray-700">
                       {t('advance')}:
                     </label>
                     <div className="flex rounded-md border border-gray-300 overflow-hidden">
@@ -4166,30 +4152,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 </div>
               </div>
 
-              {handicap === 'on' && activePlayers.length > 0 && (
-                <div className="bg-white rounded-lg p-4 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                    <Settings className="w-4 h-4" />
-                    {t('handicapSettings')}
-                  </h3>
-                  <div className="text-xs text-gray-500 mb-3">
-                    {lang === 'zh' 
-                      ? `基于球场难度指数(Index)分配让杆 • ${selectedCourse?.index ? '✓ 已加载Index' : '⚠ 未加载Index，按洞号顺序分配'}`
-                      : `Strokes allocated by hole Index • ${selectedCourse?.index ? '✓ Index loaded' : '⚠ No Index, using hole order'}`
-                    }
-                  </div>
-                  {activePlayers.map(playerName => (
-                    <HandicapRow
-                      key={playerName}
-                      playerName={playerName}
-                      handicapValue={playerHandicaps[playerName] || 0}
-                      onChange={updatePlayerHandicap}
-                      maxHoles={holes.length}
-                      lang={lang}
-                    />
-                  ))}
-                </div>
-              )}
 
               <div className="flex gap-3">
                 <button
@@ -4570,7 +4532,7 @@ return (
                                               {score ? (
                                                 <div>
                                                   <ScoreDisplay score={score} par={par} />
-                                                  {!gameComplete && handicap === 'on' && handicapValue > 0 && (
+                                                  {!gameComplete && handicapValue > 0 && (
                                                     <div style={{ fontSize: '8px', color: '#059669' }}>
                                                       ({netScore})
                                                     </div>
@@ -4636,7 +4598,7 @@ return (
                                               {score ? (
                                                 <div>
                                                   <ScoreDisplay score={score} par={par} />
-                                                  {!gameComplete && handicap === 'on' && handicapValue > 0 && (
+                                                  {!gameComplete && handicapValue > 0 && (
                                                     <div style={{ fontSize: '8px', color: '#059669' }}>
                                                       ({netScore})
                                                     </div>
@@ -4948,7 +4910,7 @@ return (
   <div className={`stroke-label ${strokeLabel.class}`}>
     {strokeLabel.text}
   </div>
-  {handicap === 'on' && getHandicapForHole(player, holes[currentHole]) > 0 && (
+  {getHandicapForHole(player, holes[currentHole]) > 0 && (
     <div className="absolute -top-1 -right-3 bg-green-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full shadow">
       -{getHandicapForHole(player, holes[currentHole])}
     </div>
@@ -5006,95 +4968,41 @@ return (
             </div>
           </div>
 
-          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'win123' && (
-            <div className="bg-orange-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = currentHoleSettlement[player]?.money || 0;
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md text-center">
-                      <div className="text-xs font-medium truncate">{player}</div>
-                      <div className={`text-sm font-bold ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+          {/* 方案C: 合并 Hole Settlement + Live Standings */}
+{Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
+  <div className="bg-orange-50 text-gray-900 p-3">
+    <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
+    <div className={`grid gap-2 ${
+      activePlayers.length <= 2 ? 'grid-cols-2' :
+      activePlayers.length === 3 ? 'grid-cols-3' :
+      'grid-cols-2'
+    }`}>
+      {activePlayers.map(player => {
+        const holeAmt = currentHoleSettlement?.[player]?.money || 0;
+        const totalAmt = totalMoney[player] || 0;
+        return (
+          <div key={player} className="bg-white p-2 rounded-md text-center">
+            <div className="text-xs font-medium truncate">{player}</div>
+            <div className={`text-sm font-bold ${
+              holeAmt > 0 ? 'text-green-600' : 
+              holeAmt < 0 ? 'text-red-600' : 
+              'text-gray-500'
+            }`}>
+              {holeAmt === 0 ? '$0' : holeAmt > 0 ? `+$${holeAmt.toFixed(1)}` : `-$${Math.abs(holeAmt).toFixed(1)}`}
             </div>
-          )}
-
-          {Number(stake) > 0 && currentHoleSettlement && gameMode === 'matchPlay' && (
-            <div className="bg-orange-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = currentHoleSettlement[player]?.money || 0;
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md text-center">
-                      <div className="text-xs font-medium truncate">{player}</div>
-                      <div className={`text-sm font-bold ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
+            <div className={`text-xs mt-1 ${
+              totalAmt > 0 ? 'text-green-500' : 
+              totalAmt < 0 ? 'text-red-400' : 
+              'text-gray-400'
+            }`}>
+              Total: {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
             </div>
-          )}
-
-          {Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
-            <div className="bg-blue-50 text-gray-900 p-3">
-              <h3 className="text-center font-semibold mb-2 text-sm">{t('currentMoney')}</h3>
-              <div className={`grid gap-2 ${
-                activePlayers.length <= 2 ? 'grid-cols-2' :
-                activePlayers.length === 3 ? 'grid-cols-3' :
-                'grid-cols-2'
-              }`}>
-                {activePlayers.map(player => {
-                  const amount = totalMoney[player] || 0;
-                  
-                  return (
-                    <div key={player} className="bg-white p-2 rounded-md">
-                      <div className="text-xs font-medium text-center truncate">{player}</div>
-                      <div className={`text-sm font-bold text-center ${
-                        amount > 0 ? 'text-green-600' : 
-                        amount < 0 ? 'text-red-600' : 
-                        'text-gray-500'
-                      }`}>
-                        {gameMode === 'win123' ? (
-                          <>
-                            {t('totalLoss')}: {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                          </>
-                        ) : (
-                          <>
-                            {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
+          </div>
+        );
+      })}
+    </div>
+  </div>
+)}
 
           <div className="bg-white p-3">
             <div className="flex gap-2">
