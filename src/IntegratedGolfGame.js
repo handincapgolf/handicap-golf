@@ -3431,8 +3431,10 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     
     if (isMobile && navigator.share) {
       // 移动端用原生分享
-      navigator.share({
-  title: `${player}'s Golf Score - ${data.s} (${data.s - data.p > 0 ? '+' : ''}${data.s - data.p})`,
+      const diff = data.s - data.p;
+const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
+navigator.share({
+  text: `${player} scored ${data.s} (${diffText})`,
   url: url
 }).catch(() => {});
     } else {
