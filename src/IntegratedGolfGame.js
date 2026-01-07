@@ -3472,15 +3472,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     if (isMobile && navigator.share) {
-      const diff = data.s - data.p;
-      const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
-      
-      const shareText = lang === 'zh' 
-        ? `⛳ ${player} 打了 ${data.s}杆 (${diffText})\n📍 ${data.c}`
-        : `⛳ ${player} shot ${data.s} (${diffText})\n📍 ${data.c}`;
-      
       navigator.share({
-        text: shareText,
         url: url
       }).catch(() => {});
     } else {

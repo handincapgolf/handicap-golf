@@ -116,10 +116,8 @@ function generateOGHtml(data, originalUrl, ogImageUrl) {
   const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
   
   // 动态标题：kk score 90 (+18) - SIGC
-  const title = `${data.name} score ${data.totalScore} (${diffText}) - ${data.courseName}`;
-  
-  // 动态描述
-  const description = `${data.holeCount} holes on ${data.date}. View full scorecard on HandinCap.`;
+  const title = `${data.name} score ${data.totalScore} (${diffText})`;
+  const description = data.courseName;
   
   return `<!DOCTYPE html>
 <html lang="en">
