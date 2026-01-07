@@ -7,9 +7,7 @@ export const KELANTAN_COURSES = {
     fullName: "Kelab Golf Gua Musang",
     location: ["Gua Musang", "Kelantan", "Malaysia"],
     pars: [0,0,0,0,0,0,0,0,0],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
+    index: [,,,,,,,,]
   },
 
   "KELAB_REKREASI_TENTERA_DARAT_DESA_PAHLAWAN": {
@@ -17,19 +15,15 @@ export const KELANTAN_COURSES = {
     fullName: "Kelab Rekreasi Tentera Darat Desa Pahlawan",
     location: ["Kota Bharu", "Kelantan", "Malaysia"],
     pars: [0,0,0,0,0,0,0,0,0],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
+    index: [,,,,,,,,]
   },
 
   "KELANTAN_GOLF_AND_COUNTRY_CLUB": {
-    shortName: "KGACC",
+    shortName: "KGCC",
     fullName: "Kelantan Golf and Country Club",
     location: ["Kota Bharu", "Kelantan", "Malaysia"],
     pars: [4,3,5,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
-    blueTees: null,
-    whiteTees: null,
-    redTees: null
+    index: [9,15,11,5,3,17,1,13,7, 8,12,14,2,10,18,4,16,6]
   }
 };
 
