@@ -3472,13 +3472,17 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     
     if (isMobile && navigator.share) {
-      // 移动端用原生分享
       const diff = data.s - data.p;
-const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
-navigator.share({
-  text: `${player} scored ${data.s} (${diffText})`,
-  url: url
-}).catch(() => {});
+      const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
+      
+      const shareText = lang === 'zh' 
+        ? `⛳ ${player} 打了 ${data.s}杆 (${diffText})\n📍 ${data.c}`
+        : `⛳ ${player} shot ${data.s} (${diffText})\n📍 ${data.c}`;
+      
+      navigator.share({
+        text: shareText,
+        url: url
+      }).catch(() => {});
     } else {
       // 桌面端直接复制链接
       navigator.clipboard.writeText(url).then(() => {
