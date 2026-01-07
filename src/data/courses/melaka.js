@@ -15,7 +15,7 @@ export const MELAKA_COURSES = {
     fullName: "A'Famosa Golf Resort (Crocodile + Rocky)",
     location: ["Alor Gajah", "Melaka", "Malaysia"],
     pars: [4,4,4,5,3,4,4,3,5, 4,3,4,5,4,3,5,4,4],
-    index: [11,3,17,13,7,9,1,15,5 2,16,8,6,4,18,10,12,14]
+    index: [11,3,17,13,7,9,1,15,5, 2,16,8,6,4,18,10,12,14]
   },
 
   "AFAMOSA_GOLF_RESORT_ROCKY_PALM": {
