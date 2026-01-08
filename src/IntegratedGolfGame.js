@@ -4960,7 +4960,7 @@ return (
                 setVoiceEnabled(!voiceEnabled);
                 localStorage.setItem('handincap_voice', (!voiceEnabled).toString());
               }}
-              className="absolute top-4 right-20 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
+              className="absolute top-4 left-4 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
             >
               {voiceEnabled ? '🔊' : '🔇'}
             </button>
