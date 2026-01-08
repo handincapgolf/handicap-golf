@@ -2332,6 +2332,55 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
   const [hasSavedGame, setHasSavedGame] = useState(false);
+  
+  // 语音播报状态
+const [voiceEnabled, setVoiceEnabled] = useState(() => {
+  try {
+    return localStorage.getItem('handincap_voice') === 'true';
+  } catch { return false; }
+});
+
+// 语音播报函数
+const playHoleResults = useCallback((players, holeScores, holePutts) => {
+  if (!voiceEnabled) return;
+  if (!('speechSynthesis' in window)) return;
+  
+  // 取消之前的播报
+  speechSynthesis.cancel();
+  
+  // 构建播报内容
+  players.forEach((player, index) => {
+    const on = holeScores[player] || 0;
+    const putt = holePutts[player] || 0;
+    const puttWord = putt === 1 ? 'putt' : 'putts';
+    
+    const text = lang === 'zh' 
+      ? `${player}，${on}上${putt}推。`
+      : `${player}, ${on} on, ${putt} ${puttWord}.`;
+    
+    const msg = new SpeechSynthesisUtterance(text);
+    msg.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
+    
+    // 尝试使用女声（覆盖所有设备）
+    const voices = speechSynthesis.getVoices();
+    const female = voices.find(v => 
+      v.name.includes('Samantha') ||        // Mac/iOS
+      v.name.includes('Zira') ||            // Windows
+      v.name.includes('Female') ||          // Google Female
+      v.name.includes('Google') && v.lang === 'en-US' ||  // Android Google
+      v.name.includes('Xiaoxiao') ||        // 中文女声
+      v.name.includes('Huihui') ||          // 中文女声 Windows
+      v.name.includes('女') ||              // 中文含"女"
+      v.name.toLowerCase().includes('female')
+    );
+    if (female) msg.voice = female;
+    
+    // 延迟播报，每个玩家间隔 1.5 秒
+    setTimeout(() => {
+      speechSynthesis.speak(msg);
+    }, index * 1500);
+  });
+}, [voiceEnabled, lang]);
 
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
@@ -3191,7 +3240,8 @@ const getScoreLabel = useCallback((stroke, par) => {
         setPrizePool(finalPrizePool);
       }
     }
-    
+     // 播报本洞成绩
+    playHoleResults(activePlayers, currentHoleScores, currentHolePutts);
     setCompletedHoles([...completedHoles, holeNum]);
     
     if (currentHole >= holes.length - 1) {
@@ -3211,7 +3261,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
-  }, [currentHole, holes, scores, ups, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, totalSpent]);
+  }, [currentHole, holes, scores, ups, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, totalSpent, playHoleResults]);
 
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
@@ -4139,6 +4189,42 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
 </button>
                     </div>
                   </div>
+				  
+				  {/* 语音播报开关 */}
+                  <div className="flex items-center justify-between mt-3">
+                    <label className="text-xs font-medium text-gray-700">
+                      {lang === 'zh' ? '语音播报' : 'Voice Announce'}:
+                    </label>
+                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
+                      <button
+                        onClick={() => {
+                          setVoiceEnabled(false);
+                          localStorage.setItem('handincap_voice', 'false');
+                        }}
+                        className={`px-3 py-1 font-medium text-sm transition ${
+                          !voiceEnabled
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {t('off')}
+                      </button>
+                      <button
+                        onClick={() => {
+                          setVoiceEnabled(true);
+                          localStorage.setItem('handincap_voice', 'true');
+                        }}
+                        className={`px-3 py-1 font-medium text-sm transition ${
+                          voiceEnabled
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {t('on')}
+                      </button>
+                    </div>
+                  </div>
+				  
                   {/* 高级模式说明 - 方案 B */}
                   <ExpandableInfo isOpen={showAdvanceInfo} onToggle={() => setShowAdvanceInfo(!showAdvanceInfo)} lang={lang}>
                     <div className="space-y-2">
@@ -4854,6 +4940,17 @@ return (
               </div>
             )}
             
+            {/* 语音开关按钮 */}
+            <button
+              onClick={() => {
+                setVoiceEnabled(!voiceEnabled);
+                localStorage.setItem('handincap_voice', (!voiceEnabled).toString());
+              }}
+              className="absolute top-4 right-20 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
+            >
+              {voiceEnabled ? '🔊' : '🔇'}
+            </button>
+
             {!gameComplete && completedHoles.length < holes.length && (
               <button
                 onClick={() => {
