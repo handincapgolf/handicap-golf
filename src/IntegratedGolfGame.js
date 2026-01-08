@@ -2340,6 +2340,15 @@ const [voiceEnabled, setVoiceEnabled] = useState(() => {
   } catch { return false; }
 });
 
+const [showAdvanceTooltip, setShowAdvanceTooltip] = useState(false);
+// 点击外部关闭气泡
+useEffect(() => {
+  if (!showAdvanceTooltip) return;
+  const handleClick = () => setShowAdvanceTooltip(false);
+  setTimeout(() => document.addEventListener('click', handleClick), 0);
+  return () => document.removeEventListener('click', handleClick);
+}, [showAdvanceTooltip]);
+
 // 语音播报函数
 const playHoleResults = useCallback((players, holeScores, holePutts) => {
   if (!voiceEnabled) return;
@@ -4163,8 +4172,25 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </div>
 
                   <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-gray-700">
+                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1 relative">
                       {t('advance')}:
+                      <button
+                        type="button"
+                        onClick={() => setShowAdvanceTooltip(!showAdvanceTooltip)}
+                        className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
+                      >
+                        ?
+                      </button>
+                      {showAdvanceTooltip && (
+                        <div className="absolute left-0 top-6 z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
+                          <div className="font-semibold mb-1">{lang === 'zh' ? '高级统计模式' : 'Advanced Stats Mode'}</div>
+                          <div className="mb-2">{lang === 'zh' ? '开启后可额外记录：' : 'Track extra data:'}</div>
+                          <div>💧 {lang === 'zh' ? '水障碍' : 'Water Hazards'}</div>
+                          <div>🚫 OB ({lang === 'zh' ? '出界' : 'Out of Bounds'})</div>
+                          <div className="mt-2 text-gray-300">{lang === 'zh' ? '赛后生成详细报告！' : 'Get stats report after round!'}</div>
+                          <div className="absolute -top-1 left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
+                        </div>
+                      )}
                     </label>
                     <div className="flex rounded-md border border-gray-300 overflow-hidden">
                       <button
@@ -4225,19 +4251,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     </div>
                   </div>
 				  
-                  {/* 高级模式说明 - 方案 B */}
-                  <ExpandableInfo isOpen={showAdvanceInfo} onToggle={() => setShowAdvanceInfo(!showAdvanceInfo)} lang={lang}>
-                    <div className="space-y-2">
-                      <div className="font-semibold text-gray-800">📊 {lang === 'zh' ? '高级统计模式' : 'Advanced Stats Mode'}</div>
-                      <div>{lang === 'zh' ? '开启后，每洞可额外记录：' : 'When enabled, track extra data:'}</div>
-                      <div className="bg-white rounded p-2 space-y-1">
-                        <div>• 🏌️ <strong>{lang === 'zh' ? '推杆数' : 'Putts'}</strong></div>
-                        <div>• 💧 <strong>{lang === 'zh' ? '水障碍' : 'Water Hazards'}</strong></div>
-                        <div>• 🚫 <strong>OB</strong> ({lang === 'zh' ? '出界' : 'Out of Bounds'})</div>
-                      </div>
-                      <div className="text-gray-600">{lang === 'zh' ? '赛后自动生成详细统计报告！' : 'Get detailed stats report after round!'}</div>
-                    </div>
-                  </ExpandableInfo>
+
 				  {/* Advance 玩家选择 */}
                   {advanceMode === 'on' && activePlayers.length > 0 && (
                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
