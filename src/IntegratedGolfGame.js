@@ -524,28 +524,63 @@ const ShareReportPage = memo(({ data, onViewFull }) => {
 )}
         </div>
 
-        {/* Score Distribution */}
-        <div className="bg-white border border-gray-200 rounded-xl p-3">
-          <div className="text-sm font-semibold text-gray-500 mb-2">🎯 Score Distribution</div>
-          <div className="grid grid-cols-4 gap-2">
-            <div className="text-center p-2 bg-blue-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Birdie</div>
-              <div className="text-xl font-bold text-blue-600">{birdies}</div>
-            </div>
-            <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Par</div>
-              <div className="text-xl font-bold text-gray-600">{pars}</div>
-            </div>
-            <div className="text-center p-2 bg-orange-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Bogey</div>
-              <div className="text-xl font-bold text-orange-600">{bogeys}</div>
-            </div>
-            <div className="text-center p-2 bg-red-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Dbl+</div>
-              <div className="text-xl font-bold text-red-600">{doubles}</div>
-            </div>
-          </div>
-        </div>
+        {/* Score Distribution - 横向药丸标签在上，渐变数字方块在下 */}
+<div className="bg-white border border-gray-200 rounded-xl p-3">
+  <div className="text-sm font-semibold text-gray-500 mb-2">🎯 Score Distribution</div>
+  <div className="flex justify-around">
+    {/* Birdie */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+        Birdie
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{birdies}</span>
+      </div>
+    </div>
+    
+    {/* Par */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold">
+        Par
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{pars}</span>
+      </div>
+    </div>
+    
+    {/* Bogey */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
+        Bogey
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{bogeys}</span>
+      </div>
+    </div>
+    
+    {/* Double+ */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+        Dbl+
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{doubles}</span>
+      </div>
+    </div>
+  </div>
+</div>
 
         {/* Putting Analysis */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
@@ -1358,28 +1393,63 @@ const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allScores, 
             )}
           </div>
 
-          {/* 成绩分布 */}
-          <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="text-center p-2 bg-blue-50 rounded-lg">
-                <div className="text-xs text-gray-500 mb-1">Birdie</div>
-                <div className="text-xl font-bold text-blue-600">{birdies}</div>
-              </div>
-              <div className="text-center p-2 bg-gray-50 rounded-lg">
-                <div className="text-xs text-gray-500 mb-1">Par</div>
-                <div className="text-xl font-bold text-gray-600">{parsCount}</div>
-              </div>
-              <div className="text-center p-2 bg-orange-50 rounded-lg">
-                <div className="text-xs text-gray-500 mb-1">Bogey</div>
-                <div className="text-xl font-bold text-orange-600">{bogeys}</div>
-              </div>
-              <div className="text-center p-2 bg-red-50 rounded-lg">
-                <div className="text-xs text-gray-500 mb-1">Double+</div>
-                <div className="text-xl font-bold text-red-600">{doubles}</div>
-              </div>
-            </div>
-          </div>
+          {/* 成绩分布 - 横向药丸标签在上，渐变数字方块在下 */}
+<div className="bg-white border border-gray-200 rounded-xl p-3">
+  <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
+  <div className="flex justify-around">
+    {/* Birdie */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
+        Birdie
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{birdies}</span>
+      </div>
+    </div>
+    
+    {/* Par */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold">
+        Par
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{parsCount}</span>
+      </div>
+    </div>
+    
+    {/* Bogey */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
+        Bogey
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{bogeys}</span>
+      </div>
+    </div>
+    
+    {/* Double+ */}
+    <div className="flex flex-col items-center gap-2">
+      <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
+        Dbl+
+      </span>
+      <div 
+        className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
+        style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}
+      >
+        <span className="text-2xl font-extrabold text-white">{doubles}</span>
+      </div>
+    </div>
+  </div>
+</div>
 
           {/* 推杆分析 */}
           <div className="bg-white border border-gray-200 rounded-xl p-3">
