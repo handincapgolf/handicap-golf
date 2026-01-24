@@ -26,6 +26,7 @@ export const zh = {
   matchPlay: 'Match Play',
   win123: 'Win123',
   skins: 'Skins',
+  baccarat: '百家乐',
   stake: '底注',
   prizePool: '奖金池',
   penaltyPot: '罚金池',
@@ -98,6 +99,7 @@ export const zh = {
   matchPlayDesc: '每洞最低净杆者赢，输家付底注',
   win123Desc: '按名次罚款入池，可喊UP赌大',
   skinsDesc: '每洞投注，唯一低杆者通吃',
+  baccaratDesc: '两两对战，UP加倍赌注',
   // 报告相关
   reportTitle: '的比赛报告',
   scoreDistribution: '成绩分布',

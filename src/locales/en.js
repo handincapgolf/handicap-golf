@@ -26,6 +26,7 @@ export const en = {
   matchPlay: 'Match Play',
   win123: 'Win123',
   skins: 'Skins',
+  baccarat: 'Baccarat',
   stake: 'Stake',
   prizePool: 'Prize Pool',
   penaltyPot: 'Pot',
@@ -98,6 +99,7 @@ export const en = {
   matchPlayDesc: 'Lowest net wins, losers pay stake',
   win123Desc: 'Ranked penalty to pool, UP for risk/reward',
   skinsDesc: 'All-in each hole, sole low takes pot',
+  baccaratDesc: 'Head-to-head matchups, UP multiplies stake',
   // Report related
   reportTitle: "'s Report",
   scoreDistribution: 'Score Distribution',

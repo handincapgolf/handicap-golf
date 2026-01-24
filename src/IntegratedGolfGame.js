@@ -27,6 +27,15 @@ import {
 
 import { GOLF_COURSES, searchCourses } from './data/courses';
 import { useTranslation } from './locales';
+import { gameModes } from './gameModes';
+import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from './gameModes/BaccaratComponents';
+
+// ========== 百家乐黑桃图标 ==========
+const SpadeIcon = ({ className = "w-4 h-4" }) => (
+  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C8 6 4 9 4 13c0 2.2 1.8 4 4 4 1.1 0 2.1-.5 2.8-1.2L10 22h4l-.8-6.2c.7.7 1.7 1.2 2.8 1.2 2.2 0 4-1.8 4-4 0-4-4-7-8-11z"/>
+  </svg>
+);
 
 // ========== 超紧凑分享链接 V3 (二进制压缩 + fullName) ==========
 
@@ -984,7 +993,7 @@ const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players
         <div className="mb-4">
           <p className="text-sm text-gray-600 mb-3">{t('holeScoresSummary')}</p>
           <div className="space-y-2">
-            {(gameMode === 'matchPlay' || gameMode === 'skins') ? (
+            {(gameMode === 'matchPlay' || gameMode === 'skins' || gameMode === 'baccarat') ? (
               players.map(player => {
                 const playerOn = scores[player] || (pars[hole] || 4);
                 const playerPutts = putts?.[player] || 0;
@@ -1092,9 +1101,10 @@ const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], onSelect,
 
 // 编辑洞成绩弹窗
 // 编辑洞成绩弹窗 - iPhone优化版
-const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, allPutts = {}, pars = {}, onSave, t, gameMode }) => {
+const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, allUpOrders = {}, allPutts = {}, pars = {}, onSave, t, gameMode }) => {
   const [editScores, setEditScores] = useState({});
   const [editUps, setEditUps] = useState({});
+  const [editUpOrder, setEditUpOrder] = useState([]);
   const [editPutts, setEditPutts] = useState({});
 
   useEffect(() => {
@@ -1110,8 +1120,10 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
       setEditScores(initialScores);
       setEditUps(initialUps);
       setEditPutts(initialPutts);
+      // 百家乐 UP 顺序
+      setEditUpOrder(allUpOrders[hole] || []);
     }
-  }, [isOpen, hole, players, allScores, allUps, allPutts, pars]);
+  }, [isOpen, hole, players, allScores, allUps, allUpOrders, allPutts, pars]);
 
   if (!isOpen || !hole || !players || players.length === 0) return null;
 
@@ -1138,6 +1150,46 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
     }));
   };
 
+  // 百家乐专用：切换UP顺序
+  const toggleBaccaratUp = (player) => {
+    setEditUpOrder(prev => {
+      const newOrder = [...prev];
+      const idx = newOrder.indexOf(player);
+      if (idx !== -1) {
+        newOrder.splice(idx, 1);
+      } else {
+        newOrder.push(player);
+      }
+      return newOrder;
+    });
+  };
+
+  // 获取百家乐UP位置
+  const getBaccaratUpPos = (player) => {
+    const idx = editUpOrder.indexOf(player);
+    return idx === -1 ? 0 : idx + 1;
+  };
+
+  // 百家乐UP按钮样式
+  const getBaccaratUpBtnStyle = (pos) => {
+    if (pos === 1) return 'bg-yellow-400 text-yellow-900 shadow';
+    if (pos === 2) return 'bg-orange-400 text-orange-900 shadow';
+    if (pos === 3) return 'bg-red-400 text-red-900 shadow';
+    if (pos === 4) return 'bg-purple-400 text-purple-900 shadow';
+    return 'bg-gray-200 text-gray-500';
+  };
+
+  // 百家乐卡片样式
+  const getBaccaratCardStyle = (pos) => {
+    if (pos === 1) return 'bg-gradient-to-br from-yellow-100 to-yellow-300 border-2 border-yellow-400';
+    if (pos === 2) return 'bg-gradient-to-br from-orange-100 to-orange-300 border-2 border-orange-400';
+    if (pos === 3) return 'bg-gradient-to-br from-red-100 to-red-300 border-2 border-red-400';
+    if (pos === 4) return 'bg-gradient-to-br from-purple-100 to-purple-300 border-2 border-purple-400';
+    return 'bg-gray-50 border border-gray-200';
+  };
+
+  const upSymbols = ['', '①', '②', '③', '④'];
+
   const getScoreLabel = (stroke, par) => {
     const diff = stroke - par;
     if (diff <= -2) return { text: 'Eagle', numClass: 'bg-purple-500 text-white', labelClass: 'bg-purple-500 text-white' };
@@ -1145,6 +1197,14 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
     if (diff === 0) return { text: 'Par', numClass: 'bg-gray-100 text-gray-800', labelClass: 'bg-gray-200 text-gray-600' };
     if (diff === 1) return { text: 'Bogey', numClass: 'bg-orange-500 text-white', labelClass: 'bg-orange-500 text-white' };
     return { text: 'Dbl+', numClass: 'bg-red-500 text-white', labelClass: 'bg-red-500 text-white' };
+  };
+
+  // 卡片样式
+  const getCardClass = (player) => {
+    if (gameMode === 'baccarat') {
+      return getBaccaratCardStyle(getBaccaratUpPos(player));
+    }
+    return editUps[player] ? 'card-up-active' : 'bg-gray-50 border border-gray-200';
   };
 
   return (
@@ -1166,11 +1226,10 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
             const stroke = playerOn + playerPutts;
             const label = getScoreLabel(stroke, par);
             const playerUp = editUps[player] || false;
+            const baccaratUpPos = getBaccaratUpPos(player);
 
             return (
-              <div key={player} className={`rounded-lg px-2.5 py-2 transition-all ${
-                playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
-              }`}>
+              <div key={player} className={`rounded-lg px-2.5 py-2 transition-all ${getCardClass(player)}`}>
                 <div className="flex items-center">
                   <div className="w-14 flex-shrink-0">
                     {gameMode === 'win123' && (
@@ -1184,6 +1243,15 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
                       >
                         <TrendingUp className="w-3 h-3" />
                         <span style={{fontSize: '7px', lineHeight: 1}}>UP</span>
+                      </button>
+                    )}
+                    {gameMode === 'baccarat' && (
+                      <button
+                        onClick={() => toggleBaccaratUp(player)}
+                        className={`w-8 h-8 rounded-md font-bold text-xs btn-press flex flex-col items-center justify-center transition mb-0.5 ${getBaccaratUpBtnStyle(baccaratUpPos)}`}
+                      >
+                        <TrendingUp className="w-3 h-3" />
+                        <span style={{fontSize: '7px', lineHeight: 1}}>{baccaratUpPos > 0 ? `UP${upSymbols[baccaratUpPos]}` : 'UP'}</span>
                       </button>
                     )}
                     <div className="font-bold text-sm text-gray-900 truncate">{player}</div>
@@ -1249,7 +1317,7 @@ const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = 
             {t('cancel')}
           </button>
           <button
-            onClick={() => { onSave(hole, editScores, editUps, editPutts); onClose(); }}
+            onClick={() => { onSave(hole, editScores, editUps, editPutts, editUpOrder); onClose(); }}
             className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1"
           >
             <CheckCircle className="w-4 h-4" />
@@ -1791,15 +1859,30 @@ const AdvancedPlayerCard = memo(({
   onResetWater, 
   onResetOb, 
   onToggleUp, 
-  getScoreLabel 
+  getScoreLabel,
+  gameMode = 'win123',
+  upOrder = []
 }) => {
   const stroke = playerOn + playerPutts;
   const label = getScoreLabel(stroke, par);
 
+  // 卡片样式
+  const cardClass = gameMode === 'baccarat' 
+    ? getBaccaratCardClass(player, upOrder)
+    : (playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200');
+
+  // UP按钮样式
+  const upBtnClass = gameMode === 'baccarat'
+    ? getBaccaratUpBtnClass(player, upOrder)
+    : (playerUp ? 'bg-yellow-400 text-yellow-900 shadow' : 'bg-gray-200 text-gray-500 hover:bg-gray-300');
+
+  // UP按钮文字
+  const upLabel = gameMode === 'baccarat'
+    ? getBaccaratUpLabel(player, upOrder)
+    : 'UP';
+
   return (
-    <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
-      playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
-    }`}>
+    <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${cardClass}`}>
       <div className="flex items-center">
         
         {/* 左侧：UP按钮 + 玩家名 */}
@@ -1807,14 +1890,10 @@ const AdvancedPlayerCard = memo(({
           {showUp && (
             <button 
               onClick={onToggleUp}
-              className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${
-                playerUp 
-                  ? 'bg-yellow-400 text-yellow-900 shadow' 
-                  : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
-              }`}
+              className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${upBtnClass}`}
             >
               <TrendingUp className="w-3.5 h-3.5" />
-              <span className="text-[8px] leading-none mt-0.5">UP</span>
+              <span className="text-[8px] leading-none mt-0.5">{upLabel}</span>
             </button>
           )}
           <div className="font-bold text-lg text-gray-900">{player}</div>
@@ -2386,11 +2465,13 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const [currentHole, setCurrentHole] = useState(1);
   const [scores, setScores] = useState({});  
   const [ups, setUps] = useState({});  
+  const [upOrder, setUpOrder] = useState([]);  // 百家乐UP顺序
   const [putts, setPutts] = useState({});
   const [water, setWater] = useState({});
   const [ob, setOb] = useState({});
   const [allScores, setAllScores] = useState({});  
   const [allUps, setAllUps] = useState({});  
+  const [allUpOrders, setAllUpOrders] = useState({});  // 百家乐每洞UP顺序
   const [allPutts, setAllPutts] = useState({});
   const [allWater, setAllWater] = useState({});
   const [allOb, setAllOb] = useState({});
@@ -2927,174 +3008,56 @@ const getScoreLabel = useCallback((stroke, par) => {
   }, [playerHandicaps, selectedCourse, holes.length]);
 
   const calculateMatchPlay = useCallback((holeScores, holeNum) => {
-    const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
-    const playerScores = activePlayers.map(p => ({
-      player: p,
-      score: holeScores[p] || par,
-      netScore: (holeScores[p] || par) - getHandicapForHole(p, holeNum, par)
-    }));
-    
-    playerScores.sort((a, b) => a.netScore - b.netScore);
-    const minScore = playerScores[0].netScore;
-    const winners = playerScores.filter(p => p.netScore === minScore);
-    const losers = playerScores.filter(p => p.netScore > minScore);
-    
-    const results = {};
-    activePlayers.forEach(player => {
-      results[player] = { money: 0 };
-    });
-    
-    if (winners.length < activePlayers.length && stakeValue > 0) {
-      const winAmount = (losers.length * stakeValue) / winners.length;
-      winners.forEach(w => {
-        results[w.player].money = winAmount;
-      });
-      losers.forEach(l => {
-        results[l.player].money = -stakeValue;
-      });
-    }
-    
-    return results;
+    return gameModes.matchPlay.calculate({
+      holeScores,
+      holeNum,
+      par,
+      stake,
+      activePlayers,
+      getHandicapForHole
+    }).results;
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
   const calculateSkins = useCallback((holeScores, holeNum) => {
-    const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
-    
-    const currentPrizePool = Math.max(0, prizePool);
-    
-    const playerScores = activePlayers.map(p => ({
-      player: p,
-      score: holeScores[p] || par,
-      netScore: (holeScores[p] || par) - getHandicapForHole(p, holeNum, par)
-    }));
-    
-    playerScores.sort((a, b) => a.netScore - b.netScore);
-    const minScore = playerScores[0].netScore;
-    const winners = playerScores.filter(p => p.netScore === minScore);
-    
-    const results = {};
-    let poolChange = 0;
-    
-    activePlayers.forEach(player => {
-      results[player] = { 
-        money: -stakeValue,
-        fromPool: 0,
-        spent: stakeValue
-      };
+    return gameModes.skins.calculate({
+      holeScores,
+      holeNum,
+      par,
+      stake,
+      prizePool,
+      activePlayers,
+      getHandicapForHole
     });
-    
-    const holeStake = stakeValue * activePlayers.length;
-    
-    if (winners.length === 1) {
-      const winner = winners[0].player;
-      const winAmount = currentPrizePool + holeStake;
-      results[winner].money = winAmount - stakeValue;
-      results[winner].fromPool = currentPrizePool;
-      
-      poolChange = -currentPrizePool;
-    } else {
-      poolChange = holeStake;
-    }
-    
-    return { results, poolChange, isTied: winners.length > 1, winner: winners.length === 1 ? winners[0].player : null, winAmount: winners.length === 1 ? currentPrizePool + holeStake : 0 };
   }, [activePlayers, stake, pars, getHandicapForHole, prizePool]);
 
   const calculateWin123 = useCallback((holeScores, holePutts, holeUps, holeNum) => {
-    const stakeValue = Number(stake) || 0;
     const par = pars[holeNum] || 4;
-    const playerScores = activePlayers.map(p => ({
-      player: p,
-      on: holeScores[p] || par,
-      putts: holePutts[p] || 0,
-      stroke: (holeScores[p] || par) + (holePutts[p] || 0),
-      netScore: (holeScores[p] || par) + (holePutts[p] || 0) - getHandicapForHole(p, holeNum, par),
-      up: holeUps[p] || false
-    }));
-    
-    playerScores.sort((a, b) => a.netScore - b.netScore);
-    
-    const uniqueScores = [...new Set(playerScores.map(p => p.netScore))];
-    const rankings = [...playerScores];
-    const playerCount = activePlayers.length;
-    
-    if (uniqueScores.length === 1) {
-      rankings.forEach(r => r.finalRank = 1);
-    } else if (playerCount <= 4) {
-      if (uniqueScores.length === 2) {
-        const firstScore = uniqueScores[0];
-        rankings.forEach(r => {
-          r.finalRank = r.netScore === firstScore ? 1 : 4;
-        });
-      } else if (uniqueScores.length === 3) {
-        const firstScore = uniqueScores[0];
-        const secondScore = uniqueScores[1];
-        const firstCount = rankings.filter(r => r.netScore === firstScore).length;
-        
-        rankings.forEach(r => {
-          if (r.netScore === firstScore) {
-            r.finalRank = 1;
-          } else if (r.netScore === secondScore) {
-            r.finalRank = firstCount >= 3 ? 4 : 3;
-          } else {
-            r.finalRank = 4;
-          }
-        });
-      } else {
-        rankings.forEach((r, i) => r.finalRank = i + 1);
-      }
-    } else {
-      let currentIndex = 0;
-      while (currentIndex < rankings.length) {
-        const currentScore = rankings[currentIndex].netScore;
-        let lastIndex = currentIndex;
-        while (lastIndex < rankings.length - 1 && 
-               rankings[lastIndex + 1].netScore === currentScore) {
-          lastIndex++;
-        }
-        const rank = lastIndex + 1;
-        for (let i = currentIndex; i <= lastIndex; i++) {
-          rankings[i].finalRank = rank;
-        }
-        currentIndex = lastIndex + 1;
-      }
-    }
-    
-    const results = {};
-    let poolChange = 0;
-    
-    activePlayers.forEach(player => {
-      results[player] = { money: 0, fromPool: 0 };
+    return gameModes.win123.calculate({
+      holeScores,
+      holePutts,
+      holeUps,
+      holeNum,
+      par,
+      stake,
+      activePlayers,
+      getHandicapForHole
     });
-    
-    if (uniqueScores.length > 1) {
-      rankings.forEach(r => {
-        let penalty = 0;
-        
-        if (r.finalRank > 1) {
-          penalty = stakeValue * (r.finalRank - 1);
-        }
-        
-        if (r.up) {
-          if (r.finalRank === 1) {
-            const poolWin = stakeValue * 6;
-            results[r.player].money = poolWin;
-            results[r.player].fromPool = poolWin;
-            poolChange -= poolWin;
-          } else {
-            penalty = penalty * 2;
-          }
-        }
-        
-        if (r.finalRank > 1) {
-          results[r.player].money = -penalty;
-          poolChange += penalty;
-        }
-      });
-    }
-    
-    return { results, poolChange, rankings };
+  }, [activePlayers, stake, pars, getHandicapForHole]);
+
+  const calculateBaccarat = useCallback((holeScores, holePutts, holeUpOrder, holeNum) => {
+    const par = pars[holeNum] || 4;
+    return gameModes.baccarat.calculate({
+      holeScores,
+      holePutts,
+      upOrder: holeUpOrder,
+      holeNum,
+      par,
+      stake,
+      activePlayers,
+      getHandicapForHole
+    });
   }, [activePlayers, stake, pars, getHandicapForHole]);
 
 // ========== 修改 On (上果岭杆数) ==========
@@ -3125,8 +3088,11 @@ const getScoreLabel = useCallback((stroke, par) => {
   } else if (gameMode === 'win123') {
     const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
     setCurrentHoleSettlement(results);
+  } else if (gameMode === 'baccarat') {
+    const { results, matchupDetails } = calculateBaccarat(holeScores, holePutts, upOrder, holeNum);
+    setCurrentHoleSettlement({ ...results, matchupDetails });
   }
-}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+}, [currentHole, holes, pars, scores, putts, ups, upOrder, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
 
   const changeScore = useCallback((player, delta) => {
     const holeNum = holes[currentHole];
@@ -3155,8 +3121,11 @@ const getScoreLabel = useCallback((stroke, par) => {
     } else if (gameMode === 'win123') {
       const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
       setCurrentHoleSettlement(results);
+    } else if (gameMode === 'baccarat') {
+      const { results, matchupDetails } = calculateBaccarat(holeScores, holePutts, upOrder, holeNum);
+      setCurrentHoleSettlement({ ...results, matchupDetails });
     }
-  }, [scores, currentHole, holes, pars, ups, putts, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+  }, [scores, currentHole, holes, pars, ups, upOrder, putts, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
 
   const changePutts = useCallback((player, delta) => {
   const holeNum = holes[currentHole];
@@ -3184,8 +3153,11 @@ const getScoreLabel = useCallback((stroke, par) => {
   } else if (gameMode === 'win123') {
     const { results } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
     setCurrentHoleSettlement(results);
+  } else if (gameMode === 'baccarat') {
+    const { results, matchupDetails } = calculateBaccarat(holeScores, holePutts, upOrder, holeNum);
+    setCurrentHoleSettlement({ ...results, matchupDetails });
   }
-}, [currentHole, holes, pars, scores, putts, ups, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123]);
+}, [currentHole, holes, pars, scores, putts, ups, upOrder, activePlayers, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
 
   const changeWater = useCallback((player) => {
     setWater(prev => ({ ...prev, [player]: (prev[player] || 0) + 1 }));
@@ -3222,6 +3194,30 @@ const getScoreLabel = useCallback((stroke, par) => {
       setCurrentHoleSettlement(results);
     }
   }, [ups, currentHole, holes, pars, scores, activePlayers, gameMode, calculateWin123]);
+
+  // 百家乐专用：切换UP（记录顺序）
+  const toggleBaccaratUp = useCallback((player) => {
+    const newUpOrder = [...upOrder];
+    const idx = newUpOrder.indexOf(player);
+    if (idx !== -1) {
+      newUpOrder.splice(idx, 1);
+    } else {
+      newUpOrder.push(player);
+    }
+    setUpOrder(newUpOrder);
+    
+    const holeNum = holes[currentHole];
+    const par = pars[holeNum] || 4;
+    const holeScores = {};
+    const holePutts = {};
+    activePlayers.forEach(p => {
+      holeScores[p] = scores[p] || par;
+      holePutts[p] = putts[p] || 0;
+    });
+    
+    const { results, matchupDetails } = calculateBaccarat(holeScores, holePutts, newUpOrder, holeNum);
+    setCurrentHoleSettlement({ ...results, matchupDetails });
+  }, [upOrder, currentHole, holes, pars, scores, putts, activePlayers, calculateBaccarat]);
 
   const proceedToNextHole = useCallback(() => {
     const holeNum = holes[currentHole];
@@ -3317,6 +3313,17 @@ const getScoreLabel = useCallback((stroke, par) => {
         setMoneyDetails(newDetails);
         finalPrizePool = prizePool + poolChange;
         setPrizePool(finalPrizePool);
+      } else if (gameMode === 'baccarat') {
+        const { results } = calculateBaccarat(currentHoleScores, currentHolePutts, upOrder, holeNum);
+        
+        const newTotalMoney = { ...totalMoney };
+        activePlayers.forEach(player => {
+          newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
+        });
+        setTotalMoney(newTotalMoney);
+        
+        // 保存百家乐UP顺序
+        setAllUpOrders(prev => ({ ...prev, [holeNum]: [...upOrder] }));
       }
     }
      // 播报本洞成绩
@@ -3332,6 +3339,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       setCurrentHole(currentHole + 1);
       setScores({});
       setUps({});
+      setUpOrder([]);  // 重置百家乐UP顺序
       setPutts({});
       setWater({});
       setOb({});
@@ -3340,7 +3348,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
-  }, [currentHole, holes, scores, ups, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, showToast, t, totalSpent, playHoleResults]);
+  }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults]);
 
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
@@ -3423,11 +3431,12 @@ activePlayers.forEach(player => {
 }, [gameMode, currentHole, holes, scores, ups, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
   // 编辑洞成绩并重新计算金额
-const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
-    // 1. 更新 allScores, allUps, allPutts
+const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUpOrder = []) => {
+    // 1. 更新 allScores, allUps, allPutts, allUpOrders
     const updatedAllScores = { ...allScores };
     const updatedAllUps = { ...allUps };
     const updatedAllPutts = { ...allPutts };
+    const updatedAllUpOrders = { ...allUpOrders };
     
     activePlayers.forEach(player => {
       if (!updatedAllScores[player]) updatedAllScores[player] = {};
@@ -3438,9 +3447,15 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
       updatedAllPutts[player][hole] = newPutts[player] || 0;
     });
     
+    // 百家乐 UP 顺序
+    if (gameMode === 'baccarat') {
+      updatedAllUpOrders[hole] = [...newUpOrder];
+    }
+    
     setAllScores(updatedAllScores);
     setAllUps(updatedAllUps);
     setAllPutts(updatedAllPutts);
+    setAllUpOrders(updatedAllUpOrders);
     
     // 2. 重新计算所有已完成洞的金额
     const stakeValue = Number(stake) || 0;
@@ -3465,10 +3480,12 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
       completedHoles.forEach(holeNum => {
         const holeScores = {};
         const holeUps = {};
+        const holePutts = {};
         
         activePlayers.forEach(player => {
           holeScores[player] = updatedAllScores[player]?.[holeNum] || (pars[holeNum] || 4);
           holeUps[player] = updatedAllUps[player]?.[holeNum] || false;
+          holePutts[player] = updatedAllPutts[player]?.[holeNum] || 0;
         });
         
         if (gameMode === 'matchPlay') {
@@ -3505,10 +3522,6 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
             newPrizePool += holeStake;
           }
         } else if (gameMode === 'win123') {
-          const holePutts = {};
-          activePlayers.forEach(p => {
-            holePutts[p] = allPutts[p]?.[holeNum] || 0;
-          });
           const { results, poolChange } = calculateWin123(holeScores, holePutts, holeUps, holeNum);
           activePlayers.forEach(player => {
             newTotalMoney[player] += results[player].money;
@@ -3517,6 +3530,12 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
             }
           });
           newPrizePool += poolChange;
+        } else if (gameMode === 'baccarat') {
+          const holeUpOrder = updatedAllUpOrders[holeNum] || [];
+          const { results } = calculateBaccarat(holeScores, holePutts, holeUpOrder, holeNum);
+          activePlayers.forEach(player => {
+            newTotalMoney[player] += results[player].money;
+          });
         }
       });
     }
@@ -3529,7 +3548,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts) => {
     }
     
     showToast(t('scoreUpdated'));
-  }, [allScores, allUps, activePlayers, stake, gameMode, completedHoles, pars, calculateMatchPlay, calculateWin123, getHandicapForHole, showToast, t]);
+  }, [allScores, allUps, allUpOrders, allPutts, activePlayers, stake, gameMode, completedHoles, pars, calculateMatchPlay, calculateWin123, calculateBaccarat, getHandicapForHole, showToast, t]);
 
   const goHome = useCallback(() => {
     const resetGame = () => {
@@ -4151,7 +4170,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     <label className="block text-xs font-medium text-gray-700 mb-2">
                       {t('gameMode')}:
                     </label>
-                    <div className="grid grid-cols-3 gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
                         onClick={() => setGameMode('matchPlay')}
                         className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
@@ -4185,6 +4204,17 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         <CircleDollarSign className="w-4 h-4" />
                         <span style={{ fontSize: '12px' }}>{t('skins')}</span>
                       </button>
+                      <button
+                        onClick={() => setGameMode('baccarat')}
+                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                          gameMode === 'baccarat'
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        <SpadeIcon className="w-4 h-4" />
+                        <span style={{ fontSize: '12px' }}>{t('baccarat')}</span>
+                      </button>
                     </div>
 					</div>
 
@@ -4194,11 +4224,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
     <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
       gameMode === 'matchPlay' ? 'bg-blue-100 text-blue-600' :
       gameMode === 'win123' ? 'bg-green-100 text-green-600' :
+      gameMode === 'baccarat' ? 'bg-amber-100 text-amber-600' :
       'bg-purple-100 text-purple-600'
     }`}>
       {gameMode === 'matchPlay' && <Trophy className="w-3.5 h-3.5" />}
       {gameMode === 'win123' && <DollarSign className="w-3.5 h-3.5" />}
       {gameMode === 'skins' && <CircleDollarSign className="w-3.5 h-3.5" />}
+      {gameMode === 'baccarat' && <SpadeIcon className="w-3.5 h-3.5" />}
     </div>
     <div className="flex-1">
       <div className="font-semibold text-sm text-gray-900">{t(gameMode)}</div>
@@ -4221,6 +4253,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           <>
             <div>• {lang === 'zh' ? '每洞每人投入1倍底注' : 'Each player antes 1x per hole'}</div>
             <div>• {lang === 'zh' ? '平局时奖池累积到下一洞' : 'Ties carry over to next hole'}</div>
+          </>
+        )}
+        {gameMode === 'baccarat' && (
+          <>
+            <div>• {lang === 'zh' ? '两两对战，共6组对决' : '6 head-to-head matchups'}</div>
+            <div>• {lang === 'zh' ? 'UP vs UP = 底注 ×4' : 'UP vs UP = Stake ×4'}</div>
+            <div>• {lang === 'zh' ? 'UP vs 没UP = 底注 ×2' : 'UP vs No UP = Stake ×2'}</div>
           </>
         )}
       </div>
@@ -5080,17 +5119,19 @@ return (
   playerPutts={playerPutts}
   playerWater={playerWater}
   playerOb={playerOb}
-  playerUp={playerUp}
+  playerUp={gameMode === 'baccarat' ? upOrder.includes(player) : playerUp}
   par={par}
-  showUp={gameMode === 'win123' && Number(stake) > 0}
+  showUp={(gameMode === 'win123' || gameMode === 'baccarat') && Number(stake) > 0}
   onChangeOn={(delta) => changeOn(player, delta)}
   onChangePutts={(delta) => changePutts(player, delta)}
   onChangeWater={() => changeWater(player)}
   onChangeOb={() => changeOb(player)}
   onResetWater={() => resetWater(player)}
   onResetOb={() => resetOb(player)}
-  onToggleUp={() => toggleUp(player)}
+  onToggleUp={() => gameMode === 'baccarat' ? toggleBaccaratUp(player) : toggleUp(player)}
   getScoreLabel={getScoreLabel}
+  gameMode={gameMode}
+  upOrder={upOrder}
 />
                   );
 } else {
@@ -5100,7 +5141,9 @@ return (
   
   return (
     <div key={player} className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
-      playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200'
+      gameMode === 'baccarat' 
+        ? getBaccaratCardClass(player, upOrder)
+        : (playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200')
     }`}>
       <div className="flex items-center">
         
@@ -5117,6 +5160,15 @@ return (
             >
               <TrendingUp className="w-3.5 h-3.5" />
               <span className="text-[8px] leading-none mt-0.5">UP</span>
+            </button>
+          )}
+          {gameMode === 'baccarat' && Number(stake) > 0 && (
+            <button 
+              onClick={() => toggleBaccaratUp(player)}
+              className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${getBaccaratUpBtnClass(player, upOrder)}`}
+            >
+              <TrendingUp className="w-3.5 h-3.5" />
+              <span className="text-[8px] leading-none mt-0.5">{getBaccaratUpLabel(player, upOrder)}</span>
             </button>
           )}
           <div className="font-bold text-lg text-gray-900">{player}</div>
@@ -5190,7 +5242,7 @@ return (
           </div>
 
           {/* 方案C: 合并 Hole Settlement + Live Standings */}
-{Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins') && (
+{Number(stake) > 0 && (gameMode === 'matchPlay' || gameMode === 'win123' || gameMode === 'skins' || gameMode === 'baccarat') && (
   <div className="bg-orange-50 text-gray-900 p-3">
     <h3 className="text-center font-semibold mb-2 text-sm">{t('holeSettlement')}</h3>
     <div className={`grid gap-2 ${
@@ -5222,6 +5274,11 @@ return (
         );
       })}
     </div>
+    
+    {/* 百家乐对战明细 */}
+    {gameMode === 'baccarat' && currentHoleSettlement?.matchupDetails && (
+      <BaccaratMatchupGrid matchupDetails={currentHoleSettlement.matchupDetails} lang={lang} upOrder={upOrder} />
+    )}
   </div>
 )}
 
@@ -5357,6 +5414,7 @@ return (
   players={activePlayers}
   allScores={allScores}
   allUps={allUps}
+  allUpOrders={allUpOrders}
   allPutts={allPutts}
   pars={pars}
   onSave={handleEditHoleSave}
