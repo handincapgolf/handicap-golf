@@ -7,7 +7,7 @@ export const OTHER_COURSES = {
     fullName: "Kelab Golf Putra",
     location: ["Kangar", "Perlis", "Malaysia"],
     pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
-    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6]
+    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6],
   },
 
   "PUTRA_GOLF_CLUB": {
@@ -15,7 +15,7 @@ export const OTHER_COURSES = {
     fullName: "Putra Golf Club",
     location: ["Kangar", "Perlis", "Malaysia"],
     pars: [5,4,4,3,4,5,4,3,4, 4,5,3,4,4,4,3,4,5],
-    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6]
+    index: [5,7,11,17,13,1,15,9,3, 8,12,18,14,4,10,16,2,6],
   },
 
   "LABUAN_INTERNATIONAL_GOLF_CLUB": {
