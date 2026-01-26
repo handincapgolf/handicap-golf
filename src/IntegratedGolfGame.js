@@ -2500,18 +2500,50 @@ useEffect(() => {
   return () => document.removeEventListener('click', handleClick);
 }, [showAdvanceTooltip]);
 
-// 语音播报函数
-const playHoleResults = useCallback((players, holeScores, holePutts) => {
+// 8杆特殊音效（放在 public/assets/ 文件夹）
+const huatAhAudio = new Audio('/assets/huat_ah.m4a');
+const HUAT_AH_DURATION = 7000; // 音效时长 7 秒
+const HUAT_AH_GAP = 2000;      // 音效结束后间隔 2 秒
+
+// UP输了音效
+const upLoseAudio = new Audio('/assets/up_lose.m4a');
+const UP_LOSE_DURATION = 16000; // 音效时长 16 秒
+const UP_LOSE_GAP = 2000;       // 音效结束后间隔 2 秒
+
+// 语音播报函数（支持8杆和UP输了音效）
+// enableSpecialAudio: 只有 Win123 + 有下注 + 4人或以上 时为 true
+// rankings: Win123 的排名结果，用于判断UP输了
+const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null) => {
   if (!voiceEnabled) return;
   if (!('speechSynthesis' in window)) return;
   
   // 取消之前的播报
   speechSynthesis.cancel();
+  huatAhAudio.pause();
+  huatAhAudio.currentTime = 0;
+  upLoseAudio.pause();
+  upLoseAudio.currentTime = 0;
   
-  // 构建播报内容
-  players.forEach((player, index) => {
+  // 构建UP输了的玩家集合（用于快速查询）
+  const upLosePlayers = new Set();
+  if (rankings && enableSpecialAudio) {
+    rankings.forEach(r => {
+      if (r.up && r.finalRank > 1) {
+        upLosePlayers.add(r.player);
+      }
+    });
+  }
+  
+  // 使用队列方式依次播报，确保前一个完成后再播下一个
+  let currentIndex = 0;
+  
+  const playNext = () => {
+    if (currentIndex >= players.length) return;
+    
+    const player = players[currentIndex];
     const on = holeScores[player] || 0;
     const putt = holePutts[player] || 0;
+    const totalStrokes = on + putt;
     const puttWord = putt === 1 ? 'putt' : 'putts';
     
     const text = lang === 'zh' 
@@ -2521,25 +2553,65 @@ const playHoleResults = useCallback((players, holeScores, holePutts) => {
     const msg = new SpeechSynthesisUtterance(text);
     msg.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
     
-    // 尝试使用女声（覆盖所有设备）
+    // 尝试使用女声
     const voices = speechSynthesis.getVoices();
     const female = voices.find(v => 
-      v.name.includes('Samantha') ||        // Mac/iOS
-      v.name.includes('Zira') ||            // Windows
-      v.name.includes('Female') ||          // Google Female
-      v.name.includes('Google') && v.lang === 'en-US' ||  // Android Google
-      v.name.includes('Xiaoxiao') ||        // 中文女声
-      v.name.includes('Huihui') ||          // 中文女声 Windows
-      v.name.includes('女') ||              // 中文含"女"
+      v.name.includes('Samantha') ||
+      v.name.includes('Zira') ||
+      v.name.includes('Female') ||
+      v.name.includes('Google') && v.lang === 'en-US' ||
+      v.name.includes('Xiaoxiao') ||
+      v.name.includes('Huihui') ||
+      v.name.includes('女') ||
       v.name.toLowerCase().includes('female')
     );
     if (female) msg.voice = female;
     
-    // 延迟播报，每个玩家间隔 1.5 秒
-    setTimeout(() => {
-      speechSynthesis.speak(msg);
-    }, index * 1500);
-  });
+    // 语音播报结束后的处理
+    msg.onend = () => {
+      const isUpLose = upLosePlayers.has(player);
+      const isHuatAh = enableSpecialAudio && totalStrokes === 8;
+      
+      // UP输了优先播放（比8杆更惨）
+      if (isUpLose) {
+        upLoseAudio.currentTime = 0;
+        upLoseAudio.play().catch(e => console.log('Audio play failed:', e));
+        
+        // 音效结束后 + 间隔，再播下一个
+        setTimeout(() => {
+          currentIndex++;
+          playNext();
+        }, UP_LOSE_DURATION + UP_LOSE_GAP);
+      } else if (isHuatAh) {
+        // 8杆音效
+        huatAhAudio.currentTime = 0;
+        huatAhAudio.play().catch(e => console.log('Audio play failed:', e));
+        
+        // 音效结束后 + 间隔，再播下一个
+        setTimeout(() => {
+          currentIndex++;
+          playNext();
+        }, HUAT_AH_DURATION + HUAT_AH_GAP);
+      } else {
+        // 普通玩家，间隔一小段时间后播下一个
+        setTimeout(() => {
+          currentIndex++;
+          playNext();
+        }, 300);
+      }
+    };
+    
+    // 播报出错时也继续下一个
+    msg.onerror = () => {
+      currentIndex++;
+      playNext();
+    };
+    
+    speechSynthesis.speak(msg);
+  };
+  
+  // 开始播报第一个
+  playNext();
 }, [voiceEnabled, lang]);
 
   const activePlayers = useMemo(() => {
@@ -3227,6 +3299,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const currentHolePutts = {};
     const currentHoleWater = {};
     const currentHoleOb = {};
+    let win123Rankings = null; // 用于保存Win123排名结果
     
     activePlayers.forEach(player => {
       currentHoleScores[player] = scores[player] || par;
@@ -3297,7 +3370,10 @@ const getScoreLabel = useCallback((stroke, par) => {
         setPrizePool(finalPrizePool);
         
       } else if (gameMode === 'win123') {
-        const { results, poolChange } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
+        const { results, poolChange, rankings } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
+        
+        // 保存rankings供播报使用
+        win123Rankings = rankings;
         
         const newTotalMoney = { ...totalMoney };
         const newDetails = { ...moneyDetails };
@@ -3326,8 +3402,15 @@ const getScoreLabel = useCallback((stroke, par) => {
         setAllUpOrders(prev => ({ ...prev, [holeNum]: [...upOrder] }));
       }
     }
-     // 播报本洞成绩
-    playHoleResults(activePlayers, currentHoleScores, currentHolePutts);
+     // 播报本洞成绩（按本洞总杆数从高到低，最差先报）
+    const sortedPlayersForVoice = [...activePlayers].sort((a, b) => {
+      const scoreA = (currentHoleScores[a] || 0) + (currentHolePutts[a] || 0);
+      const scoreB = (currentHoleScores[b] || 0) + (currentHolePutts[b] || 0);
+      return scoreB - scoreA; // 降序：杆数高的先报
+    });
+    // 只有 Win123 + 有下注 + 4人或以上 时启用特殊音效
+    const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
+    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings);
     setCompletedHoles([...completedHoles, holeNum]);
     
     if (currentHole >= holes.length - 1) {
