@@ -2,12 +2,19 @@
  * Win123 Game Mode
  * 
  * 规则：
- * - 按净杆数排名 1-2-3-4
- * - 第1名不扣钱，第2名扣1x，第3名扣2x，第4名扣3x
+ * - 按净杆数排名
+ * - 第1名不扣钱，第2名扣1x，第3名扣2x，第4名扣3x...
  * - UP功能：可以选择 UP（加注）
  *   - UP玩家如果赢得第1名，从罚池拿 6x stake
  *   - UP玩家如果输了，罚款翻倍
  * - 所有罚款进入罚池 (Penalty Pot)
+ * 
+ * 4人或以下：原有逻辑（并列取最差排名，跳跃式）
+ * 5-8人 Jumbo模式：从最后一名往上数
+ *   - 最差杆数 = 最后一名（第N名）
+ *   - 倒数第二差 = 第N-1名
+ *   - ...一直到最好的 = 第1名
+ *   - 并列第1名都不罚，其他并列同名次同罚款
  */
 
 import { DollarSign } from 'lucide-react';
@@ -32,6 +39,90 @@ export const config = {
 };
 
 /**
+ * 计算排名 - 4人或以下
+ * 原有逻辑保持不变
+ */
+const calculateRankingsStandard = (rankings, uniqueScores) => {
+  if (uniqueScores.length === 2) {
+    // 只有两种分数：第1和第4
+    const firstScore = uniqueScores[0];
+    rankings.forEach(r => {
+      r.finalRank = r.netScore === firstScore ? 1 : 4;
+    });
+  } else if (uniqueScores.length === 3) {
+    // 三种分数
+    const firstScore = uniqueScores[0];
+    const secondScore = uniqueScores[1];
+    const firstCount = rankings.filter(r => r.netScore === firstScore).length;
+    
+    rankings.forEach(r => {
+      if (r.netScore === firstScore) {
+        r.finalRank = 1;
+      } else if (r.netScore === secondScore) {
+        // 如果第1名有3人或以上，第2名变第4
+        r.finalRank = firstCount >= 3 ? 4 : 3;
+      } else {
+        r.finalRank = 4;
+      }
+    });
+  } else {
+    // 4种分数，正常排名
+    rankings.forEach((r, i) => r.finalRank = i + 1);
+  }
+  
+  return rankings;
+};
+
+/**
+ * 计算排名 - 5人以上 Jumbo模式
+ * 从最后一名往上数：
+ * - 最差杆数 = 最后一名
+ * - 倒数第二差 = 第N-1名
+ * - 并列第1名都不罚
+ */
+const calculateRankingsJumbo = (rankings, uniqueScores, playerCount) => {
+  // uniqueScores 已经从小到大排序（最好到最差）
+  // 我们需要从后往前分配名次
+  
+  const scoreCount = uniqueScores.length; // 有几种不同的杆数
+  
+  // 从最后一名开始分配
+  // 最差的杆数 = 第playerCount名
+  // 倒数第二差 = 第playerCount-1名
+  // ...
+  // 最好的杆数 = 第1名
+  
+  // 计算每个分数对应的名次
+  // 名次 = playerCount - (scoreCount - 1 - scoreIndex)
+  // 简化：名次 = playerCount - scoreCount + 1 + scoreIndex
+  
+  // 但最好的（第1名）永远是1
+  const scoreToRank = {};
+  
+  for (let i = 0; i < scoreCount; i++) {
+    const score = uniqueScores[i];
+    if (i === 0) {
+      // 最好的杆数 = 第1名
+      scoreToRank[score] = 1;
+    } else {
+      // 从后面数上来
+      // 最差(最后一个) = playerCount
+      // 倒数第二 = playerCount - 1
+      // ...
+      // 所以：名次 = playerCount - (scoreCount - 1 - i)
+      scoreToRank[score] = playerCount - (scoreCount - 1 - i);
+    }
+  }
+  
+  // 分配名次给每个玩家
+  rankings.forEach(r => {
+    r.finalRank = scoreToRank[r.netScore];
+  });
+  
+  return rankings;
+};
+
+/**
  * 计算排名
  * 处理并列情况的排名逻辑
  */
@@ -45,53 +136,13 @@ const calculateRankings = (playerScores, playerCount) => {
     return rankings;
   }
   
-  // 4人或以下的特殊处理
+  // 4人或以下：原有逻辑
   if (playerCount <= 4) {
-    if (uniqueScores.length === 2) {
-      // 只有两种分数：第1和第4
-      const firstScore = uniqueScores[0];
-      rankings.forEach(r => {
-        r.finalRank = r.netScore === firstScore ? 1 : 4;
-      });
-    } else if (uniqueScores.length === 3) {
-      // 三种分数
-      const firstScore = uniqueScores[0];
-      const secondScore = uniqueScores[1];
-      const firstCount = rankings.filter(r => r.netScore === firstScore).length;
-      
-      rankings.forEach(r => {
-        if (r.netScore === firstScore) {
-          r.finalRank = 1;
-        } else if (r.netScore === secondScore) {
-          // 如果第1名有3人或以上，第2名变第4
-          r.finalRank = firstCount >= 3 ? 4 : 3;
-        } else {
-          r.finalRank = 4;
-        }
-      });
-    } else {
-      // 4种分数，正常排名
-      rankings.forEach((r, i) => r.finalRank = i + 1);
-    }
-  } else {
-    // 5人以上的标准排名
-    let currentIndex = 0;
-    while (currentIndex < rankings.length) {
-      const currentScore = rankings[currentIndex].netScore;
-      let lastIndex = currentIndex;
-      while (lastIndex < rankings.length - 1 && 
-             rankings[lastIndex + 1].netScore === currentScore) {
-        lastIndex++;
-      }
-      const rank = lastIndex + 1;
-      for (let i = currentIndex; i <= lastIndex; i++) {
-        rankings[i].finalRank = rank;
-      }
-      currentIndex = lastIndex + 1;
-    }
+    return calculateRankingsStandard(rankings, uniqueScores);
   }
   
-  return rankings;
+  // 5-8人：Jumbo模式
+  return calculateRankingsJumbo(rankings, uniqueScores, playerCount);
 };
 
 /**

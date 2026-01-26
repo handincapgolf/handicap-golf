@@ -82,14 +82,6 @@ export const JOHOR_COURSES = {
     index: [3,8,1,6,7,9,4,5,2]
   },
 
-  "KELAB_GOLF_SERI_DELIMA": {
-    shortName: "KGSD",
-    fullName: "Kelab Golf Seri Delima",
-    location: ["Kluang", "Johor", "Malaysia"],
-    pars: [0,0,0,0,0,0,0,0,0],
-    index: [,,,,,,,,]
-  },
-
   "KELAB_GOLF_TANJONG_EMAS": {
     shortName: "KGTE",
     fullName: "Kelab Golf Tanjong Emas",
