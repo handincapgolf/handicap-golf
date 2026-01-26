@@ -2510,9 +2510,9 @@ const upLoseAudio = new Audio('/assets/up_lose.m4a');
 const UP_LOSE_DURATION = 16000; // 音效时长 16 秒
 const UP_LOSE_GAP = 2000;       // 音效结束后间隔 2 秒
 
-// 语音播报函数（支持8杆和UP输了音效）
+// 语音播报函数（支持净杆8和UP输了音效）
 // enableSpecialAudio: 只有 Win123 + 有下注 + 4人或以上 时为 true
-// rankings: Win123 的排名结果，用于判断UP输了
+// rankings: Win123 的排名结果，包含 netScore 和 UP 状态
 const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null) => {
   if (!voiceEnabled) return;
   if (!('speechSynthesis' in window)) return;
@@ -2524,12 +2524,18 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   upLoseAudio.pause();
   upLoseAudio.currentTime = 0;
   
-  // 构建UP输了的玩家集合（用于快速查询）
+  // 构建UP输了的玩家集合 和 净杆数8的玩家集合
   const upLosePlayers = new Set();
+  const netScore8Players = new Set();
   if (rankings && enableSpecialAudio) {
     rankings.forEach(r => {
+      // UP输了：喊了UP但没赢
       if (r.up && r.finalRank > 1) {
         upLosePlayers.add(r.player);
+      }
+      // 净杆数 = 8
+      if (r.netScore === 8) {
+        netScore8Players.add(r.player);
       }
     });
   }
@@ -2570,7 +2576,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     // 语音播报结束后的处理
     msg.onend = () => {
       const isUpLose = upLosePlayers.has(player);
-      const isHuatAh = enableSpecialAudio && totalStrokes === 8;
+      const isHuatAh = netScore8Players.has(player);
       
       // UP输了优先播放（比8杆更惨）
       if (isUpLose) {
