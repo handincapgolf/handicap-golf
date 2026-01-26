@@ -2513,7 +2513,8 @@ const UP_LOSE_GAP = 2000;       // 音效结束后间隔 2 秒
 // 语音播报函数（支持净杆8和UP输了音效）
 // enableSpecialAudio: 只有 Win123 + 有下注 + 4人或以上 时为 true
 // rankings: Win123 的排名结果，包含 netScore 和 UP 状态
-const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null) => {
+// isTied: 是否全部平局
+const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null, isTied = false) => {
   if (!voiceEnabled) return;
   if (!('speechSynthesis' in window)) return;
   
@@ -2529,11 +2530,12 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   const netScore8Players = new Set();
   if (rankings && enableSpecialAudio) {
     rankings.forEach(r => {
-      // UP输了：喊了UP但没赢
-      if (r.up && r.finalRank > 1) {
+      // UP输了：喊了UP但没赢（平局时所有人都是第1名，不算输）
+      // 只有非平局时，finalRank > 1 才算输
+      if (!isTied && r.up && r.finalRank > 1) {
         upLosePlayers.add(r.player);
       }
-      // 净杆数 = 8
+      // 净杆数 = 8（不管平局）
       if (r.netScore === 8) {
         netScore8Players.add(r.player);
       }
@@ -2552,9 +2554,26 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     const totalStrokes = on + putt;
     const puttWord = putt === 1 ? 'putt' : 'putts';
     
-    const text = lang === 'zh' 
-      ? `${player}，${on}上${putt}推。`
-      : `${player}, ${on} on, ${putt} ${puttWord}.`;
+    // 从rankings获取该玩家的差点（如果有）
+    let handicap = 0;
+    if (rankings) {
+      const playerRanking = rankings.find(r => r.player === player);
+      if (playerRanking) {
+        handicap = playerRanking.stroke - playerRanking.netScore; // 总杆 - 净杆 = 差点
+      }
+    }
+    
+    // 构建播报文字
+    let text;
+    if (lang === 'zh') {
+      text = handicap > 0 
+        ? `${player}，${on}上${putt}推，让杆${handicap}。`
+        : `${player}，${on}上${putt}推。`;
+    } else {
+      text = handicap > 0
+        ? `${player}, ${on} on, ${putt} ${puttWord}, ${handicap} handicap.`
+        : `${player}, ${on} on, ${putt} ${puttWord}.`;
+    }
     
     const msg = new SpeechSynthesisUtterance(text);
     msg.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
@@ -3306,6 +3325,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const currentHoleWater = {};
     const currentHoleOb = {};
     let win123Rankings = null; // 用于保存Win123排名结果
+    let win123IsTied = false;  // 用于保存是否平局
     
     activePlayers.forEach(player => {
       currentHoleScores[player] = scores[player] || par;
@@ -3376,10 +3396,11 @@ const getScoreLabel = useCallback((stroke, par) => {
         setPrizePool(finalPrizePool);
         
       } else if (gameMode === 'win123') {
-        const { results, poolChange, rankings } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
+        const { results, poolChange, rankings, isTied } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
         
-        // 保存rankings供播报使用
+        // 保存rankings和isTied供播报使用
         win123Rankings = rankings;
+        win123IsTied = isTied;
         
         const newTotalMoney = { ...totalMoney };
         const newDetails = { ...moneyDetails };
@@ -3416,7 +3437,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     });
     // 只有 Win123 + 有下注 + 4人或以上 时启用特殊音效
     const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings);
+    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied);
     setCompletedHoles([...completedHoles, holeNum]);
     
     if (currentHole >= holes.length - 1) {
