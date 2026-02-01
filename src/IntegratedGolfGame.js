@@ -3026,6 +3026,12 @@ const getScoreLabel = useCallback((stroke, par) => {
         return;
       }
       setPrizePool(0);
+    } else if (gameMode === 'baccarat') {
+      if (stakeValue <= 0) {
+        showToast(t('noStake'), 'error');
+        return;
+      }
+      setPrizePool(0);
     }
 
     const initMoney = {};

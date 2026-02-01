@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-	<script>window.APP_VERSION = 'v1.0.1.3';</script>
+	<script>window.APP_VERSION = 'v1.0.1.4';</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HandinCap - Your Handicap in Hand</title>
     
@@ -53,9 +53,13 @@
                     console.log('New SW activated!');
                     
                     // 显示更新提示
-                    if (confirm('🎉 发现新版本！点击确定刷新页面加载最新内容')) {
-                      window.location.reload();
-                    }
+                    const lang = localStorage.getItem('handincap_lang') || 'en';
+const msg = lang === 'zh' 
+  ? '🎉 发现新版本！点击确定刷新页面加载最新版本'
+  : '🎉 New version available! Click OK to refresh and load the latest version';
+if (confirm(msg)) {
+  window.location.reload();
+}
                   }
                 });
               });
