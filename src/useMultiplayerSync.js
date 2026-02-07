@@ -1,0 +1,306 @@
+// useMultiplayerSync.js — HandinCap Multiplayer Sync Hook
+// Uses Cloudflare Workers + KV (polling every 3 seconds)
+
+import { useState, useEffect, useCallback, useRef } from 'react';
+
+const API_BASE = '/api';
+
+// Generate unique device ID (persisted in localStorage)
+function getDeviceId() {
+  let id = localStorage.getItem('handincap_device_id');
+  if (!id) {
+    id = 'dev_' + Math.random().toString(36).substr(2, 12) + '_' + Date.now();
+    localStorage.setItem('handincap_device_id', id);
+  }
+  return id;
+}
+
+async function apiCall(path, method = 'GET', body = null) {
+  const opts = {
+    method,
+    headers: { 'Content-Type': 'application/json' },
+  };
+  if (body) opts.body = JSON.stringify(body);
+  const res = await fetch(`${API_BASE}${path}`, opts);
+  return res.json();
+}
+
+export function useMultiplayerSync() {
+  const [multiplayerOn, setMultiplayerOn] = useState(false);
+  const [multiplayerRole, setMultiplayerRole] = useState(null); // 'creator' | 'joiner'
+  const [gameCode, setGameCode] = useState('');
+  const [joinerCode, setJoinerCode] = useState('');
+  const [remoteGame, setRemoteGame] = useState(null);
+  const [syncStatus, setSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'error' | 'connected'
+  const [syncFlash, setSyncFlash] = useState(null);
+  const [confirmed, setConfirmed] = useState({ creator: false, joiner: false });
+  const [claimed, setClaimed] = useState({}); // { playerName: "creator" | "joiner" }
+  const [claimChecked, setClaimChecked] = useState({});
+  const [multiplayerSection, setMultiplayerSection] = useState(null); // 'lobby' | 'joinerEntry' | 'joinerClaim'
+  
+  const pollRef = useRef(null);
+  const deviceId = useRef(getDeviceId());
+  const lastUpdateRef = useRef(0);
+
+  // Start polling for game state
+  const startPolling = useCallback((code) => {
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      try {
+        const result = await apiCall(`/game/${code}`);
+        if (result.ok && result.game) {
+          // Only update if data changed
+          if (result.game.lastUpdate > lastUpdateRef.current) {
+            lastUpdateRef.current = result.game.lastUpdate;
+            setRemoteGame(result.game);
+            setSyncStatus('connected');
+            
+            // Update confirmed state from server
+            const hole = result.game.currentHole;
+            if (result.game.holes && result.game.holes[hole]) {
+              setConfirmed(result.game.holes[hole].confirmed || { creator: false, joiner: false });
+            }
+            
+            // Update claimed state
+            if (result.game.claimed) {
+              setClaimed(result.game.claimed);
+            }
+          }
+        }
+      } catch (err) {
+        setSyncStatus('error');
+      }
+    }, 3000);
+  }, []);
+
+  const stopPolling = useCallback(() => {
+    if (pollRef.current) {
+      clearInterval(pollRef.current);
+      pollRef.current = null;
+    }
+  }, []);
+
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => stopPolling();
+  }, [stopPolling]);
+
+  // Creator: Create game room
+  const createGame = useCallback(async (gameSetup) => {
+    try {
+      setSyncStatus('syncing');
+      const result = await apiCall('/game/create', 'POST', {
+        ...gameSetup,
+        deviceId: deviceId.current,
+      });
+      if (result.ok) {
+        setGameCode(result.code);
+        setMultiplayerRole('creator');
+        setClaimed(result.game.claimed || {});
+        setRemoteGame(result.game);
+        setSyncStatus('connected');
+        startPolling(result.code);
+        setMultiplayerSection('lobby');
+        return result;
+      } else {
+        setSyncStatus('error');
+        return result;
+      }
+    } catch (err) {
+      setSyncStatus('error');
+      return { ok: false, error: err.message };
+    }
+  }, [startPolling]);
+
+  // Joiner: Join game
+  const joinGame = useCallback(async (code) => {
+    try {
+      setSyncStatus('syncing');
+      const result = await apiCall(`/game/${code}`);
+      if (result.ok) {
+        setGameCode(code);
+        setMultiplayerRole('joiner');
+        setRemoteGame(result.game);
+        setClaimed(result.game.claimed || {});
+        
+        // Register joiner device
+        await apiCall(`/game/${code}/join`, 'PUT', { deviceId: deviceId.current });
+        
+        setSyncStatus('connected');
+        startPolling(code);
+        setMultiplayerSection('joinerClaim');
+        return result;
+      } else {
+        setSyncStatus('error');
+        return result;
+      }
+    } catch (err) {
+      setSyncStatus('error');
+      return { ok: false, error: err.message };
+    }
+  }, [startPolling]);
+
+  // Joiner: Claim players
+  const claimPlayers = useCallback(async (playerNames) => {
+    if (!gameCode) return { ok: false };
+    const result = await apiCall(`/game/${gameCode}/claim`, 'PUT', { players: playerNames });
+    if (result.ok) {
+      setClaimed(result.game.claimed || {});
+      setRemoteGame(result.game);
+      setMultiplayerSection('lobby');
+    }
+    return result;
+  }, [gameCode]);
+
+  // Creator: Start the game
+  const startMultiplayerGame = useCallback(async () => {
+    if (!gameCode) return { ok: false };
+    const result = await apiCall(`/game/${gameCode}/start`, 'PUT', {});
+    if (result.ok) {
+      setRemoteGame(result.game);
+      setConfirmed({ creator: false, joiner: false });
+    }
+    return result;
+  }, [gameCode]);
+
+  // Submit scores for current hole
+  const submitScores = useCallback(async (hole, data) => {
+    if (!gameCode || !multiplayerRole) return { ok: false };
+    const result = await apiCall(`/game/${gameCode}/score`, 'PUT', {
+      hole,
+      role: multiplayerRole,
+      ...data,
+    });
+    if (result.ok) {
+      setRemoteGame(result.game);
+      if (data.confirmed) {
+        setSyncFlash(multiplayerRole);
+        setTimeout(() => setSyncFlash(null), 1500);
+      }
+    }
+    return result;
+  }, [gameCode, multiplayerRole]);
+
+  // Confirm my scores for this hole
+  const confirmMyScores = useCallback(async (hole, scores, putts, ups, upOrder, water, ob) => {
+    return submitScores(hole, {
+      scores, putts, ups, upOrder, water, ob,
+      confirmed: true,
+    });
+  }, [submitScores]);
+
+  // Move to next hole
+  const syncNextHole = useCallback(async (nextHole, gameState) => {
+    if (!gameCode) return { ok: false };
+    const result = await apiCall(`/game/${gameCode}/next`, 'PUT', {
+      nextHole,
+      ...gameState,
+    });
+    if (result.ok) {
+      setRemoteGame(result.game);
+      setConfirmed({ creator: false, joiner: false });
+    }
+    return result;
+  }, [gameCode]);
+
+  // Sync edit
+  const syncEdit = useCallback(async (gameState) => {
+    if (!gameCode) return { ok: false };
+    const result = await apiCall(`/game/${gameCode}/edit`, 'PUT', gameState);
+    if (result.ok) {
+      setRemoteGame(result.game);
+    }
+    return result;
+  }, [gameCode]);
+
+  // Get players assigned to my role
+  const getMyPlayers = useCallback((allPlayers) => {
+    if (!multiplayerOn || !multiplayerRole) return allPlayers;
+    return allPlayers.filter(p => claimed[p] === multiplayerRole);
+  }, [multiplayerOn, multiplayerRole, claimed]);
+
+  // Get players assigned to other role
+  const getOtherPlayers = useCallback((allPlayers) => {
+    if (!multiplayerOn || !multiplayerRole) return [];
+    const otherRole = multiplayerRole === 'creator' ? 'joiner' : 'creator';
+    return allPlayers.filter(p => claimed[p] === otherRole);
+  }, [multiplayerOn, multiplayerRole, claimed]);
+
+  // Check if other side has confirmed
+  const isOtherConfirmed = useCallback(() => {
+    const otherRole = multiplayerRole === 'creator' ? 'joiner' : 'creator';
+    return confirmed[otherRole] || false;
+  }, [multiplayerRole, confirmed]);
+
+  const isBothConfirmed = useCallback(() => {
+    return confirmed.creator && confirmed.joiner;
+  }, [confirmed]);
+
+  const isMyConfirmed = useCallback(() => {
+    return confirmed[multiplayerRole] || false;
+  }, [multiplayerRole, confirmed]);
+
+  // Get scores from remote for other players' current hole
+  const getRemoteHoleData = useCallback((holeNum) => {
+    if (!remoteGame?.holes?.[holeNum]) return null;
+    return remoteGame.holes[holeNum];
+  }, [remoteGame]);
+
+  // Reset multiplayer state
+  const resetMultiplayer = useCallback(() => {
+    stopPolling();
+    setMultiplayerOn(false);
+    setMultiplayerRole(null);
+    setGameCode('');
+    setJoinerCode('');
+    setRemoteGame(null);
+    setSyncStatus('idle');
+    setSyncFlash(null);
+    setConfirmed({ creator: false, joiner: false });
+    setClaimed({});
+    setClaimChecked({});
+    setMultiplayerSection(null);
+    lastUpdateRef.current = 0;
+  }, [stopPolling]);
+
+  // Check if joiner has claimed any players
+  const joinerCount = Object.values(claimed).filter(v => v === 'joiner').length;
+
+  return {
+    // State
+    multiplayerOn, setMultiplayerOn,
+    multiplayerRole,
+    gameCode,
+    joinerCode, setJoinerCode,
+    remoteGame,
+    syncStatus,
+    syncFlash,
+    confirmed,
+    claimed,
+    claimChecked, setClaimChecked,
+    multiplayerSection, setMultiplayerSection,
+    joinerCount,
+    deviceId: deviceId.current,
+    
+    // Actions
+    createGame,
+    joinGame,
+    claimPlayers,
+    startMultiplayerGame,
+    submitScores,
+    confirmMyScores,
+    syncNextHole,
+    syncEdit,
+    resetMultiplayer,
+    startPolling,
+    stopPolling,
+    
+    // Helpers
+    getMyPlayers,
+    getOtherPlayers,
+    isOtherConfirmed,
+    isBothConfirmed,
+    isMyConfirmed,
+    getRemoteHoleData,
+  };
+}

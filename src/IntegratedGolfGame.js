@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import { useMultiplayerSync } from './useMultiplayerSync';
 import { 
   Plus, 
   Minus, 
@@ -2492,6 +2493,69 @@ const [voiceEnabled, setVoiceEnabled] = useState(() => {
 });
 
 const [showAdvanceTooltip, setShowAdvanceTooltip] = useState(false);
+
+// ========== 多人同步 ==========
+const mp = useMultiplayerSync();
+
+// Joiner: 检测 Creator 开始比赛
+useEffect(() => {
+  if (!mp.multiplayerOn || !mp.remoteGame) return;
+  if (mp.remoteGame.status === 'playing' && mp.multiplayerSection === 'lobby') {
+    mp.setMultiplayerSection(null);
+    setCurrentSection('game');
+  }
+}, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
+
+// 多人模式：合并对方球员的成绩到本地 state
+useEffect(() => {
+  if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
+  const hole = mp.remoteGame.currentHole;
+  const holeData = mp.remoteGame.holes?.[hole];
+  if (!holeData) return;
+  
+  const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
+  const otherPlayers = activePlayers.filter(p => mp.claimed[p] === otherRole);
+  
+  if (otherPlayers.length === 0) return;
+  
+  // Merge other players' scores into local state
+  setScores(prev => {
+    const next = { ...prev };
+    otherPlayers.forEach(p => {
+      if (holeData.scores?.[p] !== undefined) next[p] = holeData.scores[p];
+    });
+    return next;
+  });
+  setPutts(prev => {
+    const next = { ...prev };
+    otherPlayers.forEach(p => {
+      if (holeData.putts?.[p] !== undefined) next[p] = holeData.putts[p];
+    });
+    return next;
+  });
+  setUps(prev => {
+    const next = { ...prev };
+    otherPlayers.forEach(p => {
+      if (holeData.ups?.[p] !== undefined) next[p] = holeData.ups[p];
+    });
+    return next;
+  });
+  setWater(prev => {
+    const next = { ...prev };
+    otherPlayers.forEach(p => {
+      if (holeData.water?.[p] !== undefined) next[p] = holeData.water[p];
+    });
+    return next;
+  });
+  setOb(prev => {
+    const next = { ...prev };
+    otherPlayers.forEach(p => {
+      if (holeData.ob?.[p] !== undefined) next[p] = holeData.ob[p];
+    });
+    return next;
+  });
+}, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers]);
+
 // 点击外部关闭气泡
 useEffect(() => {
   if (!showAdvanceTooltip) return;
@@ -3074,8 +3138,29 @@ const getScoreLabel = useCallback((stroke, par) => {
     setCompletedHoles([]);
     setGameComplete(false);
     setCurrentHoleSettlement(null);
+    
+    // ===== 多人模式：创建房间 =====
+    if (mp.multiplayerOn) {
+      const gameSetup = {
+        course: selectedCourse || {},
+        gameMode,
+        stake: Number(stake) || 0,
+        jumboMode,
+        players: activePlayers,
+        handicaps: playerHandicaps,
+        advanceMode,
+        advancePlayers,
+      };
+      mp.createGame(gameSetup).then(result => {
+        if (!result.ok) {
+          showToast('Failed to create game room', 'error');
+        }
+      });
+      return; // Don't go to game section yet — go to lobby
+    }
+    
     setCurrentSection('game');
-  }, [activePlayers, stake, gameMode, showToast, t]);
+  }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, advanceMode, advancePlayers, lang]);
 
   // 基于 Index 的让杆计算
   // holeNum: 实际洞号 (1-18)
@@ -3446,11 +3531,17 @@ const getScoreLabel = useCallback((stroke, par) => {
     playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied);
     setCompletedHoles([...completedHoles, holeNum]);
     
+    const newCompletedHoles = [...completedHoles, holeNum];
+    
     if (currentHole >= holes.length - 1) {
       setGameComplete(true);
 	showToast(t('gameOver'));
 	setCurrentSection('scorecard');
 	triggerConfetti();
+	// 多人同步：通知结束
+	if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
+	  mp.syncNextHole(holes.length, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles, finished: true });
+	}
     } else {
       setCurrentHole(currentHole + 1);
       setScores({});
@@ -3460,11 +3551,15 @@ const getScoreLabel = useCallback((stroke, par) => {
       setWater({});
       setOb({});
       setCurrentHoleSettlement(null);
+      // 多人同步：通知下一洞
+      if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
+        mp.syncNextHole(currentHole + 1, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles });
+      }
     }
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
-  }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults]);
+  }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults, mp]);
 
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
@@ -4525,11 +4620,317 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 >
                   {t('back')}
                 </button>
+                
+                {/* 多人同步开关 */}
+                <button
+                  onClick={() => mp.setMultiplayerOn(!mp.multiplayerOn)}
+                  className={`px-3 py-2 rounded-lg font-medium text-sm transition ${
+                    mp.multiplayerOn
+                      ? 'bg-amber-500 text-white hover:bg-amber-600'
+                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
+                  }`}
+                >
+                  {mp.multiplayerOn ? '📡 Sync' : '📡'}
+                </button>
+                
                 <button
                   onClick={startGame}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700"
                 >
-                  {t('start')}
+                  {mp.multiplayerOn ? (lang === 'zh' ? '创建房间' : 'Create Room') : t('start')}
+                </button>
+              </div>
+              
+              {/* 加入房间按钮 */}
+              {mp.multiplayerOn && !mp.multiplayerRole && (
+                <button
+                  onClick={() => mp.setMultiplayerSection('joinerEntry')}
+                  className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 mt-2"
+                >
+                  {lang === 'zh' ? '🔗 加入房间' : '🔗 Join Room'}
+                </button>
+              )}
+            </div>
+          )}
+
+          {/* ========== 多人同步：Creator 大厅 ========== */}
+          {mp.multiplayerSection === 'lobby' && (
+            <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-6">
+              <div className="max-w-md mx-auto px-4 space-y-4">
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {mp.multiplayerRole === 'creator' 
+                      ? (lang === 'zh' ? '📡 等待同伴加入' : '📡 Waiting for Partner')
+                      : (lang === 'zh' ? '📡 等待开始' : '📡 Waiting to Start')}
+                  </h2>
+                </div>
+                
+                {/* Game Code Display */}
+                <div className="bg-white rounded-xl p-6 shadow-md text-center">
+                  <p className="text-sm text-gray-500 mb-2">
+                    {lang === 'zh' ? '房间码' : 'Room Code'}
+                  </p>
+                  <div className="text-4xl font-mono font-bold tracking-[0.3em] text-amber-600 bg-amber-50 rounded-lg py-3">
+                    {mp.gameCode}
+                  </div>
+                  <button
+                    onClick={() => {
+                      navigator.clipboard?.writeText(mp.gameCode);
+                      showToast(lang === 'zh' ? '已复制' : 'Copied!', 'success');
+                    }}
+                    className="mt-3 text-sm text-blue-500 underline"
+                  >
+                    {lang === 'zh' ? '复制房间码' : 'Copy Code'}
+                  </button>
+                </div>
+
+                {/* Player Claim Status */}
+                <div className="bg-white rounded-xl p-4 shadow-md">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    {lang === 'zh' ? '球员分配' : 'Player Assignment'}
+                  </h3>
+                  {activePlayers.map(player => (
+                    <div key={player} className="flex items-center justify-between py-2 border-b last:border-0">
+                      <span className="font-medium">{player}</span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        mp.claimed[player] === 'creator' ? 'bg-green-100 text-green-700' :
+                        mp.claimed[player] === 'joiner' ? 'bg-blue-100 text-blue-700' :
+                        'bg-gray-100 text-gray-500'
+                      }`}>
+                        {mp.claimed[player] === 'creator' ? (lang === 'zh' ? '🅰️ 我的' : '🅰️ Mine') :
+                         mp.claimed[player] === 'joiner' ? (lang === 'zh' ? '🅱️ 对方' : '🅱️ Partner') :
+                         (lang === 'zh' ? '未认领' : 'Unclaimed')}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Sync status indicator */}
+                <div className="text-center">
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-sm ${
+                    mp.syncStatus === 'connected' ? 'bg-green-100 text-green-700' :
+                    mp.syncStatus === 'error' ? 'bg-red-100 text-red-700' :
+                    'bg-gray-100 text-gray-500'
+                  }`}>
+                    <span className={`w-2 h-2 rounded-full ${
+                      mp.syncStatus === 'connected' ? 'bg-green-500 animate-pulse' :
+                      mp.syncStatus === 'error' ? 'bg-red-500' :
+                      'bg-gray-400'
+                    }`}></span>
+                    {mp.syncStatus === 'connected' ? (lang === 'zh' ? '已连接' : 'Connected') :
+                     mp.syncStatus === 'error' ? (lang === 'zh' ? '连接错误' : 'Error') :
+                     (lang === 'zh' ? '连接中...' : 'Connecting...')}
+                  </div>
+                </div>
+
+                {/* Creator: Start Game button (only show when joiner has claimed players) */}
+                {mp.multiplayerRole === 'creator' && mp.joinerCount > 0 && (
+                  <button
+                    onClick={async () => {
+                      const result = await mp.startMultiplayerGame();
+                      if (result.ok) {
+                        setCurrentSection('game');
+                        mp.setMultiplayerSection(null);
+                      }
+                    }}
+                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 text-lg"
+                  >
+                    {lang === 'zh' ? '🏌️ 开始比赛' : '🏌️ Start Game'}
+                  </button>
+                )}
+
+                {/* Back button */}
+                <button
+                  onClick={() => {
+                    mp.resetMultiplayer();
+                    mp.setMultiplayerSection(null);
+                  }}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                >
+                  {t('back')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========== 多人同步：Joiner 输入房间码 ========== */}
+          {mp.multiplayerSection === 'joinerEntry' && (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
+              <div className="max-w-md mx-auto px-4 space-y-4">
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {lang === 'zh' ? '🔗 加入房间' : '🔗 Join Room'}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {lang === 'zh' ? '输入对方的6位房间码' : 'Enter the 6-digit room code'}
+                  </p>
+                </div>
+                
+                <div className="bg-white rounded-xl p-6 shadow-md text-center">
+                  <input
+                    type="text"
+                    maxLength={6}
+                    value={mp.joinerCode}
+                    onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                    placeholder="XXXXXX"
+                    className="text-center text-3xl font-mono font-bold tracking-[0.3em] w-full py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  />
+                </div>
+
+                <button
+                  onClick={async () => {
+                    if (mp.joinerCode.length !== 6) {
+                      showToast(lang === 'zh' ? '请输入6位房间码' : 'Enter 6-digit code', 'error');
+                      return;
+                    }
+                    const result = await mp.joinGame(mp.joinerCode);
+                    if (!result.ok) {
+                      showToast(result.error || 'Failed to join', 'error');
+                    }
+                    // joinGame will set multiplayerSection to 'joinerClaim'
+                  }}
+                  disabled={mp.joinerCode.length !== 6}
+                  className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition ${
+                    mp.joinerCode.length === 6
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  }`}
+                >
+                  {lang === 'zh' ? '加入' : 'Join'}
+                </button>
+                
+                <button
+                  onClick={() => {
+                    mp.setJoinerCode('');
+                    mp.setMultiplayerSection(null);
+                  }}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                >
+                  {t('back')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========== 多人同步：Joiner 认领球员 ========== */}
+          {mp.multiplayerSection === 'joinerClaim' && mp.remoteGame && (
+            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
+              <div className="max-w-md mx-auto px-4 space-y-4">
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {lang === 'zh' ? '选择你的球员' : 'Claim Your Players'}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {lang === 'zh' ? '选择你要负责输入成绩的球员' : 'Select players you will score for'}
+                  </p>
+                </div>
+
+                <div className="bg-white rounded-xl p-4 shadow-md space-y-2">
+                  {(mp.remoteGame.players || []).map(player => (
+                    <label key={player} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-100">
+                      <input
+                        type="checkbox"
+                        checked={mp.claimChecked[player] || false}
+                        onChange={(e) => mp.setClaimChecked(prev => ({ ...prev, [player]: e.target.checked }))}
+                        className="w-5 h-5 rounded text-blue-600"
+                      />
+                      <span className="font-medium text-gray-900 text-lg">{player}</span>
+                      {mp.claimed[player] === 'creator' && (
+                        <span className="ml-auto text-xs text-green-600">🅰️ Creator</span>
+                      )}
+                    </label>
+                  ))}
+                </div>
+
+                <button
+                  onClick={async () => {
+                    const selected = Object.entries(mp.claimChecked).filter(([,v]) => v).map(([k]) => k);
+                    if (selected.length === 0) {
+                      showToast(lang === 'zh' ? '请至少选择一位球员' : 'Select at least one player', 'error');
+                      return;
+                    }
+                    // Apply remote game settings locally
+                    const g = mp.remoteGame;
+                    setGameMode(g.gameMode || 'matchPlay');
+                    setStake(String(g.stake || ''));
+                    setJumboMode(g.jumboMode || false);
+                    setPlayerHandicaps(g.handicaps || {});
+                    setAdvanceMode(g.advanceMode || 'off');
+                    setAdvancePlayers(g.advancePlayers || {});
+                    
+                    // Set player names
+                    const names = [...(g.players || [])];
+                    while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
+                    setPlayerNames(names);
+                    
+                    // Apply course if available
+                    if (g.course && g.course.fullName) {
+                      setSelectedCourse(g.course);
+                      if (g.course.pars) {
+                        const newPars = {};
+                        g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
+                        setPars(newPars);
+                      }
+                    }
+
+                    const result = await mp.claimPlayers(selected);
+                    if (result.ok) {
+                      // Initialize game state locally like startGame does
+                      const allP = g.players || [];
+                      const initMoney = {};
+                      const initDetails = {};
+                      const initAllScores = {};
+                      const initSpent = {};
+                      const initAllPutts = {};
+                      const initAllWater = {};
+                      const initAllOb = {};
+                      allP.forEach(player => {
+                        initMoney[player] = 0;
+                        initDetails[player] = { fromPool: 0, fromPlayers: {} };
+                        initAllScores[player] = {};
+                        initSpent[player] = 0;
+                        initAllPutts[player] = {};
+                        initAllWater[player] = {};
+                        initAllOb[player] = {};
+                        allP.forEach(other => {
+                          if (other !== player) initDetails[player].fromPlayers[other] = 0;
+                        });
+                      });
+                      setTotalMoney(initMoney);
+                      setMoneyDetails(initDetails);
+                      setAllScores(initAllScores);
+                      setAllUps({});
+                      setAllPutts(initAllPutts);
+                      setAllWater(initAllWater);
+                      setAllOb(initAllOb);
+                      setTotalSpent(initSpent);
+                      setCurrentHole(0);
+                      setScores({});
+                      setUps({});
+                      setPutts({});
+                      setWater({});
+                      setOb({});
+                      setCompletedHoles([]);
+                      setGameComplete(false);
+                      setCurrentHoleSettlement(null);
+                      
+                      showToast(lang === 'zh' ? '已认领，等待Creator开始' : 'Claimed! Waiting for start...', 'success');
+                      mp.setMultiplayerSection('lobby');
+                    }
+                  }}
+                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
+                >
+                  {lang === 'zh' ? '确认认领' : 'Confirm Claim'}
+                </button>
+
+                <button
+                  onClick={() => {
+                    mp.resetMultiplayer();
+                    mp.setMultiplayerSection(null);
+                  }}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                >
+                  {t('back')}
                 </button>
               </div>
             </div>
@@ -5399,13 +5800,62 @@ return (
 )}
 
           <div className="bg-white p-3">
+            {/* 多人同步状态栏 */}
+            {mp.multiplayerOn && (
+              <div className="mb-2 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-xs">
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full ${mp.syncStatus === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                  <span className="text-gray-600">📡 {mp.gameCode}</span>
+                </div>
+                <div className="flex gap-2">
+                  <span className={`px-2 py-0.5 rounded-full ${mp.confirmed.creator ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
+                    🅰️ {mp.confirmed.creator ? '✓' : '...'}
+                  </span>
+                  <span className={`px-2 py-0.5 rounded-full ${mp.confirmed.joiner ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-500'}`}>
+                    🅱️ {mp.confirmed.joiner ? '✓' : '...'}
+                  </span>
+                </div>
+              </div>
+            )}
+            
             <div className="flex gap-2">
-              <button
-                onClick={nextHole}
-                className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
-              >
-                {currentHole === holes.length - 1 ? t('finishRound') : t('nextHole')}
-              </button>
+              {/* 多人模式：Confirm 按钮 */}
+              {mp.multiplayerOn && !mp.isMyConfirmed() ? (
+                <button
+                  onClick={async () => {
+                    const holeNum = holes[currentHole];
+                    const par = pars[holeNum] || 4;
+                    const myPlayers = mp.getMyPlayers(activePlayers);
+                    const myScores = {}; const myPutts = {}; const myUps = {}; const myWater = {}; const myOb = {};
+                    myPlayers.forEach(p => {
+                      myScores[p] = scores[p] || par;
+                      myPutts[p] = putts[p] || 0;
+                      myUps[p] = ups[p] || false;
+                      myWater[p] = water[p] || 0;
+                      myOb[p] = ob[p] || 0;
+                    });
+                    await mp.confirmMyScores(holeNum, myScores, myPutts, myUps, upOrder, myWater, myOb);
+                    showToast(lang === 'zh' ? '已提交 ✓' : 'Submitted ✓', 'success');
+                  }}
+                  className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
+                >
+                  {lang === 'zh' ? '📤 确认提交' : '📤 Confirm'}
+                </button>
+              ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isBothConfirmed() ? (
+                <button
+                  disabled
+                  className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
+                >
+                  {lang === 'zh' ? '⏳ 等待对方...' : '⏳ Waiting...'}
+                </button>
+              ) : (
+                <button
+                  onClick={nextHole}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
+                >
+                  {currentHole === holes.length - 1 ? t('finishRound') : t('nextHole')}
+                </button>
+              )}
               <button
                 onClick={() => setCurrentSection('scorecard')}
                 className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition"
