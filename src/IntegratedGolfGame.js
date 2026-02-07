@@ -2661,6 +2661,37 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
+    
+    // Joiner: 自动跟随 Creator 的洞号
+    if (mp.remoteGame.currentHole !== undefined) {
+      const remoteHoleIndex = mp.remoteGame.currentHole;
+      if (remoteHoleIndex !== currentHole && mp.multiplayerRole === 'joiner') {
+        setCurrentHole(remoteHoleIndex);
+        setScores({});
+        setUps({});
+        setUpOrder([]);
+        setPutts({});
+        setWater({});
+        setOb({});
+        setCurrentHoleSettlement(null);
+        // Sync accumulated data from creator
+        if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+        if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+        if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+        if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+        if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+        if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
+        if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
+        if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+        if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+        if (mp.remoteGame.status === 'finished') {
+          setGameComplete(true);
+          setCurrentSection('scorecard');
+        }
+        return; // Don't merge scores for old hole
+      }
+    }
+    
     const hole = mp.remoteGame.currentHole;
     const holeData = mp.remoteGame.holes?.[hole];
     if (!holeData) return;
@@ -2705,7 +2736,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       });
       return next;
     });
-  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers]);
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole]);
 
   // 从localStorage加载游戏状态
   useEffect(() => {
@@ -5583,7 +5614,13 @@ return (
 
           <div className="bg-white text-gray-900 p-3"> 
 		  <div className="grid gap-3">
-              {activePlayers.map(player => {
+              {(() => {
+                // 多人模式：我的球员排前面
+                const sortedPlayers = mp.multiplayerOn 
+                  ? [...mp.getMyPlayers(activePlayers), ...mp.getOtherPlayers(activePlayers)]
+                  : activePlayers;
+                return sortedPlayers;
+              })().map(player => {
                 const holeNum = holes[currentHole];
                 const par = pars[holeNum] || 4;
                 const playerScore = scores[player] || par;
