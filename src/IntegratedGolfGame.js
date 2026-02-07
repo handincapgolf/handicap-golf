@@ -2652,11 +2652,11 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   // Joiner: 检测 Creator 开始比赛
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
-    if (mp.remoteGame.status === 'playing' && (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby')) {
+    if (mp.remoteGame.status === 'playing' && mp.multiplayerSection === 'lobby') {
       mp.setMultiplayerSection(null);
       setCurrentSection('game');
     }
-  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
+  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
@@ -3153,11 +3153,9 @@ const getScoreLabel = useCallback((stroke, par) => {
       mp.createGame(gameSetup).then(result => {
         if (!result.ok) {
           showToast('Failed to create game room', 'error');
-        } else {
-          setCurrentSection('mp-lobby');
         }
       });
-      return;
+      return; // Don't go to game section yet — go to lobby
     }
     
     setCurrentSection('game');
@@ -3992,9 +3990,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         const result = await mp.joinGame(mp.joinerCode);
                         if (!result.ok) {
                           showToast(result.error || 'Room not found', 'error');
-                        } else {
-                          setCurrentSection('mp-claim');
                         }
+                        // joinGame sets multiplayerSection to 'joinerClaim'
                       }}
                       disabled={mp.joinerCode.length !== 6}
                       className={`px-4 py-2 rounded-lg font-semibold transition ${
@@ -4686,7 +4683,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Creator 大厅 ========== */}
-          {(currentSection === 'mp-lobby' || mp.multiplayerSection === 'lobby') && (
+          {mp.multiplayerSection === 'lobby' && (
             <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -4776,7 +4773,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
-                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
@@ -4787,7 +4783,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Joiner 认领球员 ========== */}
-          {(currentSection === 'mp-claim' || mp.multiplayerSection === 'joinerClaim') && mp.remoteGame && (
+          {mp.multiplayerSection === 'joinerClaim' && mp.remoteGame && (
             <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -4890,7 +4886,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       
                       showToast(lang === 'zh' ? '已认领，等待Creator开始' : 'Claimed! Waiting for start...', 'success');
                       mp.setMultiplayerSection('lobby');
-                      setCurrentSection('mp-lobby');
                     }
                   }}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
@@ -4902,7 +4897,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
-                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
@@ -5602,9 +5596,15 @@ return (
                 const scoreLabel = getScoreLabel(netScore, par);
                 const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
                 
+                // 多人模式：判断是否是我的球员
+                const isMyPlayer = !mp.multiplayerOn || mp.getMyPlayers(activePlayers).includes(player);
+                const noOp = () => {};
+                
                 if (isAdvancePlayer) {
                   // Advance 玩家 - 显示高级卡片
                   return (
+                    <div key={player} style={!isMyPlayer ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                    {!isMyPlayer && <div className="text-xs text-center text-gray-400 -mb-1">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
                     <AdvancedPlayerCard
   key={player}
   player={player}
@@ -5626,6 +5626,7 @@ return (
   gameMode={gameMode}
   upOrder={upOrder}
 />
+                  </div>
                   );
 } else {
   // Classic 玩家 - 方案3 布局（无 Water/OB）
@@ -5633,7 +5634,9 @@ return (
   const strokeLabel = getScoreLabel(stroke, par);
   
   return (
-    <div key={player} className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
+    <div key={player} style={!isMyPlayer ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+    {!isMyPlayer && <div className="text-xs text-center text-gray-400 mb-0.5">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
+    <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
       gameMode === 'baccarat' 
         ? getBaccaratCardClass(player, upOrder)
         : (playerUp ? 'card-up-active' : 'bg-gray-50 border border-gray-200')
@@ -5727,6 +5730,7 @@ return (
         </div>
         
       </div>
+    </div>
     </div>
   );
 }
