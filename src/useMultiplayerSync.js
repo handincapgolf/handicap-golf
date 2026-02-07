@@ -55,10 +55,14 @@ export function useMultiplayerSync() {
             setRemoteGame(result.game);
             setSyncStatus('connected');
             
-            // Update confirmed state from server
-            const hole = result.game.currentHole;
-            if (result.game.holes && result.game.holes[hole]) {
-              setConfirmed(result.game.holes[hole].confirmed || { creator: false, joiner: false });
+            // Update confirmed state - find confirmed from current hole data
+            // holes are keyed by hole NUMBER, not index
+            if (result.game.holes) {
+              const holeKeys = Object.keys(result.game.holes);
+              const latestKey = holeKeys[holeKeys.length - 1];
+              if (latestKey && result.game.holes[latestKey]) {
+                setConfirmed(result.game.holes[latestKey].confirmed || { creator: false, joiner: false });
+              }
             }
             
             // Update claimed state

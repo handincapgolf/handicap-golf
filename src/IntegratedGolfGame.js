@@ -2692,8 +2692,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       }
     }
     
-    const hole = mp.remoteGame.currentHole;
-    const holeData = mp.remoteGame.holes?.[hole];
+    const holeIndex = mp.remoteGame.currentHole;
+    const holeNum = holes[holeIndex]; // convert index to hole number
+    const holeData = mp.remoteGame.holes?.[holeNum];
     if (!holeData) return;
     
     const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
