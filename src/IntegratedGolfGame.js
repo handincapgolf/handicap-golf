@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback, useMemo, memo } from 'react';
+import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { useMultiplayerSync } from './useMultiplayerSync';
 import { 
   Plus, 
@@ -2489,6 +2489,9 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
   const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [showQrScanner, setShowQrScanner] = useState(false);
+  const qrVideoRef = useRef(null);
+  const qrStreamRef = useRef(null);
   
   // 语音播报状态
 const [voiceEnabled, setVoiceEnabled] = useState(() => {
@@ -2742,6 +2745,64 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, []);
 
+  // QR Scanner
+  const stopQrScanner = useCallback(() => {
+    if (qrStreamRef.current) {
+      qrStreamRef.current.getTracks().forEach(t => t.stop());
+      qrStreamRef.current = null;
+    }
+    setShowQrScanner(false);
+  }, []);
+
+  const startQrScanner = useCallback(async () => {
+    setShowQrScanner(true);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      qrStreamRef.current = stream;
+      const tryAttach = () => {
+        if (qrVideoRef.current) {
+          qrVideoRef.current.srcObject = stream;
+          qrVideoRef.current.play();
+          const canvas = document.createElement('canvas');
+          const ctx = canvas.getContext('2d');
+          const scan = async () => {
+            if (!qrVideoRef.current || !qrStreamRef.current) return;
+            const v = qrVideoRef.current;
+            if (v.readyState >= 2) {
+              canvas.width = v.videoWidth;
+              canvas.height = v.videoHeight;
+              ctx.drawImage(v, 0, 0);
+              try {
+                if ('BarcodeDetector' in window) {
+                  const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
+                  const results = await detector.detect(canvas);
+                  if (results.length > 0) {
+                    const val = results[0].rawValue;
+                    const match = val.match(/[?&]join=([A-Z0-9]{6})/i);
+                    const code = match ? match[1] : (/^[A-Z0-9]{6}$/i.test(val.trim()) ? val.trim() : null);
+                    if (code) {
+                      mp.setJoinerCode(code.toUpperCase());
+                      stopQrScanner();
+                      showToast('QR scanned!', 'success');
+                      return;
+                    }
+                  }
+                }
+              } catch(e) {}
+            }
+            if (qrStreamRef.current) requestAnimationFrame(scan);
+          };
+          scan();
+        } else {
+          setTimeout(tryAttach, 100);
+        }
+      };
+      tryAttach();
+    } catch(e) {
+      showToast(lang === 'zh' ? '无法访问相机' : 'Camera access denied', 'error');
+      setShowQrScanner(false);
+    }
+  }, [mp, stopQrScanner, showToast, lang]);
   // 从localStorage加载游戏状态
   useEffect(() => {
     const savedGame = localStorage.getItem('golfGameState');
@@ -4037,8 +4098,32 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     >
                       {lang === 'zh' ? '加入' : 'Join'}
                     </button>
+                    <button
+                      onClick={startQrScanner}
+                      className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
+                      title="Scan QR"
+                    >
+                      📷
+                    </button>
                   </div>
                 </div>
+
+                {/* QR Scanner Modal */}
+                {showQrScanner && (
+                  <div className="fixed inset-0 bg-black bg-opacity-80 z-50 flex flex-col items-center justify-center">
+                    <div className="relative w-72 h-72 rounded-2xl overflow-hidden border-4 border-white">
+                      <video ref={qrVideoRef} className="w-full h-full object-cover" playsInline muted />
+                      <div className="absolute inset-0 border-2 border-green-400 rounded-2xl pointer-events-none" />
+                    </div>
+                    <p className="text-white mt-4 text-sm">{lang === 'zh' ? '对准QR码扫描' : 'Point at QR code'}</p>
+                    <button
+                      onClick={stopQrScanner}
+                      className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-semibold"
+                    >
+                      {lang === 'zh' ? '关闭' : 'Close'}
+                    </button>
+                  </div>
+                )}
              </div>
             
             {/* 页脚版权 */}
