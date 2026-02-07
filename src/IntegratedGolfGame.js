@@ -2683,6 +2683,13 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     }
     
+    // Joiner: sync accumulated data when Creator has advanced
+    const remoteHoleIndex = mp.remoteGame.currentHole;
+    if (mp.multiplayerRole === 'joiner' && remoteHoleIndex > currentHole) {
+      // Don't auto-advance, just sync data - Joiner advances via own Confirm & Next
+      return;
+    }
+    
     // Only merge scores for CURRENT hole (use hole number as key)
     const holeIndex = mp.remoteGame.currentHole;
     // Only merge if remote is on same hole as local
