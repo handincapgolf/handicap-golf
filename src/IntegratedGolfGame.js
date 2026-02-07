@@ -2362,6 +2362,11 @@ function IntegratedGolfGame() {
           transform: scale(0.95);
         }
         
+        .mp-locked-card button {
+          opacity: 0.3 !important;
+          background: #9ca3af !important;
+        }
+        
         .badge-count {
           position: absolute;
           bottom: -2px;
@@ -5641,7 +5646,7 @@ return (
                 if (isAdvancePlayer) {
                   // Advance 玩家 - 显示高级卡片
                   return (
-                    <div key={player} style={!isMyPlayer ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+                    <div key={player} className={!isMyPlayer ? 'mp-locked-card' : ''} style={!isMyPlayer ? { pointerEvents: 'none' } : {}}>
                     {!isMyPlayer && <div className="text-xs text-center text-gray-400 -mb-1">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
                     <AdvancedPlayerCard
   key={player}
@@ -5672,7 +5677,7 @@ return (
   const strokeLabel = getScoreLabel(stroke, par);
   
   return (
-    <div key={player} style={!isMyPlayer ? { opacity: 0.5, pointerEvents: 'none' } : {}}>
+    <div key={player} className={!isMyPlayer ? 'mp-locked-card' : ''} style={!isMyPlayer ? { pointerEvents: 'none' } : {}}>
     {!isMyPlayer && <div className="text-xs text-center text-gray-400 mb-0.5">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
     <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
       gameMode === 'baccarat' 
@@ -5865,6 +5870,22 @@ return (
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
                   {lang === 'zh' ? '⏳ 等待对方...' : '⏳ Waiting...'}
+                </button>
+              ) : mp.multiplayerOn && mp.isBothConfirmed() ? (
+                <button
+                  onClick={() => {
+                    if (mp.multiplayerRole === 'creator') {
+                      nextHole();
+                    } else {
+                      // Joiner: mark ready, will auto-advance when creator syncs
+                      showToast(lang === 'zh' ? '等待Creator确认...' : 'Waiting for Creator...', 'success');
+                    }
+                  }}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
+                >
+                  {currentHole === holes.length - 1 
+                    ? (lang === 'zh' ? '✅ 确认 & 完成' : '✅ Confirm & Finish')
+                    : (lang === 'zh' ? '✅ 确认 & 下一洞' : '✅ Confirm & Next')}
                 </button>
               ) : (
                 <button
