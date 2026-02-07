@@ -2731,6 +2731,17 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     });
   }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole]);
 
+  // 检测 URL 参数 ?join=XXXXXX（QR码扫描）
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const joinCode = params.get('join');
+    if (joinCode && joinCode.length === 6) {
+      mp.setJoinerCode(joinCode.toUpperCase());
+      // Clean URL
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, []);
+
   // 从localStorage加载游戏状态
   useEffect(() => {
     const savedGame = localStorage.getItem('golfGameState');
@@ -4735,6 +4746,16 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   >
                     {lang === 'zh' ? '复制房间码' : 'Copy Code'}
                   </button>
+                  
+                  {/* QR Code */}
+                  <div className="mt-3">
+                    <img 
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('https://handincap.golf?join=' + mp.gameCode)}`}
+                      alt="QR Code"
+                      className="mx-auto w-40 h-40 rounded-lg"
+                    />
+                    <p className="text-xs text-gray-400 mt-1">{lang === 'zh' ? '扫码加入' : 'Scan to join'}</p>
+                  </div>
                 </div>
 
                 {/* Player Claim Status */}
