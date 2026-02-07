@@ -2497,65 +2497,6 @@ const [showAdvanceTooltip, setShowAdvanceTooltip] = useState(false);
 // ========== 多人同步 ==========
 const mp = useMultiplayerSync();
 
-// Joiner: 检测 Creator 开始比赛
-useEffect(() => {
-  if (!mp.multiplayerOn || !mp.remoteGame) return;
-  if (mp.remoteGame.status === 'playing' && mp.multiplayerSection === 'lobby') {
-    mp.setMultiplayerSection(null);
-    setCurrentSection('game');
-  }
-}, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
-
-// 多人模式：合并对方球员的成绩到本地 state
-useEffect(() => {
-  if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
-  const hole = mp.remoteGame.currentHole;
-  const holeData = mp.remoteGame.holes?.[hole];
-  if (!holeData) return;
-  
-  const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
-  const otherPlayers = activePlayers.filter(p => mp.claimed[p] === otherRole);
-  
-  if (otherPlayers.length === 0) return;
-  
-  // Merge other players' scores into local state
-  setScores(prev => {
-    const next = { ...prev };
-    otherPlayers.forEach(p => {
-      if (holeData.scores?.[p] !== undefined) next[p] = holeData.scores[p];
-    });
-    return next;
-  });
-  setPutts(prev => {
-    const next = { ...prev };
-    otherPlayers.forEach(p => {
-      if (holeData.putts?.[p] !== undefined) next[p] = holeData.putts[p];
-    });
-    return next;
-  });
-  setUps(prev => {
-    const next = { ...prev };
-    otherPlayers.forEach(p => {
-      if (holeData.ups?.[p] !== undefined) next[p] = holeData.ups[p];
-    });
-    return next;
-  });
-  setWater(prev => {
-    const next = { ...prev };
-    otherPlayers.forEach(p => {
-      if (holeData.water?.[p] !== undefined) next[p] = holeData.water[p];
-    });
-    return next;
-  });
-  setOb(prev => {
-    const next = { ...prev };
-    otherPlayers.forEach(p => {
-      if (holeData.ob?.[p] !== undefined) next[p] = holeData.ob[p];
-    });
-    return next;
-  });
-}, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers]);
-
 // 点击外部关闭气泡
 useEffect(() => {
   if (!showAdvanceTooltip) return;
@@ -2707,6 +2648,64 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
   
+  // ========== 多人同步 Effects ==========
+  // Joiner: 检测 Creator 开始比赛
+  useEffect(() => {
+    if (!mp.multiplayerOn || !mp.remoteGame) return;
+    if (mp.remoteGame.status === 'playing' && mp.multiplayerSection === 'lobby') {
+      mp.setMultiplayerSection(null);
+      setCurrentSection('game');
+    }
+  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
+
+  // 多人模式：合并对方球员的成绩到本地 state
+  useEffect(() => {
+    if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
+    const hole = mp.remoteGame.currentHole;
+    const holeData = mp.remoteGame.holes?.[hole];
+    if (!holeData) return;
+    
+    const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
+    const otherPlayers = activePlayers.filter(p => mp.claimed[p] === otherRole);
+    
+    if (otherPlayers.length === 0) return;
+    
+    setScores(prev => {
+      const next = { ...prev };
+      otherPlayers.forEach(p => {
+        if (holeData.scores?.[p] !== undefined) next[p] = holeData.scores[p];
+      });
+      return next;
+    });
+    setPutts(prev => {
+      const next = { ...prev };
+      otherPlayers.forEach(p => {
+        if (holeData.putts?.[p] !== undefined) next[p] = holeData.putts[p];
+      });
+      return next;
+    });
+    setUps(prev => {
+      const next = { ...prev };
+      otherPlayers.forEach(p => {
+        if (holeData.ups?.[p] !== undefined) next[p] = holeData.ups[p];
+      });
+      return next;
+    });
+    setWater(prev => {
+      const next = { ...prev };
+      otherPlayers.forEach(p => {
+        if (holeData.water?.[p] !== undefined) next[p] = holeData.water[p];
+      });
+      return next;
+    });
+    setOb(prev => {
+      const next = { ...prev };
+      otherPlayers.forEach(p => {
+        if (holeData.ob?.[p] !== undefined) next[p] = holeData.ob[p];
+      });
+      return next;
+    });
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers]);
 
   // 从localStorage加载游戏状态
   useEffect(() => {
