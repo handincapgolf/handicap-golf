@@ -3966,6 +3966,44 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   <Play className="w-5 h-5" />
                   {t('create')}
                 </button>
+                
+                {/* 加入房间 */}
+                <div className="pt-3 border-t border-gray-200 mt-3">
+                  <p className="text-xs text-gray-500 text-center mb-2">
+                    {lang === 'zh' ? '📡 多人同步 — 输入房间码加入' : '📡 Multiplayer — Enter room code to join'}
+                  </p>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      maxLength={6}
+                      value={mp.joinerCode}
+                      onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+                      placeholder="XXXXXX"
+                      className="flex-1 text-center text-lg font-mono font-bold tracking-[0.2em] py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    />
+                    <button
+                      onClick={async () => {
+                        if (mp.joinerCode.length !== 6) {
+                          showToast(lang === 'zh' ? '请输入6位房间码' : 'Enter 6-digit code', 'error');
+                          return;
+                        }
+                        const result = await mp.joinGame(mp.joinerCode);
+                        if (!result.ok) {
+                          showToast(result.error || 'Room not found', 'error');
+                        }
+                        // joinGame sets multiplayerSection to 'joinerClaim'
+                      }}
+                      disabled={mp.joinerCode.length !== 6}
+                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                        mp.joinerCode.length === 6
+                          ? 'bg-blue-600 text-white hover:bg-blue-700'
+                          : 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                      }`}
+                    >
+                      {lang === 'zh' ? '加入' : 'Join'}
+                    </button>
+                  </div>
+                </div>
              </div>
             
             {/* 页脚版权 */}
@@ -4640,15 +4678,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 </button>
               </div>
               
-              {/* 加入房间按钮 */}
-              {mp.multiplayerOn && !mp.multiplayerRole && (
-                <button
-                  onClick={() => mp.setMultiplayerSection('joinerEntry')}
-                  className="w-full bg-blue-500 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-600 mt-2"
-                >
-                  {lang === 'zh' ? '🔗 加入房间' : '🔗 Join Room'}
-                </button>
-              )}
+              {/* 加入房间按钮已移至首页 */}
             </div>
           )}
 
@@ -4742,65 +4772,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 <button
                   onClick={() => {
                     mp.resetMultiplayer();
-                    mp.setMultiplayerSection(null);
-                  }}
-                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
-                >
-                  {t('back')}
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* ========== 多人同步：Joiner 输入房间码 ========== */}
-          {mp.multiplayerSection === 'joinerEntry' && (
-            <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
-              <div className="max-w-md mx-auto px-4 space-y-4">
-                <div className="text-center">
-                  <h2 className="text-xl font-bold text-gray-900">
-                    {lang === 'zh' ? '🔗 加入房间' : '🔗 Join Room'}
-                  </h2>
-                  <p className="text-sm text-gray-500 mt-1">
-                    {lang === 'zh' ? '输入对方的6位房间码' : 'Enter the 6-digit room code'}
-                  </p>
-                </div>
-                
-                <div className="bg-white rounded-xl p-6 shadow-md text-center">
-                  <input
-                    type="text"
-                    maxLength={6}
-                    value={mp.joinerCode}
-                    onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                    placeholder="XXXXXX"
-                    className="text-center text-3xl font-mono font-bold tracking-[0.3em] w-full py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  />
-                </div>
-
-                <button
-                  onClick={async () => {
-                    if (mp.joinerCode.length !== 6) {
-                      showToast(lang === 'zh' ? '请输入6位房间码' : 'Enter 6-digit code', 'error');
-                      return;
-                    }
-                    const result = await mp.joinGame(mp.joinerCode);
-                    if (!result.ok) {
-                      showToast(result.error || 'Failed to join', 'error');
-                    }
-                    // joinGame will set multiplayerSection to 'joinerClaim'
-                  }}
-                  disabled={mp.joinerCode.length !== 6}
-                  className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition ${
-                    mp.joinerCode.length === 6
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  }`}
-                >
-                  {lang === 'zh' ? '加入' : 'Join'}
-                </button>
-                
-                <button
-                  onClick={() => {
-                    mp.setJoinerCode('');
                     mp.setMultiplayerSection(null);
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
