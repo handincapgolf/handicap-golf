@@ -2667,38 +2667,25 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
     
-    // Joiner: 自动跟随 Creator 的洞号
-    if (mp.remoteGame.currentHole !== undefined) {
-      const remoteHoleIndex = mp.remoteGame.currentHole;
-      if (remoteHoleIndex !== currentHole && mp.multiplayerRole === 'joiner') {
-        setCurrentHole(remoteHoleIndex);
-        setScores({});
-        setUps({});
-        setUpOrder([]);
-        setPutts({});
-        setWater({});
-        setOb({});
-        setCurrentHoleSettlement(null);
-        // Sync accumulated data from creator
-        if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
-        if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
-        if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
-        if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
-        if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
-        if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
-        if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
-        if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
-        if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
-        if (mp.remoteGame.status === 'finished') {
-          setGameComplete(true);
-          setCurrentSection('scorecard');
-        }
-        return; // Don't merge scores for old hole
-      }
+    // Sync accumulated data from creator (money, allScores etc)
+    if (mp.multiplayerRole === 'joiner' && mp.remoteGame.totalMoney) {
+      setTotalMoney(mp.remoteGame.totalMoney);
+      if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+      if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+      if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+      if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+      if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
+      if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
+      if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+      if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     }
     
+    // Only merge scores for CURRENT hole (use hole number as key)
     const holeIndex = mp.remoteGame.currentHole;
-    const holeNum = holes[holeIndex]; // convert index to hole number
+    // Only merge if remote is on same hole as local
+    if (holeIndex !== currentHole) return;
+    
+    const holeNum = holes[currentHole];
     const holeData = mp.remoteGame.holes?.[holeNum];
     if (!holeData) return;
     
@@ -5873,14 +5860,7 @@ return (
                 </button>
               ) : mp.multiplayerOn && mp.isBothConfirmed() ? (
                 <button
-                  onClick={() => {
-                    if (mp.multiplayerRole === 'creator') {
-                      nextHole();
-                    } else {
-                      // Joiner: mark ready, will auto-advance when creator syncs
-                      showToast(lang === 'zh' ? '等待Creator确认...' : 'Waiting for Creator...', 'success');
-                    }
-                  }}
+                  onClick={() => nextHole()}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
                   {currentHole === holes.length - 1 
