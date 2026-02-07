@@ -2652,11 +2652,11 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   // Joiner: 检测 Creator 开始比赛
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
-    if (mp.remoteGame.status === 'playing' && mp.multiplayerSection === 'lobby') {
+    if (mp.remoteGame.status === 'playing' && (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby')) {
       mp.setMultiplayerSection(null);
       setCurrentSection('game');
     }
-  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
+  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
@@ -3153,9 +3153,11 @@ const getScoreLabel = useCallback((stroke, par) => {
       mp.createGame(gameSetup).then(result => {
         if (!result.ok) {
           showToast('Failed to create game room', 'error');
+        } else {
+          setCurrentSection('mp-lobby');
         }
       });
-      return; // Don't go to game section yet — go to lobby
+      return;
     }
     
     setCurrentSection('game');
@@ -3990,8 +3992,9 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         const result = await mp.joinGame(mp.joinerCode);
                         if (!result.ok) {
                           showToast(result.error || 'Room not found', 'error');
+                        } else {
+                          setCurrentSection('mp-claim');
                         }
-                        // joinGame sets multiplayerSection to 'joinerClaim'
                       }}
                       disabled={mp.joinerCode.length !== 6}
                       className={`px-4 py-2 rounded-lg font-semibold transition ${
@@ -4683,7 +4686,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Creator 大厅 ========== */}
-          {mp.multiplayerSection === 'lobby' && (
+          {(currentSection === 'mp-lobby' || mp.multiplayerSection === 'lobby') && (
             <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -4773,6 +4776,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
+                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
@@ -4783,7 +4787,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Joiner 认领球员 ========== */}
-          {mp.multiplayerSection === 'joinerClaim' && mp.remoteGame && (
+          {(currentSection === 'mp-claim' || mp.multiplayerSection === 'joinerClaim') && mp.remoteGame && (
             <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -4886,6 +4890,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       
                       showToast(lang === 'zh' ? '已认领，等待Creator开始' : 'Claimed! Waiting for start...', 'success');
                       mp.setMultiplayerSection('lobby');
+                      setCurrentSection('mp-lobby');
                     }
                   }}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
@@ -4897,6 +4902,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
+                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
