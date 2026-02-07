@@ -120,6 +120,7 @@ export function useMultiplayerSync() {
       if (result.ok) {
         setGameCode(code);
         setMultiplayerRole('joiner');
+        setMultiplayerOn(true);
         setRemoteGame(result.game);
         setClaimed(result.game.claimed || {});
         
