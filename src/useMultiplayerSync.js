@@ -193,10 +193,6 @@ export function useMultiplayerSync() {
     });
     if (result.ok) {
       setRemoteGame(result.game);
-      if (data.confirmed) {
-        setSyncFlash(multiplayerRole);
-        setTimeout(() => setSyncFlash(null), 1500);
-      }
     }
     return result;
   }, [gameCode, multiplayerRole]);

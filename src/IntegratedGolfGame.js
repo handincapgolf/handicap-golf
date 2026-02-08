@@ -5027,7 +5027,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       setGameComplete(false);
                       setCurrentHoleSettlement(null);
                       
-                      showToast(lang === 'zh' ? '已认领，等待Creator开始' : 'Claimed! Waiting for start...', 'success');
                       mp.setMultiplayerSection('lobby');
                     }
                   }}
@@ -5964,7 +5963,6 @@ return (
                       myOb[p] = ob[p] || 0;
                     });
                     await mp.confirmMyScores(holeNum, myScores, myPutts, myUps, upOrder, myWater, myOb);
-                    showToast(lang === 'zh' ? '已提交 ✓' : 'Submitted ✓', 'success');
                   }}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
                 >
