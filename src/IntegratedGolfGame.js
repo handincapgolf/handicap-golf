@@ -2682,6 +2682,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
       if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
       if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+      if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
       setGameComplete(true);
       setCurrentSection('scorecard');
       showToast(t('gameOver'));
@@ -2725,6 +2726,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     // 直接同步 creator 推送的 totalMoney + moneyDetails
     if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
     if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+    if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
   }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
 
   // 多人模式：合并对方球员的成绩到本地 state
@@ -3760,7 +3762,7 @@ const getScoreLabel = useCallback((stroke, par) => {
 	triggerConfetti();
 	// 多人同步：通知结束
 	if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-	  mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, finished: true });
+	  mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool, finished: true });
 	}
     } else {
       setCurrentHole(currentHole + 1);
@@ -3773,7 +3775,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       setCurrentHoleSettlement(null);
       // 多人同步：通知下一洞
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles });
+        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool });
       }
     }
     
