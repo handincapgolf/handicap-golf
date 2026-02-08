@@ -2660,7 +2660,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   // Joiner: 检测 Creator 开始比赛
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
-    if (mp.remoteGame.status === 'playing' && (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby' || currentSection === 'home')) {
+    if (mp.remoteGame.status === 'playing' && (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby')) {
       mp.setMultiplayerSection(null);
       setCurrentSection('game');
     }
@@ -3874,6 +3874,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
   const goHome = useCallback(() => {
     const resetGame = () => {
       clearSavedGame();
+      mp.resetMultiplayer();
       setCurrentSection('home');
       setGameMode('matchPlay');
       setJumboMode(false);
