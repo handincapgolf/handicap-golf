@@ -2671,9 +2671,12 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
-    if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
+    if (!mp.multiplayerOn || !mp.remoteGame) return;
+    const status = mp.remoteGame.status;
+    if (status !== 'playing' && status !== 'finished') return;
     
     // Sync accumulated data from creator (money, allScores etc)
+    // 包括 finished 状态，确保 joiner 能看到最终结算
     if (mp.multiplayerRole === 'joiner' && mp.remoteGame.totalMoney) {
       setTotalMoney(mp.remoteGame.totalMoney);
       if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
@@ -2685,6 +2688,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
       if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     }
+    
+    // 以下仅在 playing 时执行（洞级别合并）
+    if (status !== 'playing') return;
     
     // Always read MY current hole's data (even if Creator already advanced)
     const holeNum = holes[currentHole];
