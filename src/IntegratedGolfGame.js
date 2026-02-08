@@ -825,16 +825,19 @@ const SharePage = memo(({ data }) => {
 });
 
 const Toast = memo(({ message, type, onClose }) => {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  
   useEffect(() => {
-    const timer = setTimeout(onClose, 3000);
+    const timer = setTimeout(() => onCloseRef.current(), 2500);
     return () => clearTimeout(timer);
-  }, [onClose]);
+  }, [message]);
 
   const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
   const icon = type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />;
 
   return (
-    <div className={`fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 text-sm animate-pulse`}>
+    <div className={`fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 text-sm`}>
       {icon}
       <span className="font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 hover:bg-white hover:bg-opacity-20 rounded p-1">
