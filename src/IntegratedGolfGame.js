@@ -4850,7 +4850,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </h2>
                 </div>
                 
-                {/* Game Code Display */}
+                {/* Creator: Game Code + QR Code */}
+                {mp.multiplayerRole === 'creator' && (
                 <div className="bg-white rounded-xl p-6 shadow-md text-center">
                   <p className="text-sm text-gray-500 mb-2">
                     {lang === 'zh' ? '房间码' : 'Room Code'}
@@ -4878,6 +4879,41 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     <p className="text-xs text-gray-400 mt-1">{lang === 'zh' ? '扫码加入' : 'Scan to join'}</p>
                   </div>
                 </div>
+                )}
+
+                {/* Joiner: Game Info */}
+                {mp.multiplayerRole === 'joiner' && mp.remoteGame && (
+                <div className="bg-white rounded-xl p-4 shadow-md">
+                  <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                    {lang === 'zh' ? '比赛信息' : 'Game Info'}
+                  </h3>
+                  {mp.remoteGame.course?.fullName && (
+                    <div className="flex items-center justify-between py-2 border-b">
+                      <span className="text-sm text-gray-500">{lang === 'zh' ? '球场' : 'Course'}</span>
+                      <span className="font-medium text-sm">{mp.remoteGame.course.fullName}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-2 border-b">
+                    <span className="text-sm text-gray-500">{lang === 'zh' ? '模式' : 'Mode'}</span>
+                    <span className="font-medium text-sm">
+                      {mp.remoteGame.gameMode === 'matchPlay' ? '🏆 Match Play' :
+                       mp.remoteGame.gameMode === 'win123' ? '💵 Win123' :
+                       mp.remoteGame.gameMode === 'skins' ? '💰 Skins' :
+                       '♠ Baccarat'}
+                    </span>
+                  </div>
+                  {mp.remoteGame.stake > 0 && (
+                    <div className="flex items-center justify-between py-2 border-b">
+                      <span className="text-sm text-gray-500">{lang === 'zh' ? '底注' : 'Stake'}</span>
+                      <span className="font-medium text-sm text-green-600">RM {mp.remoteGame.stake}</span>
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between py-2">
+                    <span className="text-sm text-gray-500">{lang === 'zh' ? '房间' : 'Room'}</span>
+                    <span className="font-mono text-sm text-amber-600">{mp.gameCode}</span>
+                  </div>
+                </div>
+                )}
 
                 {/* Player Claim Status */}
                 <div className="bg-white rounded-xl p-4 shadow-md">
@@ -4886,15 +4922,26 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </h3>
                   {activePlayers.map(player => (
                     <div key={player} className="flex items-center justify-between py-2 border-b last:border-0">
-                      <span className="font-medium">{player}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="font-medium">{player}</span>
+                        {playerHandicaps[player] > 0 && (
+                          <span className="text-xs text-gray-400">HCP {playerHandicaps[player]}</span>
+                        )}
+                      </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
                         mp.claimed[player] === 'creator' ? 'bg-green-100 text-green-700' :
                         mp.claimed[player] === 'joiner' ? 'bg-blue-100 text-blue-700' :
                         'bg-gray-100 text-gray-500'
                       }`}>
-                        {mp.claimed[player] === 'creator' ? (lang === 'zh' ? '🅰️ 我的' : '🅰️ Mine') :
-                         mp.claimed[player] === 'joiner' ? (lang === 'zh' ? '🅱️ 对方' : '🅱️ Partner') :
-                         (lang === 'zh' ? '未认领' : 'Unclaimed')}
+                        {mp.claimed[player] === 'creator' 
+                          ? (mp.multiplayerRole === 'creator' 
+                              ? (lang === 'zh' ? '🅰️ 我的' : '🅰️ Mine') 
+                              : (lang === 'zh' ? '🅰️ 对方' : '🅰️ Partner'))
+                          : mp.claimed[player] === 'joiner' 
+                            ? (mp.multiplayerRole === 'joiner' 
+                                ? (lang === 'zh' ? '🅱️ 我的' : '🅱️ Mine') 
+                                : (lang === 'zh' ? '🅱️ 对方' : '🅱️ Partner'))
+                            : (lang === 'zh' ? '未认领' : 'Unclaimed')}
                       </span>
                     </div>
                   ))}
@@ -4934,12 +4981,22 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </button>
                 )}
 
+                {/* Joiner: Waiting message */}
+                {mp.multiplayerRole === 'joiner' && (
+                  <div className="text-center">
+                    <p className="text-sm text-gray-500">
+                      ⏳ {lang === 'zh' ? '等待创建者开始比赛...' : 'Waiting for Creator to start the game...'}
+                    </p>
+                  </div>
+                )}
+
                 {/* Back button */}
                 <button
                   onClick={() => {
+                    const wasJoiner = mp.multiplayerRole === 'joiner';
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
-                    setCurrentSection('players');
+                    setCurrentSection(wasJoiner ? 'home' : 'players');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
