@@ -5978,12 +5978,12 @@ return (
           <div className="bg-white text-gray-900 p-3"> 
 		  <div className="grid gap-3">
               {(() => {
-                // 多人模式：我的球员排前面
-                const sortedPlayers = mp.multiplayerOn 
-                  ? [...mp.getMyPlayers(activePlayers), ...mp.getOtherPlayers(activePlayers)]
-                  : activePlayers;
-                return sortedPlayers;
-              })().map(player => {
+                const myPlayers = mp.multiplayerOn ? mp.getMyPlayers(activePlayers) : activePlayers;
+                const otherPlayers = mp.multiplayerOn ? mp.getOtherPlayers(activePlayers) : [];
+                const otherConfirmed = mp.multiplayerOn && (mp.multiplayerRole === 'creator' ? mp.confirmed.joiner : mp.confirmed.creator);
+                const otherLabel = mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️';
+                
+                const renderPlayer = (player, isOther) => {
                 const holeNum = holes[currentHole];
                 const par = pars[holeNum] || 4;
                 const playerScore = scores[player] || par;
@@ -5995,16 +5995,12 @@ return (
                 const netScore = playerScore - playerHandicapValue;
                 const scoreLabel = getScoreLabel(netScore, par);
                 const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
-                
-                // 多人模式：判断是否是我的球员
-                const isMyPlayer = !mp.multiplayerOn || mp.getMyPlayers(activePlayers).includes(player);
-                const noOp = () => {};
+                const isMyPlayer = !isOther;
+                const hideBtns = isOther && otherConfirmed;
                 
                 if (isAdvancePlayer) {
-                  // Advance 玩家 - 显示高级卡片
                   return (
-                    <div key={player} className={!isMyPlayer ? 'mp-locked-card' : ''} style={!isMyPlayer ? { pointerEvents: 'none' } : {}}>
-                    {!isMyPlayer && <div className="text-xs text-center text-gray-400 -mb-1">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
+                    <div key={player} className={isOther ? 'mp-locked-card' : ''} style={isOther ? { pointerEvents: 'none' } : {}}>
                     <AdvancedPlayerCard
   key={player}
   player={player}
@@ -6029,13 +6025,11 @@ return (
                   </div>
                   );
 } else {
-  // Classic 玩家 - 方案3 布局（无 Water/OB）
   const stroke = playerScore + playerPutts;
   const strokeLabel = getScoreLabel(stroke, par);
   
   return (
-    <div key={player} className={!isMyPlayer ? 'mp-locked-card' : ''} style={!isMyPlayer ? { pointerEvents: 'none' } : {}}>
-    {!isMyPlayer && <div className="text-xs text-center text-gray-400 mb-0.5">🔒 {mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️'}</div>}
+    <div key={player} className={isOther ? 'mp-locked-card' : ''} style={isOther ? { pointerEvents: 'none' } : {}}>
     <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
       gameMode === 'baccarat' 
         ? getBaccaratCardClass(player, upOrder)
@@ -6070,7 +6064,7 @@ return (
           <div className="font-bold text-lg text-gray-900">{player}</div>
         </div>
 
-        {/* 中间：Stroke 显示（方案3 双层分离） */}
+        {/* 中间：Stroke 显示 */}
         <div className="flex-1 flex justify-center">
           <div className="stroke-display relative">
   <div className={`stroke-number ${strokeLabel.numClass}`}>
@@ -6097,6 +6091,7 @@ return (
               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
                 playerScore > 1 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
               }`}
+              style={hideBtns ? { visibility: 'hidden' } : {}}
             >
               −
             </button>
@@ -6104,6 +6099,7 @@ return (
             <button
               onClick={() => changeOn(player, 1)}
               className="w-10 h-10 bg-green-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+              style={hideBtns ? { visibility: 'hidden' } : {}}
             >
               +
             </button>
@@ -6116,6 +6112,7 @@ return (
               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
                 playerPutts > 0 ? 'bg-gray-500 text-white' : 'bg-gray-300 text-gray-400'
               }`}
+              style={hideBtns ? { visibility: 'hidden' } : {}}
             >
               −
             </button>
@@ -6123,6 +6120,7 @@ return (
             <button
               onClick={() => changePutts(player, 1)}
               className="w-10 h-10 bg-blue-500 text-white rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold"
+              style={hideBtns ? { visibility: 'hidden' } : {}}
             >
               +
             </button>
@@ -6134,7 +6132,27 @@ return (
     </div>
   );
 }
-              })}
+                };
+                
+                return (
+                  <>
+                    {myPlayers.map(p => renderPlayer(p, false))}
+                    {otherPlayers.length > 0 && (
+                      <div className={otherConfirmed ? 'rounded-xl border-2 border-green-400 p-1.5' : ''} 
+                           style={otherConfirmed ? { background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' } : {}}>
+                        {otherConfirmed && (
+                          <div className="text-xs font-semibold text-green-700 flex items-center gap-1 px-2 py-1">
+                            {otherLabel} Confirmed ✓
+                          </div>
+                        )}
+                        <div className="grid gap-2">
+                          {otherPlayers.map(p => renderPlayer(p, true))}
+                        </div>
+                      </div>
+                    )}
+                  </>
+                );
+              })()}
             </div>
           </div>
 
