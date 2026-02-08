@@ -2673,7 +2673,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
     if (mp.remoteGame.status === 'finished' && !gameComplete) {
-      // 先同步最终数据
       if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
       if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
       if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
@@ -2683,12 +2682,34 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
       if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
       if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
-      // 跳转结果页
       setGameComplete(true);
       setCurrentSection('scorecard');
       showToast(t('gameOver'));
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
+
+  // Joiner: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
+  useEffect(() => {
+    if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner') return;
+    if (!mp.remoteGame?.completedHoles || mp.remoteGame.status !== 'playing') return;
+    
+    const myHoleNum = holes[currentHole];
+    // Creator 已完成我当前所在洞 → 我应该跟进
+    if (mp.remoteGame.completedHoles.includes(myHoleNum)) {
+      if (currentHole < holes.length - 1) {
+        setCurrentHole(currentHole + 1);
+        setScores({});
+        setUps({});
+        setUpOrder([]);
+        setPutts({});
+        setWater({});
+        setOb({});
+        setCurrentHoleSettlement(null);
+        mp.setConfirmedFromHole({ creator: false, joiner: false });
+      }
+      // 最后一洞的完成由 finished effect 处理
+    }
+  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes]);
 
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -3310,6 +3331,7 @@ const getScoreLabel = useCallback((stroke, par) => {
         handicaps: playerHandicaps,
         advanceMode,
         advancePlayers,
+        holes,
       };
       mp.createGame(gameSetup).then(result => {
         if (!result.ok) {
@@ -3436,7 +3458,6 @@ const getScoreLabel = useCallback((stroke, par) => {
       const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
       setCurrentHoleSettlement(results);
     } else if (gameMode === 'baccarat') {
-      // 合并双方 upOrder：本地（我方玩家）+ 远端（对方玩家）
       const myPlayers = new Set(activePlayers.filter(p => mp.claimed[p] === mp.multiplayerRole));
       const myUps = upOrder.filter(p => myPlayers.has(p));
       const otherUps = (holeData.upOrder || []).filter(p => !myPlayers.has(p));
@@ -3651,7 +3672,6 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     const stakeValue = Number(stake) || 0;
     let finalPrizePool = prizePool;
-    
     // 提升到函数作用域，确保 syncNextHole 能拿到结算后的最新值
     let newTotalMoney = { ...totalMoney };
     let newMoneyDetails = { ...moneyDetails };
@@ -5014,10 +5034,21 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       <span className="font-medium text-sm text-green-600">RM {mp.remoteGame.stake}</span>
                     </div>
                   )}
-                  <div className="flex items-center justify-between py-2">
+                  <div className="flex items-center justify-between py-2 border-b">
                     <span className="text-sm text-gray-500">{t('mpRoom')}</span>
                     <span className="font-mono text-sm text-amber-600">{mp.gameCode}</span>
                   </div>
+                  {mp.remoteGame.holes && (
+                    <div className="flex items-center justify-between py-2">
+                      <span className="text-sm text-gray-500">{lang === 'zh' ? '洞数' : 'Holes'}</span>
+                      <span className="font-medium text-sm">
+                        {mp.remoteGame.holes.length === 18 ? '18 Holes' :
+                         mp.remoteGame.holes[0] === 1 && mp.remoteGame.holes.length === 9 ? 'Front 9' :
+                         mp.remoteGame.holes[0] === 10 && mp.remoteGame.holes.length === 9 ? 'Back 9' :
+                         `${mp.remoteGame.holes.length} Holes (${mp.remoteGame.holes[0]}-${mp.remoteGame.holes[mp.remoteGame.holes.length - 1]})`}
+                      </span>
+                    </div>
+                  )}
                 </div>
                 )}
 
@@ -6164,7 +6195,7 @@ return (
                 >
                   {t('mpWaiting')}
                 </button>
-              ) : mp.multiplayerOn && mp.isBothConfirmed() ? (
+              ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'creator' ? (
                 <button
                   onClick={() => nextHole()}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
@@ -6172,6 +6203,13 @@ return (
                   {currentHole === holes.length - 1 
                     ? (t('mpConfirmFinish'))
                     : (t('mpConfirmNext'))}
+                </button>
+              ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'joiner' ? (
+                <button
+                  disabled
+                  className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
+                >
+                  ⏳ {lang === 'zh' ? '等待 🅰️ 进入下一洞...' : 'Waiting 🅰️ to proceed...'}
                 </button>
               ) : (
                 <button
