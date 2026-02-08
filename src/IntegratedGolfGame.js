@@ -2752,6 +2752,10 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, []);
 
+  const showToast = useCallback((message, type = 'success') => {
+    setToast({ message, type });
+  }, []);
+
   // QR Scanner
   const stopQrScanner = useCallback(() => {
     if (qrStreamRef.current) {
@@ -2828,10 +2832,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   const clearSavedGame = useCallback(() => {
     localStorage.removeItem('golfGameState');
     setHasSavedGame(false);
-  }, []);
-
-  const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type });
   }, []);
 
   // 恢复游戏状态
