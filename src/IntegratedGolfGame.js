@@ -2767,6 +2767,22 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
 
   const startQrScanner = useCallback(async () => {
     setShowQrScanner(true);
+    // Load jsQR library if not loaded
+    if (!window.jsQR) {
+      try {
+        await new Promise((resolve, reject) => {
+          const s = document.createElement('script');
+          s.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js';
+          s.onload = resolve;
+          s.onerror = reject;
+          document.head.appendChild(s);
+        });
+      } catch(e) {
+        showToast(lang === 'zh' ? 'QR库加载失败' : 'QR lib load failed', 'error');
+        setShowQrScanner(false);
+        return;
+      }
+    }
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
       qrStreamRef.current = stream;
@@ -2776,30 +2792,26 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           qrVideoRef.current.play();
           const canvas = document.createElement('canvas');
           const ctx = canvas.getContext('2d');
-          const scan = async () => {
+          const scan = () => {
             if (!qrVideoRef.current || !qrStreamRef.current) return;
             const v = qrVideoRef.current;
             if (v.readyState >= 2) {
               canvas.width = v.videoWidth;
               canvas.height = v.videoHeight;
               ctx.drawImage(v, 0, 0);
-              try {
-                if ('BarcodeDetector' in window) {
-                  const detector = new window.BarcodeDetector({ formats: ['qr_code'] });
-                  const results = await detector.detect(canvas);
-                  if (results.length > 0) {
-                    const val = results[0].rawValue;
-                    const match = val.match(/[?&]join=([A-Z0-9]{6})/i);
-                    const code = match ? match[1] : (/^[A-Z0-9]{6}$/i.test(val.trim()) ? val.trim() : null);
-                    if (code) {
-                      mp.setJoinerCode(code.toUpperCase());
-                      stopQrScanner();
-                      showToast('QR scanned!', 'success');
-                      return;
-                    }
-                  }
+              const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+              const qr = window.jsQR(imageData.data, canvas.width, canvas.height);
+              if (qr && qr.data) {
+                const val = qr.data;
+                const match = val.match(/[?&]join=([A-Z0-9]{6})/i);
+                const code = match ? match[1] : (/^[A-Z0-9]{6}$/i.test(val.trim()) ? val.trim() : null);
+                if (code) {
+                  mp.setJoinerCode(code.toUpperCase());
+                  stopQrScanner();
+                  showToast('QR scanned!', 'success');
+                  return;
                 }
-              } catch(e) {}
+              }
             }
             if (qrStreamRef.current) requestAnimationFrame(scan);
           };

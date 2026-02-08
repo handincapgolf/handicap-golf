@@ -19,9 +19,11 @@ async function apiCall(path, method = 'GET', body = null) {
   const opts = {
     method,
     headers: { 'Content-Type': 'application/json' },
+    cache: 'no-store',
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`${API_BASE}${path}`, opts);
+  const cacheBust = method === 'GET' ? `${path}${path.includes('?') ? '&' : '?'}_t=${Date.now()}` : path;
+  const res = await fetch(`${API_BASE}${cacheBust}`, opts);
   return res.json();
 }
 
@@ -49,32 +51,27 @@ export function useMultiplayerSync() {
       try {
         const result = await apiCall(`/game/${code}`);
         if (result.ok && result.game) {
-          // Only update if data changed
-          if (result.game.lastUpdate > lastUpdateRef.current) {
-            lastUpdateRef.current = result.game.lastUpdate;
-            setRemoteGame(result.game);
-            setSyncStatus('connected');
-            
-            // Update confirmed state - find confirmed from current hole data
-            // holes are keyed by hole NUMBER, not index
-            if (result.game.holes) {
-              const holeKeys = Object.keys(result.game.holes);
-              const latestKey = holeKeys[holeKeys.length - 1];
-              if (latestKey && result.game.holes[latestKey]) {
-                setConfirmed(result.game.holes[latestKey].confirmed || { creator: false, joiner: false });
-              }
+          setRemoteGame(result.game);
+          setSyncStatus('connected');
+          
+          // Update confirmed state from latest hole
+          if (result.game.holes) {
+            const holeKeys = Object.keys(result.game.holes);
+            const latestKey = holeKeys[holeKeys.length - 1];
+            if (latestKey && result.game.holes[latestKey]) {
+              setConfirmed(result.game.holes[latestKey].confirmed || { creator: false, joiner: false });
             }
-            
-            // Update claimed state
-            if (result.game.claimed) {
-              setClaimed(result.game.claimed);
-            }
+          }
+          
+          // Update claimed state
+          if (result.game.claimed) {
+            setClaimed(result.game.claimed);
           }
         }
       } catch (err) {
         setSyncStatus('error');
       }
-    }, 3000);
+    }, 2000);
   }, []);
 
   const stopPolling = useCallback(() => {
