@@ -2669,6 +2669,27 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
+  // Joiner: 检测 Creator 结束比赛 → 自动跳转结果页
+  useEffect(() => {
+    if (!mp.multiplayerOn || !mp.remoteGame) return;
+    if (mp.remoteGame.status === 'finished' && !gameComplete) {
+      // 先同步最终数据
+      if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+      if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+      if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+      if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
+      if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
+      if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+      if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+      if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+      if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+      // 跳转结果页
+      setGameComplete(true);
+      setCurrentSection('scorecard');
+      showToast(t('gameOver'));
+    }
+  }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
+
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
     if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner' || !mp.remoteGame) return;
@@ -2681,11 +2702,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
     // 直接同步 creator 推送的 totalMoney + moneyDetails
-    if (mp.remoteGame.totalMoney && Object.keys(mp.remoteGame.totalMoney).length > 0) {
-      setTotalMoney(mp.remoteGame.totalMoney);
-    }
+    if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
     if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
-  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole]);
+  }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
@@ -2755,7 +2774,18 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       });
       return next;
     });
-  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, holes]);
+    // 百家乐 upOrder 合并：保留我方 UP 选择 + 合并对方 UP 选择
+    if (gameMode === 'baccarat' && holeData.upOrder) {
+      setUpOrder(prev => {
+        const myPlayers = new Set(activePlayers.filter(p => mp.claimed[p] === mp.multiplayerRole));
+        const myUps = prev.filter(p => myPlayers.has(p));
+        const otherUps = holeData.upOrder.filter(p => !myPlayers.has(p));
+        const merged = [...myUps, ...otherUps];
+        if (merged.length === prev.length && merged.every((v, i) => v === prev[i])) return prev;
+        return merged;
+      });
+    }
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, holes, gameMode]);
 
   // 检测 URL 参数 ?join=XXXXXX（QR码扫描）
   useEffect(() => {
@@ -3406,7 +3436,12 @@ const getScoreLabel = useCallback((stroke, par) => {
       const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
       setCurrentHoleSettlement(results);
     } else if (gameMode === 'baccarat') {
-      const { results, matchupDetails } = calculateBaccarat(mergedScores, mergedPutts, upOrder, holeNum);
+      // 合并双方 upOrder：本地（我方玩家）+ 远端（对方玩家）
+      const myPlayers = new Set(activePlayers.filter(p => mp.claimed[p] === mp.multiplayerRole));
+      const myUps = upOrder.filter(p => myPlayers.has(p));
+      const otherUps = (holeData.upOrder || []).filter(p => !myPlayers.has(p));
+      const mergedUpOrder = [...myUps, ...otherUps];
+      const { results, matchupDetails } = calculateBaccarat(mergedScores, mergedPutts, mergedUpOrder, holeNum);
       setCurrentHoleSettlement({ ...results, matchupDetails });
     }
   }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, activePlayers, currentHole, scores, putts, ups, upOrder, pars, holes, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
