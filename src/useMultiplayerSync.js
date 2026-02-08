@@ -69,7 +69,7 @@ export function useMultiplayerSync() {
       } catch (err) {
         setSyncStatus('error');
       }
-    }, 2000);
+    }, 3000);
   }, []);
 
   const stopPolling = useCallback(() => {
