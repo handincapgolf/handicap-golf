@@ -2742,31 +2742,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       });
       return next;
     });
-    
-    // 重新计算 hole settlement（合并远程分数后）
-    const par = pars[holeNum] || 4;
-    const mergedScores = {};
-    const mergedPutts = {};
-    const mergedUps = {};
-    activePlayers.forEach(p => {
-      mergedScores[p] = holeData.scores?.[p] !== undefined ? holeData.scores[p] : (scores[p] || par);
-      mergedPutts[p] = holeData.putts?.[p] !== undefined ? holeData.putts[p] : (putts[p] || 0);
-      mergedUps[p] = holeData.ups?.[p] !== undefined ? holeData.ups[p] : (ups[p] || false);
-    });
-    
-    if (gameMode === 'matchPlay') {
-      setCurrentHoleSettlement(calculateMatchPlay(mergedScores, holeNum));
-    } else if (gameMode === 'skins') {
-      const { results } = calculateSkins(mergedScores, holeNum);
-      setCurrentHoleSettlement(results);
-    } else if (gameMode === 'win123') {
-      const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
-      setCurrentHoleSettlement(results);
-    } else if (gameMode === 'baccarat') {
-      const { results, matchupDetails } = calculateBaccarat(mergedScores, mergedPutts, upOrder, holeNum);
-      setCurrentHoleSettlement({ ...results, matchupDetails });
-    }
-  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, scores, putts, ups, upOrder, pars, holes, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, holes]);
 
   // 检测 URL 参数 ?join=XXXXXX（QR码扫描）
   useEffect(() => {
@@ -3390,6 +3366,37 @@ const getScoreLabel = useCallback((stroke, par) => {
       getHandicapForHole
     });
   }, [activePlayers, stake, pars, getHandicapForHole]);
+
+  // 多人同步：远程分数合并后重算 hole settlement
+  useEffect(() => {
+    if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
+    const holeNum = holes[currentHole];
+    const holeData = mp.remoteGame.holes?.[holeNum];
+    if (!holeData) return;
+    
+    const par = pars[holeNum] || 4;
+    const mergedScores = {};
+    const mergedPutts = {};
+    const mergedUps = {};
+    activePlayers.forEach(p => {
+      mergedScores[p] = holeData.scores?.[p] !== undefined ? holeData.scores[p] : (scores[p] || par);
+      mergedPutts[p] = holeData.putts?.[p] !== undefined ? holeData.putts[p] : (putts[p] || 0);
+      mergedUps[p] = holeData.ups?.[p] !== undefined ? holeData.ups[p] : (ups[p] || false);
+    });
+    
+    if (gameMode === 'matchPlay') {
+      setCurrentHoleSettlement(calculateMatchPlay(mergedScores, holeNum));
+    } else if (gameMode === 'skins') {
+      const { results } = calculateSkins(mergedScores, holeNum);
+      setCurrentHoleSettlement(results);
+    } else if (gameMode === 'win123') {
+      const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
+      setCurrentHoleSettlement(results);
+    } else if (gameMode === 'baccarat') {
+      const { results, matchupDetails } = calculateBaccarat(mergedScores, mergedPutts, upOrder, holeNum);
+      setCurrentHoleSettlement({ ...results, matchupDetails });
+    }
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, activePlayers, currentHole, scores, putts, ups, upOrder, pars, holes, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
 
 // ========== 修改 On (上果岭杆数) ==========
   const changeOn = useCallback((player, delta) => {
