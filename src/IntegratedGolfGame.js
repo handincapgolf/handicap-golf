@@ -2747,6 +2747,10 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     
     // Always read MY current hole's data (even if Creator already advanced)
     const holeNum = holes[currentHole];
+    
+    // 如果当前洞已完成（Creator 已推进），不要再合并旧数据，等 auto-advance effect 处理
+    if (mp.remoteGame.completedHoles?.includes(holeNum)) return;
+    
     const holeData = mp.remoteGame.holes?.[holeNum];
     if (!holeData) return;
     
@@ -3331,7 +3335,7 @@ const getScoreLabel = useCallback((stroke, par) => {
         handicaps: playerHandicaps,
         advanceMode,
         advancePlayers,
-        holes,
+        holesList: [...holes],
       };
       mp.createGame(gameSetup).then(result => {
         if (!result.ok) {
@@ -3436,6 +3440,8 @@ const getScoreLabel = useCallback((stroke, par) => {
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame || mp.remoteGame.status !== 'playing') return;
     const holeNum = holes[currentHole];
+    // 已完成的洞不再重算（等 auto-advance）
+    if (mp.remoteGame.completedHoles?.includes(holeNum)) return;
     const holeData = mp.remoteGame.holes?.[holeNum];
     if (!holeData) return;
     
@@ -5038,14 +5044,14 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     <span className="text-sm text-gray-500">{t('mpRoom')}</span>
                     <span className="font-mono text-sm text-amber-600">{mp.gameCode}</span>
                   </div>
-                  {mp.remoteGame.holes && (
+                  {mp.remoteGame.holesList && (
                     <div className="flex items-center justify-between py-2">
                       <span className="text-sm text-gray-500">{lang === 'zh' ? '洞数' : 'Holes'}</span>
                       <span className="font-medium text-sm">
-                        {mp.remoteGame.holes.length === 18 ? '18 Holes' :
-                         mp.remoteGame.holes[0] === 1 && mp.remoteGame.holes.length === 9 ? 'Front 9' :
-                         mp.remoteGame.holes[0] === 10 && mp.remoteGame.holes.length === 9 ? 'Back 9' :
-                         `${mp.remoteGame.holes.length} Holes (${mp.remoteGame.holes[0]}-${mp.remoteGame.holes[mp.remoteGame.holes.length - 1]})`}
+                        {mp.remoteGame.holesList.length === 18 ? '18 Holes' :
+                         mp.remoteGame.holesList[0] === 1 && mp.remoteGame.holesList.length === 9 ? 'Front 9' :
+                         mp.remoteGame.holesList[0] === 10 && mp.remoteGame.holesList.length === 9 ? 'Back 9' :
+                         `${mp.remoteGame.holesList.length} Holes (${mp.remoteGame.holesList[0]}-${mp.remoteGame.holesList[mp.remoteGame.holesList.length - 1]})`}
                       </span>
                     </div>
                   )}
