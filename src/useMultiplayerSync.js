@@ -104,24 +104,6 @@ export function useMultiplayerSync() {
     }
   }, [startPolling]);
 
-  // Pause polling when screen off / app in background, resume when visible
-  useEffect(() => {
-    if (!multiplayerOn || !gameCode) return;
-
-    const handleVisibility = () => {
-      if (document.visibilityState === 'hidden') {
-        stopPolling();
-        setSyncStatus('paused');
-      } else if (document.visibilityState === 'visible') {
-        startPolling(gameCode);
-        setSyncStatus('connected');
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibility);
-    return () => document.removeEventListener('visibilitychange', handleVisibility);
-  }, [multiplayerOn, gameCode, startPolling, stopPolling]);
-
   // Creator: Create game room
   const createGame = useCallback(async (gameSetup) => {
     try {
@@ -216,10 +198,13 @@ export function useMultiplayerSync() {
   }, [gameCode, multiplayerRole]);
 
   // Confirm my scores for this hole
-  const confirmMyScores = useCallback(async (hole, scores, putts, ups, upOrder, water, ob) => {
+  const confirmMyScores = useCallback(async (hole, scores, putts, ups, upOrder, water, ob, totalMoney, moneyDetails, totalSpent) => {
     return submitScores(hole, {
       scores, putts, ups, upOrder, water, ob,
       confirmed: true,
+      totalMoney: totalMoney || {},
+      moneyDetails: moneyDetails || {},
+      totalSpent: totalSpent || {},
     });
   }, [submitScores]);
 

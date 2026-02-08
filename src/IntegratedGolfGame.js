@@ -2669,16 +2669,23 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
-  // Joiner：专门同步累计金额（独立 effect，确保每次 polling 都更新）
+  // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
     if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner' || !mp.remoteGame) return;
+    // 同步 allScores 等原始数据
+    if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+    if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+    if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+    if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
+    if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
+    if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+    if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+    // 直接同步 creator 推送的 totalMoney + moneyDetails
     if (mp.remoteGame.totalMoney && Object.keys(mp.remoteGame.totalMoney).length > 0) {
       setTotalMoney(mp.remoteGame.totalMoney);
     }
     if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
-    if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
-    if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
-  }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
@@ -6118,7 +6125,7 @@ return (
                       myWater[p] = water[p] || 0;
                       myOb[p] = ob[p] || 0;
                     });
-                    await mp.confirmMyScores(holeNum, myScores, myPutts, myUps, upOrder, myWater, myOb);
+                    await mp.confirmMyScores(holeNum, myScores, myPutts, myUps, upOrder, myWater, myOb, totalMoney, moneyDetails, totalSpent);
                   }}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
                 >
