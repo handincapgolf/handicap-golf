@@ -2683,21 +2683,15 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     }
     
-    // Joiner: sync accumulated data when Creator has advanced
-    const remoteHoleIndex = mp.remoteGame.currentHole;
-    if (mp.multiplayerRole === 'joiner' && remoteHoleIndex > currentHole) {
-      // Don't auto-advance, just sync data - Joiner advances via own Confirm & Next
-      return;
-    }
-    
-    // Only merge scores for CURRENT hole (use hole number as key)
-    const holeIndex = mp.remoteGame.currentHole;
-    // Only merge if remote is on same hole as local
-    if (holeIndex !== currentHole) return;
-    
+    // Always read MY current hole's data (even if Creator already advanced)
     const holeNum = holes[currentHole];
     const holeData = mp.remoteGame.holes?.[holeNum];
     if (!holeData) return;
+    
+    // Update confirmed from MY current hole (not latest hole)
+    if (holeData.confirmed) {
+      mp.setConfirmedFromHole(holeData.confirmed);
+    }
     
     const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
     const otherPlayers = activePlayers.filter(p => mp.claimed[p] === otherRole);
@@ -3654,7 +3648,7 @@ const getScoreLabel = useCallback((stroke, par) => {
 	triggerConfetti();
 	// 多人同步：通知结束
 	if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-	  mp.syncNextHole(holes.length, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles, finished: true });
+	  mp.syncNextHole(holes.length, holes.length, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles, finished: true });
 	}
     } else {
       setCurrentHole(currentHole + 1);
@@ -3667,7 +3661,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       setCurrentHoleSettlement(null);
       // 多人同步：通知下一洞
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-        mp.syncNextHole(currentHole + 1, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles });
+        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles });
       }
     }
     

@@ -58,14 +58,8 @@ export function useMultiplayerSync() {
           setRemoteGame(result.game);
           setSyncStatus('connected');
           
-          // Update confirmed state from latest hole
-          if (result.game.holes) {
-            const holeKeys = Object.keys(result.game.holes);
-            const latestKey = holeKeys[holeKeys.length - 1];
-            if (latestKey && result.game.holes[latestKey]) {
-              setConfirmed(result.game.holes[latestKey].confirmed || { creator: false, joiner: false });
-            }
-          }
+          // Note: confirmed state is managed by main component's merge effect
+          // which reads from LOCAL current hole, not latest hole
           
           // Update claimed state
           if (result.game.claimed) {
@@ -216,10 +210,11 @@ export function useMultiplayerSync() {
   }, [submitScores]);
 
   // Move to next hole
-  const syncNextHole = useCallback(async (nextHole, gameState) => {
+  const syncNextHole = useCallback(async (nextHole, nextHoleNum, gameState) => {
     if (!gameCode) return { ok: false };
     const result = await apiCall(`/game/${gameCode}/next`, 'PUT', {
       nextHole,
+      nextHoleNum,
       ...gameState,
     });
     if (result.ok) {
@@ -328,5 +323,6 @@ export function useMultiplayerSync() {
     isBothConfirmed,
     isMyConfirmed,
     getRemoteHoleData,
+    setConfirmedFromHole: setConfirmed,
   };
 }
