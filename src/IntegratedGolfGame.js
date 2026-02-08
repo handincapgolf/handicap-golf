@@ -2689,50 +2689,40 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
 
-  // Joiner: 检测 Creator 已完成当前洞 → 标记 ready，等 Joiner 点按钮
-  const [joinerNextReady, setJoinerNextReady] = useState(false);
-  
+  // Joiner: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
   useEffect(() => {
     if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner') return;
     if (!mp.remoteGame?.completedHoles || mp.remoteGame.status !== 'playing') return;
     
     const myHoleNum = holes[currentHole];
-    if (mp.remoteGame.completedHoles.includes(myHoleNum) && !joinerNextReady) {
-      setJoinerNextReady(true);
+    if (mp.remoteGame.completedHoles.includes(myHoleNum)) {
+      // 播报本洞成绩
+      const holeData = mp.remoteGame.holes?.[myHoleNum];
+      if (holeData?.scores && voiceEnabled) {
+        const holeScores = holeData.scores;
+        const holePutts = holeData.putts || {};
+        const sortedPlayers = [...activePlayers].sort((a, b) => {
+          const scoreA = (holeScores[a] || 0) + (holePutts[a] || 0);
+          const scoreB = (holeScores[b] || 0) + (holePutts[b] || 0);
+          return scoreB - scoreA;
+        });
+        const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
+        playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
+      }
+      
+      if (currentHole < holes.length - 1) {
+        setCurrentHole(currentHole + 1);
+        setScores({});
+        setUps({});
+        setUpOrder([]);
+        setPutts({});
+        setWater({});
+        setOb({});
+        setCurrentHoleSettlement(null);
+        mp.setConfirmedFromHole({ creator: false, joiner: false });
+      }
     }
-  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, joinerNextReady]);
-
-  // Joiner 点击按钮后执行跳转 + 语音
-  const joinerProceedNext = useCallback(() => {
-    const myHoleNum = holes[currentHole];
-    
-    // 播报本洞成绩
-    const holeData = mp.remoteGame?.holes?.[myHoleNum];
-    if (holeData?.scores) {
-      const holeScores = holeData.scores;
-      const holePutts = holeData.putts || {};
-      const sortedPlayers = [...activePlayers].sort((a, b) => {
-        const scoreA = (holeScores[a] || 0) + (holePutts[a] || 0);
-        const scoreB = (holeScores[b] || 0) + (holePutts[b] || 0);
-        return scoreB - scoreA;
-      });
-      const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-      playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
-    }
-    
-    if (currentHole < holes.length - 1) {
-      setCurrentHole(currentHole + 1);
-      setScores({});
-      setUps({});
-      setUpOrder([]);
-      setPutts({});
-      setWater({});
-      setOb({});
-      setCurrentHoleSettlement(null);
-      mp.setConfirmedFromHole({ creator: false, joiner: false });
-    }
-    setJoinerNextReady(false);
-  }, [currentHole, holes, activePlayers, gameMode, stake, playHoleResults, mp]);
+  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
 
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -4894,6 +4884,12 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         onClick={() => {
                           setVoiceEnabled(true);
                           localStorage.setItem('handincap_voice', 'true');
+                          // 解锁 speechSynthesis
+                          if ('speechSynthesis' in window) {
+                            const u = new SpeechSynthesisUtterance('');
+                            u.volume = 0;
+                            speechSynthesis.speak(u);
+                          }
                         }}
                         className={`px-3 py-1 font-medium text-sm transition ${
                           voiceEnabled
@@ -5945,8 +5941,14 @@ return (
             {/* 语音开关按钮 */}
             <button
               onClick={() => {
-                setVoiceEnabled(!voiceEnabled);
-                localStorage.setItem('handincap_voice', (!voiceEnabled).toString());
+                const newVal = !voiceEnabled;
+                setVoiceEnabled(newVal);
+                localStorage.setItem('handincap_voice', newVal.toString());
+                if (newVal && 'speechSynthesis' in window) {
+                  const u = new SpeechSynthesisUtterance('');
+                  u.volume = 0;
+                  speechSynthesis.speak(u);
+                }
               }}
               className="absolute top-4 left-4 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
             >
@@ -6213,6 +6215,12 @@ return (
                       myOb[p] = ob[p] || 0;
                     });
                     await mp.confirmMyScores(holeNum, myScores, myPutts, myUps, upOrder, myWater, myOb, totalMoney, moneyDetails, totalSpent);
+                    // 解锁 speechSynthesis（用户手势内调用一次，后续 effect 就能自动播报）
+                    if (voiceEnabled && 'speechSynthesis' in window) {
+                      const unlock = new SpeechSynthesisUtterance('');
+                      unlock.volume = 0;
+                      speechSynthesis.speak(unlock);
+                    }
                   }}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
                 >
@@ -6239,21 +6247,12 @@ return (
                     : (t('mpConfirmNext'))}
                 </button>
               ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'joiner' ? (
-                joinerNextReady ? (
-                <button
-                  onClick={joinerProceedNext}
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
-                >
-                  ➡️ {lang === 'zh' ? '进入下一洞' : 'Go to Next Hole'}
-                </button>
-                ) : (
                 <button
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
                   ⏳ {lang === 'zh' ? '等待 🅰️ 进入下一洞...' : 'Waiting 🅰️ to proceed...'}
                 </button>
-                )
               ) : (
                 <button
                   onClick={nextHole}
