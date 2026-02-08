@@ -2775,7 +2775,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           document.head.appendChild(s);
         });
       } catch(e) {
-        showToast(lang === 'zh' ? 'QR库加载失败' : 'QR lib load failed', 'error');
+        showToast(t('mpQrLoadFail'), 'error');
         setShowQrScanner(false);
         return;
       }
@@ -3951,7 +3951,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     } else {
       // 桌面端直接复制链接
       navigator.clipboard.writeText(url).then(() => {
-        showToast(lang === 'zh' ? '链接已复制！' : 'Link copied!');
+        showToast(t('mpLinkCopied'));
       }).catch(() => showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error'));
     }
   }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast, advancePlayers]);
@@ -4085,7 +4085,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {/* 加入房间 */}
                 <div className="pt-3 border-t border-gray-200 mt-3">
                   <p className="text-xs text-gray-500 text-center mb-2">
-                    {lang === 'zh' ? '📡 多人同步' : '📡 Multiplayer'}
+                    {t('mpMultiplayer')}
                   </p>
                   <div className="flex gap-1.5">
                     <input
@@ -4093,13 +4093,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       maxLength={6}
                       value={mp.joinerCode}
                       onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                      placeholder={lang === 'zh' ? '房间码' : 'CODE'}
+                      placeholder={t('mpCodePlaceholder')}
                       className="w-0 flex-1 min-w-0 text-center text-base font-mono font-bold tracking-wider py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     />
                     <button
                       onClick={async () => {
                         if (mp.joinerCode.length !== 6) {
-                          showToast(lang === 'zh' ? '请输入6位房间码' : 'Enter 6-digit code', 'error');
+                          showToast(t('mpEnter6Digit'), 'error');
                           return;
                         }
                         const result = await mp.joinGame(mp.joinerCode);
@@ -4116,7 +4116,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
                       }`}
                     >
-                      {lang === 'zh' ? '加入' : 'Join'}
+                      {t('mpJoin')}
                     </button>
                     <button
                       onClick={startQrScanner}
@@ -4135,7 +4135,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       <video ref={qrVideoRef} className="w-full h-full object-cover" playsInline muted />
                       <div className="absolute inset-0 border-2 border-green-400 rounded-2xl pointer-events-none" />
                     </div>
-                    <p className="text-white mt-4 text-sm">{lang === 'zh' ? '对准QR码扫描' : 'Point at QR code'}</p>
+                    <p className="text-white mt-4 text-sm">{t('mpPointQr')}</p>
                     <button
                       onClick={stopQrScanner}
                       className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-semibold"
@@ -4510,7 +4510,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                     }`}
                   >
-                    {lang === 'zh' ? '多人' : 'Jumbo'}
+                    {t('mpJumbo')}
                   </button>
                 </div>
                 
@@ -4680,7 +4680,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </button>
                       {showAdvanceTooltip && (
                         <div className="absolute left-0 top-6 z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div className="font-semibold mb-1">{lang === 'zh' ? '高级统计模式' : 'Advanced Stats Mode'}</div>
+                          <div className="font-semibold mb-1">{t('mpAdvancedStats')}</div>
                           <div className="mb-2">{lang === 'zh' ? '开启后可额外记录：' : 'Track extra data:'}</div>
                           <div>💧 {lang === 'zh' ? '水障碍' : 'Water Hazards'}</div>
                           <div>🚫 OB ({lang === 'zh' ? '出界' : 'Out of Bounds'})</div>
@@ -4751,7 +4751,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
 				  {/* 多人同步开关 */}
                   <div className="flex items-center justify-between mt-3">
                     <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
-                      📡 {lang === 'zh' ? '多人同步' : 'Multiplayer Sync'}:
+                      📡 {t('mpSync')}:
                     </label>
                     <div className="flex rounded-md border border-gray-300 overflow-hidden">
                       <button
@@ -4782,7 +4782,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
                       <div className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
                         <BarChart3 className="w-4 h-4" />
-                        {lang === 'zh' ? '选择使用高级统计的玩家' : 'Select players for advanced stats'}
+                        {t('mpSelectAdvanced')}
                       </div>
                       <div className="space-y-2">
                         {activePlayers.map(player => (
@@ -4830,7 +4830,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={startGame}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700"
                 >
-                  {mp.multiplayerOn ? (lang === 'zh' ? '创建房间' : 'Create Room') : t('start')}
+                  {mp.multiplayerOn ? t('mpCreateRoom') : t('start')}
                 </button>
               </div>
               
@@ -4844,9 +4844,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
                   <h2 className="text-xl font-bold text-gray-900">
-                    {mp.multiplayerRole === 'creator' 
-                      ? (lang === 'zh' ? '📡 等待同伴加入' : '📡 Waiting for Partner')
-                      : (lang === 'zh' ? '📡 等待开始' : '📡 Waiting to Start')}
+                    {mp.multiplayerRole === 'creator' ? t('mpWaitingPartner') : t('mpWaitingStart')}
                   </h2>
                 </div>
                 
@@ -4854,7 +4852,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {mp.multiplayerRole === 'creator' && (
                 <div className="bg-white rounded-xl p-6 shadow-md text-center">
                   <p className="text-sm text-gray-500 mb-2">
-                    {lang === 'zh' ? '房间码' : 'Room Code'}
+                    {t('mpRoomCode')}
                   </p>
                   <div className="text-4xl font-mono font-bold tracking-[0.3em] text-amber-600 bg-amber-50 rounded-lg py-3">
                     {mp.gameCode}
@@ -4862,11 +4860,11 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   <button
                     onClick={() => {
                       navigator.clipboard?.writeText(mp.gameCode);
-                      showToast(lang === 'zh' ? '已复制' : 'Copied!', 'success');
+                      showToast(t('mpCopied'), 'success');
                     }}
                     className="mt-3 text-sm text-blue-500 underline"
                   >
-                    {lang === 'zh' ? '复制房间码' : 'Copy Code'}
+                    {t('mpCopyCode')}
                   </button>
                   
                   {/* QR Code */}
@@ -4876,7 +4874,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       alt="QR Code"
                       className="mx-auto w-40 h-40 rounded-lg"
                     />
-                    <p className="text-xs text-gray-400 mt-1">{lang === 'zh' ? '扫码加入' : 'Scan to join'}</p>
+                    <p className="text-xs text-gray-400 mt-1">{t('mpScanToJoin')}</p>
                   </div>
                 </div>
                 )}
@@ -4885,16 +4883,16 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {mp.multiplayerRole === 'joiner' && mp.remoteGame && (
                 <div className="bg-white rounded-xl p-4 shadow-md">
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    {lang === 'zh' ? '比赛信息' : 'Game Info'}
+                    {t('mpGameInfo')}
                   </h3>
                   {mp.remoteGame.course?.fullName && (
                     <div className="flex items-center justify-between py-2 border-b">
-                      <span className="text-sm text-gray-500">{lang === 'zh' ? '球场' : 'Course'}</span>
+                      <span className="text-sm text-gray-500">{t('mpCourse')}</span>
                       <span className="font-medium text-sm">{mp.remoteGame.course.fullName}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between py-2 border-b">
-                    <span className="text-sm text-gray-500">{lang === 'zh' ? '模式' : 'Mode'}</span>
+                    <span className="text-sm text-gray-500">{t('mpMode')}</span>
                     <span className="font-medium text-sm">
                       {mp.remoteGame.gameMode === 'matchPlay' ? '🏆 Match Play' :
                        mp.remoteGame.gameMode === 'win123' ? '💵 Win123' :
@@ -4904,12 +4902,12 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </div>
                   {mp.remoteGame.stake > 0 && (
                     <div className="flex items-center justify-between py-2 border-b">
-                      <span className="text-sm text-gray-500">{lang === 'zh' ? '底注' : 'Stake'}</span>
+                      <span className="text-sm text-gray-500">{t('mpStake')}</span>
                       <span className="font-medium text-sm text-green-600">RM {mp.remoteGame.stake}</span>
                     </div>
                   )}
                   <div className="flex items-center justify-between py-2">
-                    <span className="text-sm text-gray-500">{lang === 'zh' ? '房间' : 'Room'}</span>
+                    <span className="text-sm text-gray-500">{t('mpRoom')}</span>
                     <span className="font-mono text-sm text-amber-600">{mp.gameCode}</span>
                   </div>
                 </div>
@@ -4918,7 +4916,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {/* Player Claim Status */}
                 <div className="bg-white rounded-xl p-4 shadow-md">
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                    {lang === 'zh' ? '球员分配' : 'Player Assignment'}
+                    {t('mpPlayerAssignment')}
                   </h3>
                   {activePlayers.map(player => (
                     <div key={player} className="flex items-center justify-between py-2 border-b last:border-0">
@@ -4935,13 +4933,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       }`}>
                         {mp.claimed[player] === 'creator' 
                           ? (mp.multiplayerRole === 'creator' 
-                              ? (lang === 'zh' ? '🅰️ 我的' : '🅰️ Mine') 
-                              : (lang === 'zh' ? '🅰️ 对方' : '🅰️ Partner'))
+                              ? (('🅰️ ' + t('mpMine'))) 
+                              : (('🅰️ ' + t('mpPartner'))))
                           : mp.claimed[player] === 'joiner' 
                             ? (mp.multiplayerRole === 'joiner' 
-                                ? (lang === 'zh' ? '🅱️ 我的' : '🅱️ Mine') 
-                                : (lang === 'zh' ? '🅱️ 对方' : '🅱️ Partner'))
-                            : (lang === 'zh' ? '未认领' : 'Unclaimed')}
+                                ? (('🅱️ ' + t('mpMine'))) 
+                                : (('🅱️ ' + t('mpPartner'))))
+                            : (t('mpUnclaimed'))}
                       </span>
                     </div>
                   ))}
@@ -4959,9 +4957,9 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       mp.syncStatus === 'error' ? 'bg-red-500' :
                       'bg-gray-400'
                     }`}></span>
-                    {mp.syncStatus === 'connected' ? (lang === 'zh' ? '已连接' : 'Connected') :
-                     mp.syncStatus === 'error' ? (lang === 'zh' ? '连接错误' : 'Error') :
-                     (lang === 'zh' ? '连接中...' : 'Connecting...')}
+                    {mp.syncStatus === 'connected' ? t('mpConnected') :
+                     mp.syncStatus === 'error' ? t('mpError') :
+                     t('mpConnecting')}
                   </div>
                 </div>
 
@@ -4977,7 +4975,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     }}
                     className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 text-lg"
                   >
-                    {lang === 'zh' ? '🏌️ 开始比赛' : '🏌️ Start Game'}
+                    {t('mpStartGame')}
                   </button>
                 )}
 
@@ -4985,7 +4983,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {mp.multiplayerRole === 'joiner' && (
                   <div className="text-center">
                     <p className="text-sm text-gray-500">
-                      ⏳ {lang === 'zh' ? '等待创建者开始比赛...' : 'Waiting for Creator to start the game...'}
+                      ⏳ {t('mpWaitingCreator')}
                     </p>
                   </div>
                 )}
@@ -5012,10 +5010,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
                   <h2 className="text-xl font-bold text-gray-900">
-                    {lang === 'zh' ? '选择你的球员' : 'Claim Your Players'}
+                    {t('mpClaimTitle')}
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    {lang === 'zh' ? '选择你要负责输入成绩的球员' : 'Select players you will score for'}
+                    {t('mpClaimDesc')}
                   </p>
                 </div>
 
@@ -5040,7 +5038,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={async () => {
                     const selected = Object.entries(mp.claimChecked).filter(([,v]) => v).map(([k]) => k);
                     if (selected.length === 0) {
-                      showToast(lang === 'zh' ? '请至少选择一位球员' : 'Select at least one player', 'error');
+                      showToast(t('mpSelectOne'), 'error');
                       return;
                     }
                     // Apply remote game settings locally
@@ -5114,7 +5112,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   }}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
                 >
-                  {lang === 'zh' ? '确认认领' : 'Confirm Claim'}
+                  {t('mpConfirmClaim')}
                 </button>
 
                 <button
@@ -6049,14 +6047,14 @@ return (
                   }}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
                 >
-                  {lang === 'zh' ? '📤 确认提交' : '📤 Confirm'}
+                  {t('mpConfirmSubmit')}
                 </button>
               ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isBothConfirmed() ? (
                 <button
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
-                  {lang === 'zh' ? '⏳ 等待对方...' : '⏳ Waiting...'}
+                  {t('mpWaiting')}
                 </button>
               ) : mp.multiplayerOn && mp.isBothConfirmed() ? (
                 <button
@@ -6064,8 +6062,8 @@ return (
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
                   {currentHole === holes.length - 1 
-                    ? (lang === 'zh' ? '✅ 确认 & 完成' : '✅ Confirm & Finish')
-                    : (lang === 'zh' ? '✅ 确认 & 下一洞' : '✅ Confirm & Next')}
+                    ? (t('mpConfirmFinish'))
+                    : (t('mpConfirmNext'))}
                 </button>
               ) : (
                 <button
