@@ -2669,6 +2669,17 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
+  // Joiner：专门同步累计金额（独立 effect，确保每次 polling 都更新）
+  useEffect(() => {
+    if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner' || !mp.remoteGame) return;
+    if (mp.remoteGame.totalMoney && Object.keys(mp.remoteGame.totalMoney).length > 0) {
+      setTotalMoney(mp.remoteGame.totalMoney);
+    }
+    if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+    if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+    if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+  }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
+
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
