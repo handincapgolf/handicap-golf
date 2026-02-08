@@ -2693,18 +2693,13 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     const status = mp.remoteGame.status;
     if (status !== 'playing' && status !== 'finished') return;
     
-    // Sync accumulated data from creator (money, allScores etc)
-    // 包括 finished 状态，确保 joiner 能看到最终结算
-    if (mp.multiplayerRole === 'joiner' && mp.remoteGame.totalMoney) {
-      setTotalMoney(mp.remoteGame.totalMoney);
-      if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+    // Sync accumulated data from creator (allScores etc, NOT totalMoney - handled by dedicated effect)
+    if (mp.multiplayerRole === 'joiner') {
       if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
       if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
       if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
       if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
       if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
-      if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
-      if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
     }
     
     // 以下仅在 playing 时执行（洞级别合并）
