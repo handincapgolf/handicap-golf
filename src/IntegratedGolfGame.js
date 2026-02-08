@@ -3652,11 +3652,15 @@ const getScoreLabel = useCallback((stroke, par) => {
     const stakeValue = Number(stake) || 0;
     let finalPrizePool = prizePool;
     
+    // 提升到函数作用域，确保 syncNextHole 能拿到结算后的最新值
+    let newTotalMoney = { ...totalMoney };
+    let newMoneyDetails = { ...moneyDetails };
+    let newTotalSpent = { ...totalSpent };
+    
     if (stakeValue > 0 || gameMode === 'skins') {
       if (gameMode === 'matchPlay') {
         const settlement = calculateMatchPlay(currentHoleScores, holeNum);
         
-        const newTotalMoney = { ...totalMoney };
         activePlayers.forEach(player => {
           newTotalMoney[player] = (newTotalMoney[player] || 0) + settlement[player].money;
         });
@@ -3665,22 +3669,18 @@ const getScoreLabel = useCallback((stroke, par) => {
       } else if (gameMode === 'skins') {
         const { results, poolChange } = calculateSkins(currentHoleScores, holeNum);
         
-        const newTotalMoney = { ...totalMoney };
-        const newDetails = { ...moneyDetails };
-        const newSpent = { ...totalSpent };
-        
         activePlayers.forEach(player => {
-          newSpent[player] = (newSpent[player] || 0) + (results[player].spent || 0);
+          newTotalSpent[player] = (newTotalSpent[player] || 0) + (results[player].spent || 0);
           newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
           
           if (results[player].fromPool) {
-            newDetails[player].fromPool += results[player].fromPool;
+            newMoneyDetails[player].fromPool += results[player].fromPool;
           }
         });
         
         setTotalMoney(newTotalMoney);
-        setMoneyDetails(newDetails);
-        setTotalSpent(newSpent);
+        setMoneyDetails(newMoneyDetails);
+        setTotalSpent(newTotalSpent);
         finalPrizePool = prizePool + poolChange;
         setPrizePool(finalPrizePool);
         
@@ -3691,24 +3691,20 @@ const getScoreLabel = useCallback((stroke, par) => {
         win123Rankings = rankings;
         win123IsTied = isTied;
         
-        const newTotalMoney = { ...totalMoney };
-        const newDetails = { ...moneyDetails };
-        
         activePlayers.forEach(player => {
           newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
           if (results[player].fromPool) {
-            newDetails[player].fromPool = (newDetails[player].fromPool || 0) + results[player].fromPool;
+            newMoneyDetails[player].fromPool = (newMoneyDetails[player].fromPool || 0) + results[player].fromPool;
           }
         });
         
         setTotalMoney(newTotalMoney);
-        setMoneyDetails(newDetails);
+        setMoneyDetails(newMoneyDetails);
         finalPrizePool = prizePool + poolChange;
         setPrizePool(finalPrizePool);
       } else if (gameMode === 'baccarat') {
         const { results } = calculateBaccarat(currentHoleScores, currentHolePutts, upOrder, holeNum);
         
-        const newTotalMoney = { ...totalMoney };
         activePlayers.forEach(player => {
           newTotalMoney[player] = (newTotalMoney[player] || 0) + results[player].money;
         });
@@ -3738,7 +3734,7 @@ const getScoreLabel = useCallback((stroke, par) => {
 	triggerConfetti();
 	// 多人同步：通知结束
 	if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-	  mp.syncNextHole(holes.length, holes.length, { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles, finished: true });
+	  mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, finished: true });
 	}
     } else {
       setCurrentHole(currentHole + 1);
@@ -3751,7 +3747,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       setCurrentHoleSettlement(null);
       // 多人同步：通知下一洞
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney, moneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent, completedHoles: newCompletedHoles });
+        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles });
       }
     }
     
