@@ -2689,42 +2689,50 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
 
-  // Joiner: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
+  // Joiner: 检测 Creator 已完成当前洞 → 标记 ready，等 Joiner 点按钮
+  const [joinerNextReady, setJoinerNextReady] = useState(false);
+  
   useEffect(() => {
     if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner') return;
     if (!mp.remoteGame?.completedHoles || mp.remoteGame.status !== 'playing') return;
     
     const myHoleNum = holes[currentHole];
-    // Creator 已完成我当前所在洞 → 我应该跟进
-    if (mp.remoteGame.completedHoles.includes(myHoleNum)) {
-      // 播报本洞成绩（从服务器数据读取所有玩家分数）
-      const holeData = mp.remoteGame.holes?.[myHoleNum];
-      if (holeData?.scores && voiceEnabled) {
-        const holeScores = holeData.scores;
-        const holePutts = holeData.putts || {};
-        const sortedPlayers = [...activePlayers].sort((a, b) => {
-          const scoreA = (holeScores[a] || 0) + (holePutts[a] || 0);
-          const scoreB = (holeScores[b] || 0) + (holePutts[b] || 0);
-          return scoreB - scoreA;
-        });
-        const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-        playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
-      }
-      
-      if (currentHole < holes.length - 1) {
-        setCurrentHole(currentHole + 1);
-        setScores({});
-        setUps({});
-        setUpOrder([]);
-        setPutts({});
-        setWater({});
-        setOb({});
-        setCurrentHoleSettlement(null);
-        mp.setConfirmedFromHole({ creator: false, joiner: false });
-      }
-      // 最后一洞的完成由 finished effect 处理
+    if (mp.remoteGame.completedHoles.includes(myHoleNum) && !joinerNextReady) {
+      setJoinerNextReady(true);
     }
-  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
+  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, joinerNextReady]);
+
+  // Joiner 点击按钮后执行跳转 + 语音
+  const joinerProceedNext = useCallback(() => {
+    const myHoleNum = holes[currentHole];
+    
+    // 播报本洞成绩
+    const holeData = mp.remoteGame?.holes?.[myHoleNum];
+    if (holeData?.scores) {
+      const holeScores = holeData.scores;
+      const holePutts = holeData.putts || {};
+      const sortedPlayers = [...activePlayers].sort((a, b) => {
+        const scoreA = (holeScores[a] || 0) + (holePutts[a] || 0);
+        const scoreB = (holeScores[b] || 0) + (holePutts[b] || 0);
+        return scoreB - scoreA;
+      });
+      const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
+      playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
+    }
+    
+    if (currentHole < holes.length - 1) {
+      setCurrentHole(currentHole + 1);
+      setScores({});
+      setUps({});
+      setUpOrder([]);
+      setPutts({});
+      setWater({});
+      setOb({});
+      setCurrentHoleSettlement(null);
+      mp.setConfirmedFromHole({ creator: false, joiner: false });
+    }
+    setJoinerNextReady(false);
+  }, [currentHole, holes, activePlayers, gameMode, stake, playHoleResults, mp]);
 
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -6231,12 +6239,21 @@ return (
                     : (t('mpConfirmNext'))}
                 </button>
               ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'joiner' ? (
+                joinerNextReady ? (
+                <button
+                  onClick={joinerProceedNext}
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
+                >
+                  ➡️ {lang === 'zh' ? '进入下一洞' : 'Go to Next Hole'}
+                </button>
+                ) : (
                 <button
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
                   ⏳ {lang === 'zh' ? '等待 🅰️ 进入下一洞...' : 'Waiting 🅰️ to proceed...'}
                 </button>
+                )
               ) : (
                 <button
                   onClick={nextHole}
