@@ -199,16 +199,23 @@ export function useMultiplayerSync() {
 
   // Confirm my scores for this hole
   const confirmMyScores = useCallback(async (hole, scores, putts, ups, upOrder, water, ob, totalMoney, moneyDetails, totalSpent) => {
-    return submitScores(hole, {
+    const data = {
       scores, putts, ups, upOrder, water, ob,
       confirmed: true,
-      totalMoney: totalMoney || {},
-      moneyDetails: moneyDetails || {},
-      totalSpent: totalSpent || {},
-    });
-  }, [submitScores]);
+    };
+    // Only creator pushes totalMoney to avoid joiner overwriting with stale data
+    if (multiplayerRole === 'creator') {
+      data.totalMoney = totalMoney || {};
+      data.moneyDetails = moneyDetails || {};
+      data.totalSpent = totalSpent || {};
+    }
+    return submitScores(hole, data);
+  }, [submitScores, multiplayerRole]);
 
-  // Move to next hole
+  // Unconfirm (retract) my scores for this hole
+  const unconfirmMyScores = useCallback(async (hole) => {
+    return submitScores(hole, { confirmed: false });
+  }, [submitScores]);
   const syncNextHole = useCallback(async (nextHole, nextHoleNum, gameState) => {
     if (!gameCode) return { ok: false };
     const result = await apiCall(`/game/${gameCode}/next`, 'PUT', {
@@ -309,6 +316,7 @@ export function useMultiplayerSync() {
     startMultiplayerGame,
     submitScores,
     confirmMyScores,
+    unconfirmMyScores,
     syncNextHole,
     syncEdit,
     resetMultiplayer,

@@ -2697,6 +2697,20 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     const myHoleNum = holes[currentHole];
     // Creator 已完成我当前所在洞 → 我应该跟进
     if (mp.remoteGame.completedHoles.includes(myHoleNum)) {
+      // 播报本洞成绩（从服务器数据读取所有玩家分数）
+      const holeData = mp.remoteGame.holes?.[myHoleNum];
+      if (holeData?.scores && voiceEnabled) {
+        const holeScores = holeData.scores;
+        const holePutts = holeData.putts || {};
+        const sortedPlayers = [...activePlayers].sort((a, b) => {
+          const scoreA = (holeScores[a] || 0) + (holePutts[a] || 0);
+          const scoreB = (holeScores[b] || 0) + (holePutts[b] || 0);
+          return scoreB - scoreA;
+        });
+        const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
+        playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
+      }
+      
       if (currentHole < holes.length - 1) {
         setCurrentHole(currentHole + 1);
         setScores({});
@@ -2710,7 +2724,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       }
       // 最后一洞的完成由 finished effect 处理
     }
-  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes]);
+  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
 
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -6198,10 +6212,14 @@ return (
                 </button>
               ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isBothConfirmed() ? (
                 <button
-                  disabled
-                  className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
+                  onClick={async () => {
+                    const holeNum = holes[currentHole];
+                    await mp.unconfirmMyScores(holeNum);
+                    showToast(lang === 'zh' ? '已撤回，可修改分数' : 'Retracted. You can edit scores now.', 'success');
+                  }}
+                  className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
-                  {t('mpWaiting')}
+                  ✏️ {lang === 'zh' ? '撤回修改' : 'Undo & Edit'}
                 </button>
               ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'creator' ? (
                 <button
