@@ -4747,7 +4747,35 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </button>
                     </div>
                   </div>
-				  
+
+				  {/* 多人同步开关 */}
+                  <div className="flex items-center justify-between mt-3">
+                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
+                      📡 {lang === 'zh' ? '多人同步' : 'Multiplayer Sync'}:
+                    </label>
+                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
+                      <button
+                        onClick={() => mp.setMultiplayerOn(false)}
+                        className={`px-3 py-1 font-medium text-sm transition ${
+                          !mp.multiplayerOn
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {t('off')}
+                      </button>
+                      <button
+                        onClick={() => mp.setMultiplayerOn(true)}
+                        className={`px-3 py-1 font-medium text-sm transition ${
+                          mp.multiplayerOn
+                            ? 'bg-green-600 text-white'
+                            : 'bg-white text-gray-700 hover:bg-gray-50'
+                        }`}
+                      >
+                        {t('on')}
+                      </button>
+                    </div>
+                  </div>
 
 				  {/* Advance 玩家选择 */}
                   {advanceMode === 'on' && activePlayers.length > 0 && (
@@ -4796,18 +4824,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   className="flex-1 bg-gray-200 text-gray-800 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
                   {t('back')}
-                </button>
-                
-                {/* 多人同步开关 */}
-                <button
-                  onClick={() => mp.setMultiplayerOn(!mp.multiplayerOn)}
-                  className={`px-3 py-2 rounded-lg font-medium text-sm transition ${
-                    mp.multiplayerOn
-                      ? 'bg-amber-500 text-white hover:bg-amber-600'
-                      : 'bg-gray-200 text-gray-600 hover:bg-gray-300'
-                  }`}
-                >
-                  {mp.multiplayerOn ? '📡 Sync' : '📡'}
                 </button>
                 
                 <button
