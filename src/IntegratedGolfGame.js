@@ -4090,7 +4090,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       maxLength={6}
                       value={mp.joinerCode}
                       onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                      placeholder="房间码"
+                      placeholder={lang === 'zh' ? '房间码' : 'CODE'}
                       className="w-0 flex-1 min-w-0 text-center text-base font-mono font-bold tracking-wider py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     />
                     <button
