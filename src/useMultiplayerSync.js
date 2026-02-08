@@ -28,21 +28,25 @@ async function apiCall(path, method = 'GET', body = null) {
 }
 
 export function useMultiplayerSync() {
-  const [multiplayerOn, setMultiplayerOn] = useState(false);
-  const [multiplayerRole, setMultiplayerRole] = useState(null); // 'creator' | 'joiner'
-  const [gameCode, setGameCode] = useState('');
+  // Restore from localStorage on init
+  const saved = useRef((() => {
+    try { return JSON.parse(localStorage.getItem('handincap_mp') || 'null'); } catch { return null; }
+  })());
+  
+  const [multiplayerOn, setMultiplayerOn] = useState(saved.current?.on || false);
+  const [multiplayerRole, setMultiplayerRole] = useState(saved.current?.role || null);
+  const [gameCode, setGameCode] = useState(saved.current?.code || '');
   const [joinerCode, setJoinerCode] = useState('');
   const [remoteGame, setRemoteGame] = useState(null);
-  const [syncStatus, setSyncStatus] = useState('idle'); // 'idle' | 'syncing' | 'error' | 'connected'
+  const [syncStatus, setSyncStatus] = useState('idle');
   const [syncFlash, setSyncFlash] = useState(null);
   const [confirmed, setConfirmed] = useState({ creator: false, joiner: false });
-  const [claimed, setClaimed] = useState({}); // { playerName: "creator" | "joiner" }
+  const [claimed, setClaimed] = useState(saved.current?.claimed || {});
   const [claimChecked, setClaimChecked] = useState({});
-  const [multiplayerSection, setMultiplayerSection] = useState(null); // 'lobby' | 'joinerEntry' | 'joinerClaim'
+  const [multiplayerSection, setMultiplayerSection] = useState(saved.current?.section || null);
   
   const pollRef = useRef(null);
   const deviceId = useRef(getDeviceId());
-  const lastUpdateRef = useRef(0);
 
   // Start polling for game state
   const startPolling = useCallback((code) => {
@@ -85,6 +89,26 @@ export function useMultiplayerSync() {
   useEffect(() => {
     return () => stopPolling();
   }, [stopPolling]);
+
+  // Save multiplayer state to localStorage
+  useEffect(() => {
+    if (multiplayerOn && gameCode) {
+      localStorage.setItem('handincap_mp', JSON.stringify({
+        on: multiplayerOn,
+        role: multiplayerRole,
+        code: gameCode,
+        claimed,
+        section: multiplayerSection,
+      }));
+    }
+  }, [multiplayerOn, multiplayerRole, gameCode, claimed, multiplayerSection]);
+
+  // Auto-reconnect on mount if saved state exists
+  useEffect(() => {
+    if (saved.current?.on && saved.current?.code && !pollRef.current) {
+      startPolling(saved.current.code);
+    }
+  }, [startPolling]);
 
   // Creator: Create game room
   const createGame = useCallback(async (gameSetup) => {
@@ -262,7 +286,7 @@ export function useMultiplayerSync() {
     setClaimed({});
     setClaimChecked({});
     setMultiplayerSection(null);
-    lastUpdateRef.current = 0;
+    localStorage.removeItem('handincap_mp');
   }, [stopPolling]);
 
   // Check if joiner has claimed any players
