@@ -3912,6 +3912,16 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     
     // 多人同步：推送编辑结果并恢复轮询
     if (mp.multiplayerOn && mp.gameCode) {
+      // 同步 allScores + 更新被编辑洞的 holes 数据
+      const holeUpdate = {
+        scores: {}, putts: {}, ups: {}, upOrder: newUpOrder,
+      };
+      activePlayers.forEach(p => {
+        holeUpdate.scores[p] = newScores[p];
+        holeUpdate.putts[p] = newPutts[p] || 0;
+        holeUpdate.ups[p] = newUps[p] || false;
+      });
+      
       mp.syncEdit({
         allScores: updatedAllScores,
         allUps: updatedAllUps,
@@ -3921,6 +3931,8 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
         moneyDetails: newDetails,
         totalSpent: newSpent,
         completedHoles,
+        editedHole: hole,
+        editedHoleData: holeUpdate,
       });
       mp.startPolling(mp.gameCode);
     }
