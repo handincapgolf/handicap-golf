@@ -2664,7 +2664,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       mp.setMultiplayerSection(null);
       setCurrentSection('game');
     }
-  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn]);
+  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
@@ -3262,6 +3262,8 @@ const getScoreLabel = useCallback((stroke, par) => {
       mp.createGame(gameSetup).then(result => {
         if (!result.ok) {
           showToast('Failed to create game room', 'error');
+        } else {
+          setCurrentSection('mp-lobby');
         }
       });
       return; // Don't go to game section yet — go to lobby
@@ -4079,16 +4081,16 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {/* 加入房间 */}
                 <div className="pt-3 border-t border-gray-200 mt-3">
                   <p className="text-xs text-gray-500 text-center mb-2">
-                    {lang === 'zh' ? '📡 多人同步 — 输入房间码加入' : '📡 Multiplayer — Enter room code to join'}
+                    {lang === 'zh' ? '📡 多人同步' : '📡 Multiplayer'}
                   </p>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     <input
                       type="text"
                       maxLength={6}
                       value={mp.joinerCode}
                       onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
-                      placeholder="XXXXXX"
-                      className="flex-1 text-center text-lg font-mono font-bold tracking-[0.2em] py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                      placeholder="房间码"
+                      className="w-0 flex-1 min-w-0 text-center text-base font-mono font-bold tracking-wider py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                     />
                     <button
                       onClick={async () => {
@@ -4099,11 +4101,12 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         const result = await mp.joinGame(mp.joinerCode);
                         if (!result.ok) {
                           showToast(result.error || 'Room not found', 'error');
+                        } else {
+                          setCurrentSection('mp-claim');
                         }
-                        // joinGame sets multiplayerSection to 'joinerClaim'
                       }}
                       disabled={mp.joinerCode.length !== 6}
-                      className={`px-4 py-2 rounded-lg font-semibold transition ${
+                      className={`px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition ${
                         mp.joinerCode.length === 6
                           ? 'bg-blue-600 text-white hover:bg-blue-700'
                           : 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -4113,7 +4116,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     </button>
                     <button
                       onClick={startQrScanner}
-                      className="px-3 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition"
+                      className="px-2.5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition text-sm"
                       title="Scan QR"
                     >
                       📷
@@ -4816,7 +4819,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Creator 大厅 ========== */}
-          {mp.multiplayerSection === 'lobby' && (
+          {currentSection === 'mp-lobby' && (
             <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -4916,6 +4919,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
+                    setCurrentSection('players');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
@@ -4926,7 +4930,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           )}
 
           {/* ========== 多人同步：Joiner 认领球员 ========== */}
-          {mp.multiplayerSection === 'joinerClaim' && mp.remoteGame && (
+          {currentSection === 'mp-claim' && mp.remoteGame && (
             <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
@@ -5028,6 +5032,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       setCurrentHoleSettlement(null);
                       
                       mp.setMultiplayerSection('lobby');
+                      setCurrentSection('mp-lobby');
                     }
                   }}
                   className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
@@ -5039,6 +5044,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   onClick={() => {
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
+                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >

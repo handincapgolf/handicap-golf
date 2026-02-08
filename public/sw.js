@@ -1,5 +1,5 @@
 // 🔴 每次发布新版本时修改这个版本号！
-const CACHE_VERSION = 'v1.0.1.5';
+const CACHE_VERSION = 'v1.0.1.6';
 const CACHE_NAME = `handincap-${CACHE_VERSION}`;
 
 const urlsToCache = [
