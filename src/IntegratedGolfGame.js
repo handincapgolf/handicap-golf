@@ -2736,7 +2736,31 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       });
       return next;
     });
-  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole]);
+    
+    // 重新计算 hole settlement（合并远程分数后）
+    const par = pars[holeNum] || 4;
+    const mergedScores = {};
+    const mergedPutts = {};
+    const mergedUps = {};
+    activePlayers.forEach(p => {
+      mergedScores[p] = holeData.scores?.[p] !== undefined ? holeData.scores[p] : (scores[p] || par);
+      mergedPutts[p] = holeData.putts?.[p] !== undefined ? holeData.putts[p] : (putts[p] || 0);
+      mergedUps[p] = holeData.ups?.[p] !== undefined ? holeData.ups[p] : (ups[p] || false);
+    });
+    
+    if (gameMode === 'matchPlay') {
+      setCurrentHoleSettlement(calculateMatchPlay(mergedScores, holeNum));
+    } else if (gameMode === 'skins') {
+      const { results } = calculateSkins(mergedScores, holeNum);
+      setCurrentHoleSettlement(results);
+    } else if (gameMode === 'win123') {
+      const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
+      setCurrentHoleSettlement(results);
+    } else if (gameMode === 'baccarat') {
+      const { results, matchupDetails } = calculateBaccarat(mergedScores, mergedPutts, upOrder, holeNum);
+      setCurrentHoleSettlement({ ...results, matchupDetails });
+    }
+  }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, scores, putts, ups, upOrder, pars, holes, gameMode, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat]);
 
   // 检测 URL 参数 ?join=XXXXXX（QR码扫描）
   useEffect(() => {
@@ -3872,7 +3896,22 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     }
     
     showToast(t('scoreUpdated'));
-  }, [allScores, allUps, allUpOrders, allPutts, activePlayers, stake, gameMode, completedHoles, pars, calculateMatchPlay, calculateWin123, calculateBaccarat, getHandicapForHole, showToast, t]);
+    
+    // 多人同步：推送编辑结果并恢复轮询
+    if (mp.multiplayerOn && mp.gameCode) {
+      mp.syncEdit({
+        allScores: updatedAllScores,
+        allUps: updatedAllUps,
+        allPutts: updatedAllPutts,
+        allUpOrders: updatedAllUpOrders,
+        totalMoney: newTotalMoney,
+        moneyDetails: newDetails,
+        totalSpent: newSpent,
+        completedHoles,
+      });
+      mp.startPolling(mp.gameCode);
+    }
+  }, [allScores, allUps, allUpOrders, allPutts, activePlayers, stake, gameMode, completedHoles, pars, calculateMatchPlay, calculateWin123, calculateBaccarat, getHandicapForHole, showToast, t, mp]);
 
   const goHome = useCallback(() => {
     const resetGame = () => {
@@ -6185,14 +6224,20 @@ return (
         isOpen={holeSelectDialog}
         onClose={() => setHoleSelectDialog(false)}
         completedHoles={completedHoles}
-        onSelect={(hole) => setEditHoleDialog({ isOpen: true, hole })}
+        onSelect={(hole) => {
+          if (mp.multiplayerOn) mp.stopPolling();
+          setEditHoleDialog({ isOpen: true, hole });
+        }}
         t={t}
 		pars={pars}
       />
 
       <EditHoleDialog
   isOpen={editHoleDialog.isOpen}
-  onClose={() => setEditHoleDialog({ isOpen: false, hole: null })}
+  onClose={() => {
+    setEditHoleDialog({ isOpen: false, hole: null });
+    if (mp.multiplayerOn && mp.gameCode) mp.startPolling(mp.gameCode);
+  }}
   hole={editHoleDialog.hole}
   players={activePlayers}
   allScores={allScores}
