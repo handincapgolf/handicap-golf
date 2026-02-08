@@ -104,6 +104,24 @@ export function useMultiplayerSync() {
     }
   }, [startPolling]);
 
+  // Pause polling when screen off / app in background, resume when visible
+  useEffect(() => {
+    if (!multiplayerOn || !gameCode) return;
+
+    const handleVisibility = () => {
+      if (document.visibilityState === 'hidden') {
+        stopPolling();
+        setSyncStatus('paused');
+      } else if (document.visibilityState === 'visible') {
+        startPolling(gameCode);
+        setSyncStatus('connected');
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [multiplayerOn, gameCode, startPolling, stopPolling]);
+
   // Creator: Create game room
   const createGame = useCallback(async (gameSetup) => {
     try {
