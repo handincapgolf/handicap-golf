@@ -23,7 +23,8 @@ import {
   Droplets,
   ChevronDown,
   ChevronUp,
-  HelpCircle
+  HelpCircle,
+  Clock
 } from 'lucide-react';
 
 import { GOLF_COURSES, searchCourses } from './data/courses';
@@ -2503,18 +2504,54 @@ const [voiceEnabled, setVoiceEnabled] = useState(() => {
   } catch { return false; }
 });
 
+// ========== iOS speechSynthesis 解锁 ==========
+// iOS 要求首次 speak() 必须在用户手势事件中触发
+// 之后程序化调用（如 auto-advance）才能正常播报
+useEffect(() => {
+  if (!('speechSynthesis' in window)) return;
+  const unlock = () => {
+    const u = new SpeechSynthesisUtterance('');
+    u.volume = 0;
+    speechSynthesis.speak(u);
+    document.removeEventListener('touchstart', unlock);
+    document.removeEventListener('click', unlock);
+  };
+  document.addEventListener('touchstart', unlock, { once: true });
+  document.addEventListener('click', unlock, { once: true });
+  return () => {
+    document.removeEventListener('touchstart', unlock);
+    document.removeEventListener('click', unlock);
+  };
+}, []);
+
+// ========== 最近使用球场 ==========
+const RECENT_COURSES_KEY = 'handincap_recent_courses';
+const [recentCourses, setRecentCourses] = useState(() => {
+  try { return JSON.parse(localStorage.getItem('handincap_recent_courses') || '[]'); } catch { return []; }
+});
+const saveRecentCourse = useCallback((course) => {
+  setRecentCourses(prev => {
+    const list = prev.filter(c => c.shortName !== course.shortName);
+    list.unshift(course);
+    const trimmed = list.slice(0, 5);
+    localStorage.setItem('handincap_recent_courses', JSON.stringify(trimmed));
+    return trimmed;
+  });
+}, []);
+
 const [showAdvanceTooltip, setShowAdvanceTooltip] = useState(false);
+const [showMpTooltip, setShowMpTooltip] = useState(false);
 
 // ========== 多人同步 ==========
 const mp = useMultiplayerSync();
 
 // 点击外部关闭气泡
 useEffect(() => {
-  if (!showAdvanceTooltip) return;
-  const handleClick = () => setShowAdvanceTooltip(false);
+  if (!showAdvanceTooltip && !showMpTooltip) return;
+  const handleClick = () => { setShowAdvanceTooltip(false); setShowMpTooltip(false); };
   setTimeout(() => document.addEventListener('click', handleClick), 0);
   return () => document.removeEventListener('click', handleClick);
-}, [showAdvanceTooltip]);
+}, [showAdvanceTooltip, showMpTooltip]);
 
 // 8杆特殊音效（放在 public/assets/ 文件夹）
 const huatAhAudio = new Audio('/assets/huat_ah.m4a');
@@ -3165,6 +3202,9 @@ const selectAndApplyCourse = useCallback((course) => {
   setPars(newPars);
   setCourseApplied(true);
   
+  // 保存到最近使用球场
+  saveRecentCourse(course);
+  
 setSearchQuery('');
     
     // 移动端兼容的自动滚动
@@ -3184,7 +3224,7 @@ setSearchQuery('');
         behavior: 'smooth'
       });
     }, 200);
-  }, []);
+  }, [saveRecentCourse]);
 
   const getVerticalArrangedHoles = useCallback(() => {
     const arranged = [];
@@ -4633,6 +4673,57 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   {t('confirmCourse')}
                 </button>
               </div>
+
+              {/* ★ 最近使用球场 — 仅在 Auto Search 模式 + 未选球场时显示 */}
+              {setupMode === 'auto' && !searchQuery.trim() && !selectedCourse && recentCourses.length > 0 && (
+                <div className="bg-white rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                      <Clock className="w-4 h-4 text-green-600" />
+                      {lang === 'zh' ? '最近球场' : 'Recent Courses'}
+                    </h3>
+                    <button
+                      onClick={() => {
+                        localStorage.removeItem('handincap_recent_courses');
+                        setRecentCourses([]);
+                      }}
+                      className="text-xs text-gray-400 hover:text-red-500 transition"
+                    >
+                      {lang === 'zh' ? '清除' : 'Clear'}
+                    </button>
+                  </div>
+                  <div className="space-y-2">
+                    {recentCourses.slice(0, 3).map((course, index) => {
+                      const coursePar = course.pars ? course.pars.reduce((sum, par) => sum + par, 0) : '?';
+                      return (
+                        <div
+                          key={`recent-${course.shortName}-${index}`}
+                          className="border border-gray-200 bg-white hover:border-green-400 hover:shadow-lg rounded-xl p-3 cursor-pointer transition-all active:scale-[0.98]"
+                          onClick={() => selectAndApplyCourse(course)}
+                        >
+                          <div className="flex gap-3">
+                            <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
+                              <span className="text-base font-bold">{coursePar}</span>
+                              <span style={{ fontSize: 8 }} className="uppercase tracking-wide opacity-90">Par</span>
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="font-semibold text-xs text-gray-900 mb-0.5 leading-snug">
+                                {course.fullName}
+                              </h4>
+                              {course.location && (
+                                <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                                  <MapPin className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                  <span>{course.location[0]}, {course.location[1]}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -4821,19 +4912,15 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       {t('advance')}:
                       <button
                         type="button"
-                        onClick={() => setShowAdvanceTooltip(!showAdvanceTooltip)}
+                        onClick={() => { setShowAdvanceTooltip(!showAdvanceTooltip); setShowMpTooltip(false); }}
                         className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
                       >
                         ?
                       </button>
                       {showAdvanceTooltip && (
-                        <div className="absolute left-0 top-6 z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div className="font-semibold mb-1">{t('mpAdvancedStats')}</div>
-                          <div className="mb-2">{lang === 'zh' ? '开启后可额外记录：' : 'Track extra data:'}</div>
-                          <div>💧 {lang === 'zh' ? '水障碍' : 'Water Hazards'}</div>
-                          <div>🚫 OB ({lang === 'zh' ? '出界' : 'Out of Bounds'})</div>
-                          <div className="mt-2 text-gray-300">{lang === 'zh' ? '赛后生成详细报告！' : 'Get stats report after round!'}</div>
-                          <div className="absolute -top-1 left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
+                        <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
+                          <div>{lang === 'zh' ? '开启后除了杆数，还会记录💧下水和🚫出界次数。打完后生成详细成绩单。' : 'Also tracks 💧 water and 🚫 out of bounds. Get a detailed report after the round.'}</div>
+                          <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
                         </div>
                       )}
                     </label>
@@ -4861,51 +4948,23 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     </div>
                   </div>
 				  
-				  {/* 语音播报开关 */}
-                  <div className="flex items-center justify-between mt-3">
-                    <label className="text-xs font-medium text-gray-700">
-                      {lang === 'zh' ? '语音播报' : 'Voice Announce'}:
-                    </label>
-                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
-                      <button
-                        onClick={() => {
-                          setVoiceEnabled(false);
-                          localStorage.setItem('handincap_voice', 'false');
-                        }}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          !voiceEnabled
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('off')}
-                      </button>
-                      <button
-                        onClick={() => {
-                          setVoiceEnabled(true);
-                          localStorage.setItem('handincap_voice', 'true');
-                          // 解锁 speechSynthesis
-                          if ('speechSynthesis' in window) {
-                            const u = new SpeechSynthesisUtterance('');
-                            u.volume = 0;
-                            speechSynthesis.speak(u);
-                          }
-                        }}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          voiceEnabled
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('on')}
-                      </button>
-                    </div>
-                  </div>
-
 				  {/* 多人同步开关 */}
                   <div className="flex items-center justify-between mt-3">
-                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1">
-                      📡 {t('mpSync')}:
+                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1 relative">
+                      {t('mpSync')}:
+                      <button
+                        type="button"
+                        onClick={() => { setShowMpTooltip(!showMpTooltip); setShowAdvanceTooltip(false); }}
+                        className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
+                      >
+                        ?
+                      </button>
+                      {showMpTooltip && (
+                        <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
+                          <div>{lang === 'zh' ? '你记你的球员，朋友记他的，分数自动同步。不用再传来传去。' : 'You score your players, your friend scores theirs. Scores sync automatically.'}</div>
+                          <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
+                        </div>
+                      )}
                     </label>
                     <div className="flex rounded-md border border-gray-300 overflow-hidden">
                       <button
