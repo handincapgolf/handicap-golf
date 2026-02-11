@@ -2524,6 +2524,30 @@ useEffect(() => {
   };
 }, []);
 
+// ========== 禁止 PWA 下拉刷新 + 修复移动端底部空白 ==========
+useEffect(() => {
+  // Chrome / Android
+  document.documentElement.style.overscrollBehavior = 'none';
+  document.body.style.overscrollBehavior = 'none';
+  // iOS Safari: 页面顶部时阻止下拉
+  const preventPullRefresh = (e) => {
+    if (window.scrollY === 0 && e.touches[0].clientY > (preventPullRefresh._startY || 0)) {
+      e.preventDefault();
+    }
+  };
+  const recordStart = (e) => {
+    preventPullRefresh._startY = e.touches[0].clientY;
+  };
+  document.addEventListener('touchstart', recordStart, { passive: true });
+  document.addEventListener('touchmove', preventPullRefresh, { passive: false });
+  return () => {
+    document.documentElement.style.overscrollBehavior = '';
+    document.body.style.overscrollBehavior = '';
+    document.removeEventListener('touchstart', recordStart);
+    document.removeEventListener('touchmove', preventPullRefresh);
+  };
+}, []);
+
 // ========== 最近使用球场 ==========
 const RECENT_COURSES_KEY = 'handincap_recent_courses';
 const [recentCourses, setRecentCourses] = useState(() => {
