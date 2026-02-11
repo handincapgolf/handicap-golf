@@ -2461,6 +2461,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [pars, setPars] = useState(courses.f18.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
   
   const [gameMode, setGameMode] = useState('matchPlay');
+  const [showModeDesc, setShowModeDesc] = useState(false);
   const [jumboMode, setJumboMode] = useState(false);
   const [playerNames, setPlayerNames] = useState(['', '', '', '']);
   const [stake, setStake] = useState('');
@@ -4811,100 +4812,79 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                     </label>
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        onClick={() => setGameMode('matchPlay')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                        onClick={() => { setGameMode('matchPlay'); setShowModeDesc(showModeDesc && gameMode === 'matchPlay' ? false : true); }}
+                        className={`px-3 rounded-lg font-medium text-sm transition flex flex-col items-center text-center gap-1 ${
                           gameMode === 'matchPlay'
-                            ? 'bg-blue-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? `bg-blue-600 text-white ${showModeDesc ? 'py-3' : 'py-2'}`
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 py-2'
                         }`}
                       >
-                        <Trophy className="w-4 h-4" />
-                        <span style={{ fontSize: '12px' }}>{t('matchPlay')}</span>
+                        <div className="flex items-center gap-1">
+                          <Trophy className="w-4 h-4" />
+                          <span style={{ fontSize: '12px' }}>{t('matchPlay')}</span>
+                        </div>
+                        {gameMode === 'matchPlay' && showModeDesc && (
+                          <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
+                            {lang === 'zh' ? '每洞净杆最低者赢。平手就没有输赢。' : 'Lowest net score wins each hole. Tied? No one pays.'}
+                          </div>
+                        )}
                       </button>
                       <button
-                        onClick={() => setGameMode('win123')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                        onClick={() => { setGameMode('win123'); setShowModeDesc(showModeDesc && gameMode === 'win123' ? false : true); }}
+                        className={`px-3 rounded-lg font-medium text-sm transition flex flex-col items-center text-center gap-1 ${
                           gameMode === 'win123'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? `bg-green-600 text-white ${showModeDesc ? 'py-3' : 'py-2'}`
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 py-2'
                         }`}
                       >
-                        <DollarSign className="w-4 h-4" />
-                        <span style={{ fontSize: '12px' }}>{t('win123')}</span>
+                        <div className="flex items-center gap-1">
+                          <DollarSign className="w-4 h-4" />
+                          <span style={{ fontSize: '12px' }}>{t('win123')}</span>
+                        </div>
+                        {gameMode === 'win123' && showModeDesc && (
+                          <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
+                            {lang === 'zh' ? '按净杆排名。排名越低罚越重。UP可以赢更多，也可能输更多。' : 'Ranked by net score. Lower rank = bigger penalty. UP to raise stakes.'}
+                          </div>
+                        )}
                       </button>
                       <button
-                        onClick={() => setGameMode('skins')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                        onClick={() => { setGameMode('skins'); setShowModeDesc(showModeDesc && gameMode === 'skins' ? false : true); }}
+                        className={`px-3 rounded-lg font-medium text-sm transition flex flex-col items-center text-center gap-1 ${
                           gameMode === 'skins'
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? `bg-purple-600 text-white ${showModeDesc ? 'py-3' : 'py-2'}`
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 py-2'
                         }`}
                       >
-                        <CircleDollarSign className="w-4 h-4" />
-                        <span style={{ fontSize: '12px' }}>{t('skins')}</span>
+                        <div className="flex items-center gap-1">
+                          <CircleDollarSign className="w-4 h-4" />
+                          <span style={{ fontSize: '12px' }}>{t('skins')}</span>
+                        </div>
+                        {gameMode === 'skins' && showModeDesc && (
+                          <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
+                            {lang === 'zh' ? '每洞每人投注。只有单独最低杆才赢走全部。平手就累积到下一洞。' : 'Lowest score alone takes the pot. Tied? Rolls to next hole.'}
+                          </div>
+                        )}
                       </button>
                       <button
-                        onClick={() => setGameMode('baccarat')}
-                        className={`px-3 py-2 rounded-lg font-medium text-sm transition flex items-center justify-center gap-1 ${
+                        onClick={() => { setGameMode('baccarat'); setShowModeDesc(showModeDesc && gameMode === 'baccarat' ? false : true); }}
+                        className={`px-3 rounded-lg font-medium text-sm transition flex flex-col items-center text-center gap-1 ${
                           gameMode === 'baccarat'
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                            ? `bg-amber-600 text-white ${showModeDesc ? 'py-3' : 'py-2'}`
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200 py-2'
                         }`}
                       >
-                        <SpadeIcon className="w-4 h-4" />
-                        <span style={{ fontSize: '12px' }}>{t('baccarat')}</span>
+                        <div className="flex items-center gap-1">
+                          <SpadeIcon className="w-4 h-4" />
+                          <span style={{ fontSize: '12px' }}>{t('baccarat')}</span>
+                        </div>
+                        {gameMode === 'baccarat' && showModeDesc && (
+                          <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
+                            {lang === 'zh' ? '4人两两对战，共6组对决。叫UP可以加注。' : '4 players, 6 matchups. Call UP to raise your bet.'}
+                          </div>
+                        )}
                       </button>
                     </div>
 					</div>
-
-{/* 模式说明卡片 - 方案 E */}
-<div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
-  <div className="flex items-start gap-2">
-    <div className={`w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
-      gameMode === 'matchPlay' ? 'bg-blue-100 text-blue-600' :
-      gameMode === 'win123' ? 'bg-green-100 text-green-600' :
-      gameMode === 'baccarat' ? 'bg-amber-100 text-amber-600' :
-      'bg-purple-100 text-purple-600'
-    }`}>
-      {gameMode === 'matchPlay' && <Trophy className="w-3.5 h-3.5" />}
-      {gameMode === 'win123' && <DollarSign className="w-3.5 h-3.5" />}
-      {gameMode === 'skins' && <CircleDollarSign className="w-3.5 h-3.5" />}
-      {gameMode === 'baccarat' && <SpadeIcon className="w-3.5 h-3.5" />}
-    </div>
-    <div className="flex-1">
-      <div className="font-semibold text-sm text-gray-900">{t(gameMode)}</div>
-      <div className="text-xs text-gray-600 mt-0.5">{t(`${gameMode}Desc`)}</div>
-      <div className="mt-2 text-xs text-gray-500 space-y-1">
-        {gameMode === 'matchPlay' && (
-          <>
-            <div>• {lang === 'zh' ? '净杆 = 实际杆数 − 让杆' : 'Net = Gross − Handicap'}</div>
-            <div>• {lang === 'zh' ? '同杆数平局，无输赢' : 'Tie = no money exchanged'}</div>
-          </>
-        )}
-        {gameMode === 'win123' && (
-          <>
-            <div>• {lang === 'zh' ? '第2名罚1倍 | 第3名罚2倍 | 第4名罚3倍' : '2nd: 1x | 3rd: 2x | 4th: 3x penalty'}</div>
-            <div>• {lang === 'zh' ? 'UP成功：从池中拿6倍底注' : 'UP win: Take 6x from pool'}</div>
-            <div>• {lang === 'zh' ? 'UP失败：双倍罚款' : 'UP lose: Double penalty'}</div>
-          </>
-        )}
-        {gameMode === 'skins' && (
-          <>
-            <div>• {lang === 'zh' ? '每洞每人投入1倍底注' : 'Each player antes 1x per hole'}</div>
-            <div>• {lang === 'zh' ? '平局时奖池累积到下一洞' : 'Ties carry over to next hole'}</div>
-          </>
-        )}
-        {gameMode === 'baccarat' && (
-          <>
-            <div>• {lang === 'zh' ? '两两对战，共6组对决' : '6 head-to-head matchups'}</div>
-            <div>• {lang === 'zh' ? 'UP vs UP = 底注 ×4' : 'UP vs UP = Stake ×4'}</div>
-            <div>• {lang === 'zh' ? 'UP vs 没UP = 底注 ×2' : 'UP vs No UP = Stake ×2'}</div>
-          </>
-        )}
-      </div>
-    </div>
-  </div>
-</div>
                   
                   <div className="space-y-1">
                     <label className="block text-xs font-medium text-gray-700">
