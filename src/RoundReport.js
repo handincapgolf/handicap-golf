@@ -607,13 +607,13 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         position: 'fixed', inset: 0, zIndex: 50,
         backgroundColor: 'rgba(0,0,0,0.6)',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '20px 16px', overflowY: 'auto'
+        padding: '20px 0', overflowY: 'auto'
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div style={{
         backgroundColor: 'white', borderRadius: '16px', width: '100%',
-        maxWidth: '460px', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
+        maxWidth: '100%', overflow: 'hidden', boxShadow: '0 20px 60px rgba(0,0,0,0.3)'
       }}>
         {/* Title Bar */}
         <div style={{
