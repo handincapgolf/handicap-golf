@@ -328,7 +328,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
 
   const containerStyle = forCapture ? {
     width: '100%',
-    backgroundColor: '#f9fafb',
+    backgroundColor: '#f0fdf4',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   } : {};
 
@@ -337,14 +337,14 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
       
       {/* ===== Header: 球场信息 ===== */}
       <div style={{
-        background: 'linear-gradient(135deg, #14532d 0%, #166534 50%, #15803d 100%)',
+        background: 'linear-gradient(135deg, #064e3b 0%, #065f46 50%, #047857 100%)',
         padding: '16px 20px',
         borderRadius: forCapture ? '0' : '8px',
         color: 'white',
         textAlign: 'center',
         position: 'relative'
       }}>
-        <div style={{ fontSize: '10px', opacity: 0.7, marginBottom: '4px', letterSpacing: '2px' }}>
+        <div style={{ fontSize: '10px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
           ROUND REPORT
         </div>
         <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
@@ -374,8 +374,8 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
             const medal = getMedalRR(rank);
             return (
               <div key={name} style={{
-                textAlign: 'center', padding: '8px', backgroundColor: '#f9fafb',
-                borderRadius: '8px', border: rank === 1 ? '2px solid #fbbf24' : '1px solid #e5e7eb'
+                textAlign: 'center', padding: '8px', backgroundColor: '#ecfdf5',
+                borderRadius: '8px', border: rank === 1 ? '2px solid #d97706' : '1px solid #e5e7eb'
               }}>
                 <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
                   {name} {medal}
@@ -387,7 +387,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
                   {total > 0 && (
                     <span style={{
                       fontSize: '12px', fontWeight: 600,
-                      color: diff > 0 ? '#dc2626' : diff === 0 ? '#6b7280' : '#16a34a'
+                      color: diff > 0 ? '#dc2626' : diff === 0 ? '#6b7280' : '#047857'
                     }}>
                       ({formatDiff(diff)})
                     </span>
@@ -410,7 +410,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         }}>
           <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
             <thead>
-              <tr style={{ backgroundColor: label === 'OUT' ? '#16a34a' : '#dc2626', color: 'white' }}>
+              <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
                 <th style={{ padding: '6px 4px', textAlign: 'left', fontWeight: 600, minWidth: '35px' }}>{label}</th>
                 {holeList.map(h => (
                   <th key={h} style={{ padding: '6px 0', textAlign: 'center', fontWeight: 600, minWidth: '18px' }}>{h}</th>
@@ -419,7 +419,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
               </tr>
             </thead>
             <tbody>
-              <tr style={{ backgroundColor: '#f9fafb' }}>
+              <tr style={{ backgroundColor: '#ecfdf5' }}>
                 <td style={{ padding: '5px 4px', fontWeight: 600, color: '#111827' }}>Par</td>
                 {holeList.map(h => (
                   <td key={h} style={{ padding: '5px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
@@ -429,7 +429,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
                 </td>
               </tr>
               {activePlayers.map((name, idx) => (
-                <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#f9fafb' }}>
+                <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#ecfdf5' }}>
                   <td style={{ padding: '5px 4px', fontWeight: 600, color: '#4b5563', fontSize: '9px' }}>{name}</td>
                   {holeList.map(h => {
                     const on = allScores[name]?.[h] || 0;
@@ -461,7 +461,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
       {/* ===== Final Settlement ===== */}
       {hasSettlement && (
         <div style={{
-          backgroundColor: '#fefce8', borderRadius: '8px', padding: '14px',
+          backgroundColor: '#fffbeb', borderRadius: '8px', padding: '14px',
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
           <div style={{ textAlign: 'center', fontSize: '16px', fontWeight: 700, color: '#111827', marginBottom: '10px' }}>
@@ -469,11 +469,11 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
           </div>
           {(stake > 0 || prizePool > 0) && (
             <div style={{
-              textAlign: 'center', padding: '6px 12px', backgroundColor: '#f3e8ff',
+              textAlign: 'center', padding: '6px 12px', backgroundColor: '#fef3c7',
               borderRadius: '6px', marginBottom: '10px'
             }}>
-              <span style={{ fontSize: '13px', color: '#7c3aed' }}>Pot: </span>
-              <span style={{ fontSize: '18px', fontWeight: 700, color: '#6d28d9' }}>
+              <span style={{ fontSize: '13px', color: '#92400e' }}>Pot: </span>
+              <span style={{ fontSize: '18px', fontWeight: 700, color: '#92400e' }}>
                 ${prizePool || 0}
               </span>
             </div>
@@ -485,14 +485,14 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
               return (
                 <div key={p.name} style={{
                   display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                  padding: '6px 0', borderBottom: '1px solid #fef08a'
+                  padding: '6px 0', borderBottom: '1px solid #fde68a'
                 }}>
                   <span style={{ fontWeight: 600, color: '#111827' }}>
                     {p.name} {medal}
                   </span>
                   <span style={{
                     fontWeight: 700,
-                    color: p.money > 0 ? '#16a34a' : p.money < 0 ? '#dc2626' : '#6b7280'
+                    color: p.money > 0 ? '#047857' : p.money < 0 ? '#dc2626' : '#6b7280'
                   }}>
                     {p.money === 0 ? '$0' : p.money > 0 ? `+$${p.money.toFixed(1)}` : `-$${Math.abs(p.money).toFixed(1)}`}
                   </span>
@@ -506,12 +506,12 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
       {/* ===== Footer ===== */}
       <div style={{
         textAlign: 'center', padding: '10px',
-        backgroundColor: forCapture ? '#f9fafb' : 'transparent',
-        borderTop: forCapture ? '1px solid #e5e7eb' : 'none'
+        backgroundColor: forCapture ? '#f0fdf4' : 'transparent',
+        borderTop: forCapture ? '1px solid #d1fae5' : 'none'
       }}>
-        <span style={{ color: '#16a34a', marginRight: '6px' }}>⛳</span>
+        <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
         <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
-          Powered by <span style={{ color: '#16a34a' }}>HandinCap.golf</span>
+          Powered by <span style={{ color: '#047857' }}>HandinCap.golf</span>
         </span>
       </div>
     </div>
@@ -543,7 +543,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
       if (!el) throw new Error('Capture element not found');
 
       const canvas = await html2canvas(el, {
-        backgroundColor: '#f9fafb',
+        backgroundColor: '#f0fdf4',
         scale: 3,
         useCORS: true,
         logging: false
@@ -643,7 +643,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
             disabled={capturing}
             style={{
               flex: 1, padding: '12px', borderRadius: '10px',
-              backgroundColor: capturing ? '#d1d5db' : '#16a34a', color: 'white',
+              backgroundColor: capturing ? '#d1d5db' : '#047857', color: 'white',
               border: 'none', cursor: capturing ? 'not-allowed' : 'pointer',
               fontWeight: 600, fontSize: '14px',
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
@@ -714,7 +714,7 @@ export const RoundReportPage = memo(({ encoded }) => {
             href="/"
             style={{
               display: 'inline-block', padding: '10px 20px',
-              backgroundColor: '#16a34a', color: 'white', borderRadius: '8px',
+              backgroundColor: '#047857', color: 'white', borderRadius: '8px',
               textDecoration: 'none', fontWeight: 600, fontSize: '14px'
             }}
           >
@@ -742,7 +742,7 @@ export const RoundReportPage = memo(({ encoded }) => {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(to bottom, #374151, #111827)',
+      background: 'linear-gradient(to bottom, #064e3b, #022c22)',
       padding: '16px'
     }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
@@ -754,7 +754,7 @@ export const RoundReportPage = memo(({ encoded }) => {
             href="/"
             style={{
               display: 'inline-block', padding: '12px 24px',
-              backgroundColor: '#16a34a', color: 'white', borderRadius: '10px',
+              backgroundColor: '#047857', color: 'white', borderRadius: '10px',
               textDecoration: 'none', fontWeight: 600, fontSize: '14px'
             }}
           >
