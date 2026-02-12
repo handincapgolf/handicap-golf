@@ -544,7 +544,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
       const canvas = await html2canvas(el, {
         backgroundColor: '#f9fafb',
-        scale: 2,
+        scale: 3,
         useCORS: true,
         logging: false
       });
