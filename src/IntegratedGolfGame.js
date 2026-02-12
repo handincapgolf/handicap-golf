@@ -31,6 +31,12 @@ import { GOLF_COURSES, searchCourses } from './data/courses';
 import { useTranslation } from './locales';
 import { gameModes } from './gameModes';
 import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from './gameModes/BaccaratComponents';
+import { 
+  RoundReportShareModal, 
+  RoundReportPage,
+  buildRoundReportData,
+  decodeRoundReport 
+} from './RoundReport';
 
 // ========== 百家乐黑桃图标 ==========
 const SpadeIcon = ({ className = "w-4 h-4" }) => (
@@ -2493,6 +2499,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const [gameComplete, setGameComplete] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
+  const [showRoundReport, setShowRoundReport] = useState(false);
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const qrVideoRef = useRef(null);
@@ -4157,6 +4164,21 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     }
   }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast, advancePlayers]);
 
+  // ========== Round Report 分享 ==========
+  const handleShareRoundReport = useCallback(() => {
+    setShowRoundReport(true);
+  }, []);
+
+  const roundReportData = useMemo(() => {
+    if (!gameComplete || completedHoles.length === 0) return null;
+    return buildRoundReportData({
+      selectedCourse, completedHoles, pars, activePlayers,
+      allScores, allPutts, totalMoney, totalSpent,
+      gameMode, stake, prizePool
+    });
+  }, [gameComplete, completedHoles, selectedCourse, pars, activePlayers,
+      allScores, allPutts, totalMoney, totalSpent, gameMode, stake, prizePool]);
+
 // 彩纸庆祝效果
 const triggerConfetti = useCallback(() => {
   if (!document.getElementById('confetti-style')) {
@@ -4225,6 +4247,12 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
     if (decoded) {
       return <SharePage data={decoded} />;
     }
+  }
+
+  // ========== 检测 Round Report 链接 ==========
+  const roundParam = urlParams.get('r');
+  if (roundParam) {
+    return <RoundReportPage encoded={roundParam} />;
   }
 
   return (
@@ -5435,6 +5463,14 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             );
                           })}
                         </div>
+                        {gameComplete && (
+                          <button
+                            onClick={handleShareRoundReport}
+                            className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
+                          >
+                            📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                          </button>
+                        )}
                       </div>
                     );
                   })()}
@@ -5656,6 +5692,14 @@ return (
                                 );
                               })}
                             </div>
+                            {gameComplete && (
+                              <button
+                                onClick={handleShareRoundReport}
+                                className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
+                              >
+                                📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                              </button>
+                            )}
                           </div>
                         )}
 
@@ -5870,6 +5914,16 @@ return (
                     })()}
                   </div>
                 </div>
+              )}
+
+              {/* Round Report 分享按钮 */}
+              {gameComplete && completedHoles.length > 0 && (
+                <button
+                  onClick={handleShareRoundReport}
+                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-sm"
+                >
+                  📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                </button>
               )}
 
               <div className="flex gap-3">
@@ -6395,6 +6449,15 @@ return (
           isAdvancePlayer={advancePlayers[advanceReportPlayer] || false}
         />
       )}
+
+      {/* Round Report 分享弹窗 */}
+      <RoundReportShareModal
+        isOpen={showRoundReport}
+        onClose={() => setShowRoundReport(false)}
+        reportData={roundReportData}
+        lang={lang}
+        showToast={showToast}
+      />
 
       {toast && (
         <Toast
