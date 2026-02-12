@@ -327,7 +327,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
     holeList.reduce((sum, h) => sum + (pars[h] || 4), 0);
 
   const containerStyle = forCapture ? {
-    width: '420px',
+    width: '100%',
     backgroundColor: '#f9fafb',
     fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
   } : {};
