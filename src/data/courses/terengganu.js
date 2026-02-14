@@ -2,12 +2,12 @@
 // Terengganu Golf Courses
 
 export const TERENGGANU_COURSES = {
-  "Awana_Kijal_Golf_Beach_&_Spa_Resort": {
+  "AWANA_KIJAL_GOLF_BEACH_AND_SPA_RESORT": {
     shortName: "AKGBSR",
     fullName: "Awana Kijal Golf Beach & Spa Resort",
     location: ["Kijal", "Terengganu", "Malaysia"],
     pars: [4,4,5,3,4,4,3,4,5, 4,4,3,5,3,5,4,4,4],
-    index: [13,7,3,15,1,5,17,9,10, 4,4,3,5,3,5,4,4,4]
+    index: [13,7,3,15,1,5,17,9,10, 11,12,18,14,16,4,6,2,8]
   },
 
   "GREEN_ACRES_GOLF_AND_COUNTRY_RESORT": {
@@ -34,7 +34,7 @@ export const TERENGGANU_COURSES = {
     index: [5,1,13,17,9,11,7,15,3, 12,10,4,2,14,18,8,16,6]
   },
 
-  "KELAB_GOLF_&_REKREASI_PETRONAS": {
+  "KELAB_GOLF_AND_REKREASI_PETRONAS": {
     shortName: "KGRP",
     fullName: "Kelab Golf & Rekreasi Petronas",
     location: ["Kerteh", "Terengganu", "Malaysia"],
@@ -58,7 +58,7 @@ export const TERENGGANU_COURSES = {
     index: [13,15,1,11,3,5,7,17,9, 2,18,6,12,4,10,8,16,14]
   },
 
-  "Royal_Terengganu_Golf_Club": {
+  "ROYAL_TERENGGANU_GOLF_CLUB": {
     shortName: "RTGC",
     fullName: "Royal Terengganu Golf Club",
     location: ["Kuala Terengganu", "Terengganu", "Malaysia"],

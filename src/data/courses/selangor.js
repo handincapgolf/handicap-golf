@@ -34,7 +34,7 @@ export const SELANGOR_COURSES = {
     index: [18,4,14,8,12,2,16,10,6, 11,7,13,15,3,1,17,9,5]
   },
 
-  "BUKIT_BERUNTUNG_GOLF_&_COUNTRY_CLUB": {
+  "BUKIT_BERUNTUNG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BBGCC",
     fullName: "Bukit Beruntung Golf & Country Club",
     location: ["Bukit Beruntung", "Selangor", "Malaysia"],
@@ -50,7 +50,7 @@ export const SELANGOR_COURSES = {
     index: [3,7,15,1,5,13,17,9,11, 12,8,6,18,16,10,4,14,2]
   },
 
-  "Bukit_Unggul_Country_Club": {
+  "BUKIT_UNGGUL_COUNTRY_CLUB": {
     shortName: "BUCC",
     fullName: "Bukit Unggul Country Club",
     location: ["Dengkil", "Selangor", "Malaysia"],
@@ -234,7 +234,7 @@ export const SELANGOR_COURSES = {
     index: [5,7,13,15,1,11,17,9,3, 4,14,8,6,18,10,16,2,12]
   },
 
-  "Kundang_Lakes_Country_Club": {
+  "KUNDANG_LAKES_COUNTRY_CLUB": {
     shortName: "KLCC",
     fullName: "Kundang Lakes Country Club",
     location: ["Rawang", "Selangor", "Malaysia"],

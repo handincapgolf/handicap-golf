@@ -186,7 +186,7 @@ export const JOHOR_COURSES = {
     index: [7,13,3,17,11,5,1,15,9, 14,8,2,16,10,18,12,6,4]
   },
 
-  "SEBANA__GOLF_&_MARINA_RESORT ": {
+  "SEBANA_GOLF_AND_MARINA_RESORT": {
     shortName: "SGMR",
     fullName: "Sebana Golf & Marina Resort ",
     location: ["Kota Tinggi", "Johor", "Malaysia"],
