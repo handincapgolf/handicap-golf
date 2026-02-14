@@ -2776,7 +2776,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setWater({});
         setOb({});
         setCurrentHoleSettlement(null);
-        mp.setConfirmedFromHole({ creator: false, joiner: false });
+        mp.resetAllConfirmed();
       }
     }
   }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
@@ -2830,8 +2830,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       mp.setConfirmedFromHole(holeData.confirmed);
     }
     
-    const otherRole = mp.multiplayerRole === 'creator' ? 'joiner' : 'creator';
-    const otherPlayers = activePlayers.filter(p => mp.claimed[p] === otherRole);
+    const otherPlayers = mp.getOtherPlayers(activePlayers);
     
     if (otherPlayers.length === 0) return;
     
@@ -2873,7 +2872,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     // 百家乐 upOrder 合并：保留我方 UP 选择 + 合并对方 UP 选择
     if (gameMode === 'baccarat' && holeData.upOrder) {
       setUpOrder(prev => {
-        const myPlayers = new Set(activePlayers.filter(p => mp.claimed[p] === mp.multiplayerRole));
+        const myPlayers = new Set(mp.getMyPlayers(activePlayers));
         const myUps = prev.filter(p => myPlayers.has(p));
         const otherUps = holeData.upOrder.filter(p => !myPlayers.has(p));
         const merged = [...myUps, ...otherUps];
@@ -3538,7 +3537,7 @@ const getScoreLabel = useCallback((stroke, par) => {
       const { results } = calculateWin123(mergedScores, mergedPutts, mergedUps, holeNum);
       setCurrentHoleSettlement(results);
     } else if (gameMode === 'baccarat') {
-      const myPlayers = new Set(activePlayers.filter(p => mp.claimed[p] === mp.multiplayerRole));
+      const myPlayers = new Set(mp.getMyPlayers(activePlayers));
       const myUps = upOrder.filter(p => myPlayers.has(p));
       const otherUps = (holeData.upOrder || []).filter(p => !myPlayers.has(p));
       const mergedUpOrder = [...myUps, ...otherUps];
@@ -5171,19 +5170,15 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         )}
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full ${
-                        mp.claimed[player] === 'creator' ? 'bg-green-100 text-green-700' :
-                        mp.claimed[player] === 'joiner' ? 'bg-blue-100 text-blue-700' :
-                        'bg-gray-100 text-gray-500'
+                        mp.claimed[player]
+                          ? mp.getDeviceBgClass(mp.claimed[player])
+                          : 'bg-gray-100 text-gray-500'
                       }`}>
-                        {mp.claimed[player] === 'creator' 
-                          ? (mp.multiplayerRole === 'creator' 
-                              ? (('🅰️ ' + t('mpMine'))) 
-                              : (('🅰️ ' + t('mpPartner'))))
-                          : mp.claimed[player] === 'joiner' 
-                            ? (mp.multiplayerRole === 'joiner' 
-                                ? (('🅱️ ' + t('mpMine'))) 
-                                : (('🅱️ ' + t('mpPartner'))))
-                            : (t('mpUnclaimed'))}
+                        {mp.claimed[player]
+                          ? (mp.claimed[player] === mp.deviceId
+                              ? (mp.getDeviceLabel(mp.claimed[player]) + ' ' + t('mpMine'))
+                              : (mp.getDeviceLabel(mp.claimed[player])))
+                          : (t('mpUnclaimed'))}
                       </span>
                     </div>
                   ))}
@@ -5208,7 +5203,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 </div>
 
                 {/* Creator: Start Game button (only show when joiner has claimed players) */}
-                {mp.multiplayerRole === 'creator' && mp.joinerCount > 0 && (
+                {mp.multiplayerRole === 'creator' && mp.otherDeviceCount > 0 && (
                   <button
                     onClick={async () => {
                       const result = await mp.startMultiplayerGame();
@@ -5271,8 +5266,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         className="w-5 h-5 rounded text-blue-600"
                       />
                       <span className="font-medium text-gray-900 text-lg">{player}</span>
-                      {mp.claimed[player] === 'creator' && (
-                        <span className="ml-auto text-xs text-green-600">🅰️ Creator</span>
+                      {mp.claimed[player] && mp.claimed[player] !== mp.deviceId && (
+                        <span className={`ml-auto text-xs ${mp.getDeviceBgClass(mp.claimed[player])} px-2 py-0.5 rounded`}>{mp.getDeviceLabel(mp.claimed[player])}</span>
                       )}
                     </label>
                   ))}
@@ -6085,8 +6080,7 @@ return (
               {(() => {
                 const myPlayers = mp.multiplayerOn ? mp.getMyPlayers(activePlayers) : activePlayers;
                 const otherPlayers = mp.multiplayerOn ? mp.getOtherPlayers(activePlayers) : [];
-                const otherConfirmed = mp.multiplayerOn && (mp.multiplayerRole === 'creator' ? mp.confirmed.joiner : mp.confirmed.creator);
-                const otherLabel = mp.multiplayerRole === 'creator' ? '🅱️' : '🅰️';
+                const otherConfirmed = mp.multiplayerOn && mp.isOthersConfirmed();
                 
                 const renderPlayer = (player, isOther) => {
                 const holeNum = holes[currentHole];
@@ -6242,19 +6236,33 @@ return (
                 return (
                   <>
                     {myPlayers.map(p => renderPlayer(p, false))}
-                    {otherPlayers.length > 0 && (
-                      <div className={otherConfirmed ? 'rounded-xl border-2 border-green-400 p-1.5' : ''} 
-                           style={otherConfirmed ? { background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' } : {}}>
-                        {otherConfirmed && (
+                    {otherPlayers.length > 0 && (() => {
+                      // Group other players by device for display
+                      const otherDeviceIds = [...new Set(otherPlayers.map(p => mp.claimed[p]).filter(Boolean))];
+                      const allOtherConfirmed = otherDeviceIds.every(devId => mp.confirmed[devId]);
+                      return (
+                      <div className={allOtherConfirmed ? 'rounded-xl border-2 border-green-400 p-1.5' : ''} 
+                           style={allOtherConfirmed ? { background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' } : {}}>
+                        {allOtherConfirmed && (
                           <div className="text-xs font-semibold text-green-700 flex items-center gap-1 px-2 py-1">
-                            {otherLabel} Confirmed ✓
+                            ✅ All Confirmed ✓
+                          </div>
+                        )}
+                        {!allOtherConfirmed && otherDeviceIds.length > 0 && (
+                          <div className="flex items-center gap-1 px-2 py-1 flex-wrap">
+                            {otherDeviceIds.map(devId => (
+                              <span key={devId} className={`text-xs px-1.5 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
+                                {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? '✓' : '...'}
+                              </span>
+                            ))}
                           </div>
                         )}
                         <div className="grid gap-2">
                           {otherPlayers.map(p => renderPlayer(p, true))}
                         </div>
                       </div>
-                    )}
+                      );
+                    })()}
                   </>
                 );
               })()}
@@ -6310,13 +6318,12 @@ return (
                   <span className={`w-2 h-2 rounded-full ${mp.syncStatus === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
                   <span className="text-gray-600">📡 {mp.gameCode}</span>
                 </div>
-                <div className="flex gap-2">
-                  <span className={`px-2 py-0.5 rounded-full ${mp.confirmed.creator ? 'bg-green-100 text-green-700' : 'bg-gray-200 text-gray-500'}`}>
-                    🅰️ {mp.confirmed.creator ? '✓' : '...'}
-                  </span>
-                  <span className={`px-2 py-0.5 rounded-full ${mp.confirmed.joiner ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-500'}`}>
-                    🅱️ {mp.confirmed.joiner ? '✓' : '...'}
-                  </span>
+                <div className="flex gap-1 flex-wrap">
+                  {mp.getActiveDeviceIds().map(devId => (
+                    <span key={devId} className={`px-2 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
+                      {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? '✓' : '...'}
+                    </span>
+                  ))}
                 </div>
               </div>
             )}
@@ -6349,7 +6356,7 @@ return (
                 >
                   {t('mpConfirmSubmit')}
                 </button>
-              ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isBothConfirmed() ? (
+              ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isAllConfirmed() ? (
                 <button
                   onClick={async () => {
                     const holeNum = holes[currentHole];
@@ -6358,9 +6365,9 @@ return (
                   }}
                   className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
-                  ✏️ {lang === 'zh' ? '撤回修改' : 'Undo & Edit'}
+                  ✏️ {lang === 'zh' ? '撤回修改' : 'Undo & Edit'} ({(() => { const s = mp.getConfirmedSummary(); return `${s.confirmed}/${s.total}`; })()})
                 </button>
-              ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'creator' ? (
+              ) : mp.multiplayerOn && mp.isAllConfirmed() && mp.multiplayerRole === 'creator' ? (
                 <button
                   onClick={() => nextHole()}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
@@ -6369,7 +6376,7 @@ return (
                     ? (t('mpConfirmFinish'))
                     : (t('mpConfirmNext'))}
                 </button>
-              ) : mp.multiplayerOn && mp.isBothConfirmed() && mp.multiplayerRole === 'joiner' ? (
+              ) : mp.multiplayerOn && mp.isAllConfirmed() && mp.multiplayerRole !== 'creator' ? (
                 <button
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"

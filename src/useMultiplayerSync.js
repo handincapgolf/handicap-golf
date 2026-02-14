@@ -1,9 +1,35 @@
-// useMultiplayerSync.js — HandinCap Multiplayer Sync Hook
+// useMultiplayerSync.js — HandinCap Multi-Device Multiplayer Sync Hook
+// Supports N devices: 1 Creator + multiple Joiners
 // Uses Cloudflare Workers + KV (polling every 3 seconds)
+//
+// === ARCHITECTURE CHANGE ===
+// OLD: 2 roles only — "creator" / "joiner"
+//   claimed:   { "Alice": "creator", "Bob": "joiner" }
+//   confirmed: { creator: true, joiner: false }
+//
+// NEW: N devices — each identified by deviceId
+//   devices:   { "dev_abc": { role:"creator", label:"🅰️", color:"green", name:"Host" },
+//                "dev_def": { role:"joiner",  label:"🅱️", color:"blue",  name:"Buggy 2" },
+//                "dev_ghi": { role:"joiner",  label:"🅲",  color:"purple", name:"Buggy 3" } }
+//   claimed:   { "Alice": "dev_abc", "Bob": "dev_def", "Charlie": "dev_ghi" }
+//   confirmed: { "dev_abc": true, "dev_def": false, "dev_ghi": true }
+// ===========================
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE = '/api';
+
+// Device labels and colors for up to 8 devices
+const DEVICE_STYLES = [
+  { label: '🅰️', color: 'green',  bgClass: 'bg-green-100 text-green-700',  dotClass: 'bg-green-500' },
+  { label: '🅱️', color: 'blue',   bgClass: 'bg-blue-100 text-blue-700',    dotClass: 'bg-blue-500' },
+  { label: 'Ⓒ',  color: 'purple', bgClass: 'bg-purple-100 text-purple-700', dotClass: 'bg-purple-500' },
+  { label: 'Ⓓ',  color: 'orange', bgClass: 'bg-orange-100 text-orange-700', dotClass: 'bg-orange-500' },
+  { label: 'Ⓔ',  color: 'pink',   bgClass: 'bg-pink-100 text-pink-700',    dotClass: 'bg-pink-500' },
+  { label: 'Ⓕ',  color: 'teal',   bgClass: 'bg-teal-100 text-teal-700',    dotClass: 'bg-teal-500' },
+  { label: 'Ⓖ',  color: 'amber',  bgClass: 'bg-amber-100 text-amber-700',  dotClass: 'bg-amber-500' },
+  { label: 'Ⓗ',  color: 'rose',   bgClass: 'bg-rose-100 text-rose-700',    dotClass: 'bg-rose-500' },
+];
 
 // Generate unique device ID (persisted in localStorage)
 function getDeviceId() {
@@ -32,21 +58,62 @@ export function useMultiplayerSync() {
   const saved = useRef((() => {
     try { return JSON.parse(localStorage.getItem('handincap_mp') || 'null'); } catch { return null; }
   })());
-  
+
   const [multiplayerOn, setMultiplayerOn] = useState(saved.current?.on || false);
-  const [multiplayerRole, setMultiplayerRole] = useState(saved.current?.role || null);
+  const [multiplayerRole, setMultiplayerRole] = useState(saved.current?.role || null); // still "creator" | "joiner"
   const [gameCode, setGameCode] = useState(saved.current?.code || '');
   const [joinerCode, setJoinerCode] = useState('');
   const [remoteGame, setRemoteGame] = useState(null);
   const [syncStatus, setSyncStatus] = useState('idle');
   const [syncFlash, setSyncFlash] = useState(null);
-  const [confirmed, setConfirmed] = useState({ creator: false, joiner: false });
+
+  // === MULTI-DEVICE STATE ===
+  // confirmed: { "dev_abc": true, "dev_def": false, ... } — per-device
+  const [confirmed, setConfirmed] = useState(saved.current?.confirmed || {});
+  // claimed: { "PlayerName": "dev_abc", ... } — player → deviceId
   const [claimed, setClaimed] = useState(saved.current?.claimed || {});
+  // devices: { "dev_abc": { role, label, color, bgClass, dotClass, index }, ... }
+  const [devices, setDevices] = useState(saved.current?.devices || {});
+
   const [claimChecked, setClaimChecked] = useState({});
   const [multiplayerSection, setMultiplayerSection] = useState(saved.current?.section || null);
-  
+
   const pollRef = useRef(null);
   const deviceId = useRef(getDeviceId());
+
+  // === DEVICE HELPERS ===
+
+  // Get style for a device by its index in the devices map
+  const getDeviceStyle = useCallback((devId) => {
+    const dev = devices[devId];
+    if (!dev) return DEVICE_STYLES[0];
+    return DEVICE_STYLES[dev.index] || DEVICE_STYLES[0];
+  }, [devices]);
+
+  // Get my device style
+  const getMyStyle = useCallback(() => {
+    return getDeviceStyle(deviceId.current);
+  }, [getDeviceStyle]);
+
+  // Get label emoji for a device
+  const getDeviceLabel = useCallback((devId) => {
+    return getDeviceStyle(devId).label;
+  }, [getDeviceStyle]);
+
+  // Get bgClass for a device (for badges)
+  const getDeviceBgClass = useCallback((devId) => {
+    return getDeviceStyle(devId).bgClass;
+  }, [getDeviceStyle]);
+
+  // Update devices map from remote game
+  const syncDevicesFromRemote = useCallback((game) => {
+    if (game.devices) {
+      setDevices(game.devices);
+    }
+    if (game.claimed) {
+      setClaimed(game.claimed);
+    }
+  }, []);
 
   // Start polling for game state
   const startPolling = useCallback((code) => {
@@ -57,20 +124,13 @@ export function useMultiplayerSync() {
         if (result.ok && result.game) {
           setRemoteGame(result.game);
           setSyncStatus('connected');
-          
-          // Note: confirmed state is managed by main component's merge effect
-          // which reads from LOCAL current hole, not latest hole
-          
-          // Update claimed state
-          if (result.game.claimed) {
-            setClaimed(result.game.claimed);
-          }
+          syncDevicesFromRemote(result.game);
         }
       } catch (err) {
         setSyncStatus('error');
       }
     }, 3000);
-  }, []);
+  }, [syncDevicesFromRemote]);
 
   const stopPolling = useCallback(() => {
     if (pollRef.current) {
@@ -92,10 +152,12 @@ export function useMultiplayerSync() {
         role: multiplayerRole,
         code: gameCode,
         claimed,
+        devices,
+        confirmed,
         section: multiplayerSection,
       }));
     }
-  }, [multiplayerOn, multiplayerRole, gameCode, claimed, multiplayerSection]);
+  }, [multiplayerOn, multiplayerRole, gameCode, claimed, devices, confirmed, multiplayerSection]);
 
   // Auto-reconnect on mount if saved state exists
   useEffect(() => {
@@ -103,6 +165,8 @@ export function useMultiplayerSync() {
       startPolling(saved.current.code);
     }
   }, [startPolling]);
+
+  // === GAME ACTIONS ===
 
   // Creator: Create game room
   const createGame = useCallback(async (gameSetup) => {
@@ -115,8 +179,8 @@ export function useMultiplayerSync() {
       if (result.ok) {
         setGameCode(result.code);
         setMultiplayerRole('creator');
-        setClaimed(result.game.claimed || {});
         setRemoteGame(result.game);
+        syncDevicesFromRemote(result.game);
         setSyncStatus('connected');
         startPolling(result.code);
         setMultiplayerSection('lobby');
@@ -129,7 +193,7 @@ export function useMultiplayerSync() {
       setSyncStatus('error');
       return { ok: false, error: err.message };
     }
-  }, [startPolling]);
+  }, [startPolling, syncDevicesFromRemote]);
 
   // Joiner: Join game
   const joinGame = useCallback(async (code) => {
@@ -141,11 +205,17 @@ export function useMultiplayerSync() {
         setMultiplayerRole('joiner');
         setMultiplayerOn(true);
         setRemoteGame(result.game);
-        setClaimed(result.game.claimed || {});
-        
-        // Register joiner device
-        await apiCall(`/game/${code}/join`, 'PUT', { deviceId: deviceId.current });
-        
+        syncDevicesFromRemote(result.game);
+
+        // Register this joiner device — Worker assigns index/label
+        const joinResult = await apiCall(`/game/${code}/join`, 'PUT', {
+          deviceId: deviceId.current,
+        });
+        if (joinResult.ok && joinResult.game) {
+          setRemoteGame(joinResult.game);
+          syncDevicesFromRemote(joinResult.game);
+        }
+
         setSyncStatus('connected');
         startPolling(code);
         setMultiplayerSection('joinerClaim');
@@ -158,19 +228,22 @@ export function useMultiplayerSync() {
       setSyncStatus('error');
       return { ok: false, error: err.message };
     }
-  }, [startPolling]);
+  }, [startPolling, syncDevicesFromRemote]);
 
-  // Joiner: Claim players
+  // Joiner: Claim players (sends deviceId so Worker maps player→deviceId)
   const claimPlayers = useCallback(async (playerNames) => {
     if (!gameCode) return { ok: false };
-    const result = await apiCall(`/game/${gameCode}/claim`, 'PUT', { players: playerNames });
+    const result = await apiCall(`/game/${gameCode}/claim`, 'PUT', {
+      players: playerNames,
+      deviceId: deviceId.current,
+    });
     if (result.ok) {
-      setClaimed(result.game.claimed || {});
+      syncDevicesFromRemote(result.game);
       setRemoteGame(result.game);
       setMultiplayerSection('lobby');
     }
     return result;
-  }, [gameCode]);
+  }, [gameCode, syncDevicesFromRemote]);
 
   // Creator: Start the game
   const startMultiplayerGame = useCallback(async () => {
@@ -178,24 +251,29 @@ export function useMultiplayerSync() {
     const result = await apiCall(`/game/${gameCode}/start`, 'PUT', {});
     if (result.ok) {
       setRemoteGame(result.game);
-      setConfirmed({ creator: false, joiner: false });
+      // Reset confirmed for ALL devices
+      const resetConfirmed = {};
+      Object.keys(result.game.devices || devices).forEach(devId => {
+        resetConfirmed[devId] = false;
+      });
+      setConfirmed(resetConfirmed);
     }
     return result;
-  }, [gameCode]);
+  }, [gameCode, devices]);
 
   // Submit scores for current hole
   const submitScores = useCallback(async (hole, data) => {
-    if (!gameCode || !multiplayerRole) return { ok: false };
+    if (!gameCode) return { ok: false };
     const result = await apiCall(`/game/${gameCode}/score`, 'PUT', {
       hole,
-      role: multiplayerRole,
+      deviceId: deviceId.current, // ← use deviceId instead of role
       ...data,
     });
     if (result.ok) {
       setRemoteGame(result.game);
     }
     return result;
-  }, [gameCode, multiplayerRole]);
+  }, [gameCode]);
 
   // Confirm my scores for this hole
   const confirmMyScores = useCallback(async (hole, scores, putts, ups, upOrder, water, ob, totalMoney, moneyDetails, totalSpent) => {
@@ -203,7 +281,7 @@ export function useMultiplayerSync() {
       scores, putts, ups, upOrder, water, ob,
       confirmed: true,
     };
-    // Only creator pushes totalMoney to avoid joiner overwriting with stale data
+    // Only creator pushes totalMoney
     if (multiplayerRole === 'creator') {
       data.totalMoney = totalMoney || {};
       data.moneyDetails = moneyDetails || {};
@@ -212,10 +290,12 @@ export function useMultiplayerSync() {
     return submitScores(hole, data);
   }, [submitScores, multiplayerRole]);
 
-  // Unconfirm (retract) my scores for this hole
+  // Unconfirm (retract) my scores
   const unconfirmMyScores = useCallback(async (hole) => {
     return submitScores(hole, { confirmed: false });
   }, [submitScores]);
+
+  // Sync next hole
   const syncNextHole = useCallback(async (nextHole, nextHoleNum, gameState) => {
     if (!gameCode) return { ok: false };
     const result = await apiCall(`/game/${gameCode}/next`, 'PUT', {
@@ -225,10 +305,15 @@ export function useMultiplayerSync() {
     });
     if (result.ok) {
       setRemoteGame(result.game);
-      setConfirmed({ creator: false, joiner: false });
+      // Reset confirmed for ALL devices
+      const resetConfirmed = {};
+      Object.keys(result.game.devices || devices).forEach(devId => {
+        resetConfirmed[devId] = false;
+      });
+      setConfirmed(resetConfirmed);
     }
     return result;
-  }, [gameCode]);
+  }, [gameCode, devices]);
 
   // Sync edit
   const syncEdit = useCallback(async (gameState) => {
@@ -240,38 +325,84 @@ export function useMultiplayerSync() {
     return result;
   }, [gameCode]);
 
-  // Get players assigned to my role
+  // === PLAYER HELPERS (deviceId-based) ===
+
+  // Get players assigned to MY device
   const getMyPlayers = useCallback((allPlayers) => {
-    if (!multiplayerOn || !multiplayerRole) return allPlayers;
-    return allPlayers.filter(p => claimed[p] === multiplayerRole);
-  }, [multiplayerOn, multiplayerRole, claimed]);
+    if (!multiplayerOn) return allPlayers;
+    return allPlayers.filter(p => claimed[p] === deviceId.current);
+  }, [multiplayerOn, claimed]);
 
-  // Get players assigned to other role
+  // Get players assigned to OTHER devices (all non-mine)
   const getOtherPlayers = useCallback((allPlayers) => {
-    if (!multiplayerOn || !multiplayerRole) return [];
-    const otherRole = multiplayerRole === 'creator' ? 'joiner' : 'creator';
-    return allPlayers.filter(p => claimed[p] === otherRole);
-  }, [multiplayerOn, multiplayerRole, claimed]);
+    if (!multiplayerOn) return [];
+    return allPlayers.filter(p => claimed[p] && claimed[p] !== deviceId.current);
+  }, [multiplayerOn, claimed]);
 
-  // Check if other side has confirmed
-  const isOtherConfirmed = useCallback(() => {
-    const otherRole = multiplayerRole === 'creator' ? 'joiner' : 'creator';
-    return confirmed[otherRole] || false;
-  }, [multiplayerRole, confirmed]);
+  // Get players assigned to a specific device
+  const getPlayersForDevice = useCallback((devId, allPlayers) => {
+    return allPlayers.filter(p => claimed[p] === devId);
+  }, [claimed]);
 
-  const isBothConfirmed = useCallback(() => {
-    return confirmed.creator && confirmed.joiner;
+  // === CONFIRMED HELPERS (multi-device) ===
+
+  // Get list of all deviceIds that have claimed players (active devices)
+  const getActiveDeviceIds = useCallback(() => {
+    const activeDevs = new Set(Object.values(claimed).filter(Boolean));
+    return [...activeDevs];
+  }, [claimed]);
+
+  // Check if ALL active devices have confirmed
+  const isAllConfirmed = useCallback(() => {
+    const activeDevs = getActiveDeviceIds();
+    if (activeDevs.length === 0) return false;
+    return activeDevs.every(devId => confirmed[devId]);
+  }, [confirmed, getActiveDeviceIds]);
+
+  // Check if MY device has confirmed
+  const isMyConfirmed = useCallback(() => {
+    return confirmed[deviceId.current] || false;
   }, [confirmed]);
 
-  const isMyConfirmed = useCallback(() => {
-    return confirmed[multiplayerRole] || false;
-  }, [multiplayerRole, confirmed]);
+  // Check if all OTHER devices (not mine) have confirmed
+  const isOthersConfirmed = useCallback(() => {
+    const activeDevs = getActiveDeviceIds().filter(d => d !== deviceId.current);
+    if (activeDevs.length === 0) return true;
+    return activeDevs.every(devId => confirmed[devId]);
+  }, [confirmed, getActiveDeviceIds]);
+
+  // Get list of devices that haven't confirmed yet
+  const getUnconfirmedDevices = useCallback(() => {
+    return getActiveDeviceIds().filter(devId => !confirmed[devId]);
+  }, [confirmed, getActiveDeviceIds]);
+
+  // Get confirmed status summary: "2/4 confirmed"
+  const getConfirmedSummary = useCallback(() => {
+    const activeDevs = getActiveDeviceIds();
+    const confirmedCount = activeDevs.filter(devId => confirmed[devId]).length;
+    return { confirmed: confirmedCount, total: activeDevs.length };
+  }, [confirmed, getActiveDeviceIds]);
 
   // Get scores from remote for other players' current hole
   const getRemoteHoleData = useCallback((holeNum) => {
     if (!remoteGame?.holes?.[holeNum]) return null;
     return remoteGame.holes[holeNum];
   }, [remoteGame]);
+
+  // === BACKWARD COMPAT: confirmed per-device from hole data ===
+  // The Worker stores confirmed as { "dev_abc": true, "dev_def": false }
+  // This replaces the old setConfirmedFromHole({ creator, joiner })
+  const setConfirmedFromHole = useCallback((holeConfirmed) => {
+    if (!holeConfirmed) return;
+    setConfirmed(prev => ({ ...prev, ...holeConfirmed }));
+  }, []);
+
+  // Reset confirmed for all devices
+  const resetAllConfirmed = useCallback(() => {
+    const reset = {};
+    getActiveDeviceIds().forEach(devId => { reset[devId] = false; });
+    setConfirmed(reset);
+  }, [getActiveDeviceIds]);
 
   // Reset multiplayer state
   const resetMultiplayer = useCallback(() => {
@@ -283,15 +414,29 @@ export function useMultiplayerSync() {
     setRemoteGame(null);
     setSyncStatus('idle');
     setSyncFlash(null);
-    setConfirmed({ creator: false, joiner: false });
+    setConfirmed({});
     setClaimed({});
+    setDevices({});
     setClaimChecked({});
     setMultiplayerSection(null);
     localStorage.removeItem('handincap_mp');
   }, [stopPolling]);
 
-  // Check if joiner has claimed any players
-  const joinerCount = Object.values(claimed).filter(v => v === 'joiner').length;
+  // Count of non-creator devices that have claimed players
+  const otherDeviceCount = getActiveDeviceIds().filter(d => d !== deviceId.current).length;
+
+  // === BACKWARD COMPAT SHIMS ===
+  // These allow gradual migration — you can remove them once IntegratedGolfGame.js is fully updated
+
+  // OLD: mp.confirmed.creator / mp.confirmed.joiner → NEW: mp.confirmed["dev_xxx"]
+  // OLD: mp.joinerCount → NEW: mp.otherDeviceCount
+  const joinerCount = otherDeviceCount; // backward compat alias
+
+  // OLD: mp.isBothConfirmed() → NEW: mp.isAllConfirmed()
+  const isBothConfirmed = isAllConfirmed; // backward compat alias
+
+  // OLD: mp.isOtherConfirmed() → NEW: mp.isOthersConfirmed()
+  const isOtherConfirmed = isOthersConfirmed; // backward compat alias
 
   return {
     // State
@@ -304,11 +449,13 @@ export function useMultiplayerSync() {
     syncFlash,
     confirmed,
     claimed,
+    devices,
     claimChecked, setClaimChecked,
     multiplayerSection, setMultiplayerSection,
-    joinerCount,
+    otherDeviceCount,
+    joinerCount, // backward compat
     deviceId: deviceId.current,
-    
+
     // Actions
     createGame,
     joinGame,
@@ -322,14 +469,33 @@ export function useMultiplayerSync() {
     resetMultiplayer,
     startPolling,
     stopPolling,
-    
-    // Helpers
+
+    // Player helpers
     getMyPlayers,
     getOtherPlayers,
-    isOtherConfirmed,
-    isBothConfirmed,
+    getPlayersForDevice,
+
+    // Confirmed helpers
+    isAllConfirmed,
+    isBothConfirmed,   // backward compat alias
     isMyConfirmed,
+    isOthersConfirmed,
+    isOtherConfirmed,  // backward compat alias
+    getUnconfirmedDevices,
+    getConfirmedSummary,
     getRemoteHoleData,
-    setConfirmedFromHole: setConfirmed,
+    setConfirmedFromHole,
+    resetAllConfirmed,
+
+    // Device style helpers
+    getDeviceStyle,
+    getMyStyle,
+    getDeviceLabel,
+    getDeviceBgClass,
+    getActiveDeviceIds,
+    getPlayersForDevice,
+
+    // Constants
+    DEVICE_STYLES,
   };
 }
