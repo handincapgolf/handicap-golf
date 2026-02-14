@@ -1,20 +1,18 @@
 /**
  * Win123 Game Mode
  * 
- * 规则：
- * - 按净杆数排名
- * - 第1名不扣钱，第2名扣1x，第3名扣2x，第4名扣3x...
- * - UP功能：可以选择 UP（加注）
- *   - UP玩家如果赢得第1名，从罚池拿 6x stake
- *   - UP玩家如果输了，罚款翻倍
- * - 所有罚款进入罚池 (Penalty Pot)
+ * 规则（所有人数通用）：
+ * - 按净杆数排名，从最烂往上数
+ * - 同杆同档位，不跳位
+ * - 罚款：1st=0, 2nd=1x, 3rd=2x ... 最后=(n-1)x
+ * - 所有罚款进入罚池 (Pool)
  * 
- * 4人或以下：原有逻辑（并列取最差排名，跳跃式）
- * 5-8人 Jumbo模式：从最后一名往上数
- *   - 最差杆数 = 最后一名（第N名）
- *   - 倒数第二差 = 第N-1名
- *   - ...一直到最好的 = 第1名
- *   - 并列第1名都不罚，其他并列同名次同罚款
+ * UP规则：
+ * - 没UP只输不赢，UP才有赢钱机会
+ * - UP赢（第1名）：从Pool拿 (n-1) × stake × 2
+ * - UP输（非第1）：自己排名罚款 × 2
+ * - 全部同杆 + 有UP：UP玩家算赢家，拿 (n-1) × stake × 2
+ * - 全部同杆 + 没UP：全部 $0
  */
 
 import { DollarSign } from 'lucide-react';
@@ -29,102 +27,26 @@ export const config = {
   bgColor: 'bg-green-600',
   bgColorLight: 'bg-green-100',
   textColor: 'text-green-600',
-  // 此模式需要的功能
   requires: ['stake', 'handicap', 'prizePool', 'up'],
-  // 此模式不需要的功能
   excludes: [],
-  // 描述
   descZh: '排名计分，支持UP加注',
   descEn: 'Ranking scoring with UP option'
 };
 
 /**
- * 计算排名 - 4人或以下
- * 原有逻辑保持不变
+ * 计算UP赢的金额 = (n-1) × stake × 2
+ * 也就是最后一名档位 × 2
  */
-const calculateRankingsStandard = (rankings, uniqueScores) => {
-  if (uniqueScores.length === 2) {
-    // 只有两种分数：第1和第4
-    const firstScore = uniqueScores[0];
-    rankings.forEach(r => {
-      r.finalRank = r.netScore === firstScore ? 1 : 4;
-    });
-  } else if (uniqueScores.length === 3) {
-    // 三种分数
-    const firstScore = uniqueScores[0];
-    const secondScore = uniqueScores[1];
-    const firstCount = rankings.filter(r => r.netScore === firstScore).length;
-    
-    rankings.forEach(r => {
-      if (r.netScore === firstScore) {
-        r.finalRank = 1;
-      } else if (r.netScore === secondScore) {
-        // 如果第1名有3人或以上，第2名变第4
-        r.finalRank = firstCount >= 3 ? 4 : 3;
-      } else {
-        r.finalRank = 4;
-      }
-    });
-  } else {
-    // 4种分数，正常排名
-    rankings.forEach((r, i) => r.finalRank = i + 1);
-  }
-  
-  return rankings;
+const getUpWinAmount = (playerCount, stakeValue) => {
+  return (playerCount - 1) * stakeValue * 2;
 };
 
 /**
- * 计算排名 - 5人以上 Jumbo模式
- * 从最后一名往上数：
- * - 最差杆数 = 最后一名
+ * 计算排名 - 从最烂往上数（所有人数通用）
+ * - 最差杆数 = 最后一名（第N名）
  * - 倒数第二差 = 第N-1名
- * - 并列第1名都不罚
- */
-const calculateRankingsJumbo = (rankings, uniqueScores, playerCount) => {
-  // uniqueScores 已经从小到大排序（最好到最差）
-  // 我们需要从后往前分配名次
-  
-  const scoreCount = uniqueScores.length; // 有几种不同的杆数
-  
-  // 从最后一名开始分配
-  // 最差的杆数 = 第playerCount名
-  // 倒数第二差 = 第playerCount-1名
-  // ...
-  // 最好的杆数 = 第1名
-  
-  // 计算每个分数对应的名次
-  // 名次 = playerCount - (scoreCount - 1 - scoreIndex)
-  // 简化：名次 = playerCount - scoreCount + 1 + scoreIndex
-  
-  // 但最好的（第1名）永远是1
-  const scoreToRank = {};
-  
-  for (let i = 0; i < scoreCount; i++) {
-    const score = uniqueScores[i];
-    if (i === 0) {
-      // 最好的杆数 = 第1名
-      scoreToRank[score] = 1;
-    } else {
-      // 从后面数上来
-      // 最差(最后一个) = playerCount
-      // 倒数第二 = playerCount - 1
-      // ...
-      // 所以：名次 = playerCount - (scoreCount - 1 - i)
-      scoreToRank[score] = playerCount - (scoreCount - 1 - i);
-    }
-  }
-  
-  // 分配名次给每个玩家
-  rankings.forEach(r => {
-    r.finalRank = scoreToRank[r.netScore];
-  });
-  
-  return rankings;
-};
-
-/**
- * 计算排名
- * 处理并列情况的排名逻辑
+ * - ...一直到最好的 = 第1名
+ * - 同杆同名次同罚款
  */
 const calculateRankings = (playerScores, playerCount) => {
   const rankings = [...playerScores];
@@ -136,27 +58,33 @@ const calculateRankings = (playerScores, playerCount) => {
     return rankings;
   }
   
-  // 4人或以下：原有逻辑
-  if (playerCount <= 4) {
-    return calculateRankingsStandard(rankings, uniqueScores);
+  // uniqueScores 从小到大（最好到最差）
+  const scoreCount = uniqueScores.length;
+  const scoreToRank = {};
+  
+  for (let i = 0; i < scoreCount; i++) {
+    const score = uniqueScores[i];
+    if (i === 0) {
+      // 最好的杆数 = 第1名
+      scoreToRank[score] = 1;
+    } else {
+      // 从后面数上来
+      // 最差(最后一个) = playerCount
+      // 倒数第二 = playerCount - 1
+      // 名次 = playerCount - (scoreCount - 1 - i)
+      scoreToRank[score] = playerCount - (scoreCount - 1 - i);
+    }
   }
   
-  // 5-8人：Jumbo模式
-  return calculateRankingsJumbo(rankings, uniqueScores, playerCount);
+  rankings.forEach(r => {
+    r.finalRank = scoreToRank[r.netScore];
+  });
+  
+  return rankings;
 };
 
 /**
  * 计算单洞结算
- * @param {Object} params
- * @param {Object} params.holeScores - 各玩家本洞On杆数 { playerName: score }
- * @param {Object} params.holePutts - 各玩家本洞推杆数 { playerName: putts }
- * @param {Object} params.holeUps - 各玩家是否UP { playerName: boolean }
- * @param {number} params.holeNum - 洞号
- * @param {number} params.par - 本洞标准杆
- * @param {number} params.stake - 基础赌注
- * @param {string[]} params.activePlayers - 参与玩家列表
- * @param {Function} params.getHandicapForHole - 获取玩家在某洞的差点
- * @returns {Object} 结算结果
  */
 export const calculate = ({
   holeScores,
@@ -169,6 +97,7 @@ export const calculate = ({
   getHandicapForHole
 }) => {
   const stakeValue = Number(stake) || 0;
+  const playerCount = activePlayers.length;
   
   // 计算每位玩家的总杆数和净杆数
   const playerScores = activePlayers.map(player => ({
@@ -184,7 +113,7 @@ export const calculate = ({
   playerScores.sort((a, b) => a.netScore - b.netScore);
   
   // 计算排名
-  const rankings = calculateRankings(playerScores, activePlayers.length);
+  const rankings = calculateRankings(playerScores, playerCount);
   const uniqueScores = [...new Set(rankings.map(p => p.netScore))];
   
   // 初始化结果
@@ -195,43 +124,59 @@ export const calculate = ({
     results[player] = { money: 0, fromPool: 0 };
   });
   
-  // 非全部平局时计算金额
-  if (uniqueScores.length > 1) {
-    rankings.forEach(r => {
-      let penalty = 0;
-      
-      // 非第1名需要罚款
-      if (r.finalRank > 1) {
-        penalty = stakeValue * (r.finalRank - 1);
-      }
-      
-      // UP玩家特殊处理
-      if (r.up) {
-        if (r.finalRank === 1) {
-          // UP且赢了，从罚池拿 6x stake
-          const poolWin = stakeValue * 6;
-          results[r.player].money = poolWin;
-          results[r.player].fromPool = poolWin;
-          poolChange -= poolWin;
-        } else {
-          // UP但输了，罚款翻倍
-          penalty = penalty * 2;
-        }
-      }
-      
-      // 应用罚款
-      if (r.finalRank > 1) {
+  // UP赢的金额 = (n-1) × stake × 2
+  const upWin = getUpWinAmount(playerCount, stakeValue);
+  
+  // 全部同杆
+  if (uniqueScores.length === 1) {
+    // 有UP玩家 → UP玩家算赢家
+    const upPlayers = rankings.filter(r => r.up);
+    if (upPlayers.length > 0) {
+      upPlayers.forEach(r => {
+        results[r.player].money = upWin;
+        results[r.player].fromPool = upWin;
+        poolChange -= upWin;
+      });
+    }
+    // 没UP的玩家：$0
+    
+    return {
+      results,
+      poolChange,
+      rankings,
+      isTied: true
+    };
+  }
+  
+  // 非全部平局 - 计算金额
+  rankings.forEach(r => {
+    if (r.up) {
+      if (r.finalRank === 1) {
+        // UP赢：从Pool拿 (n-1) × stake × 2
+        results[r.player].money = upWin;
+        results[r.player].fromPool = upWin;
+        poolChange -= upWin;
+      } else {
+        // UP输：自己排名罚款 × 2
+        const penalty = stakeValue * (r.finalRank - 1) * 2;
         results[r.player].money = -penalty;
         poolChange += penalty;
       }
-    });
-  }
+    } else {
+      // 非UP玩家：只输不赢
+      if (r.finalRank > 1) {
+        const penalty = stakeValue * (r.finalRank - 1);
+        results[r.player].money = -penalty;
+        poolChange += penalty;
+      }
+    }
+  });
   
   return {
     results,
     poolChange,
     rankings,
-    isTied: uniqueScores.length === 1
+    isTied: false
   };
 };
 
@@ -263,18 +208,23 @@ export const getRankings = ({
 
 /**
  * 计算UP的潜在收益/损失
+ * @param {number} currentRank - 当前排名
+ * @param {number} stakeValue - 底注
+ * @param {number} playerCount - 玩家人数
  */
-export const calculateUpPotential = (currentRank, stakeValue) => {
+export const calculateUpPotential = (currentRank, stakeValue, playerCount = 4) => {
+  const upAmount = getUpWinAmount(playerCount, stakeValue);
+  
   if (currentRank === 1) {
     return {
-      win: stakeValue * 6,  // 从罚池拿6x
+      win: upAmount,
       lose: 0
     };
   } else {
     const basePenalty = stakeValue * (currentRank - 1);
     return {
       win: 0,
-      lose: basePenalty * 2  // 罚款翻倍
+      lose: basePenalty * 2
     };
   }
 };
