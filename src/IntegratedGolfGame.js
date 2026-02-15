@@ -5759,10 +5759,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>OUT</th>
                                   {frontNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold relative" style={{ minWidth: '18px', cursor: editedHolesSet.has(h) ? 'pointer' : 'default' }}
-                                      onClick={() => editedHolesSet.has(h) && setEditLogDialog({ isOpen: true, hole: h })}>
-                                      {h}{editedHolesSet.has(h) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
-                                    </th>
+                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
                                   ))}
                                   <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
                                 </tr>
@@ -5808,10 +5805,7 @@ return (
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>IN</th>
                                   {backNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold relative" style={{ minWidth: '18px', cursor: editedHolesSet.has(h) ? 'pointer' : 'default' }}
-                                      onClick={() => editedHolesSet.has(h) && setEditLogDialog({ isOpen: true, hole: h })}>
-                                      {h}{editedHolesSet.has(h) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
-                                    </th>
+                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
                                   ))}
                                   <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
                                 </tr>
@@ -5969,9 +5963,8 @@ return (
                                         {t('out')}
                                       </th>
                                       {frontNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold relative" style={{ minWidth: '20px', cursor: editedHolesSet.has(hole) ? 'pointer' : 'default' }}
-                                          onClick={() => editedHolesSet.has(hole) && setEditLogDialog({ isOpen: true, hole })}>
-                                          {hole}{editedHolesSet.has(hole) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
+                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
+                                          {hole}
                                         </th>
                                       ))}
                                       <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
@@ -6036,9 +6029,8 @@ return (
                                         {t('in')}
                                       </th>
                                       {backNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold relative" style={{ minWidth: '20px', cursor: editedHolesSet.has(hole) ? 'pointer' : 'default' }}
-                                          onClick={() => editedHolesSet.has(hole) && setEditLogDialog({ isOpen: true, hole })}>
-                                          {hole}{editedHolesSet.has(hole) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
+                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
+                                          {hole}
                                         </th>
                                       ))}
                                       <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
@@ -6106,6 +6098,17 @@ return (
                 </>
               )}
 
+              {/* 修改记录按钮 - scorecard 下方 */}
+              {editLog.length > 0 && (
+                <button
+                  onClick={() => setEditLogDialog({ isOpen: true, hole: null })}
+                  className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
+                >
+                  📋 {t('editLogTitle')}
+                  <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
+                </button>
+              )}
+
               {(gameComplete || completedHoles.length === holes.length) && (Number(stake) > 0 || (gameMode === 'skins' && prizePool > 0)) && (
                 <div className="bg-yellow-50 rounded-lg p-4 shadow-sm">
                   <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">
@@ -6171,27 +6174,6 @@ return (
                     })()}
                   </div>
                 </div>
-              )}
-
-              {/* Round Report 分享按钮 */}
-              {gameComplete && completedHoles.length > 0 && (
-                <button
-                  onClick={handleShareRoundReport}
-                  className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-sm"
-                >
-                  📊 {t('shareRoundReport')}
-                </button>
-              )}
-
-              {/* 修改记录按钮 */}
-              {editLog.length > 0 && (
-                <button
-                  onClick={() => setEditLogDialog({ isOpen: true, hole: null })}
-                  className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
-                >
-                  📋 {t('editLogTitle')}
-                  <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
-                </button>
               )}
 
               <div className="flex gap-3">
