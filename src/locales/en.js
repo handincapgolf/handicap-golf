@@ -58,7 +58,7 @@ export const en = {
   cancel: 'Cancel',
   yes: 'Yes',
   confirm: 'Confirm',
-  switchLang: '中文',
+  switchLang: '🌐 Language',
   noStake: 'Please enter stake amount',
   atLeast2: 'Please enter at least 2 players',
   gameOver: 'Game Over!',

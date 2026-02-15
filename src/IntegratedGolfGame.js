@@ -28,7 +28,7 @@ import {
 } from 'lucide-react';
 
 import { GOLF_COURSES, searchCourses } from './data/courses';
-import { useTranslation } from './locales';
+import { useTranslation, detectLanguage, LANGUAGES } from './locales';
 import { gameModes } from './gameModes';
 import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from './gameModes/BaccaratComponents';
 import { 
@@ -2441,12 +2441,12 @@ function IntegratedGolfGame() {
   // ========== 结束样式注入 ==========
   const [lang, setLang] = useState(() => {
     try {
-      const savedLang = localStorage.getItem('handincap_lang');
-      return savedLang || 'en';
+      return detectLanguage();
     } catch {
       return 'en';
     }
   });
+  const [showLangPicker, setShowLangPicker] = useState(false);
   const [currentSection, setCurrentSection] = useState('home');
   const [toast, setToast] = useState(null);
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', action: null, showScreenshotHint: false });
@@ -4257,19 +4257,33 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       {currentSection === 'home' && (
-        <div className="flex justify-end items-center p-3 bg-white border-b border-gray-200">
+        <div className="flex justify-end items-center p-3 bg-white border-b border-gray-200 relative">
           <button
-            onClick={() => {
-              const newLang = lang === 'zh' ? 'en' : 'zh';
-              setLang(newLang);
-              try {
-                localStorage.setItem('handincap_lang', newLang);
-              } catch {}
-            }}
+            onClick={() => setShowLangPicker(!showLangPicker)}
             className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium shadow-sm"
           >
             {t('switchLang')}
           </button>
+          {showLangPicker && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowLangPicker(false)} />
+              <div className="absolute right-3 top-12 z-50 bg-white rounded-xl shadow-2xl border border-gray-200 py-1 min-w-[160px] overflow-hidden" style={{ animation: 'fadeIn 0.15s ease-out' }}>
+                {LANGUAGES.map(({ code, label }) => (
+                  <button
+                    key={code}
+                    onClick={() => {
+                      setLang(code);
+                      try { localStorage.setItem('handincap_lang', code); } catch {}
+                      setShowLangPicker(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${lang === code ? 'bg-green-50 text-green-700 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`}
+                  >
+                    {lang === code && <span className="mr-1.5">✓</span>}{label}
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
         </div>
       )}
 

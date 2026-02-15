@@ -58,7 +58,7 @@ export const zh = {
   cancel: '取消',
   yes: '确定',
   confirm: '确认',
-  switchLang: 'English',
+  switchLang: '🌐 语言',
   noStake: '请输入底注金额',
   atLeast2: '请至少输入2名玩家',
   gameOver: '比赛结束！',
