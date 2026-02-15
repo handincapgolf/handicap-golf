@@ -196,7 +196,20 @@ export const th = {
   waitingProceed: 'กำลังรอ 🅰️ ดำเนินการต่อ...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
   voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
-  ttsLang: 'th-TH'
+  ttsLang: 'th-TH',
+  editLogTitle: 'บันทึกการแก้ไข',
+  editLogHoleTitle: 'หลุม {n} บันทึกการแก้ไข',
+  editLogEmpty: 'ไม่มีบันทึกการแก้ไข',
+  editLogCount: '{n} การแก้ไข',
+  editLogAllRecorded: 'บันทึกการแก้ไขทั้งหมดแล้ว',
+  editLogScore: 'สกอร์',
+  editLogPutts: 'พัตต์',
+  editLogUp: 'UP',
+  editNotifyTitle: 'สกอร์หลุม {n} ถูกแก้ไข',
+  editNotifyBy: 'แก้ไขโดย {who}',
+  editNotifyDetail: 'แตะเพื่อดูรายละเอียด',
+  editLogTapHint: 'แตะ ✏️ บนหมายเลขหลุมเพื่อดูบันทึก',
+  editLogClose: 'ปิด'
 };
 
 export default th;

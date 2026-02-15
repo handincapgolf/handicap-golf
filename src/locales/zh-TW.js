@@ -196,7 +196,20 @@ export const zhTW = {
   waitingProceed: '等待 🅰️ 進入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，讓桿{handicap}。',
   voiceNoHcp: '{player}，{on}上{putt}推。',
-  ttsLang: 'zh-TW'
+  ttsLang: 'zh-TW',
+  editLogTitle: '修改記錄',
+  editLogHoleTitle: '第{n}洞 修改記錄',
+  editLogEmpty: '沒有修改記錄',
+  editLogCount: '{n} 條修改',
+  editLogAllRecorded: '所有編輯操作均已記錄',
+  editLogScore: '桿數',
+  editLogPutts: '推桿',
+  editLogUp: 'UP',
+  editNotifyTitle: '第{n}洞 成績被修改',
+  editNotifyBy: '由 {who} 編輯',
+  editNotifyDetail: '點擊查看詳情',
+  editLogTapHint: '點擊洞號上 ✏️ 查看該洞修改記錄',
+  editLogClose: '關閉'
 };
 
 export default zhTW;

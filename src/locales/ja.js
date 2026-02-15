@@ -196,7 +196,20 @@ export const ja = {
   waitingProceed: '🅰️の進行を待っています...',
   voiceWithHcp: '{player}、{on}オン{putt}パット、ハンディ{handicap}。',
   voiceNoHcp: '{player}、{on}オン{putt}パット。',
-  ttsLang: 'ja-JP'
+  ttsLang: 'ja-JP',
+  editLogTitle: '編集履歴',
+  editLogHoleTitle: 'ホール{n} 編集履歴',
+  editLogEmpty: '編集履歴はありません',
+  editLogCount: '{n}件の編集',
+  editLogAllRecorded: 'すべての編集が記録されています',
+  editLogScore: 'スコア',
+  editLogPutts: 'パット',
+  editLogUp: 'UP',
+  editNotifyTitle: 'ホール{n}のスコアが編集されました',
+  editNotifyBy: '{who}が編集',
+  editNotifyDetail: 'タップして詳細を見る',
+  editLogTapHint: 'ホール番号の✏️をタップして編集履歴を表示',
+  editLogClose: '閉じる'
 };
 
 export default ja;

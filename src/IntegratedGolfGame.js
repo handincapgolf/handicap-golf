@@ -854,6 +854,160 @@ const Toast = memo(({ message, type, onClose }) => {
   );
 });
 
+// ========== iOS 风格编辑通知 Toast ==========
+const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    requestAnimationFrame(() => setVisible(true));
+    const timer = setTimeout(() => { setVisible(false); setTimeout(() => onCloseRef.current(), 300); }, 5000);
+    return () => clearTimeout(timer);
+  }, [log?.id]);
+
+  if (!log) return null;
+
+  const fieldLabel = (f) => {
+    const map = { score: t('editLogScore'), putts: t('editLogPutts'), up: t('editLogUp') };
+    return map[f] || f;
+  };
+  const fmtVal = (f, v) => (f === 'up' ? (v ? '✓' : '✗') : v);
+
+  return (
+    <div className="fixed left-3 right-3 z-50" style={{
+      top: visible ? 12 : -200,
+      transition: 'top 0.35s cubic-bezier(0.32, 0.72, 0, 1)',
+      maxWidth: 400, margin: '0 auto',
+    }}>
+      <div onClick={() => { onViewDetail(log.hole); onClose(); }} style={{
+        background: 'rgba(30, 30, 30, 0.92)',
+        backdropFilter: 'blur(20px)', WebkitBackdropFilter: 'blur(20px)',
+        borderRadius: 14, padding: '12px 14px',
+        boxShadow: '0 8px 30px rgba(0,0,0,0.3), 0 0 0 0.5px rgba(255,255,255,0.1)',
+        cursor: 'pointer',
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
+          <div style={{
+            width: 32, height: 32, borderRadius: 8,
+            background: 'linear-gradient(135deg, #166534, #15803d)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
+          }}>⛳</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <span style={{ color: '#f5f5f5', fontWeight: 600, fontSize: 13 }}>
+                {t('editNotifyTitle').replace('{n}', log.hole)}
+              </span>
+            </div>
+            <div style={{ color: '#aaa', fontSize: 11, marginTop: 1 }}>
+              {log.editedByLabel ? t('editNotifyBy').replace('{who}', log.editedByLabel) : ''}
+            </div>
+          </div>
+          <button onClick={(e) => { e.stopPropagation(); onClose(); }}
+            style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer', padding: 4 }}>×</button>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 42 }}>
+          {log.changes.map((c, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13 }}>
+              <span style={{ color: '#e5e5e5', fontWeight: 500, minWidth: 36 }}>{c.player}</span>
+              <span style={{ color: '#999', fontSize: 11, background: 'rgba(255,255,255,0.08)', borderRadius: 4, padding: '1px 6px' }}>
+                {fieldLabel(c.field)}
+              </span>
+              <span style={{ color: '#ef4444', textDecoration: 'line-through', opacity: 0.7, fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
+              <span style={{ color: '#666', fontSize: 11 }}>→</span>
+              <span style={{ color: '#4ade80', fontWeight: 600, fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+});
+
+// ========== 修改记录弹窗 ==========
+const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => {
+  if (!isOpen) return null;
+  const filtered = filterHole ? logs.filter(l => l.hole === filterHole) : logs;
+
+  const fieldLabel = (f) => {
+    const map = { score: t('editLogScore'), putts: t('editLogPutts'), up: t('editLogUp') };
+    return map[f] || f;
+  };
+  const fmtVal = (f, v) => (f === 'up' ? (v ? '✓' : '✗') : v);
+  const timeAgo = (ts) => {
+    const d = typeof ts === 'string' ? new Date(ts) : new Date(ts);
+    const mins = Math.floor((Date.now() - d.getTime()) / 60000);
+    if (mins < 1) return t('editLogScore') === 'Score' ? 'just now' : '刚刚';
+    if (mins < 60) return t('editLogScore') === 'Score' ? `${mins}m ago` : `${mins}分钟前`;
+    const hrs = Math.floor(mins / 60);
+    return t('editLogScore') === 'Score' ? `${hrs}h ago` : `${hrs}小时前`;
+  };
+  const fmtTime = (ts) => {
+    const d = typeof ts === 'string' ? new Date(ts) : new Date(ts);
+    return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl max-h-[80vh] flex flex-col">
+        <div className="flex justify-between items-center mb-3">
+          <h3 className="text-lg font-bold text-gray-900">
+            📋 {filterHole ? t('editLogHoleTitle').replace('{n}', filterHole) : t('editLogTitle')}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+        </div>
+        <p className="text-xs text-gray-500 mb-3">
+          {t('editLogCount').replace('{n}', filtered.length)} · {t('editLogAllRecorded')}
+        </p>
+        <div className="flex-1 overflow-auto space-y-3 min-h-0">
+          {filtered.length === 0 ? (
+            <div className="text-center py-8">
+              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <p className="text-gray-500 text-sm">{t('editLogEmpty')} ✅</p>
+            </div>
+          ) : filtered.map((log) => (
+            <div key={log.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
+              <div className="flex justify-between items-start mb-2">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-bold text-gray-900">
+                    {t('hole')} {log.hole}
+                  </span>
+                  {log.editedByLabel && (
+                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{log.editedByLabel}</span>
+                  )}
+                </div>
+                <div className="text-right">
+                  <div className="text-xs text-gray-500">{fmtTime(log.timestamp)}</div>
+                  <div className="text-xs text-gray-400">{timeAgo(log.timestamp)}</div>
+                </div>
+              </div>
+              <div className="space-y-1.5">
+                {log.changes.map((c, ci) => (
+                  <div key={ci} className="flex items-center gap-2 bg-white rounded px-2.5 py-1.5 border border-gray-100">
+                    <span className="text-sm font-semibold text-gray-800" style={{ minWidth: 40 }}>{c.player}</span>
+                    <span className={`px-1.5 py-0.5 rounded text-xs font-medium ${
+                      c.field === 'score' ? 'bg-green-100 text-green-700' :
+                      c.field === 'putts' ? 'bg-purple-100 text-purple-700' :
+                      'bg-yellow-100 text-yellow-700'
+                    }`}>{fieldLabel(c.field)}</span>
+                    <div className="flex-1" />
+                    <span className="text-red-500 line-through text-sm" style={{ fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
+                    <span className="text-gray-400 text-xs">→</span>
+                    <span className="text-green-600 font-bold text-sm" style={{ fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+        <button onClick={onClose} className="w-full px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300 mt-4">
+          {t('editLogClose')}
+        </button>
+      </div>
+    </div>
+  );
+});
+
 const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreenshotHint }) => {
   if (!isOpen) return null;
 
@@ -2455,6 +2609,9 @@ function IntegratedGolfGame() {
   const [holeConfirmDialog, setHoleConfirmDialog] = useState({ isOpen: false, action: null });
   const [holeSelectDialog, setHoleSelectDialog] = useState(false);
   const [editHoleDialog, setEditHoleDialog] = useState({ isOpen: false, hole: null });
+  const [editLog, setEditLog] = useState([]);
+  const [editToastData, setEditToastData] = useState(null);
+  const [editLogDialog, setEditLogDialog] = useState({ isOpen: false, hole: null });
   // Advance Mode 报告弹窗状态
 const [advanceReportPlayer, setAdvanceReportPlayer] = useState(null);
 const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
@@ -2566,6 +2723,9 @@ const [showMpTooltip, setShowMpTooltip] = useState(false);
 
 // ========== 多人同步 ==========
 const mp = useMultiplayerSync();
+
+  // 从 editLog 中提取被编辑过的洞号集合
+  const editedHolesSet = useMemo(() => new Set(editLog.map(l => l.hole)), [editLog]);
 
 // 点击外部关闭气泡
 useEffect(() => {
@@ -2798,6 +2958,21 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
   }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
 
+  // 多人模式：检测远程 editLog，合并并弹出通知
+  const lastEditLogIdRef = useRef(null);
+  useEffect(() => {
+    if (!mp.multiplayerOn || !mp.remoteGame?.editLog) return;
+    const remoteLog = mp.remoteGame.editLog;
+    if (remoteLog.editedBy === mp.deviceId) return;
+    if (remoteLog.id === lastEditLogIdRef.current) return;
+    lastEditLogIdRef.current = remoteLog.id;
+    setEditLog(prev => {
+      if (prev.some(l => l.id === remoteLog.id)) return prev;
+      return [remoteLog, ...prev];
+    });
+    setEditToastData(remoteLog);
+  }, [mp.remoteGame?.editLog?.id, mp.multiplayerOn]);
+
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
@@ -3024,6 +3199,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setSetupMode(gameState.setupMode || 'auto');
         setJumboMode(gameState.jumboMode || false);
 		setAdvancePlayers(gameState.advancePlayers || {});
+        setEditLog(gameState.editLog || []);
         setCurrentSection('game');
       } catch (error) {
         console.error('Failed to resume game:', error);
@@ -3066,7 +3242,8 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         selectedCourse,
         setupMode,
         jumboMode,
-		advancePlayers
+		advancePlayers,
+        editLog
       };
       localStorage.setItem('golfGameState', JSON.stringify(gameState));
       setHasSavedGame(true);
@@ -3075,7 +3252,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
       allScores, allUps, allPutts, allWater, allOb, totalMoney, 
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
-      selectedCourse, setupMode, jumboMode, activePlayers.length]);
+      selectedCourse, setupMode, jumboMode, activePlayers.length, editLog]);
 
   const showConfirm = useCallback((message, action, showScreenshotHint = false) => {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
@@ -3936,6 +4113,36 @@ activePlayers.forEach(player => {
 
   // 编辑洞成绩并重新计算金额
 const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUpOrder = []) => {
+    // ===== Edit Log: 对比新旧值，记录差异 =====
+    const changes = [];
+    activePlayers.forEach(player => {
+      const oldScore = allScores[player]?.[hole];
+      const newScore = newScores[player];
+      if (oldScore !== undefined && newScore !== undefined && oldScore !== newScore) {
+        changes.push({ player, field: 'score', from: oldScore, to: newScore });
+      }
+      const oldPutt = allPutts[player]?.[hole];
+      const newPutt = newPutts[player] || 0;
+      if (oldPutt !== undefined && oldPutt !== newPutt) {
+        changes.push({ player, field: 'putts', from: oldPutt, to: newPutt });
+      }
+      const oldUp = allUps[player]?.[hole] || false;
+      const newUp = newUps[player] || false;
+      if (oldUp !== newUp) {
+        changes.push({ player, field: 'up', from: oldUp, to: newUp });
+      }
+    });
+    const editLogEntry = changes.length > 0 ? {
+      id: Date.now(),
+      timestamp: new Date().toISOString(),
+      hole,
+      editedBy: mp.multiplayerOn ? mp.deviceId : 'local',
+      editedByLabel: mp.multiplayerOn ? (mp.getDeviceLabel(mp.deviceId) || mp.deviceId) : '',
+      changes,
+    } : null;
+    if (editLogEntry) {
+      setEditLog(prev => [editLogEntry, ...prev]);
+    }
     // 1. 更新 allScores, allUps, allPutts, allUpOrders
     const updatedAllScores = { ...allScores };
     const updatedAllUps = { ...allUps };
@@ -4076,6 +4283,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
         completedHoles,
         editedHole: hole,
         editedHoleData: holeUpdate,
+        editLog: editLogEntry,
       });
       mp.startPolling(mp.gameCode);
     }
@@ -4118,6 +4326,9 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
       setSearchQuery('');
       setSelectedCourse(null);
       setCourseApplied(false);
+      setEditLog([]);
+      setEditToastData(null);
+      setEditLogDialog({ isOpen: false, hole: null });
     };
 
     if (gameComplete) {
@@ -5517,7 +5728,10 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>OUT</th>
                                   {frontNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
+                                    <th key={h} className="px-0 py-1.5 text-center font-semibold relative" style={{ minWidth: '18px', cursor: editedHolesSet.has(h) ? 'pointer' : 'default' }}
+                                      onClick={() => editedHolesSet.has(h) && setEditLogDialog({ isOpen: true, hole: h })}>
+                                      {h}{editedHolesSet.has(h) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
+                                    </th>
                                   ))}
                                   <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
                                 </tr>
@@ -5563,7 +5777,10 @@ return (
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>IN</th>
                                   {backNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
+                                    <th key={h} className="px-0 py-1.5 text-center font-semibold relative" style={{ minWidth: '18px', cursor: editedHolesSet.has(h) ? 'pointer' : 'default' }}
+                                      onClick={() => editedHolesSet.has(h) && setEditLogDialog({ isOpen: true, hole: h })}>
+                                      {h}{editedHolesSet.has(h) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
+                                    </th>
                                   ))}
                                   <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
                                 </tr>
@@ -5721,8 +5938,9 @@ return (
                                         {t('out')}
                                       </th>
                                       {frontNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
-                                          {hole}
+                                        <th key={hole} className="px-0 py-1 text-center font-semibold relative" style={{ minWidth: '20px', cursor: editedHolesSet.has(hole) ? 'pointer' : 'default' }}
+                                          onClick={() => editedHolesSet.has(hole) && setEditLogDialog({ isOpen: true, hole })}>
+                                          {hole}{editedHolesSet.has(hole) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
                                         </th>
                                       ))}
                                       <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
@@ -5787,8 +6005,9 @@ return (
                                         {t('in')}
                                       </th>
                                       {backNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
-                                          {hole}
+                                        <th key={hole} className="px-0 py-1 text-center font-semibold relative" style={{ minWidth: '20px', cursor: editedHolesSet.has(hole) ? 'pointer' : 'default' }}
+                                          onClick={() => editedHolesSet.has(hole) && setEditLogDialog({ isOpen: true, hole })}>
+                                          {hole}{editedHolesSet.has(hole) && <span className="absolute -top-0.5 -right-0.5" style={{ fontSize: 7 }}>✏️</span>}
                                         </th>
                                       ))}
                                       <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
@@ -5930,6 +6149,17 @@ return (
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-sm"
                 >
                   📊 {t('shareRoundReport')}
+                </button>
+              )}
+
+              {/* 修改记录按钮 */}
+              {editLog.length > 0 && (
+                <button
+                  onClick={() => setEditLogDialog({ isOpen: true, hole: null })}
+                  className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
+                >
+                  📋 {t('editLogTitle')}
+                  <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
                 </button>
               )}
 
@@ -6483,6 +6713,23 @@ return (
           onClose={() => setToast(null)}
         />
       )}
+
+      {editToastData && (
+        <EditToast
+          log={editToastData}
+          onClose={() => setEditToastData(null)}
+          onViewDetail={(hole) => setEditLogDialog({ isOpen: true, hole })}
+          t={t}
+        />
+      )}
+
+      <EditLogDialog
+        isOpen={editLogDialog.isOpen}
+        onClose={() => setEditLogDialog({ isOpen: false, hole: null })}
+        logs={editLog}
+        filterHole={editLogDialog.hole}
+        t={t}
+      />
 
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}

@@ -201,7 +201,20 @@ export const en = {
   waitingProceed: 'Waiting 🅰️ to proceed...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
   voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
-  ttsLang: 'en-US'
+  ttsLang: 'en-US',
+  editLogTitle: 'Edit Log',
+  editLogHoleTitle: 'Hole {n} Edit Log',
+  editLogEmpty: 'No edits recorded',
+  editLogCount: '{n} edits',
+  editLogAllRecorded: 'All edits are logged',
+  editLogScore: 'Score',
+  editLogPutts: 'Putts',
+  editLogUp: 'UP',
+  editNotifyTitle: 'Hole {n} score edited',
+  editNotifyBy: 'Edited by {who}',
+  editNotifyDetail: 'Tap to view details',
+  editLogTapHint: 'Tap ✏️ on hole number to view edit log',
+  editLogClose: 'Close'
 };
 
 export default en;

@@ -196,7 +196,20 @@ export const ko = {
   waitingProceed: '🅰️ 진행 대기 중...',
   voiceWithHcp: '{player}, {on} 온, {putt} 퍼팅, 핸디캡 {handicap}.',
   voiceNoHcp: '{player}, {on} 온, {putt} 퍼팅.',
-  ttsLang: 'ko-KR'
+  ttsLang: 'ko-KR',
+  editLogTitle: '수정 기록',
+  editLogHoleTitle: '홀 {n} 수정 기록',
+  editLogEmpty: '수정 기록 없음',
+  editLogCount: '{n}건 수정',
+  editLogAllRecorded: '모든 편집이 기록되었습니다',
+  editLogScore: '스코어',
+  editLogPutts: '퍼팅',
+  editLogUp: 'UP',
+  editNotifyTitle: '홀 {n} 스코어 수정됨',
+  editNotifyBy: '{who}이(가) 수정',
+  editNotifyDetail: '탭하여 상세 보기',
+  editLogTapHint: '홀 번호의 ✏️를 탭하여 수정 기록 보기',
+  editLogClose: '닫기'
 };
 
 export default ko;

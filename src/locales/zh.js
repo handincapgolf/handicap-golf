@@ -201,7 +201,21 @@ export const zh = {
   waitingProceed: '等待 🅰️ 进入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，让杆{handicap}。',
   voiceNoHcp: '{player}，{on}上{putt}推。',
-  ttsLang: 'zh-CN'
+  ttsLang: 'zh-CN',
+  // Edit Log 修改记录
+  editLogTitle: '修改记录',
+  editLogHoleTitle: '第{n}洞 修改记录',
+  editLogEmpty: '没有修改记录',
+  editLogCount: '{n} 条修改',
+  editLogAllRecorded: '所有编辑操作均已记录',
+  editLogScore: '杆数',
+  editLogPutts: '推杆',
+  editLogUp: 'UP',
+  editNotifyTitle: '第{n}洞 成绩被修改',
+  editNotifyBy: '由 {who} 编辑',
+  editNotifyDetail: '点击查看详情',
+  editLogTapHint: '点击洞号上 ✏️ 查看该洞修改记录',
+  editLogClose: '关闭'
 };
 
 export default zh;

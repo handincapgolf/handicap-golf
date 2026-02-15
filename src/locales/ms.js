@@ -196,7 +196,20 @@ export const ms = {
   waitingProceed: 'Menunggu 🅰️ meneruskan...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
   voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
-  ttsLang: 'ms-MY'
+  ttsLang: 'ms-MY',
+  editLogTitle: 'Log Perubahan',
+  editLogHoleTitle: 'Lubang {n} Log Perubahan',
+  editLogEmpty: 'Tiada perubahan direkodkan',
+  editLogCount: '{n} perubahan',
+  editLogAllRecorded: 'Semua perubahan telah direkodkan',
+  editLogScore: 'Skor',
+  editLogPutts: 'Putt',
+  editLogUp: 'UP',
+  editNotifyTitle: 'Skor lubang {n} diubah',
+  editNotifyBy: 'Diubah oleh {who}',
+  editNotifyDetail: 'Ketik untuk butiran',
+  editLogTapHint: 'Ketik ✏️ pada nombor lubang untuk lihat log',
+  editLogClose: 'Tutup'
 };
 
 export default ms;
