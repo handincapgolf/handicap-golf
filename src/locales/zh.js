@@ -171,7 +171,37 @@ export const zh = {
   mpConfirmNext: '✅ 确认 & 下一洞',
   mpAdvancedStats: '高级统计模式',
   mpSelectAdvanced: '选择使用高级统计的玩家',
-  mpHolesLabel: '洞'
+  mpHolesLabel: '洞',
+  // ===== Additional UI keys =====
+  hcpLabel: '差点',
+  hideInfo: '收起说明',
+  learnMore: '了解更多',
+  close: '关闭',
+  clearRecent: '清除',
+  recentCourses: '最近球场',
+  endGame: '终止',
+  advancedTag: '📊 高级',
+  advancedSelectDesc: '勾选的玩家将记录推杆、水障碍、OB等详细数据',
+  shareRoundReport: '分享 Round Report',
+  allDataCleared: '所有比赛数据将被清除',
+  endGameConfirm: '确定要终止比赛吗？\n未完成的洞将不计入成绩',
+  holeLabel: '{n}洞',
+  holeLabelShort: '{n}洞',
+  cameraAccessDenied: '无法访问相机',
+  generateLinkFailed: '生成链接失败',
+  copyFailed: '复制失败',
+  retracted: '已撤回，可修改分数',
+  matchPlayBubble: '每洞净杆最低者赢。平手就没有输赢。',
+  win123Bubble: '按净杆排名。排名越低罚越重。UP可以赢更多，也可能输更多。',
+  skinsBubble: '每洞每人投注。只有单独最低杆才赢走全部。平手就累积到下一洞。',
+  baccaratBubble: '4人两两对战，共6组对决。叫UP可以加注。',
+  advanceBubble: '开启后除了杆数，还会记录💧下水和🚫出界次数。打完后生成详细成绩单。',
+  mpSyncBubble: '你记你的球员，朋友记他的，分数自动同步。不用再传来传去。',
+  undoEdit: '撤回修改',
+  waitingProceed: '等待 🅰️ 进入下一洞...',
+  voiceWithHcp: '{player}，{on}上{putt}推，让杆{handicap}。',
+  voiceNoHcp: '{player}，{on}上{putt}推。',
+  ttsLang: 'zh-CN'
 };
 
 export default zh;

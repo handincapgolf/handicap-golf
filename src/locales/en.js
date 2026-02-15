@@ -171,7 +171,37 @@ export const en = {
   mpConfirmNext: '✅ Confirm & Next',
   mpAdvancedStats: 'Advanced Stats Mode',
   mpSelectAdvanced: 'Select players for advanced stats',
-  mpHolesLabel: 'Holes'
+  mpHolesLabel: 'Holes',
+  // ===== Additional UI keys =====
+  hcpLabel: 'HCP',
+  hideInfo: 'Hide',
+  learnMore: 'Learn more',
+  close: 'Close',
+  clearRecent: 'Clear',
+  recentCourses: 'Recent Courses',
+  endGame: 'End',
+  advancedTag: '📊 Advanced',
+  advancedSelectDesc: 'Selected players will track putts, water, OB details',
+  shareRoundReport: 'Share Round Report',
+  allDataCleared: 'All game data will be cleared',
+  endGameConfirm: 'End the game now?\nIncomplete holes will not be counted',
+  holeLabel: 'Hole {n}',
+  holeLabelShort: 'H{n}',
+  cameraAccessDenied: 'Camera access denied',
+  generateLinkFailed: 'Failed to generate link',
+  copyFailed: 'Copy failed',
+  retracted: 'Retracted. You can edit scores now.',
+  matchPlayBubble: 'Lowest net score wins each hole. Tied? No one pays.',
+  win123Bubble: 'Ranked by net score. Lower rank = bigger penalty. UP to raise stakes.',
+  skinsBubble: 'Lowest score alone takes the pot. Tied? Rolls to next hole.',
+  baccaratBubble: '4 players, 6 matchups. Call UP to raise your bet.',
+  advanceBubble: 'Also tracks 💧 water and 🚫 out of bounds. Get a detailed report after the round.',
+  mpSyncBubble: 'You score your players, your friend scores theirs. Scores sync automatically.',
+  undoEdit: 'Undo & Edit',
+  waitingProceed: 'Waiting 🅰️ to proceed...',
+  voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
+  voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
+  ttsLang: 'en-US'
 };
 
 export default en;

@@ -914,8 +914,8 @@ const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, scores, 
               <div key={player} className="flex items-center justify-between py-1.5 border-b border-yellow-100 last:border-b-0">
                 <span className="font-semibold text-gray-900">{player}</span>
                 <div className="flex items-center gap-3 text-sm">
-                  <span className="text-gray-600">{lang === 'zh' ? '成绩' : 'Score'}: <span className="font-bold text-gray-900">{playerScore}</span></span>
-                  <span className="text-red-600 font-bold">{lang === 'zh' ? '推' : 'Putts'}: 0</span>
+                  <span className="text-gray-600">{t('puttsScore')}: <span className="font-bold text-gray-900">{playerScore}</span></span>
+                  <span className="text-red-600 font-bold">{t('puttsPutts')}: 0</span>
                 </div>
               </div>
             );
@@ -1786,6 +1786,7 @@ const PlayerInput = memo(({ index, value, placeholder, onChange }) => {
 });
 
 const HandicapRow = memo(({ playerName, handicapValue, onChange, maxHoles = 18, lang = 'en' }) => {
+  const _t = useTranslation(lang);
   return (
     <div className="bg-gray-50 rounded-md p-3 mb-3">
       <div className="flex items-center justify-between gap-3">
@@ -1794,7 +1795,7 @@ const HandicapRow = memo(({ playerName, handicapValue, onChange, maxHoles = 18, 
         </div>
         <div className="flex items-center gap-2">
           <span className="text-xs text-gray-500">
-            {lang === 'zh' ? '差点' : 'HCP'}
+            {_t('hcpLabel')}
           </span>
           <input
   type="text"
@@ -1821,6 +1822,7 @@ const HandicapRow = memo(({ playerName, handicapValue, onChange, maxHoles = 18, 
 
 // 展开式说明组件
 const ExpandableInfo = memo(({ children, isOpen, onToggle, lang }) => {
+  const _t = useTranslation(lang);
   return (
     <div className="mt-2">
       <button
@@ -1828,7 +1830,7 @@ const ExpandableInfo = memo(({ children, isOpen, onToggle, lang }) => {
         className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-800 transition"
       >
         <HelpCircle className="w-3.5 h-3.5" />
-        <span>{isOpen ? (lang === 'zh' ? '收起说明' : 'Hide') : (lang === 'zh' ? '了解更多' : 'Learn more')}</span>
+        <span>{isOpen ? _t('hideInfo') : _t('learnMore')}</span>
         {isOpen ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
       </button>
       {isOpen && (
@@ -2638,18 +2640,16 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     
     // 构建播报文字
     let text;
-    if (lang === 'zh') {
-      text = handicap > 0 
-        ? `${player}，${on}上${putt}推，让杆${handicap}。`
-        : `${player}，${on}上${putt}推。`;
-    } else {
-      text = handicap > 0
-        ? `${player}, ${on} on, ${putt} ${puttWord}, ${handicap} handicap.`
-        : `${player}, ${on} on, ${putt} ${puttWord}.`;
-    }
+    const voiceTemplate = handicap > 0 ? t('voiceWithHcp') : t('voiceNoHcp');
+    text = voiceTemplate
+      .replace('{player}', player)
+      .replace('{on}', on)
+      .replace('{putt}', putt)
+      .replace('{puttWord}', puttWord)
+      .replace('{handicap}', handicap);
     
     const msg = new SpeechSynthesisUtterance(text);
-    msg.lang = lang === 'zh' ? 'zh-CN' : 'en-US';
+    msg.lang = t('ttsLang');
     
     // 尝试使用女声
     const voices = speechSynthesis.getVoices();
@@ -2963,7 +2963,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       };
       tryAttach();
     } catch(e) {
-      showToast(lang === 'zh' ? '无法访问相机' : 'Camera access denied', 'error');
+      showToast(t('cameraAccessDenied'), 'error');
       setShowQrScanner(false);
     }
   }, [mp, stopQrScanner, showToast, lang]);
@@ -4144,7 +4144,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     const url = generateShareUrl(data);
     
     if (!url) {
-      showToast(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
+      showToast(t('generateLinkFailed'), 'error');
       return;
     }
     
@@ -4159,7 +4159,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
       // 桌面端直接复制链接
       navigator.clipboard.writeText(url).then(() => {
         showToast(t('mpLinkCopied'));
-      }).catch(() => showToast(lang === 'zh' ? '复制失败' : 'Copy failed', 'error'));
+      }).catch(() => showToast(t('copyFailed'), 'error'));
     }
   }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast, advancePlayers]);
 
@@ -4382,7 +4382,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       onClick={stopQrScanner}
                       className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg font-semibold"
                     >
-                      {lang === 'zh' ? '关闭' : 'Close'}
+                      {t('close')}
                     </button>
                   </div>
                 )}
@@ -4570,7 +4570,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                               {holes.slice(0, 9).map((hole, idx) => (
                                 <div key={hole}>
                                   <div className="text-xs text-gray-600 mb-0.5 font-medium text-center">
-                                    {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
+                                    {t('holeLabel').replace('{n}', hole)}
                                   </div>
                                   <div className={`rounded font-bold text-sm py-1.5 shadow-sm text-center ${
                                     pars[hole] === 3 ? 'bg-yellow-300 text-black' :
@@ -4593,7 +4593,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                                 {holes.slice(9, 18).map((hole, idx) => (
                                   <div key={hole}>
                                     <div className="text-xs text-gray-600 mb-0.5 font-medium text-center">
-                                      {lang === 'zh' ? `${hole}洞` : `Hole ${hole}`}
+                                      {t('holeLabel').replace('{n}', hole)}
                                     </div>
                                     <div className={`rounded font-bold text-sm py-1.5 shadow-sm text-center ${
                                       pars[hole] === 3 ? 'bg-yellow-300 text-black' :
@@ -4626,7 +4626,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             {pair[0] && (
                               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <span className="text-sm font-medium text-gray-700 min-w-[40px]">
-                                  {lang === 'zh' ? `${pair[0]}洞` : `H${pair[0]}`}
+                                  {t('holeLabelShort').replace('{n}', pair[0])}
                                 </span>
                                 <div className="flex gap-1">
                                   {[3, 4, 5].map(par => (
@@ -4649,7 +4649,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             {pair[1] ? (
                               <div className="flex items-center justify-between p-2 bg-gray-50 rounded-lg">
                                 <span className="text-sm font-medium text-gray-700 min-w-[40px]">
-                                  {lang === 'zh' ? `${pair[1]}洞` : `H${pair[1]}`}
+                                  {t('holeLabelShort').replace('{n}', pair[1])}
                                 </span>
                                 <div className="flex gap-1">
                                   {[3, 4, 5].map(par => (
@@ -4734,7 +4734,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
                       <Clock className="w-4 h-4 text-green-600" />
-                      {lang === 'zh' ? '最近球场' : 'Recent Courses'}
+                      {t('recentCourses')}
                     </h3>
                     <button
                       onClick={() => {
@@ -4743,7 +4743,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       }}
                       className="text-xs text-gray-400 hover:text-red-500 transition"
                     >
-                      {lang === 'zh' ? '清除' : 'Clear'}
+                      {t('clearRecent')}
                     </button>
                   </div>
                   <div className="space-y-2">
@@ -4866,7 +4866,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         </div>
                         {gameMode === 'matchPlay' && showModeDesc && (
                           <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
-                            {lang === 'zh' ? '每洞净杆最低者赢。平手就没有输赢。' : 'Lowest net score wins each hole. Tied? No one pays.'}
+                            {t('matchPlayBubble')}
                           </div>
                         )}
                       </button>
@@ -4884,7 +4884,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         </div>
                         {gameMode === 'win123' && showModeDesc && (
                           <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
-                            {lang === 'zh' ? '按净杆排名。排名越低罚越重。UP可以赢更多，也可能输更多。' : 'Ranked by net score. Lower rank = bigger penalty. UP to raise stakes.'}
+                            {t('win123Bubble')}
                           </div>
                         )}
                       </button>
@@ -4902,7 +4902,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         </div>
                         {gameMode === 'skins' && showModeDesc && (
                           <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
-                            {lang === 'zh' ? '每洞每人投注。只有单独最低杆才赢走全部。平手就累积到下一洞。' : 'Lowest score alone takes the pot. Tied? Rolls to next hole.'}
+                            {t('skinsBubble')}
                           </div>
                         )}
                       </button>
@@ -4920,7 +4920,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         </div>
                         {gameMode === 'baccarat' && showModeDesc && (
                           <div className="text-xs font-normal opacity-90 mt-1 leading-snug" style={{ fontSize: '10px' }}>
-                            {lang === 'zh' ? '4人两两对战，共6组对决。叫UP可以加注。' : '4 players, 6 matchups. Call UP to raise your bet.'}
+                            {t('baccaratBubble')}
                           </div>
                         )}
                       </button>
@@ -4952,7 +4952,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </button>
                       {showAdvanceTooltip && (
                         <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div>{lang === 'zh' ? '开启后除了杆数，还会记录💧下水和🚫出界次数。打完后生成详细成绩单。' : 'Also tracks 💧 water and 🚫 out of bounds. Get a detailed report after the round.'}</div>
+                          <div>{t('advanceBubble')}</div>
                           <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
                         </div>
                       )}
@@ -4994,7 +4994,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                       </button>
                       {showMpTooltip && (
                         <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div>{lang === 'zh' ? '你记你的球员，朋友记他的，分数自动同步。不用再传来传去。' : 'You score your players, your friend scores theirs. Scores sync automatically.'}</div>
+                          <div>{t('mpSyncBubble')}</div>
                           <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
                         </div>
                       )}
@@ -5047,16 +5047,14 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             <span className="font-medium text-gray-900">{player}</span>
                             {advancePlayers[player] && (
                               <span className="ml-auto text-xs text-green-600 font-medium">
-                                {lang === 'zh' ? '📊 高级' : '📊 Advanced'}
+                                {t('advancedTag')}
                               </span>
                             )}
                           </label>
                         ))}
                       </div>
                       <p className="text-xs text-gray-500 mt-2">
-                        {lang === 'zh' 
-                          ? '勾选的玩家将记录推杆、水障碍、OB等详细数据' 
-                          : 'Selected players will track putts, water, OB details'}
+                        {t('advancedSelectDesc')}
                       </p>
                     </div>
                   )}
@@ -5158,7 +5156,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </div>
                   {mp.remoteGame.holesList && (
                     <div className="flex items-center justify-between py-2">
-                      <span className="text-sm text-gray-500">{lang === 'zh' ? '洞数' : 'Holes'}</span>
+                      <span className="text-sm text-gray-500">{t('mpHolesLabel')}</span>
                       <span className="font-medium text-sm">
                         {mp.remoteGame.holesList.length === 18 ? '18 Holes' :
                          mp.remoteGame.holesList[0] === 1 && mp.remoteGame.holesList.length === 9 ? 'Front 9' :
@@ -5477,7 +5475,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                             onClick={handleShareRoundReport}
                             className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
                           >
-                            📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                            📊 {t('shareRoundReport')}
                           </button>
                         )}
                       </div>
@@ -5706,7 +5704,7 @@ return (
                                 onClick={handleShareRoundReport}
                                 className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
                               >
-                                📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                                📊 {t('shareRoundReport')}
                               </button>
                             )}
                           </div>
@@ -5931,7 +5929,7 @@ return (
                   onClick={handleShareRoundReport}
                   className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 shadow-sm"
                 >
-                  📊 {lang === 'zh' ? '分享 Round Report' : 'Share Round Report'}
+                  📊 {t('shareRoundReport')}
                 </button>
               )}
 
@@ -5963,7 +5961,7 @@ return (
                       {t('backToHome')}
                     </button>
                     <p className="text-xs text-gray-500 text-center mt-2">
-                      {lang === 'zh' ? '所有比赛数据将被清除' : 'All game data will be cleared'}
+                      {t('allDataCleared')}
                     </p>
                   </div>
                 )}
@@ -6072,9 +6070,7 @@ return (
             {!gameComplete && completedHoles.length < holes.length && (
               <button
                 onClick={() => {
-                  const message = lang === 'zh' 
-                    ? '确定要终止比赛吗？\n未完成的洞将不计入成绩' 
-                    : 'End the game now?\nIncomplete holes will not be counted';
+                  const message = t('endGameConfirm');
                   showConfirm(message, () => {
                     setGameComplete(true);
 					showToast(t('gameOver'));
@@ -6084,7 +6080,7 @@ return (
                 }}
                 className="absolute top-4 right-4 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition"
               >
-                {lang === 'zh' ? '终止' : 'End'}
+                {t('endGame')}
               </button>
             )}
           </div>
@@ -6375,11 +6371,11 @@ return (
                   onClick={async () => {
                     const holeNum = holes[currentHole];
                     await mp.unconfirmMyScores(holeNum);
-                    showToast(lang === 'zh' ? '已撤回，可修改分数' : 'Retracted. You can edit scores now.', 'success');
+                    showToast(t('retracted'), 'success');
                   }}
                   className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
-                  ✏️ {lang === 'zh' ? '撤回修改' : 'Undo & Edit'} ({(() => { const s = mp.getConfirmedSummary(); return `${s.confirmed}/${s.total}`; })()})
+                  ✏️ {t('undoEdit')} ({(() => { const s = mp.getConfirmedSummary(); return `${s.confirmed}/${s.total}`; })()})
                 </button>
               ) : mp.multiplayerOn && mp.isAllConfirmed() && mp.multiplayerRole === 'creator' ? (
                 <button
@@ -6395,7 +6391,7 @@ return (
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
-                  ⏳ {lang === 'zh' ? '等待 🅰️ 进入下一洞...' : 'Waiting 🅰️ to proceed...'}
+                  ⏳ {t('waitingProceed')}
                 </button>
               ) : (
                 <button
