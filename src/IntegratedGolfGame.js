@@ -2958,20 +2958,51 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
   }, [mp.remoteGame?.lastUpdate, mp.remoteGame?.totalMoney, mp.multiplayerOn, mp.multiplayerRole]);
 
-  // 多人模式：检测远程 editLog，合并并弹出通知
+  // 多人模式：检测远程编辑 → 同步数据 + editLog 通知（Creator 和 Joiner 都需要）
   const lastEditLogIdRef = useRef(null);
+  const lastRemoteEditKeyRef = useRef(null);
   useEffect(() => {
-    if (!mp.multiplayerOn || !mp.remoteGame?.editLog) return;
-    const remoteLog = mp.remoteGame.editLog;
-    if (remoteLog.editedBy === mp.deviceId) return;
-    if (remoteLog.id === lastEditLogIdRef.current) return;
-    lastEditLogIdRef.current = remoteLog.id;
-    setEditLog(prev => {
-      if (prev.some(l => l.id === remoteLog.id)) return prev;
-      return [remoteLog, ...prev];
-    });
-    setEditToastData(remoteLog);
-  }, [mp.remoteGame?.editLog?.id, mp.multiplayerOn]);
+    if (!mp.multiplayerOn || !mp.remoteGame) return;
+
+    // === 方法1: 通过 editLog 字段检测（如果服务器返回了 editLog）===
+    if (mp.remoteGame.editLog) {
+      const remoteLog = mp.remoteGame.editLog;
+      if (remoteLog.editedBy !== mp.deviceId && remoteLog.id !== lastEditLogIdRef.current) {
+        lastEditLogIdRef.current = remoteLog.id;
+        // 合并 editLog + 弹通知
+        setEditLog(prev => {
+          if (prev.some(l => l.id === remoteLog.id)) return prev;
+          return [remoteLog, ...prev];
+        });
+        setEditToastData(remoteLog);
+        // ★ 同步远程编辑后的完整数据（分数+金额）
+        if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+        if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+        if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+        if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+        if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+        if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+        if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
+        return;
+      }
+    }
+
+    // === 方法2: 通过 editedHole + lastUpdate 检测 (fallback) ===
+    const editedHole = mp.remoteGame.editedHole;
+    if (editedHole) {
+      const editKey = `${editedHole}_${mp.remoteGame.lastUpdate || ''}_${JSON.stringify(mp.remoteGame.totalMoney || {})}`;
+      if (editKey !== lastRemoteEditKeyRef.current) {
+        lastRemoteEditKeyRef.current = editKey;
+        if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+        if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+        if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+        if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+        if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+        if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+        if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
+      }
+    }
+  }, [mp.remoteGame?.editLog?.id, mp.remoteGame?.editedHole, mp.remoteGame?.lastUpdate, mp.multiplayerOn]);
 
   // 多人模式：合并对方球员的成绩到本地 state
   useEffect(() => {
