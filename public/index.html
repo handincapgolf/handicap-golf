@@ -25,14 +25,359 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- ✅ Babel 必须在 type="text/babel" 的 script 之前加载 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- PWA Install Banner Styles -->
+    <style>
+      /* ===== PWA 安装横幅样式 ===== */
+      .pwa-install-banner {
+        display: none;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(135deg, #16a34a, #15803d);
+        color: white;
+        padding: 14px 16px;
+        z-index: 99999;
+        box-shadow: 0 -4px 20px rgba(0,0,0,0.3);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        animation: slideUp 0.4s ease-out;
+      }
+      .pwa-install-banner.show { display: flex; }
+      
+      @keyframes slideUp {
+        from { transform: translateY(100%); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+      }
+      
+      .pwa-banner-content {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        gap: 12px;
+      }
+      
+      .pwa-banner-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 10px;
+        flex-shrink: 0;
+      }
+      
+      .pwa-banner-text {
+        flex: 1;
+        min-width: 0;
+      }
+      .pwa-banner-text strong {
+        display: block;
+        font-size: 15px;
+        margin-bottom: 2px;
+      }
+      .pwa-banner-text span {
+        font-size: 12px;
+        opacity: 0.9;
+      }
+      
+      .pwa-banner-btn {
+        background: white;
+        color: #16a34a;
+        border: none;
+        padding: 8px 18px;
+        border-radius: 20px;
+        font-size: 14px;
+        font-weight: 700;
+        cursor: pointer;
+        white-space: nowrap;
+        flex-shrink: 0;
+      }
+      .pwa-banner-btn:active {
+        transform: scale(0.95);
+      }
+      
+      .pwa-banner-close {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 22px;
+        cursor: pointer;
+        padding: 4px 8px;
+        opacity: 0.7;
+        flex-shrink: 0;
+        line-height: 1;
+      }
+      .pwa-banner-close:hover { opacity: 1; }
+
+      /* ===== iOS 安装引导弹窗 ===== */
+      .ios-install-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.6);
+        z-index: 100000;
+        justify-content: center;
+        align-items: flex-end;
+        padding: 20px;
+      }
+      .ios-install-overlay.show { display: flex; }
+      
+      .ios-install-modal {
+        background: white;
+        border-radius: 16px;
+        padding: 24px;
+        max-width: 340px;
+        width: 100%;
+        margin-bottom: 20px;
+        text-align: center;
+        animation: slideUp 0.3s ease-out;
+        position: relative;
+      }
+      
+      .ios-install-modal img {
+        width: 60px;
+        height: 60px;
+        border-radius: 14px;
+        margin: 0 auto 12px;
+      }
+      
+      .ios-install-modal h3 {
+        font-size: 18px;
+        font-weight: 700;
+        color: #1a1a1a;
+        margin: 0 0 6px;
+      }
+      
+      .ios-install-modal p {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 20px;
+        line-height: 1.5;
+      }
+      
+      .ios-step {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 0;
+        border-top: 1px solid #eee;
+        text-align: left;
+      }
+      .ios-step-num {
+        background: #16a34a;
+        color: white;
+        width: 26px;
+        height: 26px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 13px;
+        font-weight: 700;
+        flex-shrink: 0;
+      }
+      .ios-step-text {
+        font-size: 14px;
+        color: #333;
+      }
+      .ios-share-icon {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        vertical-align: middle;
+        margin: 0 2px;
+      }
+      
+      .ios-install-close {
+        position: absolute;
+        top: 10px;
+        right: 14px;
+        background: none;
+        border: none;
+        font-size: 24px;
+        color: #999;
+        cursor: pointer;
+        line-height: 1;
+      }
+      
+      /* iOS bottom arrow */
+      .ios-arrow-down {
+        width: 0;
+        height: 0;
+        border-left: 14px solid transparent;
+        border-right: 14px solid transparent;
+        border-top: 14px solid white;
+        margin: 0 auto;
+      }
+    </style>
 </head>
 <body>
     <div id="root"></div>
-    <script type="text/babel" data-presets="react,stage-3">
-        // 这里放入您的完整 React 代码
-        // 由于代码太长，我建议用另一种方法
+
+    <!-- ✅ Babel 已在 head 加载，这里可以正常使用 type="text/babel" -->
+    <script type="text/babel" data-presets="react,stage-3" src="/IntegratedGolfGame.js"></script>
+
+    <!-- ===== Android PWA 安装横幅 ===== -->
+    <div id="pwa-install-banner" class="pwa-install-banner">
+      <div class="pwa-banner-content">
+        <img src="/logo192.png" alt="HandinCap" class="pwa-banner-icon">
+        <div class="pwa-banner-text">
+          <strong>HandinCap</strong>
+          <span id="pwa-banner-desc">Add to Home Screen for better experience</span>
+        </div>
+        <button id="pwa-install-btn" class="pwa-banner-btn">Install</button>
+        <button id="pwa-close-btn" class="pwa-banner-close">&times;</button>
+      </div>
+    </div>
+
+    <!-- ===== iOS 安装引导弹窗 ===== -->
+    <div id="ios-install-overlay" class="ios-install-overlay">
+      <div>
+        <div class="ios-install-modal">
+          <button id="ios-close-btn" class="ios-install-close">&times;</button>
+          <img src="/logo192.png" alt="HandinCap">
+          <h3>HandinCap</h3>
+          <p id="ios-install-desc">Install this app on your iPhone for quick access</p>
+          <div class="ios-step">
+            <div class="ios-step-num">1</div>
+            <div class="ios-step-text" id="ios-step1">
+              Tap the Share button 
+              <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/>
+                <polyline points="16 6 12 2 8 6"/>
+                <line x1="12" y1="2" x2="12" y2="15"/>
+              </svg>
+              at the bottom of Safari
+            </div>
+          </div>
+          <div class="ios-step">
+            <div class="ios-step-num">2</div>
+            <div class="ios-step-text" id="ios-step2">Scroll down and tap <strong>"Add to Home Screen"</strong></div>
+          </div>
+          <div class="ios-step">
+            <div class="ios-step-num">3</div>
+            <div class="ios-step-text" id="ios-step3">Tap <strong>"Add"</strong> to confirm</div>
+          </div>
+        </div>
+        <div class="ios-arrow-down"></div>
+      </div>
+    </div>
+
+    <!-- ===== PWA Install Logic ===== -->
+    <script>
+    (function() {
+      const lang = localStorage.getItem('handincap_lang') || 'en';
+      const isZh = lang === 'zh';
+      
+      // ===== Localize banner text =====
+      const bannerDesc = document.getElementById('pwa-banner-desc');
+      const installBtn = document.getElementById('pwa-install-btn');
+      const iosDesc = document.getElementById('ios-install-desc');
+      const iosStep1 = document.getElementById('ios-step1');
+      const iosStep2 = document.getElementById('ios-step2');
+      const iosStep3 = document.getElementById('ios-step3');
+      
+      if (isZh) {
+        bannerDesc.textContent = '添加到主屏幕，获得更好体验';
+        installBtn.textContent = '安装';
+        iosDesc.textContent = '将此应用安装到您的手机，快速访问';
+        iosStep1.innerHTML = '点击 Safari 底部的 分享按钮 <svg class="ios-share-icon" viewBox="0 0 24 24" fill="none" stroke="#007AFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>';
+        iosStep2.innerHTML = '向下滚动，点击 <strong>"添加到主屏幕"</strong>';
+        iosStep3.innerHTML = '点击 <strong>"添加"</strong> 确认';
+      }
+      
+      // ===== Check if already installed as PWA =====
+      const isStandalone = window.matchMedia('(display-mode: standalone)').matches 
+                        || window.navigator.standalone === true;
+      
+      // Don't show banner if already installed or dismissed recently
+      const dismissedTime = localStorage.getItem('pwa_banner_dismissed');
+      const dismissCooldown = 3 * 24 * 60 * 60 * 1000; // 3 days
+      const recentlyDismissed = dismissedTime && (Date.now() - parseInt(dismissedTime)) < dismissCooldown;
+      
+      if (isStandalone || recentlyDismissed) return;
+      
+      // ===== Detect platform =====
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+      const isSafari = /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|Chrome/.test(navigator.userAgent);
+      const isIOSSafari = isIOS && isSafari;
+      
+      // ===== ANDROID: beforeinstallprompt =====
+      let deferredPrompt = null;
+      
+      window.addEventListener('beforeinstallprompt', function(e) {
+        e.preventDefault();
+        deferredPrompt = e;
+        
+        // Show Android install banner
+        const banner = document.getElementById('pwa-install-banner');
+        banner.classList.add('show');
+        console.log('[PWA] Install prompt captured');
+      });
+      
+      // Install button click
+      document.getElementById('pwa-install-btn').addEventListener('click', function() {
+        if (deferredPrompt) {
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then(function(result) {
+            console.log('[PWA] User choice:', result.outcome);
+            deferredPrompt = null;
+            document.getElementById('pwa-install-banner').classList.remove('show');
+          });
+        }
+      });
+      
+      // Close Android banner
+      document.getElementById('pwa-close-btn').addEventListener('click', function() {
+        document.getElementById('pwa-install-banner').classList.remove('show');
+        localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      });
+      
+      // Listen for successful install
+      window.addEventListener('appinstalled', function() {
+        console.log('[PWA] App installed!');
+        document.getElementById('pwa-install-banner').classList.remove('show');
+        deferredPrompt = null;
+      });
+      
+      // ===== iOS: Custom install guide =====
+      if (isIOSSafari) {
+        // Show iOS banner after 3 seconds
+        setTimeout(function() {
+          document.getElementById('pwa-install-banner').classList.add('show');
+          // Reuse the same banner but change button text
+          installBtn.textContent = isZh ? '查看步骤' : 'How to Install';
+          installBtn.style.fontSize = '12px';
+          installBtn.style.padding = '8px 14px';
+          
+          // Override install button to show iOS modal
+          installBtn.onclick = function() {
+            document.getElementById('pwa-install-banner').classList.remove('show');
+            document.getElementById('ios-install-overlay').classList.add('show');
+          };
+        }, 3000);
+      }
+      
+      // Close iOS overlay
+      document.getElementById('ios-close-btn').addEventListener('click', function() {
+        document.getElementById('ios-install-overlay').classList.remove('show');
+        localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+      });
+      
+      // Close iOS overlay by clicking background
+      document.getElementById('ios-install-overlay').addEventListener('click', function(e) {
+        if (e.target === this) {
+          this.classList.remove('show');
+          localStorage.setItem('pwa_banner_dismissed', Date.now().toString());
+        }
+      });
+      
+    })();
     </script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     
     <!-- Register Service Worker with Update Detection -->
     <script>
@@ -54,12 +399,12 @@
                     
                     // 显示更新提示
                     const lang = localStorage.getItem('handincap_lang') || 'en';
-const msg = lang === 'zh' 
-  ? '🎉 发现新版本！点击确定刷新页面加载最新版本'
-  : '🎉 New version available! Click OK to refresh and load the latest version';
-if (confirm(msg)) {
-  window.location.reload();
-}
+                    const msg = lang === 'zh' 
+                      ? '🎉 发现新版本！点击确定刷新页面加载最新版本'
+                      : '🎉 New version available! Click OK to refresh and load the latest version';
+                    if (confirm(msg)) {
+                      window.location.reload();
+                    }
                   }
                 });
               });
