@@ -2929,7 +2929,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         const joinerNextIdx = currentHole + 1;
         const joinerHasNext = joinerNextIdx < holes.length;
         playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false,
-          joinerHasNext ? () => { setTimeout(() => playHoleIntroRef.current?.(holes[joinerNextIdx]), 10000); } : null
+          joinerHasNext ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[joinerNextIdx]); }, 10000); } : null
         );
       }
       
@@ -3636,7 +3636,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     setCurrentSection('game');
     // 开局播报第一洞信息（延迟1秒等UI渲染）
-    setTimeout(() => playHoleIntroRef.current?.(holes[0]), 1000);
+    setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[0]); }, 1000);
   }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, advanceMode, advancePlayers, lang, holes]);
 
   // 基于 Index 的让杆计算
@@ -4106,7 +4106,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const nextHoleIdx = currentHole + 1;
     const hasNextHole = nextHoleIdx < holes.length;
     playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied, 
-      hasNextHole ? () => { setTimeout(() => playHoleIntroRef.current?.(holes[nextHoleIdx]), 10000); } : null
+      hasNextHole ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextHoleIdx]); }, 10000); } : null
     );
     setCompletedHoles([...completedHoles, holeNum]);
     
