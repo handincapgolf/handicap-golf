@@ -26,25 +26,9 @@
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- ✅ Babel 必须在 type="text/babel" 的 script 之前加载 -->
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script>
-      // ✅ 修复 decorators plugin 报错
-      Babel.registerPreset('custom', {
-        presets: [
-          [Babel.availablePresets['react']],
-          [Babel.availablePresets['stage-3'], { decoratorsBeforeExport: true }]
-        ]
-      });
-    </script>
 </head>
 <body>
     <div id="root"></div>
-
-    <!-- ✅ 使用 custom preset 解决 decorators 报错 -->
-    <!-- ✅ PWA 安装提示已内置在 IntegratedGolfGame.js 的 PWAInstallPrompt 组件中 -->
-    <script type="text/babel" data-presets="custom" src="/IntegratedGolfGame.js"></script>
     
     <!-- Register Service Worker with Update Detection -->
     <script>
