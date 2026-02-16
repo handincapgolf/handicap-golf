@@ -5142,13 +5142,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                           className="flex-1 px-3 py-2 rounded-md border border-gray-300 bg-white text-gray-900 focus:ring-2 focus:ring-green-500 focus:border-transparent text-sm"
                         />
                         <div className="flex items-center gap-1 relative">
-                          <span className="text-xs text-gray-500">{i === 0 ? (
-                            <span className="inline-flex items-center gap-0.5">HCP<button
-                                type="button"
-                                onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); setShowAdvanceTooltip(false); setShowMpTooltip(false); }}
-                                className="inline-flex items-center justify-center rounded-full bg-gray-300 text-gray-600 font-bold hover:bg-gray-400 transition" style={{ width: '14px', height: '14px', fontSize: '9px', lineHeight: '1', marginTop: '-2px' }}
-                              >?</button></span>
-                          ) : 'HCP'}</span>
+                          {i === 0 ? (
+                            <span className="text-xs text-gray-500 border-b border-dashed border-gray-400 cursor-pointer"
+                              onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); setShowAdvanceTooltip(false); setShowMpTooltip(false); }}
+                            >HCP</span>
+                          ) : (
+                            <span className="text-xs text-gray-500">HCP</span>
+                          )}
                           {i === 0 && showHcpTooltip && (
                             <div className="absolute right-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
                               <div>{t('hcpBubble')}</div>
