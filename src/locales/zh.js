@@ -202,6 +202,9 @@ export const zh = {
   waitingProceed: '等待 🅰️ 进入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，让杆{handicap}。',
   voiceNoHcp: '{player}，{on}上{putt}推。',
+  voiceHoleIntro: '第{hole}洞，标准杆{par}，难度指数{index}。',
+  voiceHoleIntroNoIdx: '第{hole}洞，标准杆{par}。',
+  voiceHcpOnHole: '{player}让{strokes}杆',
   ttsLang: 'zh-CN',
   // Edit Log 修改记录
   editLogTitle: '修改记录',

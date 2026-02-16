@@ -2750,9 +2750,9 @@ const UP_LOSE_GAP = 2000;       // 音效结束后间隔 2 秒
 // enableSpecialAudio: 只有 Win123 + 有下注 + 4人或以上 时为 true
 // rankings: Win123 的排名结果，包含 netScore 和 UP 状态
 // isTied: 是否全部平局
-const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null, isTied = false) => {
-  if (!voiceEnabled) return;
-  if (!('speechSynthesis' in window)) return;
+const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null, isTied = false, onComplete = null) => {
+  if (!voiceEnabled) { if (onComplete) onComplete(); return; }
+  if (!('speechSynthesis' in window)) { if (onComplete) onComplete(); return; }
   
   // 取消之前的播报
   speechSynthesis.cancel();
@@ -2782,7 +2782,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   let currentIndex = 0;
   
   const playNext = () => {
-    if (currentIndex >= players.length) return;
+    if (currentIndex >= players.length) { if (onComplete) onComplete(); return; }
     
     const player = players[currentIndex];
     const on = holeScores[player] || 0;
@@ -2925,7 +2925,11 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           return scoreB - scoreA;
         });
         const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-        playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false);
+        const joinerNextIdx = currentHole + 1;
+        const joinerHasNext = joinerNextIdx < holes.length;
+        playHoleResults(sortedPlayers, holeScores, holePutts, enableSpecialAudio, null, false,
+          joinerHasNext ? () => { setTimeout(() => playHoleIntro(holes[joinerNextIdx]), 10000); } : null
+        );
       }
       
       if (currentHole < holes.length - 1) {
@@ -2940,7 +2944,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         mp.resetAllConfirmed();
       }
     }
-  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
+  }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults, playHoleIntro]);
 
   // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -3630,7 +3634,9 @@ const getScoreLabel = useCallback((stroke, par) => {
     }
     
     setCurrentSection('game');
-  }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, advanceMode, advancePlayers, lang]);
+    // 开局播报第一洞信息（延迟1秒等UI渲染）
+    setTimeout(() => playHoleIntro(holes[0]), 1000);
+  }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, advanceMode, advancePlayers, lang, playHoleIntro, holes]);
 
   // 基于 Index 的让杆计算
   // holeNum: 实际洞号 (1-18)
@@ -3664,6 +3670,70 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     return strokes;
   }, [playerHandicaps, selectedCourse, holes.length]);
+
+  // ========== 新洞播报：洞号、标准杆、Index、让杆玩家 ==========
+  const playHoleIntro = useCallback((holeNum) => {
+    if (!voiceEnabled) return;
+    if (!('speechSynthesis' in window)) return;
+    
+    const par = pars[holeNum] || 4;
+    let holeIndex = null;
+    if (selectedCourse && selectedCourse.index && Array.isArray(selectedCourse.index)) {
+      holeIndex = selectedCourse.index[holeNum - 1];
+    }
+    
+    // 构建洞信息播报文字
+    let introText;
+    if (holeIndex) {
+      introText = t('voiceHoleIntro')
+        .replace('{hole}', holeNum)
+        .replace('{par}', par)
+        .replace('{index}', holeIndex);
+    } else {
+      introText = t('voiceHoleIntroNoIdx')
+        .replace('{hole}', holeNum)
+        .replace('{par}', par);
+    }
+    
+    const introMsg = new SpeechSynthesisUtterance(introText);
+    introMsg.lang = t('ttsLang');
+    
+    // 尝试使用女声
+    const voices = speechSynthesis.getVoices();
+    const female = voices.find(v => 
+      v.name.includes('Samantha') ||
+      v.name.includes('Zira') ||
+      v.name.includes('Female') ||
+      v.name.includes('Google') && v.lang === 'en-US' ||
+      v.name.includes('Xiaoxiao') ||
+      v.name.includes('Huihui') ||
+      v.name.includes('女') ||
+      v.name.toLowerCase().includes('female')
+    );
+    if (female) introMsg.voice = female;
+    
+    // 播报完洞信息后，播报让杆玩家
+    introMsg.onend = () => {
+      const playersWithHcp = activePlayers.filter(p => getHandicapForHole(p, holeNum, par) > 0);
+      if (playersWithHcp.length === 0) return;
+      
+      setTimeout(() => {
+        const hcpParts = playersWithHcp.map(p => {
+          const strokes = getHandicapForHole(p, holeNum, par);
+          return t('voiceHcpOnHole').replace('{player}', p).replace('{strokes}', strokes);
+        });
+        const hcpText = hcpParts.join('. ');
+        
+        const hcpMsg = new SpeechSynthesisUtterance(hcpText);
+        hcpMsg.lang = t('ttsLang');
+        if (female) hcpMsg.voice = female;
+        speechSynthesis.speak(hcpMsg);
+      }, 500);
+    };
+    
+    introMsg.onerror = () => {};
+    speechSynthesis.speak(introMsg);
+  }, [voiceEnabled, pars, selectedCourse, activePlayers, getHandicapForHole, t]);
 
   const calculateMatchPlay = useCallback((holeScores, holeNum) => {
     const par = pars[holeNum] || 4;
@@ -4030,7 +4100,12 @@ const getScoreLabel = useCallback((stroke, par) => {
     });
     // 只有 Win123 + 有下注 + 4人或以上 时启用特殊音效
     const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied);
+    // 播报完成绩后，如果还有下一洞，等10秒再播报下一洞信息
+    const nextHoleIdx = currentHole + 1;
+    const hasNextHole = nextHoleIdx < holes.length;
+    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied, 
+      hasNextHole ? () => { setTimeout(() => playHoleIntro(holes[nextHoleIdx]), 10000); } : null
+    );
     setCompletedHoles([...completedHoles, holeNum]);
     
     const newCompletedHoles = [...completedHoles, holeNum];
@@ -4061,7 +4136,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     
     setHoleConfirmDialog({ isOpen: false, action: null });
     setPendingRankings(null);
-  }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults, mp]);
+  }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults, playHoleIntro, mp]);
 
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
