@@ -24,7 +24,8 @@ import {
   ChevronDown,
   ChevronUp,
   HelpCircle,
-  Clock
+  Clock,
+  Eye
 } from 'lucide-react';
 
 import { GOLF_COURSES, searchCourses } from './data/courses';
@@ -2908,9 +2909,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
 
-  // Joiner: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
+  // Joiner/Viewer: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
   useEffect(() => {
-    if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner') return;
+    if (!mp.multiplayerOn || (mp.multiplayerRole !== 'joiner' && mp.multiplayerRole !== 'viewer')) return;
     if (!mp.remoteGame?.completedHoles || mp.remoteGame.status !== 'playing') return;
     
     const myHoleNum = holes[currentHole];
@@ -2947,9 +2948,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
 
-  // Joiner：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
+  // Joiner/Viewer：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
-    if (!mp.multiplayerOn || mp.multiplayerRole !== 'joiner' || !mp.remoteGame) return;
+    if (!mp.multiplayerOn || (mp.multiplayerRole !== 'joiner' && mp.multiplayerRole !== 'viewer') || !mp.remoteGame) return;
     // 同步 allScores 等原始数据
     if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
     if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
@@ -3017,7 +3018,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     if (status !== 'playing' && status !== 'finished') return;
     
     // Sync accumulated data from creator (allScores etc, NOT totalMoney - handled by dedicated effect)
-    if (mp.multiplayerRole === 'joiner') {
+    if (mp.multiplayerRole === 'joiner' || mp.multiplayerRole === 'viewer') {
       if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
       if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
       if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
@@ -4668,7 +4669,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                         if (!result.ok) {
                           showToast(result.error || 'Room not found', 'error');
                         } else {
-                          setCurrentSection('mp-claim');
+                          setCurrentSection('mp-role');
                         }
                       }}
                       disabled={mp.joinerCode.length !== 6}
@@ -5455,8 +5456,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 </div>
                 )}
 
-                {/* Joiner: Game Info */}
-                {mp.multiplayerRole === 'joiner' && mp.remoteGame && (
+                {/* Joiner/Viewer: Game Info */}
+                {(mp.multiplayerRole === 'joiner' || mp.multiplayerRole === 'viewer') && mp.remoteGame && (
                 <div className="bg-white rounded-xl p-4 shadow-md">
                   <h3 className="text-sm font-semibold text-gray-700 mb-3">
                     {t('mpGameInfo')}
@@ -5562,9 +5563,14 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                   </button>
                 )}
 
-                {/* Joiner: Waiting message */}
-                {mp.multiplayerRole === 'joiner' && (
+                {/* Joiner/Viewer: Waiting message */}
+                {(mp.multiplayerRole === 'joiner' || mp.multiplayerRole === 'viewer') && (
                   <div className="text-center">
+                    {mp.multiplayerRole === 'viewer' && (
+                      <div className="mb-2 inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium">
+                        <Eye className="w-4 h-4" /> {t('mpViewerRole') || 'Viewer'}
+                      </div>
+                    )}
                     <p className="text-sm text-gray-500">
                       ⏳ {t('mpWaitingCreator')}
                     </p>
@@ -5574,10 +5580,158 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
                 {/* Back button */}
                 <button
                   onClick={() => {
-                    const wasJoiner = mp.multiplayerRole === 'joiner';
+                    const wasJoiner = mp.multiplayerRole === 'joiner' || mp.multiplayerRole === 'viewer';
                     mp.resetMultiplayer();
                     mp.setMultiplayerSection(null);
                     setCurrentSection(wasJoiner ? 'home' : 'players');
+                  }}
+                  className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
+                >
+                  {t('back')}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ========== 多人同步：角色选择页 (Player / Viewer) ========== */}
+          {currentSection === 'mp-role' && mp.remoteGame && (
+            <div className="min-h-screen bg-gradient-to-b from-gray-50 to-gray-100 py-6">
+              <div className="max-w-md mx-auto px-4 space-y-4">
+                <div className="text-center">
+                  <h2 className="text-xl font-bold text-gray-900">
+                    {t('mpRoleTitle') || 'Join Room'}
+                  </h2>
+                  <p className="text-sm text-gray-500 mt-1">
+                    {t('mpRoleDesc') || 'How would you like to join?'}
+                  </p>
+                  <div className="mt-2 inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-mono">
+                    🏠 {mp.gameCode}
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  {/* Player Card */}
+                  <button
+                    onClick={() => setCurrentSection('mp-claim')}
+                    className="bg-white rounded-xl p-5 shadow-md border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition text-left"
+                  >
+                    <div className="text-3xl mb-2">🎯</div>
+                    <div className="text-lg font-bold text-blue-700 mb-1">
+                      {t('mpPlayerRole') || 'Player'}
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3">
+                      {t('mpPlayerRoleDesc') || 'Claim players and input scores'}
+                    </p>
+                    <div className="space-y-1">
+                      <div className="text-xs text-blue-600 flex items-center gap-1">
+                        ✏️ <span>{t('mpPlayerTagInput') || 'Input scores'}</span>
+                      </div>
+                      <div className="text-xs text-blue-600 flex items-center gap-1">
+                        👤 <span>{t('mpPlayerTagClaim') || 'Claim players'}</span>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Viewer Card */}
+                  <button
+                    onClick={async () => {
+                      // Viewer: set role, init game state, go to lobby (or game if already started)
+                      const g = mp.remoteGame;
+                      // Apply remote game settings locally
+                      setGameMode(g.gameMode || 'matchPlay');
+                      setStake(String(g.stake || ''));
+                      setJumboMode(g.jumboMode || false);
+                      setPlayerHandicaps(g.handicaps || {});
+                      setAdvanceMode(g.advanceMode || 'off');
+                      setAdvancePlayers(g.advancePlayers || {});
+                      
+                      const names = [...(g.players || [])];
+                      while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
+                      setPlayerNames(names);
+                      
+                      if (g.course && g.course.fullName) {
+                        setSelectedCourse(g.course);
+                        if (g.course.pars) {
+                          const newPars = {};
+                          g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
+                          setPars(newPars);
+                        }
+                      }
+                      // Set holes list from remote game
+                      if (g.holesList) {
+                        setHoles(g.holesList);
+                      }
+
+                      // Initialize game state
+                      const allP = g.players || [];
+                      const initMoney = {};
+                      const initDetails = {};
+                      const initAllScores = {};
+                      const initSpent = {};
+                      const initAllPutts = {};
+                      const initAllWater = {};
+                      const initAllOb = {};
+                      allP.forEach(player => {
+                        initMoney[player] = 0;
+                        initDetails[player] = { fromPool: 0, fromPlayers: {} };
+                        initAllScores[player] = {};
+                        initSpent[player] = 0;
+                        initAllPutts[player] = {};
+                        initAllWater[player] = {};
+                        initAllOb[player] = {};
+                        allP.forEach(other => {
+                          if (other !== player) initDetails[player].fromPlayers[other] = 0;
+                        });
+                      });
+                      setTotalMoney(initMoney);
+                      setMoneyDetails(initDetails);
+                      setAllScores(initAllScores);
+                      setAllUps({});
+                      setAllPutts(initAllPutts);
+                      setAllWater(initAllWater);
+                      setAllOb(initAllOb);
+                      setTotalSpent(initSpent);
+                      setCurrentHole(0);
+                      setScores({});
+                      setUps({});
+                      setPutts({});
+                      setWater({});
+                      setOb({});
+                      setCompletedHoles([]);
+                      setGameComplete(false);
+                      setCurrentHoleSettlement(null);
+
+                      // Switch to viewer role (re-join without claiming)
+                      await mp.joinAsViewer(mp.gameCode);
+
+                      mp.setMultiplayerSection('lobby');
+                      setCurrentSection('mp-lobby');
+                    }}
+                    className="bg-white rounded-xl p-5 shadow-md border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition text-left"
+                  >
+                    <div className="text-3xl mb-2">👁</div>
+                    <div className="text-lg font-bold text-purple-700 mb-1">
+                      {t('mpViewerRole') || 'Viewer'}
+                    </div>
+                    <p className="text-xs text-gray-500 mb-3">
+                      {t('mpViewerRoleDesc') || 'Watch the game live, read-only'}
+                    </p>
+                    <div className="space-y-1">
+                      <div className="text-xs text-purple-600 flex items-center gap-1">
+                        👁 <span>{t('mpViewerTagLive') || 'Live scores'}</span>
+                      </div>
+                      <div className="text-xs text-gray-400 flex items-center gap-1 line-through">
+                        ✏️ <span>{t('mpViewerTagNoInput') || 'No input'}</span>
+                      </div>
+                    </div>
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => {
+                    mp.resetMultiplayer();
+                    mp.setMultiplayerSection(null);
+                    setCurrentSection('home');
                   }}
                   className="w-full bg-gray-200 text-gray-700 py-2 px-4 rounded-lg font-medium hover:bg-gray-300"
                 >
@@ -6275,7 +6429,7 @@ return (
                     >
                       {t('resume')}
                     </button>
-                    {completedHoles.length > 0 && (
+                    {completedHoles.length > 0 && !mp.isViewer && (
                       <button
                         onClick={() => setHoleSelectDialog(true)}
                         className="w-14 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex items-center justify-center transition"
@@ -6306,6 +6460,17 @@ return (
 
       {currentSection === 'game' && (
         <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
+          {/* Viewer Mode Banner */}
+          {mp.isViewer && (
+            <div className="bg-purple-600 text-white text-center py-2 px-4 text-sm font-semibold flex items-center justify-center gap-2">
+              <Eye className="w-4 h-4" />
+              {t('mpViewerBanner') || 'VIEW ONLY — score input disabled'}
+              <span className="ml-2 inline-flex items-center gap-1">
+                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
+                <span className="text-xs font-normal text-purple-200">LIVE</span>
+              </span>
+            </div>
+          )}
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
             <h1 className="text-2xl font-bold mb-2">
   {t('hole')} {holes[currentHole]}
@@ -6400,7 +6565,7 @@ return (
               {voiceEnabled ? '🔊' : '🔇'}
             </button>
 
-            {!gameComplete && completedHoles.length < holes.length && (
+            {!gameComplete && completedHoles.length < holes.length && !mp.isViewer && (
               <button
                 onClick={() => {
                   const message = t('endGameConfirm');
@@ -6438,7 +6603,7 @@ return (
                 const scoreLabel = getScoreLabel(netScore, par);
                 const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
                 const isMyPlayer = !isOther;
-                const hideBtns = isOther && otherConfirmed;
+                const hideBtns = mp.isViewer || (isOther && otherConfirmed);
                 
                 if (isAdvancePlayer) {
                   return (
@@ -6654,6 +6819,23 @@ return (
 )}
 
           <div className="bg-white p-3">
+            {/* Viewer 提醒卡 */}
+            {mp.isViewer && (
+              <div className="mb-3 border-2 border-dashed border-purple-300 rounded-lg p-3 bg-purple-50">
+                <div className="flex items-start gap-2">
+                  <Eye className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <div className="text-sm font-semibold text-purple-700">
+                      {t('mpViewerReminder') || 'You are viewing this game'}
+                    </div>
+                    <div className="text-xs text-purple-500 mt-0.5">
+                      {t('mpViewerReminderDesc') || 'Scores update in real-time. You cannot input or modify scores.'}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* 多人同步状态栏 */}
             {mp.multiplayerOn && (
               <div className="mb-2 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-xs">
@@ -6672,6 +6854,32 @@ return (
             )}
             
             <div className="flex gap-2">
+              {/* Viewer Mode: Exit + Live status */}
+              {mp.isViewer ? (
+                <>
+                  <button
+                    onClick={() => {
+                      mp.resetMultiplayer();
+                      mp.setMultiplayerSection(null);
+                      setCurrentSection('home');
+                    }}
+                    className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition"
+                  >
+                    {t('exit') || 'Exit'}
+                  </button>
+                  <div className="flex items-center gap-1.5 px-3 bg-green-50 rounded-lg text-xs text-green-700">
+                    <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                    Live syncing
+                  </div>
+                  <button
+                    onClick={() => setCurrentSection('scorecard')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition"
+                  >
+                    <BarChart3 className="w-5 h-5" />
+                  </button>
+                </>
+              ) : (
+              <>
               {/* 多人模式：Confirm 按钮 */}
               {mp.multiplayerOn && !mp.isMyConfirmed() ? (
                 <button
@@ -6740,6 +6948,8 @@ return (
               >
                 <BarChart3 className="w-5 h-5" />
               </button>
+              </>
+              )}
             </div>
           </div>
         </div>

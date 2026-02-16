@@ -213,7 +213,22 @@ export const ko = {
   editNotifyBy: '{who}이(가) 수정',
   editNotifyDetail: '탭하여 상세 보기',
   editLogTapHint: '홀 번호의 ✏️를 탭하여 수정 기록 보기',
-  editLogClose: '닫기'
+  editLogClose: '닫기',
+  // Viewer Mode 관전 모드
+  mpRoleTitle: '방 참가',
+  mpRoleDesc: '참가 방법 선택',
+  mpPlayerRole: '플레이어',
+  mpPlayerRoleDesc: '선수 선택 및 스코어 입력',
+  mpPlayerTagInput: '스코어 입력',
+  mpPlayerTagClaim: '선수 선택',
+  mpViewerRole: '관전',
+  mpViewerRoleDesc: '실시간 관전 (읽기 전용)',
+  mpViewerTagLive: '실시간 스코어',
+  mpViewerTagNoInput: '입력 불가',
+  mpViewerBanner: '관전 전용 — 스코어 입력 비활성화',
+  mpViewerReminder: '이 게임을 관전 중입니다',
+  mpViewerReminderDesc: '스코어가 실시간 업데이트됩니다. 입력이나 수정은 불가합니다.',
+  exit: '나가기'
 };
 
 export default ko;

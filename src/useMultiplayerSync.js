@@ -60,7 +60,7 @@ export function useMultiplayerSync() {
   })());
 
   const [multiplayerOn, setMultiplayerOn] = useState(saved.current?.on || false);
-  const [multiplayerRole, setMultiplayerRole] = useState(saved.current?.role || null); // still "creator" | "joiner"
+  const [multiplayerRole, setMultiplayerRole] = useState(saved.current?.role || null); // "creator" | "joiner" | "viewer"
   const [gameCode, setGameCode] = useState(saved.current?.code || '');
   const [joinerCode, setJoinerCode] = useState('');
   const [remoteGame, setRemoteGame] = useState(null);
@@ -230,6 +230,32 @@ export function useMultiplayerSync() {
     }
   }, [startPolling, syncDevicesFromRemote]);
 
+  // Viewer: Join game as read-only viewer (no claim, no input)
+  const joinAsViewer = useCallback(async (code) => {
+    try {
+      setSyncStatus('syncing');
+      const result = await apiCall(`/game/${code}`);
+      if (result.ok) {
+        setGameCode(code);
+        setMultiplayerRole('viewer');
+        setMultiplayerOn(true);
+        setRemoteGame(result.game);
+        syncDevicesFromRemote(result.game);
+        setSyncStatus('connected');
+        startPolling(code);
+        // Viewer skips claim, goes directly to lobby or game
+        setMultiplayerSection('lobby');
+        return result;
+      } else {
+        setSyncStatus('error');
+        return result;
+      }
+    } catch (err) {
+      setSyncStatus('error');
+      return { ok: false, error: err.message };
+    }
+  }, [startPolling, syncDevicesFromRemote]);
+
   // Joiner: Claim players (sends deviceId so Worker maps player→deviceId)
   const claimPlayers = useCallback(async (playerNames) => {
     if (!gameCode) return { ok: false };
@@ -327,17 +353,19 @@ export function useMultiplayerSync() {
 
   // === PLAYER HELPERS (deviceId-based) ===
 
-  // Get players assigned to MY device
+  // Get players assigned to MY device (viewer has none)
   const getMyPlayers = useCallback((allPlayers) => {
     if (!multiplayerOn) return allPlayers;
+    if (multiplayerRole === 'viewer') return [];
     return allPlayers.filter(p => claimed[p] === deviceId.current);
-  }, [multiplayerOn, claimed]);
+  }, [multiplayerOn, multiplayerRole, claimed]);
 
-  // Get players assigned to OTHER devices (all non-mine)
+  // Get players assigned to OTHER devices (viewer sees all as "other")
   const getOtherPlayers = useCallback((allPlayers) => {
     if (!multiplayerOn) return [];
+    if (multiplayerRole === 'viewer') return allPlayers;
     return allPlayers.filter(p => claimed[p] && claimed[p] !== deviceId.current);
-  }, [multiplayerOn, claimed]);
+  }, [multiplayerOn, multiplayerRole, claimed]);
 
   // Get players assigned to a specific device
   const getPlayersForDevice = useCallback((devId, allPlayers) => {
@@ -438,10 +466,14 @@ export function useMultiplayerSync() {
   // OLD: mp.isOtherConfirmed() → NEW: mp.isOthersConfirmed()
   const isOtherConfirmed = isOthersConfirmed; // backward compat alias
 
+  // Viewer helper
+  const isViewer = multiplayerRole === 'viewer';
+
   return {
     // State
     multiplayerOn, setMultiplayerOn,
     multiplayerRole,
+    isViewer,
     gameCode,
     joinerCode, setJoinerCode,
     remoteGame,
@@ -459,6 +491,7 @@ export function useMultiplayerSync() {
     // Actions
     createGame,
     joinGame,
+    joinAsViewer,
     claimPlayers,
     startMultiplayerGame,
     submitScores,

@@ -213,7 +213,22 @@ export const th = {
   editNotifyBy: 'แก้ไขโดย {who}',
   editNotifyDetail: 'แตะเพื่อดูรายละเอียด',
   editLogTapHint: 'แตะ ✏️ บนหมายเลขหลุมเพื่อดูบันทึก',
-  editLogClose: 'ปิด'
+  editLogClose: 'ปิด',
+  // Viewer Mode
+  mpRoleTitle: 'เข้าร่วมห้อง',
+  mpRoleDesc: 'เลือกวิธีเข้าร่วม',
+  mpPlayerRole: 'ผู้เล่น',
+  mpPlayerRoleDesc: 'เลือกผู้เล่นและใส่คะแนน',
+  mpPlayerTagInput: 'ใส่คะแนน',
+  mpPlayerTagClaim: 'เลือกผู้เล่น',
+  mpViewerRole: 'ผู้ชม',
+  mpViewerRoleDesc: 'ดูเกมสด อ่านอย่างเดียว',
+  mpViewerTagLive: 'คะแนนสด',
+  mpViewerTagNoInput: 'ไม่สามารถป้อน',
+  mpViewerBanner: 'ดูเท่านั้น — ไม่สามารถใส่คะแนน',
+  mpViewerReminder: 'คุณกำลังดูเกมนี้',
+  mpViewerReminderDesc: 'คะแนนอัปเดตแบบเรียลไทม์ คุณไม่สามารถป้อนหรือแก้ไขคะแนน',
+  exit: 'ออก'
 };
 
 export default th;

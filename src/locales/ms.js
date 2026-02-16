@@ -213,7 +213,22 @@ export const ms = {
   editNotifyBy: 'Diubah oleh {who}',
   editNotifyDetail: 'Ketik untuk butiran',
   editLogTapHint: 'Ketik ✏️ pada nombor lubang untuk lihat log',
-  editLogClose: 'Tutup'
+  editLogClose: 'Tutup',
+  // Viewer Mode
+  mpRoleTitle: 'Sertai Bilik',
+  mpRoleDesc: 'Bagaimana anda ingin menyertai?',
+  mpPlayerRole: 'Pemain',
+  mpPlayerRoleDesc: 'Tuntut pemain dan masukkan skor',
+  mpPlayerTagInput: 'Masukkan skor',
+  mpPlayerTagClaim: 'Tuntut pemain',
+  mpViewerRole: 'Penonton',
+  mpViewerRoleDesc: 'Tonton permainan secara langsung',
+  mpViewerTagLive: 'Skor langsung',
+  mpViewerTagNoInput: 'Tiada input',
+  mpViewerBanner: 'TONTONAN SAHAJA — input skor dilumpuhkan',
+  mpViewerReminder: 'Anda sedang menonton permainan ini',
+  mpViewerReminderDesc: 'Skor dikemas kini secara langsung. Anda tidak boleh memasukkan atau mengubah skor.',
+  exit: 'Keluar'
 };
 
 export default ms;

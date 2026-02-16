@@ -218,7 +218,22 @@ export const en = {
   editNotifyBy: 'Edited by {who}',
   editNotifyDetail: 'Tap to view details',
   editLogTapHint: 'Tap ✏️ on hole number to view edit log',
-  editLogClose: 'Close'
+  editLogClose: 'Close',
+  // Viewer Mode
+  mpRoleTitle: 'Join Room',
+  mpRoleDesc: 'How would you like to join?',
+  mpPlayerRole: 'Player',
+  mpPlayerRoleDesc: 'Claim players and input scores',
+  mpPlayerTagInput: 'Input scores',
+  mpPlayerTagClaim: 'Claim players',
+  mpViewerRole: 'Viewer',
+  mpViewerRoleDesc: 'Watch the game live, read-only',
+  mpViewerTagLive: 'Live scores',
+  mpViewerTagNoInput: 'No input',
+  mpViewerBanner: 'VIEW ONLY — score input disabled',
+  mpViewerReminder: 'You are viewing this game',
+  mpViewerReminderDesc: 'Scores update in real-time. You cannot input or modify scores.',
+  exit: 'Exit'
 };
 
 export default en;

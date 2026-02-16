@@ -213,7 +213,22 @@ export const ja = {
   editNotifyBy: '{who}が編集',
   editNotifyDetail: 'タップして詳細を見る',
   editLogTapHint: 'ホール番号の✏️をタップして編集履歴を表示',
-  editLogClose: '閉じる'
+  editLogClose: '閉じる',
+  // Viewer Mode 観戦モード
+  mpRoleTitle: 'ルームに参加',
+  mpRoleDesc: '参加方法を選択',
+  mpPlayerRole: 'プレイヤー',
+  mpPlayerRoleDesc: '選手を選んでスコア入力',
+  mpPlayerTagInput: 'スコア入力',
+  mpPlayerTagClaim: '選手選択',
+  mpViewerRole: '観戦',
+  mpViewerRoleDesc: 'ライブ観戦（読取専用）',
+  mpViewerTagLive: 'ライブスコア',
+  mpViewerTagNoInput: '入力不可',
+  mpViewerBanner: '観戦のみ — スコア入力無効',
+  mpViewerReminder: 'この試合を観戦中',
+  mpViewerReminderDesc: 'スコアはリアルタイム更新。入力・修正はできません。',
+  exit: '退出'
 };
 
 export default ja;

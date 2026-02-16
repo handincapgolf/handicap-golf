@@ -213,7 +213,22 @@ export const zhTW = {
   editNotifyBy: '由 {who} 編輯',
   editNotifyDetail: '點擊查看詳情',
   editLogTapHint: '點擊洞號上 ✏️ 查看該洞修改記錄',
-  editLogClose: '關閉'
+  editLogClose: '關閉',
+  // Viewer Mode 觀戰模式
+  mpRoleTitle: '加入房間',
+  mpRoleDesc: '選擇加入方式',
+  mpPlayerRole: '球員',
+  mpPlayerRoleDesc: '認領球員並輸入桿數',
+  mpPlayerTagInput: '輸入桿數',
+  mpPlayerTagClaim: '認領球員',
+  mpViewerRole: '觀戰',
+  mpViewerRoleDesc: '即時觀看比賽，唯讀',
+  mpViewerTagLive: '即時比分',
+  mpViewerTagNoInput: '無法輸入',
+  mpViewerBanner: '僅觀戰 — 無法輸入桿數',
+  mpViewerReminder: '你正在觀看此比賽',
+  mpViewerReminderDesc: '成績即時更新，你無法輸入或修改桿數。',
+  exit: '退出'
 };
 
 export default zhTW;
