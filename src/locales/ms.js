@@ -192,6 +192,7 @@ export const ms = {
   baccaratBubble: '4 pemain, 6 perlawanan. Panggil UP untuk naikkan taruhan.',
   advanceBubble: 'Turut jejak 💧 air dan 🚫 OB. Dapat laporan terperinci selepas pusingan.',
   mpSyncBubble: 'Anda skor pemain anda, rakan skor mereka. Skor disegerakkan automatik.',
+  hcpBubble: 'Handicap (0-36): Menyeimbangkan pemain berlainan tahap. Pukulan diagihkan auto mengikut kesukaran lubang.',
   undoEdit: 'Buat Asal & Edit',
   waitingProceed: 'Menunggu 🅰️ meneruskan...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',

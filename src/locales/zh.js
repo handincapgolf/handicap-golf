@@ -197,6 +197,7 @@ export const zh = {
   baccaratBubble: '4人两两对战，共6组对决。叫UP可以加注。',
   advanceBubble: '开启后除了杆数，还会记录💧下水和🚫出界次数。打完后生成详细成绩单。',
   mpSyncBubble: '你记你的球员，朋友记他的，分数自动同步。不用再传来传去。',
+  hcpBubble: '差点(0-36)：让不同水平的球员公平竞争。系统根据球场难度自动分配让杆到各洞。',
   undoEdit: '撤回修改',
   waitingProceed: '等待 🅰️ 进入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，让杆{handicap}。',

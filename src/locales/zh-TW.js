@@ -192,6 +192,7 @@ export const zhTW = {
   baccaratBubble: '4人兩兩對戰，共6組對決。叫UP可以加注。',
   advanceBubble: '開啟後除了桿數，還會記錄💧下水和🚫出界次數。打完後產生詳細成績單。',
   mpSyncBubble: '你記你的球員，朋友記他的，分數自動同步。不用再傳來傳去。',
+  hcpBubble: '差點(0-36)：讓不同水平的球員公平競爭。系統根據球場難度自動分配讓桿到各洞。',
   undoEdit: '撤回修改',
   waitingProceed: '等待 🅰️ 進入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，讓桿{handicap}。',

@@ -197,6 +197,7 @@ export const en = {
   baccaratBubble: '4 players, 6 matchups. Call UP to raise your bet.',
   advanceBubble: 'Also tracks 💧 water and 🚫 out of bounds. Get a detailed report after the round.',
   mpSyncBubble: 'You score your players, your friend scores theirs. Scores sync automatically.',
+  hcpBubble: 'Handicap (0-36): Levels the playing field. Strokes are auto-distributed across holes by course difficulty.',
   undoEdit: 'Undo & Edit',
   waitingProceed: 'Waiting 🅰️ to proceed...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
