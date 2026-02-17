@@ -95,16 +95,16 @@ function ScoreCell({ stroke, par }) {
 const TabLive = memo(({
   activePlayers, scores, putts, pars, holes, currentHole,
   completedHoles, allScores, allPutts, gameMode, stake,
-  totalMoney, mp, t
+  totalMoney, getHandicapForHole, mp, t
 }) => {
   const holeNum = holes[currentHole];
   const curPar = pars[holeNum] || 4;
-  const showMoney = gameMode === 'baccarat' && Number(stake) > 0;
+  const hasMoney = Number(stake) > 0;
 
   // Confirmed progress
   const summary = mp.getConfirmedSummary();
 
-  // Per-player: confirmed status + current hole score
+  // Per-player: confirmed status + current hole score + handicap
   const playerData = activePlayers.map(p => {
     const deviceId = mp.claimed[p];
     const isConfirmed = deviceId ? (mp.confirmed[deviceId] || false) : false;
@@ -112,8 +112,10 @@ const TabLive = memo(({
     const pt = putts[p];
     const hasScore = on !== undefined && on !== null;
     const stroke = hasScore ? on + (pt || 0) : null;
+    const hcpStrokes = getHandicapForHole ? getHandicapForHole(p, holeNum, curPar) : 0;
+    const netStroke = stroke != null ? stroke - hcpStrokes : null;
     const money = totalMoney?.[p] || 0;
-    return { name: p, isConfirmed, hasScore, stroke, on, pt, money };
+    return { name: p, isConfirmed, hasScore, stroke, netStroke, hcpStrokes, on, pt, money };
   });
 
   return (
@@ -134,7 +136,7 @@ const TabLive = memo(({
 
       {/* Player cards */}
       {playerData.map(d => {
-        const sc = d.stroke != null ? getScoreInfo(d.stroke, curPar) : null;
+        const sc = d.netStroke != null ? getScoreInfo(d.netStroke, curPar) : null;
         const mColor = d.money > 0 ? '#059669' : d.money < 0 ? '#dc2626' : '#9ca3af';
         const mText = d.money === 0 ? '$0' : d.money > 0 ? `+$${d.money.toFixed(1)}` : `-$${Math.abs(d.money).toFixed(1)}`;
 
@@ -156,12 +158,24 @@ const TabLive = memo(({
               </div>
             </div>
 
-            {/* Center: score */}
-            <div style={{ textAlign: 'center', minWidth: 70 }}>
+            {/* Center: score + handicap badge */}
+            <div style={{ textAlign: 'center', minWidth: 70, position: 'relative' }}>
               {d.stroke != null ? (
-                <div>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
                   <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
+                  {d.hcpStrokes > 0 && (
+                    <div style={{
+                      position: 'absolute', top: -4, right: -14,
+                      background: '#22c55e', color: '#fff',
+                      fontSize: 11, fontWeight: 800,
+                      padding: '1px 5px', borderRadius: 10,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      lineHeight: '16px'
+                    }}>
+                      -{d.hcpStrokes}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>
@@ -171,9 +185,9 @@ const TabLive = memo(({
               )}
             </div>
 
-            {/* Right: money (baccarat only) or vs par */}
+            {/* Right: money if available, otherwise vs par */}
             <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
-              {showMoney ? (
+              {hasMoney ? (
                 <div style={{ fontSize: 18, fontWeight: 900, color: mColor }}>{mText}</div>
               ) : (
                 (() => {
@@ -306,7 +320,7 @@ const ViewerGameScreen = memo(({
   activePlayers, allScores, allPutts, scores, putts,
   pars, holes, currentHole, completedHoles,
   gameMode, stake, selectedCourse, totalMoney,
-  currentHoleSettlement, mp, t, setCurrentSection
+  currentHoleSettlement, getHandicapForHole, mp, t, setCurrentSection
 }) => {
   const [tab, setTab] = useState('live');
 
@@ -399,6 +413,7 @@ const ViewerGameScreen = memo(({
             gameMode={gameMode}
             stake={stake}
             totalMoney={totalMoney}
+            getHandicapForHole={getHandicapForHole}
             mp={mp}
             t={t}
           />

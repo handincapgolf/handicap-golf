@@ -6476,6 +6476,7 @@ return (
             selectedCourse={selectedCourse}
             totalMoney={totalMoney}
             currentHoleSettlement={currentHoleSettlement}
+            getHandicapForHole={getHandicapForHole}
             mp={mp}
             t={t}
             setCurrentSection={setCurrentSection}
