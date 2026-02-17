@@ -113,9 +113,8 @@ const TabLive = memo(({
     const hasScore = on !== undefined && on !== null;
     const stroke = hasScore ? on + (pt || 0) : null;
     const hcpStrokes = getHandicapForHole ? getHandicapForHole(p, holeNum, curPar) : 0;
-    const netStroke = stroke != null ? stroke - hcpStrokes : null;
     const money = totalMoney?.[p] || 0;
-    return { name: p, isConfirmed, hasScore, stroke, netStroke, hcpStrokes, on, pt, money };
+    return { name: p, isConfirmed, hasScore, stroke, hcpStrokes, on, pt, money };
   });
 
   return (
@@ -136,7 +135,7 @@ const TabLive = memo(({
 
       {/* Player cards */}
       {playerData.map(d => {
-        const sc = d.netStroke != null ? getScoreInfo(d.netStroke, curPar) : null;
+        const sc = d.stroke != null ? getScoreInfo(d.stroke, curPar) : null;
         const mColor = d.money > 0 ? '#059669' : d.money < 0 ? '#dc2626' : '#9ca3af';
         const mText = d.money === 0 ? '$0' : d.money > 0 ? `+$${d.money.toFixed(1)}` : `-$${Math.abs(d.money).toFixed(1)}`;
 
@@ -151,31 +150,24 @@ const TabLive = memo(({
             display: 'flex', alignItems: 'center',
             transition: 'all 0.3s ease'
           }}>
-            {/* Left: name */}
+            {/* Left: name + handicap hint */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {d.name}
               </div>
+              {d.hcpStrokes > 0 && (
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', marginTop: 1 }}>
+                  ⛳ -{d.hcpStrokes}
+                </div>
+              )}
             </div>
 
-            {/* Center: score + handicap badge */}
-            <div style={{ textAlign: 'center', minWidth: 70, position: 'relative' }}>
+            {/* Center: score (gross) */}
+            <div style={{ textAlign: 'center', minWidth: 70 }}>
               {d.stroke != null ? (
-                <div style={{ position: 'relative', display: 'inline-block' }}>
+                <div>
                   <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
-                  {d.hcpStrokes > 0 && (
-                    <div style={{
-                      position: 'absolute', top: -4, right: -14,
-                      background: '#22c55e', color: '#fff',
-                      fontSize: 11, fontWeight: 800,
-                      padding: '1px 5px', borderRadius: 10,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      lineHeight: '16px'
-                    }}>
-                      -{d.hcpStrokes}
-                    </div>
-                  )}
                 </div>
               ) : (
                 <div>
