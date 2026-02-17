@@ -150,24 +150,31 @@ const TabLive = memo(({
             display: 'flex', alignItems: 'center',
             transition: 'all 0.3s ease'
           }}>
-            {/* Left: name + handicap hint */}
+            {/* Left: name */}
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {d.name}
               </div>
-              {d.hcpStrokes > 0 && (
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#22c55e', marginTop: 1 }}>
-                  ⛳ -{d.hcpStrokes}
-                </div>
-              )}
             </div>
 
-            {/* Center: score (gross) */}
+            {/* Center: score (gross) + handicap badge */}
             <div style={{ textAlign: 'center', minWidth: 70 }}>
               {d.stroke != null ? (
-                <div>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
                   <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
                   <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
+                  {d.hcpStrokes > 0 && (
+                    <div style={{
+                      position: 'absolute', top: -4, right: -14,
+                      background: '#22c55e', color: '#fff',
+                      fontSize: 11, fontWeight: 800,
+                      padding: '1px 5px', borderRadius: 10,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      lineHeight: '16px'
+                    }}>
+                      -{d.hcpStrokes}
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div>
