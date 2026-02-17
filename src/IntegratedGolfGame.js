@@ -2910,6 +2910,23 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
 
+  // Viewer: 房间消失或断线 → 跳转 scorecard（有数据）或 home（无数据）
+  useEffect(() => {
+    if (!mp.isViewer || !mp.multiplayerOn) return;
+    if (mp.syncStatus !== 'roomGone') return;
+    
+    mp.stopPolling();
+    if (completedHoles.length > 0) {
+      setGameComplete(true);
+      setCurrentSection('scorecard');
+      showToast(t('gameOver') || 'Game ended');
+    } else {
+      mp.resetMultiplayer();
+      mp.setMultiplayerSection(null);
+      setCurrentSection('home');
+    }
+  }, [mp.syncStatus, mp.isViewer, mp.multiplayerOn, completedHoles.length]);
+
   // Joiner/Viewer: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
   useEffect(() => {
     if (!mp.multiplayerOn || (mp.multiplayerRole !== 'joiner' && mp.multiplayerRole !== 'viewer')) return;

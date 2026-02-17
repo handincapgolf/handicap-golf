@@ -115,19 +115,33 @@ export function useMultiplayerSync() {
     }
   }, []);
 
+  // Track consecutive poll failures for roomGone resilience
+  const pollFailCount = useRef(0);
+  const ROOM_GONE_THRESHOLD = 5; // 5 consecutive failures (~15s) before declaring roomGone
+
   // Start polling for game state
   const startPolling = useCallback((code) => {
     if (pollRef.current) clearInterval(pollRef.current);
+    pollFailCount.current = 0;
     pollRef.current = setInterval(async () => {
       try {
         const result = await apiCall(`/game/${code}`);
         if (result.ok && result.game) {
+          pollFailCount.current = 0;
           setRemoteGame(result.game);
           setSyncStatus('connected');
           syncDevicesFromRemote(result.game);
+        } else if (!result.ok) {
+          pollFailCount.current++;
+          if (pollFailCount.current >= ROOM_GONE_THRESHOLD) {
+            setSyncStatus('roomGone');
+          }
         }
       } catch (err) {
-        setSyncStatus('error');
+        pollFailCount.current++;
+        if (pollFailCount.current >= ROOM_GONE_THRESHOLD) {
+          setSyncStatus('error');
+        }
       }
     }, 3000);
   }, [syncDevicesFromRemote]);
@@ -143,6 +157,29 @@ export function useMultiplayerSync() {
   useEffect(() => {
     return () => stopPolling();
   }, [stopPolling]);
+
+  // Page Visibility: restart polling when screen comes back from background/sleep
+  useEffect(() => {
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible' && multiplayerOn && gameCode) {
+        // Screen came back — restart polling immediately + do one instant fetch
+        pollFailCount.current = 0;
+        if (syncStatus === 'error') setSyncStatus('syncing');
+        startPolling(gameCode);
+        // Immediate fetch (don't wait 3s)
+        apiCall(`/game/${gameCode}`).then(result => {
+          if (result.ok && result.game) {
+            pollFailCount.current = 0;
+            setRemoteGame(result.game);
+            setSyncStatus('connected');
+            syncDevicesFromRemote(result.game);
+          }
+        }).catch(() => {});
+      }
+    };
+    document.addEventListener('visibilitychange', handleVisibility);
+    return () => document.removeEventListener('visibilitychange', handleVisibility);
+  }, [multiplayerOn, gameCode, startPolling, syncDevicesFromRemote, syncStatus]);
 
   // Save multiplayer state to localStorage
   useEffect(() => {
