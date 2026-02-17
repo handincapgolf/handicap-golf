@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback, useMemo, memo, useRef } from 'react';
 import { useMultiplayerSync } from './useMultiplayerSync';
+import ViewerGameScreen from './ViewerGameScreen';
 import { 
   Plus, 
   Minus, 
@@ -6459,18 +6460,28 @@ return (
       </div>
 
       {currentSection === 'game' && (
+        mp.isViewer ? (
+          <ViewerGameScreen
+            activePlayers={activePlayers}
+            allScores={allScores}
+            allPutts={allPutts}
+            scores={scores}
+            putts={putts}
+            pars={pars}
+            holes={holes}
+            currentHole={currentHole}
+            completedHoles={completedHoles}
+            gameMode={gameMode}
+            stake={stake}
+            selectedCourse={selectedCourse}
+            totalMoney={totalMoney}
+            currentHoleSettlement={currentHoleSettlement}
+            mp={mp}
+            t={t}
+            setCurrentSection={setCurrentSection}
+          />
+        ) : (
         <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
-          {/* Viewer Mode Banner */}
-          {mp.isViewer && (
-            <div className="bg-purple-600 text-white text-center py-2 px-4 text-sm font-semibold flex items-center justify-center gap-2">
-              <Eye className="w-4 h-4" />
-              {t('mpViewerBanner') || 'VIEW ONLY — score input disabled'}
-              <span className="ml-2 inline-flex items-center gap-1">
-                <span className="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                <span className="text-xs font-normal text-purple-200">LIVE</span>
-              </span>
-            </div>
-          )}
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
             <h1 className="text-2xl font-bold mb-2">
   {t('hole')} {holes[currentHole]}
@@ -6953,6 +6964,7 @@ return (
             </div>
           </div>
         </div>
+        )
       )}
 
 {/* Advance Mode 报告弹窗 */}
