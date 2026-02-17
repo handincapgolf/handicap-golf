@@ -9,14 +9,14 @@
 import { useState, useMemo, memo } from 'react';
 
 // ===== Score label helpers =====
-const getScoreInfo = (stroke, par) => {
+// Score label — uses t() for i18n, fallback to English
+const getScoreInfo = (stroke, par, t) => {
   const d = stroke - par;
-  if (d <= -3) return { label: 'Albatross', color: '#f59e0b', bg: '#fffbeb' };
-  if (d === -2) return { label: 'Eagle', color: '#f59e0b', bg: '#fffbeb' };
-  if (d === -1) return { label: 'Birdie', color: '#3b82f6', bg: '#eff6ff' };
-  if (d === 0)  return { label: 'Par', color: '#374151', bg: '#f9fafb' };
-  if (d === 1)  return { label: 'Bogey', color: '#f97316', bg: '#fff7ed' };
-  return { label: `+${d}`, color: '#dc2626', bg: '#fef2f2' };
+  if (d <= -2) return { label: t('eagle') || 'Eagle', color: '#f59e0b', bg: '#fffbeb' };
+  if (d === -1) return { label: t('birdie') || 'Birdie', color: '#3b82f6', bg: '#eff6ff' };
+  if (d === 0)  return { label: t('parLabel') || 'Par', color: '#374151', bg: '#f9fafb' };
+  if (d === 1)  return { label: t('bogey') || 'Bogey', color: '#f97316', bg: '#fff7ed' };
+  return { label: t('doubleplus') || 'Dbl Bogey+', color: '#dc2626', bg: '#fef2f2' };
 };
 
 // ===== Scorecard cell renderer (circle/square symbols) =====
@@ -135,7 +135,7 @@ const TabLive = memo(({
 
       {/* Player cards */}
       {playerData.map(d => {
-        const sc = d.stroke != null ? getScoreInfo(d.stroke, curPar) : null;
+        const sc = d.stroke != null ? getScoreInfo(d.stroke, curPar, t) : null;
         const mColor = d.money > 0 ? '#059669' : d.money < 0 ? '#dc2626' : '#9ca3af';
         const mText = d.money === 0 ? '$0' : d.money > 0 ? `+$${d.money.toFixed(1)}` : `-$${Math.abs(d.money).toFixed(1)}`;
 
