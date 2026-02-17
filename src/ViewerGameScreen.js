@@ -159,29 +159,31 @@ const TabLive = memo(({
 
             {/* Center: score (gross) + handicap badge */}
             <div style={{ textAlign: 'center', minWidth: 70 }}>
-              {d.stroke != null ? (
-                <div style={{ position: 'relative', display: 'inline-block' }}>
-                  <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
-                  <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
-                  {d.hcpStrokes > 0 && (
-                    <div style={{
-                      position: 'absolute', top: -4, right: -14,
-                      background: '#22c55e', color: '#fff',
-                      fontSize: 11, fontWeight: 800,
-                      padding: '1px 5px', borderRadius: 10,
-                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                      lineHeight: '16px'
-                    }}>
-                      -{d.hcpStrokes}
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <div>
-                  <div style={{ fontSize: 48, fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>—</div>
-                  <div style={{ fontSize: 12, color: '#d1d5db', marginTop: 3 }}>⏳</div>
-                </div>
-              )}
+              <div style={{ position: 'relative', display: 'inline-block' }}>
+                {d.stroke != null ? (
+                  <>
+                    <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
+                  </>
+                ) : (
+                  <>
+                    <div style={{ fontSize: 48, fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>—</div>
+                    <div style={{ fontSize: 12, color: '#d1d5db', marginTop: 3 }}>⏳</div>
+                  </>
+                )}
+                {d.hcpStrokes > 0 && (
+                  <div style={{
+                    position: 'absolute', top: -4, right: -14,
+                    background: '#22c55e', color: '#fff',
+                    fontSize: 11, fontWeight: 800,
+                    padding: '1px 5px', borderRadius: 10,
+                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                    lineHeight: '16px'
+                  }}>
+                    -{d.hcpStrokes}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Right: money if available, otherwise vs par */}
