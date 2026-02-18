@@ -2063,7 +2063,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         />
       )}
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" style={currentSection === 'game' ? { display: 'none' } : undefined}>
         <div className="max-w-md mx-auto p-3">
           
           {currentSection === 'home' && (
