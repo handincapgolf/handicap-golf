@@ -199,9 +199,26 @@ export function useMultiplayerSync() {
   // Auto-reconnect on mount if saved state exists
   useEffect(() => {
     if (saved.current?.on && saved.current?.code && !pollRef.current) {
-      startPolling(saved.current.code);
+      const code = saved.current.code;
+      const role = saved.current.role;
+      
+      // Re-register device with Worker (in case it lost the device info)
+      if (role === 'joiner' || role === 'viewer') {
+        apiCall(`/game/${code}/join`, 'PUT', {
+          deviceId: deviceId.current,
+          ...(role === 'viewer' ? { role: 'viewer' } : {}),
+        }).then(result => {
+          if (result.ok && result.game) {
+            setRemoteGame(result.game);
+            syncDevicesFromRemote(result.game);
+            setSyncStatus('connected');
+          }
+        }).catch(() => {}); // Polling will handle errors
+      }
+      
+      startPolling(code);
     }
-  }, [startPolling]);
+  }, [startPolling, syncDevicesFromRemote]);
 
   // === GAME ACTIONS ===
 

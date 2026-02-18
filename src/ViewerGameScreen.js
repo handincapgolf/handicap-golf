@@ -36,8 +36,8 @@ function ScoreCell({ stroke, par }) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
-          width: 28, height: 28, borderRadius: '50%',
-          border: '2px solid #f59e0b', outline: '2px solid #f59e0b', outlineOffset: '2px',
+          width: 26, height: 26, borderRadius: '50%',
+          border: '2px solid #f59e0b', outline: '2px solid #f59e0b', outlineOffset: '1px',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           ...ns, color: '#f59e0b'
         }}>{stroke}</span>
@@ -49,7 +49,7 @@ function ScoreCell({ stroke, par }) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
-          width: 26, height: 26, borderRadius: '50%',
+          width: 28, height: 28, borderRadius: '50%',
           border: '2px solid #3b82f6',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           ...ns, color: '#3b82f6'
@@ -70,7 +70,7 @@ function ScoreCell({ stroke, par }) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
-          width: 26, height: 26, borderRadius: 4,
+          width: 28, height: 28, borderRadius: 4,
           border: '2px solid #f97316',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           ...ns, color: '#f97316'
@@ -82,8 +82,8 @@ function ScoreCell({ stroke, par }) {
   return (
     <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <span style={{
-        width: 28, height: 28, borderRadius: 4,
-        border: '2px solid #dc2626', outline: '2px solid #dc2626', outlineOffset: '2px',
+        width: 26, height: 26, borderRadius: 4,
+        border: '2px solid #dc2626', outline: '2px solid #dc2626', outlineOffset: '1px',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         ...ns, color: '#dc2626'
       }}>{stroke}</span>
@@ -329,10 +329,10 @@ const TabCard = memo(({
   };
 
   return (
-    <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
+    <div style={{ flex: 1, width: '100%', alignSelf: 'stretch', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
       {/* Header */}
       <div style={{
-        display: 'flex', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
+        display: 'flex', width: '100%', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
         position: 'sticky', top: 0, background: '#fff', zIndex: 2
       }}>
         <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>#</div>
@@ -350,7 +350,7 @@ const TabCard = memo(({
         const isCurrent = h === holeNum && !completedHoles.includes(h);
         return (
           <div key={h} style={{
-            display: 'flex', alignItems: 'center', padding: '8px 0',
+            display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0',
             borderBottom: '1px solid #f3f4f6',
             background: isCurrent ? '#fffbeb' : 'transparent'
           }}>
@@ -370,7 +370,7 @@ const TabCard = memo(({
       {/* Total row */}
       {completedHoles.length > 0 && (
         <div style={{
-          display: 'flex', alignItems: 'center', padding: '10px 0',
+          display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0',
           background: '#f9fafb', borderTop: '2px solid #e5e7eb',
           position: 'sticky', bottom: 0
         }}>
@@ -485,8 +485,8 @@ const ViewerGameScreen = memo(({
       </div>
 
       {/* Content */}
-      <div style={{ flex: 1, padding: '6px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
-        {tab === 'live' && (
+      <div style={{ flex: 1, padding: '6px 12px', overflow: 'hidden', display: 'flex', flexDirection: 'column', alignItems: 'stretch' }}>
+        <div style={{ flex: 1, display: tab === 'live' ? 'flex' : 'none', flexDirection: 'column', overflow: 'hidden' }}>
           <TabLive
             activePlayers={activePlayers}
             scores={scores}
@@ -506,8 +506,8 @@ const ViewerGameScreen = memo(({
             mp={mp}
             t={t}
           />
-        )}
-        {tab === 'card' && (
+        </div>
+        <div style={{ flex: 1, width: '100%', display: tab === 'card' ? 'flex' : 'none', flexDirection: 'column', alignItems: 'stretch', minHeight: 0 }}>
           <TabCard
             activePlayers={activePlayers}
             allScores={allScores}
@@ -519,7 +519,7 @@ const ViewerGameScreen = memo(({
             currentHole={currentHole}
             completedHoles={completedHoles}
           />
-        )}
+        </div>
       </div>
 
       {/* Bottom bar */}
