@@ -110,6 +110,11 @@ export const calculate = ({
 }) => {
   const stakeValue = Number(stake) || 0;
   
+  // Guard: no players yet (e.g. during sync init)
+  if (!activePlayers || activePlayers.length === 0) {
+    return { results: {}, matchupDetails: [], upOrder: [] };
+  }
+  
   // 初始化结果
   const results = {};
   activePlayers.forEach(player => {

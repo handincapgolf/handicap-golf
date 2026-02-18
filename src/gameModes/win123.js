@@ -99,6 +99,11 @@ export const calculate = ({
   const stakeValue = Number(stake) || 0;
   const playerCount = activePlayers.length;
   
+  // Guard: no players yet (e.g. during sync init)
+  if (!activePlayers || playerCount === 0) {
+    return { results: {}, poolChange: 0, rankings: [], isTied: true };
+  }
+  
   // 计算每位玩家的总杆数和净杆数
   const playerScores = activePlayers.map(player => ({
     player,

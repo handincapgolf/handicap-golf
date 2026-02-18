@@ -52,6 +52,11 @@ export const calculate = ({
   const stakeValue = Number(stake) || 0;
   const currentPrizePool = Math.max(0, prizePool);
   
+  // Guard: no players yet (e.g. during sync init)
+  if (!activePlayers || activePlayers.length === 0) {
+    return { results: {}, poolChange: 0, isTied: true, winner: null, winAmount: 0, newPrizePool: currentPrizePool };
+  }
+  
   // 计算每位玩家的净杆数
   const playerScores = activePlayers.map(player => ({
     player,

@@ -50,6 +50,11 @@ export const calculate = ({
 }) => {
   const stakeValue = Number(stake) || 0;
   
+  // Guard: no players yet (e.g. during sync init)
+  if (!activePlayers || activePlayers.length === 0) {
+    return { results: {}, winners: [], losers: [], isTied: true };
+  }
+  
   // 计算每位玩家的净杆数
   const playerScores = activePlayers.map(player => ({
     player,
