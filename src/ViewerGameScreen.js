@@ -95,118 +95,225 @@ function ScoreCell({ stroke, par }) {
 const TabLive = memo(({
   activePlayers, scores, putts, pars, holes, currentHole,
   completedHoles, allScores, allPutts, gameMode, stake,
-  totalMoney, getHandicapForHole, mp, t
+  totalMoney, getHandicapForHole, selectedCourse, mp, t
 }) => {
-  const holeNum = holes[currentHole];
-  const curPar = pars[holeNum] || 4;
+  const nowHoleNum = holes[currentHole];
+  const nowPar = pars[nowHoleNum] || 4;
+  const nowIndex = selectedCourse?.index?.[nowHoleNum - 1];
   const hasMoney = Number(stake) > 0;
+
+  // Last completed hole (the "results" we show)
+  const lastCompleted = completedHoles.length > 0
+    ? completedHoles[completedHoles.length - 1]
+    : null;
+  const lastPar = lastCompleted ? (pars[lastCompleted] || 4) : null;
+
+  // If no completed holes yet, show waiting state
+  if (!lastCompleted) {
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ fontSize: 40, opacity: 0.5 }}>⛳</div>
+        <div style={{ fontSize: 15, fontWeight: 700, color: '#6b7280' }}>
+          {t('viewerWaitingFirst') || 'Waiting for first hole to be completed...'}
+        </div>
+
+        {/* Show Now Playing preview even when no completed holes */}
+        <NowPlayingCard
+          holeNum={nowHoleNum} par={nowPar} index={nowIndex}
+          activePlayers={activePlayers} getHandicapForHole={getHandicapForHole}
+          scores={scores} putts={putts}
+          mp={mp} t={t}
+        />
+      </div>
+    );
+  }
+
+  // Build player data from LAST COMPLETED hole
+  const playerData = activePlayers.map(p => {
+    const on = allScores[p]?.[lastCompleted];
+    const pt = allPutts[p]?.[lastCompleted];
+    const hasScore = on !== undefined && on !== null;
+    const stroke = hasScore ? on + (pt || 0) : null;
+    const hcpStrokes = getHandicapForHole ? getHandicapForHole(p, lastCompleted, lastPar) : 0;
+    const money = totalMoney?.[p] || 0;
+    return { name: p, hasScore, stroke, hcpStrokes, on, pt, money };
+  });
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
+      {/* Header: which hole's results we're showing */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#6b7280' }}>
+          ✅ {t('hole') || 'Hole'} {lastCompleted} {t('viewerResults') || 'Results'}
+        </span>
+        <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>
+          Par {lastPar} · {completedHoles.length}/{holes.length} {t('viewerPlayed') || 'played'}
+        </span>
+      </div>
+
+      {/* Player cards — last completed hole results */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0, overflow: 'auto' }}>
+        {playerData.map(d => {
+          const sc = d.stroke != null ? getScoreInfo(d.stroke, lastPar, t) : null;
+          const mColor = d.money > 0 ? '#059669' : d.money < 0 ? '#dc2626' : '#9ca3af';
+          const mText = d.money === 0 ? '$0' : d.money > 0 ? `+$${d.money.toFixed(1)}` : `-$${Math.abs(d.money).toFixed(1)}`;
+
+          return (
+            <div key={d.name} style={{
+              padding: '8px 14px', borderRadius: 16,
+              background: sc ? sc.bg : '#f9fafb',
+              border: `2px solid ${sc ? sc.color + '4D' : '#e5e7eb'}`,
+              display: 'flex', alignItems: 'center',
+              transition: 'all 0.3s ease'
+            }}>
+              {/* Left: name */}
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {d.name}
+                </div>
+              </div>
+
+              {/* Center: score (gross) + handicap badge */}
+              <div style={{ textAlign: 'center', minWidth: 70 }}>
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  {d.stroke != null ? (
+                    <>
+                      <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
+                      <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
+                    </>
+                  ) : (
+                    <>
+                      <div style={{ fontSize: 48, fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>—</div>
+                      <div style={{ fontSize: 12, color: '#d1d5db', marginTop: 3 }}>N/A</div>
+                    </>
+                  )}
+                  {d.hcpStrokes > 0 && (
+                    <div style={{
+                      position: 'absolute', top: -4, right: -14,
+                      background: '#22c55e', color: '#fff',
+                      fontSize: 11, fontWeight: 800,
+                      padding: '1px 5px', borderRadius: 10,
+                      boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
+                      lineHeight: '16px'
+                    }}>
+                      -{d.hcpStrokes}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Right: money or vs par */}
+              <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
+                {hasMoney ? (
+                  <div style={{ fontSize: 18, fontWeight: 900, color: mColor }}>{mText}</div>
+                ) : (
+                  (() => {
+                    const totalStroke = completedHoles.reduce((sum, h) =>
+                      sum + (allScores[d.name]?.[h] || 0) + (allPutts[d.name]?.[h] || 0), 0);
+                    const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
+                    if (completedHoles.length === 0) return null;
+                    const diff = totalStroke - totalPar;
+                    const vsText = diff === 0 ? 'E' : diff > 0 ? `+${diff}` : `${diff}`;
+                    const vsColor = diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
+                    return <div style={{ fontSize: 18, fontWeight: 900, color: vsColor }}>{vsText}</div>;
+                  })()
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Now Playing preview card */}
+      <NowPlayingCard
+        holeNum={nowHoleNum} par={nowPar} index={nowIndex}
+        activePlayers={activePlayers} getHandicapForHole={getHandicapForHole}
+        scores={scores} putts={putts}
+        mp={mp} t={t}
+      />
+    </div>
+  );
+});
+
+// ===== NOW PLAYING CARD — compact preview of current hole =====
+const NowPlayingCard = memo(({
+  holeNum, par, index, activePlayers, getHandicapForHole,
+  scores, putts, mp, t
+}) => {
+  // Who gets handicap strokes on this hole?
+  const hcpPlayers = activePlayers.filter(p => {
+    const strokes = getHandicapForHole ? getHandicapForHole(p, holeNum, par) : 0;
+    return strokes > 0;
+  }).map(p => ({
+    name: p,
+    strokes: getHandicapForHole(p, holeNum, par),
+  }));
+
+  // How many players have entered scores already?
+  const enteredCount = activePlayers.filter(p => scores[p] != null).length;
 
   // Confirmed progress
   const summary = mp.getConfirmedSummary();
 
-  // Per-player: confirmed status + current hole score + handicap
-  const playerData = activePlayers.map(p => {
-    const deviceId = mp.claimed[p];
-    const isConfirmed = deviceId ? (mp.confirmed[deviceId] || false) : false;
-    const on = scores[p];
-    const pt = putts[p];
-    const hasScore = on !== undefined && on !== null;
-    const stroke = hasScore ? on + (pt || 0) : null;
-    const hcpStrokes = getHandicapForHole ? getHandicapForHole(p, holeNum, curPar) : 0;
-    const money = totalMoney?.[p] || 0;
-    return { name: p, isConfirmed, hasScore, stroke, hcpStrokes, on, pt, money };
-  });
-
   return (
-    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, justifyContent: 'center' }}>
-      {/* Confirm progress bar */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ flex: 1, height: 4, background: '#f3f4f6', borderRadius: 4, overflow: 'hidden' }}>
-          <div style={{
-            height: '100%', background: '#22c55e', borderRadius: 4,
-            width: (summary.total > 0 ? (summary.confirmed / summary.total * 100) : 0) + '%',
-            transition: 'width 0.3s ease'
-          }} />
+    <div style={{
+      flexShrink: 0, borderRadius: 14,
+      background: 'linear-gradient(135deg, #fefce8, #fef9c3)',
+      border: '1.5px solid #fde68a',
+      padding: '10px 14px',
+    }}>
+      {/* Top row: hole info */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 800, color: '#92400e' }}>
+            ⏳ {t('viewerNowPlaying') || 'Now Playing'}
+          </span>
+          <span style={{ fontSize: 16, fontWeight: 900, color: '#78350f' }}>
+            #{holeNum}
+          </span>
         </div>
-        <span style={{ fontSize: 10, color: '#9ca3af', fontWeight: 600 }}>
-          {summary.confirmed}/{summary.total}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+          <span style={{
+            fontSize: 11, fontWeight: 700, color: '#92400e',
+            background: '#fef3c7', padding: '2px 8px', borderRadius: 6,
+          }}>
+            Par {par}
+          </span>
+          {index != null && (
+            <span style={{
+              fontSize: 11, fontWeight: 700, color: '#92400e',
+              background: '#fef3c7', padding: '2px 8px', borderRadius: 6,
+            }}>
+              SI {index}
+            </span>
+          )}
+        </div>
       </div>
 
-      {/* Player cards */}
-      {playerData.map(d => {
-        const sc = d.stroke != null ? getScoreInfo(d.stroke, curPar, t) : null;
-        const mColor = d.money > 0 ? '#059669' : d.money < 0 ? '#dc2626' : '#9ca3af';
-        const mText = d.money === 0 ? '$0' : d.money > 0 ? `+$${d.money.toFixed(1)}` : `-$${Math.abs(d.money).toFixed(1)}`;
+      {/* Handicap strokes info */}
+      {hcpPlayers.length > 0 && (
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+          {hcpPlayers.map(hp => (
+            <span key={hp.name} style={{
+              fontSize: 11, fontWeight: 700,
+              background: '#dcfce7', color: '#166534',
+              padding: '2px 8px', borderRadius: 8,
+            }}>
+              🏌️ {hp.name} <span style={{ fontWeight: 800 }}>-{hp.strokes}</span>
+            </span>
+          ))}
+        </div>
+      )}
 
-        return (
-          <div key={d.name} style={{
-            padding: '8px 14px', borderRadius: 16,
-            background: sc ? sc.bg : '#f9fafb',
-            border: d.isConfirmed
-              ? `2px solid ${sc ? sc.color + '4D' : '#e5e7eb'}`
-              : '2px dashed #e5e7eb',
-            flex: 1, minHeight: 0,
-            display: 'flex', alignItems: 'center',
-            transition: 'all 0.3s ease'
-          }}>
-            {/* Left: name */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {d.name}
-              </div>
-            </div>
-
-            {/* Center: score (gross) + handicap badge */}
-            <div style={{ textAlign: 'center', minWidth: 70 }}>
-              <div style={{ position: 'relative', display: 'inline-block' }}>
-                {d.stroke != null ? (
-                  <>
-                    <div style={{ fontSize: 48, fontWeight: 900, color: sc.color, lineHeight: 1 }}>{d.stroke}</div>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: sc.color, marginTop: 3 }}>{sc.label}</div>
-                  </>
-                ) : (
-                  <>
-                    <div style={{ fontSize: 48, fontWeight: 900, color: '#e5e7eb', lineHeight: 1 }}>—</div>
-                    <div style={{ fontSize: 12, color: '#d1d5db', marginTop: 3 }}>⏳</div>
-                  </>
-                )}
-                {d.hcpStrokes > 0 && (
-                  <div style={{
-                    position: 'absolute', top: -4, right: -14,
-                    background: '#22c55e', color: '#fff',
-                    fontSize: 11, fontWeight: 800,
-                    padding: '1px 5px', borderRadius: 10,
-                    boxShadow: '0 1px 3px rgba(0,0,0,0.2)',
-                    lineHeight: '16px'
-                  }}>
-                    -{d.hcpStrokes}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Right: money if available, otherwise vs par */}
-            <div style={{ flex: 1, minWidth: 0, textAlign: 'right' }}>
-              {hasMoney ? (
-                <div style={{ fontSize: 18, fontWeight: 900, color: mColor }}>{mText}</div>
-              ) : (
-                (() => {
-                  // Show cumulative vs par for non-baccarat
-                  const totalStroke = completedHoles.reduce((sum, h) =>
-                    sum + (allScores[d.name]?.[h] || 0) + (allPutts[d.name]?.[h] || 0), 0);
-                  const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
-                  if (completedHoles.length === 0) return null;
-                  const diff = totalStroke - totalPar;
-                  const vsText = diff === 0 ? 'E' : diff > 0 ? `+${diff}` : `${diff}`;
-                  const vsColor = diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
-                  return <div style={{ fontSize: 18, fontWeight: 900, color: vsColor }}>{vsText}</div>;
-                })()
-              )}
-            </div>
-          </div>
-        );
-      })}
+      {/* Progress: scores entered + confirmed */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, color: '#a16207' }}>
+        <span>
+          ✏️ {enteredCount}/{activePlayers.length} {t('viewerScored') || 'scored'}
+        </span>
+        <span>
+          ✅ {summary.confirmed}/{summary.total} {t('viewerConfirmed') || 'confirmed'}
+        </span>
+      </div>
     </div>
   );
 });
@@ -328,7 +435,15 @@ const ViewerGameScreen = memo(({
   const holeNum = holes[currentHole];
   const curPar = pars[holeNum] || 4;
   const courseName = selectedCourse?.shortName || selectedCourse?.fullName || '';
-  const holeIndex = selectedCourse?.index?.[holeNum - 1];
+
+  // Last completed hole for display in course bar
+  const lastCompletedHole = completedHoles.length > 0
+    ? completedHoles[completedHoles.length - 1]
+    : null;
+  // Show last completed hole info in bar (what Live tab displays), fallback to current
+  const barHole = lastCompletedHole || holeNum;
+  const barPar = pars[barHole] || 4;
+  const barIndex = selectedCourse?.index?.[barHole - 1];
 
   const tabList = [
     { id: 'live', label: `⛳ ${t('live') || 'Live'}` },
@@ -357,7 +472,7 @@ const ViewerGameScreen = memo(({
         </span>
       </div>
 
-      {/* Course bar */}
+      {/* Course bar — shows last completed hole (what Live tab displays) */}
       <div style={{
         flexShrink: 0, padding: '6px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
@@ -365,16 +480,22 @@ const ViewerGameScreen = memo(({
       }}>
         <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>{courseName}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ fontSize: 13, fontWeight: 800, color: '#1f2937' }}>
-            {t('hole') || 'Hole'} {holeNum}
-          </span>
-          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>Par {curPar}</span>
-          {holeIndex != null && (
+          {lastCompletedHole ? (
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#1f2937' }}>
+              ✅ {t('hole') || 'Hole'} {lastCompletedHole}
+            </span>
+          ) : (
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#9ca3af' }}>
+              ⏳ {t('hole') || 'Hole'} {holeNum}
+            </span>
+          )}
+          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>Par {barPar}</span>
+          {barIndex != null && (
             <span style={{
               fontSize: 10, background: '#fef3c7', color: '#b45309',
               padding: '1px 6px', borderRadius: 4, fontWeight: 700
             }}>
-              Index {holeIndex}
+              SI {barIndex}
             </span>
           )}
         </div>
@@ -415,6 +536,7 @@ const ViewerGameScreen = memo(({
             stake={stake}
             totalMoney={totalMoney}
             getHandicapForHole={getHandicapForHole}
+            selectedCourse={selectedCourse}
             mp={mp}
             t={t}
           />

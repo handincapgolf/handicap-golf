@@ -278,6 +278,17 @@ export function useMultiplayerSync() {
         setMultiplayerOn(true);
         setRemoteGame(result.game);
         syncDevicesFromRemote(result.game);
+
+        // Register this viewer device in the room
+        const joinResult = await apiCall(`/game/${code}/join`, 'PUT', {
+          deviceId: deviceId.current,
+          role: 'viewer',
+        });
+        if (joinResult.ok && joinResult.game) {
+          setRemoteGame(joinResult.game);
+          syncDevicesFromRemote(joinResult.game);
+        }
+
         setSyncStatus('connected');
         startPolling(code);
         // Viewer skips claim, goes directly to lobby or game
@@ -490,6 +501,14 @@ export function useMultiplayerSync() {
   // Count of non-creator devices that have claimed players
   const otherDeviceCount = getActiveDeviceIds().filter(d => d !== deviceId.current).length;
 
+  // Count of player devices (joiner role, excluding creator) and viewer devices
+  const playerDeviceCount = Object.entries(devices).filter(
+    ([devId, dev]) => devId !== deviceId.current && dev.role === 'joiner'
+  ).length;
+  const viewerDeviceCount = Object.entries(devices).filter(
+    ([, dev]) => dev.role === 'viewer'
+  ).length;
+
   // === BACKWARD COMPAT SHIMS ===
   // These allow gradual migration — you can remove them once IntegratedGolfGame.js is fully updated
 
@@ -522,6 +541,8 @@ export function useMultiplayerSync() {
     claimChecked, setClaimChecked,
     multiplayerSection, setMultiplayerSection,
     otherDeviceCount,
+    playerDeviceCount,
+    viewerDeviceCount,
     joinerCount, // backward compat
     deviceId: deviceId.current,
 

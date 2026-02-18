@@ -139,8 +139,44 @@ const MpLobbySection = memo(({
                   </div>
                 </div>
 
-                {/* Creator: Start Game button (only show when joiner has claimed players) */}
-                {mp.multiplayerRole === 'creator' && mp.otherDeviceCount > 0 && (
+                {/* Creator: Connected devices summary */}
+                {mp.multiplayerRole === 'creator' && (
+                  <div className="bg-white rounded-xl p-4 shadow-md">
+                    <h3 className="text-sm font-semibold text-gray-700 mb-3">
+                      {t('mpConnectionStatus') || 'Connection Status'}
+                    </h3>
+                    <div className="flex items-center justify-between py-2 border-b">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">🎯</span>
+                        <span className="text-sm text-gray-600">{t('mpPlayersJoined') || 'Players joined'}</span>
+                      </div>
+                      <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
+                        mp.playerDeviceCount > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        {mp.playerDeviceCount}
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">👁</span>
+                        <span className="text-sm text-gray-600">{t('mpViewersJoined') || 'Viewers joined'}</span>
+                      </div>
+                      <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
+                        mp.viewerDeviceCount > 0 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'
+                      }`}>
+                        {mp.viewerDeviceCount}
+                      </span>
+                    </div>
+                    {mp.playerDeviceCount === 0 && (
+                      <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2">
+                        💡 {t('mpSoloCreatorHint') || 'No players joined yet. You can still start — you\'ll score all players yourself.'}
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Creator: Start Game button (always available — creator can score all players solo) */}
+                {mp.multiplayerRole === 'creator' && (
                   <button
                     onClick={async () => {
                       const result = await mp.startMultiplayerGame();
