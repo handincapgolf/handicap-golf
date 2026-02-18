@@ -143,12 +143,12 @@ const MpLobbySection = memo(({
                 {mp.multiplayerRole === 'creator' && (
                   <div className="bg-white rounded-xl p-4 shadow-md">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                      {t('mpConnectionStatus') || 'Connection Status'}
+                      Connection Status
                     </h3>
                     <div className="flex items-center justify-between py-2 border-b">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🎯</span>
-                        <span className="text-sm text-gray-600">{t('mpPlayersJoined') || 'Players joined'}</span>
+                        <span className="text-sm text-gray-600">Players joined</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
                         mp.playerDeviceCount > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
@@ -159,7 +159,7 @@ const MpLobbySection = memo(({
                     <div className="flex items-center justify-between py-2">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">👁</span>
-                        <span className="text-sm text-gray-600">{t('mpViewersJoined') || 'Viewers joined'}</span>
+                        <span className="text-sm text-gray-600">Viewers joined</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
                         mp.viewerDeviceCount > 0 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'
@@ -169,7 +169,7 @@ const MpLobbySection = memo(({
                     </div>
                     {mp.playerDeviceCount === 0 && (
                       <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2">
-                        💡 {t('mpSoloCreatorHint') || 'No players joined yet. You can still start — you\'ll score all players yourself.'}
+                        💡 No players joined yet. You can still start — you'll score all players yourself.
                       </p>
                     )}
                   </div>

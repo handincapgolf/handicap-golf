@@ -114,7 +114,7 @@ const TabLive = memo(({
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
         <div style={{ fontSize: 40, opacity: 0.5 }}>⛳</div>
         <div style={{ fontSize: 15, fontWeight: 700, color: '#6b7280' }}>
-          {t('viewerWaitingFirst') || 'Waiting for first hole to be completed...'}
+          Waiting for first hole to be completed...
         </div>
 
         {/* Show Now Playing preview even when no completed holes */}
@@ -144,10 +144,10 @@ const TabLive = memo(({
       {/* Header: which hole's results we're showing */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <span style={{ fontSize: 12, fontWeight: 700, color: '#6b7280' }}>
-          ✅ {t('hole') || 'Hole'} {lastCompleted} {t('viewerResults') || 'Results'}
+          ✅ {t('hole') || 'Hole'} {lastCompleted} Results
         </span>
         <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>
-          Par {lastPar} · {completedHoles.length}/{holes.length} {t('viewerPlayed') || 'played'}
+          Par {lastPar} · {completedHoles.length}/{holes.length} played
         </span>
       </div>
 
@@ -266,7 +266,7 @@ const NowPlayingCard = memo(({
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 12, fontWeight: 800, color: '#92400e' }}>
-            ⏳ {t('viewerNowPlaying') || 'Now Playing'}
+            ⏳ Now Playing
           </span>
           <span style={{ fontSize: 16, fontWeight: 900, color: '#78350f' }}>
             #{holeNum}
@@ -308,10 +308,10 @@ const NowPlayingCard = memo(({
       {/* Progress: scores entered + confirmed */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, color: '#a16207' }}>
         <span>
-          ✏️ {enteredCount}/{activePlayers.length} {t('viewerScored') || 'scored'}
+          ✏️ {enteredCount}/{activePlayers.length} scored
         </span>
         <span>
-          ✅ {summary.confirmed}/{summary.total} {t('viewerConfirmed') || 'confirmed'}
+          ✅ {summary.confirmed}/{summary.total} confirmed
         </span>
       </div>
     </div>
