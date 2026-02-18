@@ -421,7 +421,7 @@ const ViewerGameScreen = memo(({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: '#e9d5ff', letterSpacing: 2 }}>
-          👁 {t('mpViewerBanner') || 'VIEWER MODE'}
+          👁 VIEW ONLY
         </span>
         <span style={{ fontSize: 10, fontWeight: 700, color: '#bbf7d0' }}>
           ● LIVE
@@ -451,7 +451,7 @@ const ViewerGameScreen = memo(({
               fontSize: 10, background: '#fef3c7', color: '#b45309',
               padding: '1px 6px', borderRadius: 4, fontWeight: 700
             }}>
-              SI {barIndex}
+              Index {barIndex}
             </span>
           )}
         </div>
