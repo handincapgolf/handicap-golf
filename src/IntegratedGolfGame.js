@@ -2051,6 +2051,28 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
     return <RoundReportPage encoded={roundParam} />;
   }
 
+  // Viewer mode: render outside Tailwind wrapper to avoid width issues
+  if (currentSection === 'game' && mp.isViewer) {
+    return (
+      <GameSection
+        activePlayers={activePlayers} allScores={allScores} allPutts={allPutts} allUps={allUps}
+        scores={scores} putts={putts} water={water} ob={ob} ups={ups} upOrder={upOrder}
+        pars={pars} holes={holes} currentHole={currentHole} completedHoles={completedHoles}
+        gameMode={gameMode} stake={stake} prizePool={prizePool}
+        advanceMode={advanceMode} advancePlayers={advancePlayers}
+        selectedCourse={selectedCourse} totalMoney={totalMoney} moneyDetails={moneyDetails}
+        totalSpent={totalSpent} currentHoleSettlement={currentHoleSettlement}
+        gameComplete={gameComplete} voiceEnabled={voiceEnabled} setVoiceEnabled={setVoiceEnabled}
+        mp={mp} getHandicapForHole={getHandicapForHole} getScoreLabel={getScoreLabel}
+        changeOn={changeOn} changePutts={changePutts} changeWater={changeWater} changeOb={changeOb}
+        resetWater={resetWater} resetOb={resetOb} toggleUp={toggleUp} toggleBaccaratUp={toggleBaccaratUp}
+        nextHole={nextHole} showConfirm={showConfirm} showToast={showToast}
+        setCurrentSection={setCurrentSection} setGameComplete={setGameComplete}
+        triggerConfetti={triggerConfetti} t={t} lang={lang}
+      />
+    );
+  }
+
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       {currentSection === 'home' && (
@@ -2063,7 +2085,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         />
       )}
 
-      <div className="flex-1 overflow-auto" style={currentSection === 'game' ? { display: 'none' } : undefined}>
+      <div className="flex-1 overflow-auto">
         <div className="max-w-md mx-auto p-3">
           
           {currentSection === 'home' && (
