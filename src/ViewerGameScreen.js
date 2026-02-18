@@ -163,6 +163,7 @@ const TabLive = memo(({
               padding: '8px 14px', borderRadius: 16,
               background: sc ? sc.bg : '#f9fafb',
               border: `2px solid ${sc ? sc.color + '4D' : '#e5e7eb'}`,
+              flex: 1, minHeight: 0,
               display: 'flex', alignItems: 'center',
               transition: 'all 0.3s ease'
             }}>
