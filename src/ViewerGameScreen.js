@@ -121,8 +121,7 @@ const TabLive = memo(({
         <NowPlayingCard
           holeNum={nowHoleNum} par={nowPar} index={nowIndex}
           activePlayers={activePlayers} getHandicapForHole={getHandicapForHole}
-          scores={scores} putts={putts}
-          mp={mp} t={t}
+          t={t}
         />
       </div>
     );
@@ -141,16 +140,6 @@ const TabLive = memo(({
 
   return (
     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, overflow: 'hidden' }}>
-      {/* Header: which hole's results we're showing */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
-        <span style={{ fontSize: 12, fontWeight: 700, color: '#6b7280' }}>
-          ✅ {t('hole') || 'Hole'} {lastCompleted} Results
-        </span>
-        <span style={{ fontSize: 11, color: '#9ca3af', fontWeight: 600 }}>
-          Par {lastPar} · {completedHoles.length}/{holes.length} played
-        </span>
-      </div>
-
       {/* Player cards — last completed hole results */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8, minHeight: 0, overflow: 'auto' }}>
         {playerData.map(d => {
@@ -229,8 +218,7 @@ const TabLive = memo(({
       <NowPlayingCard
         holeNum={nowHoleNum} par={nowPar} index={nowIndex}
         activePlayers={activePlayers} getHandicapForHole={getHandicapForHole}
-        scores={scores} putts={putts}
-        mp={mp} t={t}
+        t={t}
       />
     </div>
   );
@@ -239,7 +227,7 @@ const TabLive = memo(({
 // ===== NOW PLAYING CARD — compact preview of current hole =====
 const NowPlayingCard = memo(({
   holeNum, par, index, activePlayers, getHandicapForHole,
-  scores, putts, mp, t
+  t
 }) => {
   // Who gets handicap strokes on this hole?
   const hcpPlayers = activePlayers.filter(p => {
@@ -250,12 +238,6 @@ const NowPlayingCard = memo(({
     strokes: getHandicapForHole(p, holeNum, par),
   }));
 
-  // How many players have entered scores already?
-  const enteredCount = activePlayers.filter(p => scores[p] != null).length;
-
-  // Confirmed progress
-  const summary = mp.getConfirmedSummary();
-
   return (
     <div style={{
       flexShrink: 0, borderRadius: 14,
@@ -263,37 +245,20 @@ const NowPlayingCard = memo(({
       border: '1.5px solid #fde68a',
       padding: '10px 14px',
     }}>
-      {/* Top row: hole info */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 800, color: '#92400e' }}>
-            ⏳ Now Playing
-          </span>
-          <span style={{ fontSize: 16, fontWeight: 900, color: '#78350f' }}>
-            #{holeNum}
-          </span>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <span style={{
-            fontSize: 11, fontWeight: 700, color: '#92400e',
-            background: '#fef3c7', padding: '2px 8px', borderRadius: 6,
-          }}>
-            Par {par}
-          </span>
-          {index != null && (
-            <span style={{
-              fontSize: 11, fontWeight: 700, color: '#92400e',
-              background: '#fef3c7', padding: '2px 8px', borderRadius: 6,
-            }}>
-              SI {index}
-            </span>
-          )}
-        </div>
+      {/* Single line: Now Playing Hole X Par X Index X */}
+      <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: hcpPlayers.length > 0 ? 6 : 0 }}>
+        <span style={{ fontSize: 13, fontWeight: 800, color: '#78350f' }}>
+          ⏳ Now Playing Hole {holeNum}
+        </span>
+        <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Par {par}</span>
+        {index != null && (
+          <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Index {index}</span>
+        )}
       </div>
 
       {/* Handicap strokes info */}
       {hcpPlayers.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 6 }}>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {hcpPlayers.map(hp => (
             <span key={hp.name} style={{
               fontSize: 11, fontWeight: 700,
@@ -305,16 +270,6 @@ const NowPlayingCard = memo(({
           ))}
         </div>
       )}
-
-      {/* Progress: scores entered + confirmed */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, fontSize: 11, color: '#a16207' }}>
-        <span>
-          ✏️ {enteredCount}/{activePlayers.length} scored
-        </span>
-        <span>
-          ✅ {summary.confirmed}/{summary.total} confirmed
-        </span>
-      </div>
     </div>
   );
 });
