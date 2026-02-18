@@ -333,7 +333,7 @@ const TabCard = memo(({
       <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch', width: '100%' }}>
         {/* Header */}
         <div style={{
-          display: 'flex', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
+          display: 'flex', width: '100%', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
           position: 'sticky', top: 0, background: '#fff', zIndex: 2
         }}>
           <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>#</div>
@@ -351,7 +351,7 @@ const TabCard = memo(({
           const isCurrent = h === holeNum && !completedHoles.includes(h);
           return (
             <div key={h} style={{
-              display: 'flex', alignItems: 'center', padding: '8px 0',
+              display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0',
               borderBottom: '1px solid #f3f4f6',
               background: isCurrent ? '#fffbeb' : 'transparent'
             }}>
@@ -371,7 +371,7 @@ const TabCard = memo(({
         {/* Total row */}
         {completedHoles.length > 0 && (
           <div style={{
-            display: 'flex', alignItems: 'center', padding: '10px 0',
+            display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0',
             background: '#f9fafb', borderTop: '2px solid #e5e7eb',
             position: 'sticky', bottom: 0
           }}>
