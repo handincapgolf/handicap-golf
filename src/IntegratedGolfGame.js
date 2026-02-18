@@ -16,6 +16,7 @@ import {
   generateShareUrl
 } from './utils/shareEncoder';
 import SharePage from './components/SharePage';
+import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import CourseSection from './sections/CourseSection';
 import PlayersSection from './sections/PlayersSection';
 import { MpLobbySection, MpRoleSection, MpClaimSection } from './sections/MultiplayerSections';
