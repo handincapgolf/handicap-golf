@@ -23,7 +23,7 @@ const getScoreInfo = (stroke, par, t) => {
 function ScoreCell({ stroke, par }) {
   if (stroke == null) {
     return (
-      <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{ fontSize: 13, color: '#d1d5db' }}>·</span>
       </div>
     );
@@ -34,7 +34,7 @@ function ScoreCell({ stroke, par }) {
   // Eagle or better: double circle
   if (diff <= -2) {
     return (
-      <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
           width: 28, height: 28, borderRadius: '50%',
           border: '2px solid #f59e0b', outline: '2px solid #f59e0b', outlineOffset: '2px',
@@ -47,7 +47,7 @@ function ScoreCell({ stroke, par }) {
   // Birdie: single circle
   if (diff === -1) {
     return (
-      <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
           width: 26, height: 26, borderRadius: '50%',
           border: '2px solid #3b82f6',
@@ -60,7 +60,7 @@ function ScoreCell({ stroke, par }) {
   // Par: plain
   if (diff === 0) {
     return (
-      <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
       </div>
     );
@@ -68,7 +68,7 @@ function ScoreCell({ stroke, par }) {
   // Bogey: single square
   if (diff === 1) {
     return (
-      <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <span style={{
           width: 26, height: 26, borderRadius: 4,
           border: '2px solid #f97316',
@@ -80,7 +80,7 @@ function ScoreCell({ stroke, par }) {
   }
   // Double bogey+: double square
   return (
-    <div style={{ flex: 1, minWidth: 44, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+    <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
       <span style={{
         width: 28, height: 28, borderRadius: 4,
         border: '2px solid #dc2626', outline: '2px solid #dc2626', outlineOffset: '2px',
@@ -329,63 +329,61 @@ const TabCard = memo(({
   };
 
   return (
-    <div style={{ flex: 1, position: 'relative', minHeight: 0 }}>
-      <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
-        {/* Header */}
+    <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
+      {/* Header */}
+      <div style={{
+        display: 'flex', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
+        position: 'sticky', top: 0, background: '#fff', zIndex: 2
+      }}>
+        <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>#</div>
+        <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>P</div>
+        {activePlayers.map(p => (
+          <div key={p} style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#6b7280', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+            {p}
+          </div>
+        ))}
+      </div>
+
+      {/* Hole rows */}
+      {displayHoles.map(h => {
+        const hp = pars[h] || 4;
+        const isCurrent = h === holeNum && !completedHoles.includes(h);
+        return (
+          <div key={h} style={{
+            display: 'flex', alignItems: 'center', padding: '8px 0',
+            borderBottom: '1px solid #f3f4f6',
+            background: isCurrent ? '#fffbeb' : 'transparent'
+          }}>
+            <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 900, color: isCurrent ? '#b45309' : '#374151' }}>
+              {h}
+            </div>
+            <div style={{ width: 28, flexShrink: 0, fontSize: 12, color: '#9ca3af', textAlign: 'center', fontWeight: 600 }}>
+              {hp}
+            </div>
+            {activePlayers.map(p => (
+              <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />
+            ))}
+          </div>
+        );
+      })}
+
+      {/* Total row */}
+      {completedHoles.length > 0 && (
         <div style={{
-          display: 'flex', width: '100%', boxSizing: 'border-box', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
-          position: 'sticky', top: 0, background: '#fff', zIndex: 2
+          display: 'flex', alignItems: 'center', padding: '10px 0',
+          background: '#f9fafb', borderTop: '2px solid #e5e7eb',
+          position: 'sticky', bottom: 0
         }}>
-          <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>#</div>
-          <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>P</div>
+          <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#6b7280' }}>TOT</div>
+          <div style={{ width: 28, flexShrink: 0, fontSize: 11, color: '#6b7280', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
           {activePlayers.map(p => (
-            <div key={p} style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#6b7280', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-              {p}
+            <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+              <div style={{ fontSize: 18, fontWeight: 900, color: getVsColor(p) }}>{getPlayerTotal(p)}</div>
+              <div style={{ fontSize: 10, fontWeight: 700, color: getVsColor(p) }}>{getVsPar(p)}</div>
             </div>
           ))}
         </div>
-
-        {/* Hole rows */}
-        {displayHoles.map(h => {
-          const hp = pars[h] || 4;
-          const isCurrent = h === holeNum && !completedHoles.includes(h);
-          return (
-            <div key={h} style={{
-              display: 'flex', width: '100%', boxSizing: 'border-box', alignItems: 'center', padding: '8px 0',
-              borderBottom: '1px solid #f3f4f6',
-              background: isCurrent ? '#fffbeb' : 'transparent'
-            }}>
-              <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 900, color: isCurrent ? '#b45309' : '#374151' }}>
-                {h}
-              </div>
-              <div style={{ width: 28, flexShrink: 0, fontSize: 12, color: '#9ca3af', textAlign: 'center', fontWeight: 600 }}>
-                {hp}
-              </div>
-              {activePlayers.map(p => (
-                <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />
-              ))}
-            </div>
-          );
-        })}
-
-        {/* Total row */}
-        {completedHoles.length > 0 && (
-          <div style={{
-            display: 'flex', width: '100%', boxSizing: 'border-box', alignItems: 'center', padding: '10px 0',
-            background: '#f9fafb', borderTop: '2px solid #e5e7eb',
-            position: 'sticky', bottom: 0
-          }}>
-            <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 11, fontWeight: 700, color: '#6b7280' }}>TOT</div>
-            <div style={{ width: 28, flexShrink: 0, fontSize: 11, color: '#6b7280', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
-            {activePlayers.map(p => (
-              <div key={p} style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 18, fontWeight: 900, color: getVsColor(p) }}>{getPlayerTotal(p)}</div>
-                <div style={{ fontSize: 10, fontWeight: 700, color: getVsColor(p) }}>{getVsPar(p)}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      )}
     </div>
   );
 });
