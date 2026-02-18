@@ -2,7 +2,7 @@
 // Independent component: Live tab + Card tab, zero input logic
 //
 // Props:
-//   activePlayers, allScores, allPutts, scores, putts, pars, holes,
+//   activePlayers, allScores, allPutts, allUps, scores, putts, pars, holes,
 //   currentHole, completedHoles, gameMode, stake, selectedCourse,
 //   totalMoney, currentHoleSettlement, mp, t, setCurrentSection
 
@@ -94,7 +94,7 @@ function ScoreCell({ stroke, par }) {
 // ===== LIVE TAB =====
 const TabLive = memo(({
   activePlayers, scores, putts, pars, holes, currentHole,
-  completedHoles, allScores, allPutts, gameMode, stake,
+  completedHoles, allScores, allPutts, allUps, gameMode, stake,
   totalMoney, getHandicapForHole, selectedCourse, mp, t
 }) => {
   const nowHoleNum = holes[currentHole];
@@ -134,8 +134,9 @@ const TabLive = memo(({
     const hasScore = on !== undefined && on !== null;
     const stroke = hasScore ? on + (pt || 0) : null;
     const hcpStrokes = getHandicapForHole ? getHandicapForHole(p, lastCompleted, lastPar) : 0;
+    const isUp = allUps?.[p]?.[lastCompleted] || false;
     const money = totalMoney?.[p] || 0;
-    return { name: p, hasScore, stroke, hcpStrokes, on, pt, money };
+    return { name: p, hasScore, stroke, hcpStrokes, isUp, on, pt, money };
   });
 
   return (
@@ -156,10 +157,20 @@ const TabLive = memo(({
               display: 'flex', alignItems: 'center',
               transition: 'all 0.3s ease'
             }}>
-              {/* Left: name */}
+              {/* Left: name + UP badge */}
               <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {d.name}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: '#1f2937', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    {d.name}
+                  </div>
+                  {d.isUp && (
+                    <span style={{
+                      fontSize: 10, fontWeight: 900, color: '#fff',
+                      background: '#ef4444', padding: '1px 6px',
+                      borderRadius: 6, letterSpacing: 1, lineHeight: '16px',
+                      flexShrink: 0
+                    }}>UP</span>
+                  )}
                 </div>
               </div>
 
@@ -381,7 +392,7 @@ const TabCard = memo(({
 
 // ===== MAIN ViewerGameScreen =====
 const ViewerGameScreen = memo(({
-  activePlayers, allScores, allPutts, scores, putts,
+  activePlayers, allScores, allPutts, allUps, scores, putts,
   pars, holes, currentHole, completedHoles,
   gameMode, stake, selectedCourse, totalMoney,
   currentHoleSettlement, getHandicapForHole, mp, t, setCurrentSection
@@ -488,6 +499,7 @@ const ViewerGameScreen = memo(({
             completedHoles={completedHoles}
             allScores={allScores}
             allPutts={allPutts}
+            allUps={allUps}
             gameMode={gameMode}
             stake={stake}
             totalMoney={totalMoney}

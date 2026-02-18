@@ -8,6 +8,7 @@ const GameSection = ({
   activePlayers,
   allScores,
   allPutts,
+  allUps,
   scores,
   putts,
   water,
@@ -57,6 +58,7 @@ const GameSection = ({
         activePlayers={activePlayers}
         allScores={allScores}
         allPutts={allPutts}
+        allUps={allUps}
         scores={scores}
         putts={putts}
         pars={pars}

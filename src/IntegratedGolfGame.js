@@ -2203,6 +2203,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           activePlayers={activePlayers}
           allScores={allScores}
           allPutts={allPutts}
+          allUps={allUps}
           scores={scores}
           putts={putts}
           water={water}
