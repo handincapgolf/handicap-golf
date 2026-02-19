@@ -320,72 +320,14 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   const activePlayers = useMemo(() => {
     return playerNames.filter(name => name.trim());
   }, [playerNames]);
-
-  // Ref for calling resumeGame from effects without circular dependency
-  const resumeGameRef = useRef(null);
   
   // ========== 多人同步 Effects ==========
-  // 检测 Creator 开始比赛 → 自动进入游戏 (包括刷新后的自动恢复)
+  // Joiner: 检测 Creator 开始比赛
   useEffect(() => {
     if (!mp.multiplayerOn || !mp.remoteGame) return;
-    if (mp.remoteGame.status !== 'playing') return;
-    // Already in game or scorecard — no transition needed
-    if (currentSection === 'game' || currentSection === 'scorecard') return;
-
-    // Case 1: Normal lobby → game transition
-    if (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby') {
+    if (mp.remoteGame.status === 'playing' && (mp.multiplayerSection === 'lobby' || currentSection === 'mp-lobby')) {
       mp.setMultiplayerSection(null);
       setCurrentSection('game');
-      return;
-    }
-
-    // Case 2: Auto-resume after page refresh
-    // (multiplayerSection is null because it was cleared when game started,
-    //  and we're on home page because page was refreshed)
-    if (currentSection === 'home') {
-      const hasSaved = localStorage.getItem('golfGameState');
-      if (hasSaved) {
-        // Restore game data from localStorage, then enter game
-        resumeGameRef.current();
-      } else if (mp.isViewer) {
-        // Viewer without saved game — restore basics from remoteGame
-        const g = mp.remoteGame;
-        if (g.players) {
-          const names = [...g.players];
-          while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
-          setPlayerNames(names);
-        }
-        if (g.gameMode) setGameMode(g.gameMode);
-        if (g.stake !== undefined) setStake(String(g.stake));
-        if (g.jumboMode) setJumboMode(g.jumboMode);
-        if (g.handicaps) setPlayerHandicaps(g.handicaps);
-        if (g.course) {
-          setSelectedCourse(g.course);
-          if (g.course.pars) {
-            const newPars = {};
-            g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
-            setPars(newPars);
-          }
-        }
-        if (g.holesList) setHoles(g.holesList);
-        mp.setMultiplayerSection(null);
-        setCurrentSection('game');
-      }
-      // Creator/joiner without saved game: stay on home (can't resume without game data)
-    }
-  }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection, mp.isViewer]);
-
-  // Auto-resume: 刷新后恢复到 lobby/claim 页面 (游戏还没开始时)
-  useEffect(() => {
-    if (!mp.multiplayerOn || !mp.remoteGame) return;
-    if (mp.remoteGame.status !== 'waiting') return;
-    if (currentSection !== 'home') return;
-
-    // Restore the appropriate multiplayer section
-    if (mp.multiplayerSection === 'lobby') {
-      setCurrentSection('mp-lobby');
-    } else if (mp.multiplayerSection === 'joinerClaim') {
-      setCurrentSection('mp-claim');
     }
   }, [mp.remoteGame?.status, mp.multiplayerSection, mp.multiplayerOn, currentSection]);
 
@@ -755,16 +697,13 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setJumboMode(gameState.jumboMode || false);
 		setAdvancePlayers(gameState.advancePlayers || {});
         setEditLog(gameState.editLog || []);
-        setCurrentSection('game');
+        setCurrentSection(gameState.gameComplete ? 'scorecard' : 'game');
       } catch (error) {
         console.error('Failed to resume game:', error);
         showToast('恢复游戏失败', 'error');
       }
     }
   }, [showToast]);
-
-  // Update ref so effects always have latest resumeGame
-  resumeGameRef.current = resumeGame;
 
   // 保存游戏状态到localStorage
   useEffect(() => {
