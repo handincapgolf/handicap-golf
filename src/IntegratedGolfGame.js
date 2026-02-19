@@ -425,96 +425,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
 
-  // ========== MP Auto-resume after page refresh ==========
-  // When MP reconnects after a refresh and we're still at 'home', navigate automatically
-  useEffect(() => {
-    if (!mp.multiplayerOn || currentSection !== 'home') return;
-    
-    // Path A: Remote game received — navigate based on status
-    if (mp.remoteGame) {
-      const status = mp.remoteGame.status;
-      
-      if (status === 'finished') {
-        // Check localStorage first — only call resumeGame if gameComplete was saved as true
-        // (otherwise let the existing finished effect at line 354 handle it with fresh remote data)
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          try {
-            const parsed = JSON.parse(savedGame);
-            if (parsed.gameComplete) {
-              resumeGame(); // Has complete data + gameComplete=true → goes to scorecard
-              return;
-            }
-          } catch {}
-          // gameComplete was false in localStorage → let finished effect handle it
-          return;
-        }
-        // Viewer without local data: restore from remote
-        if (mp.isViewer) {
-          if (mp.remoteGame.playerNames) setPlayerNames(mp.remoteGame.playerNames);
-          if (mp.remoteGame.holes) setHoles(mp.remoteGame.holes);
-          if (mp.remoteGame.pars) setPars(mp.remoteGame.pars);
-          if (mp.remoteGame.gameMode) setGameMode(mp.remoteGame.gameMode);
-          if (mp.remoteGame.stake !== undefined) setStake(mp.remoteGame.stake);
-          if (mp.remoteGame.selectedCourse) setSelectedCourse(mp.remoteGame.selectedCourse);
-          if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
-          if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
-          if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
-          if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
-          if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
-          if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
-          if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
-          if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
-          if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
-          if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
-          setGameComplete(true);
-          setCurrentSection('scorecard');
-        }
-        return;
-      }
-      
-      if (status === 'playing') {
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          resumeGame(); // Routes to scorecard or game based on localStorage gameComplete
-          return;
-        }
-        // Viewer without local data: restore basics from remote and enter game
-        if (mp.isViewer) {
-          if (mp.remoteGame.playerNames) setPlayerNames(mp.remoteGame.playerNames);
-          if (mp.remoteGame.holes) setHoles(mp.remoteGame.holes);
-          if (mp.remoteGame.pars) setPars(mp.remoteGame.pars);
-          if (mp.remoteGame.gameMode) setGameMode(mp.remoteGame.gameMode);
-          if (mp.remoteGame.stake !== undefined) setStake(mp.remoteGame.stake);
-          if (mp.remoteGame.selectedCourse) setSelectedCourse(mp.remoteGame.selectedCourse);
-          if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
-          if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
-          if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
-          if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
-          if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
-          if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
-          setCurrentSection('game');
-        }
-        return;
-      }
-      
-      if (status === 'waiting') {
-        if (mp.multiplayerSection === 'lobby') setCurrentSection('mp-lobby');
-        else if (mp.multiplayerSection === 'joinerClaim') setCurrentSection('mp-claim');
-      }
-      return;
-    }
-    
-    // Path B: Room gone / connection error — use localStorage as fallback
-    if (mp.syncStatus === 'roomGone' || mp.syncStatus === 'error') {
-      const savedGame = localStorage.getItem('golfGameState');
-      if (savedGame) {
-        resumeGame();
-        mp.stopPolling();
-      }
-    }
-  }, [mp.multiplayerOn, mp.remoteGame?.status, mp.syncStatus, currentSection, mp.isViewer, mp.multiplayerSection, resumeGame, mp.stopPolling]);
-
   // Joiner/Viewer：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
     if (!mp.multiplayerOn || (mp.multiplayerRole !== 'joiner' && mp.multiplayerRole !== 'viewer') || !mp.remoteGame) return;
@@ -859,6 +769,105 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
       selectedCourse, setupMode, jumboMode, activePlayers.length, editLog]);
 
+  // ========== MP Auto-resume after page refresh ==========
+  // When MP reconnects after a refresh and we're still at 'home', navigate automatically
+  useEffect(() => {
+    if (!mp.multiplayerOn || currentSection !== 'home') return;
+    
+    // Path A: Remote game received — navigate based on status
+    if (mp.remoteGame) {
+      const status = mp.remoteGame.status;
+      
+      if (status === 'finished') {
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          try {
+            const parsed = JSON.parse(savedGame);
+            if (parsed.gameComplete) {
+              resumeGame();
+              return;
+            }
+          } catch {}
+          return;
+        }
+        if (mp.isViewer) {
+          const rg = mp.remoteGame;
+          if (rg.playerNames || rg.players) {
+            const names = rg.playerNames || rg.players;
+            const padded = [...names];
+            while (padded.length < 4) padded.push('');
+            setPlayerNames(padded);
+          }
+          if (rg.holesList) setHoles(rg.holesList);
+          if (rg.pars) setPars(rg.pars);
+          if (rg.gameMode) setGameMode(rg.gameMode);
+          if (rg.stake !== undefined) setStake(rg.stake);
+          if (rg.course) setSelectedCourse(rg.course);
+          if (rg.handicaps) setPlayerHandicaps(rg.handicaps);
+          if (rg.allScores) setAllScores(rg.allScores);
+          if (rg.allPutts) setAllPutts(rg.allPutts);
+          if (rg.allUps) setAllUps(rg.allUps);
+          if (rg.allWater) setAllWater(rg.allWater);
+          if (rg.allOb) setAllOb(rg.allOb);
+          if (rg.completedHoles) setCompletedHoles(rg.completedHoles);
+          if (rg.totalMoney) setTotalMoney(rg.totalMoney);
+          if (rg.moneyDetails) setMoneyDetails(rg.moneyDetails);
+          if (rg.totalSpent) setTotalSpent(rg.totalSpent);
+          if (rg.prizePool !== undefined) setPrizePool(rg.prizePool);
+          setGameComplete(true);
+          setCurrentSection('scorecard');
+        }
+        return;
+      }
+      
+      if (status === 'playing') {
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          resumeGame();
+          return;
+        }
+        if (mp.isViewer) {
+          const rg = mp.remoteGame;
+          if (rg.playerNames || rg.players) {
+            const names = rg.playerNames || rg.players;
+            const padded = [...names];
+            while (padded.length < 4) padded.push('');
+            setPlayerNames(padded);
+          }
+          if (rg.holesList) setHoles(rg.holesList);
+          if (rg.pars) setPars(rg.pars);
+          if (rg.gameMode) setGameMode(rg.gameMode);
+          if (rg.stake !== undefined) setStake(rg.stake);
+          if (rg.course) setSelectedCourse(rg.course);
+          if (rg.handicaps) setPlayerHandicaps(rg.handicaps);
+          if (rg.allScores) setAllScores(rg.allScores);
+          if (rg.allPutts) setAllPutts(rg.allPutts);
+          if (rg.allUps) setAllUps(rg.allUps);
+          if (rg.completedHoles) setCompletedHoles(rg.completedHoles);
+          if (rg.totalMoney) setTotalMoney(rg.totalMoney);
+          if (rg.moneyDetails) setMoneyDetails(rg.moneyDetails);
+          setCurrentSection('game');
+        }
+        return;
+      }
+      
+      if (status === 'waiting') {
+        if (mp.multiplayerSection === 'lobby') setCurrentSection('mp-lobby');
+        else if (mp.multiplayerSection === 'joinerClaim') setCurrentSection('mp-claim');
+      }
+      return;
+    }
+    
+    // Path B: Room gone / connection error — use localStorage as fallback
+    if (mp.syncStatus === 'roomGone' || mp.syncStatus === 'error') {
+      const savedGame = localStorage.getItem('golfGameState');
+      if (savedGame) {
+        resumeGame();
+        mp.stopPolling();
+      }
+    }
+  }, [mp.multiplayerOn, mp.remoteGame?.status, mp.syncStatus, currentSection, mp.isViewer, mp.multiplayerSection, resumeGame, mp.stopPolling]);
+
   const showConfirm = useCallback((message, action, showScreenshotHint = false) => {
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
   }, []);
@@ -1187,6 +1196,8 @@ const getScoreLabel = useCallback((stroke, par) => {
         stake: Number(stake) || 0,
         jumboMode,
         players: activePlayers,
+        playerNames: [...playerNames],
+        pars: { ...pars },
         handicaps: playerHandicaps,
         advanceMode,
         advancePlayers,
