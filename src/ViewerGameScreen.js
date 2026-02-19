@@ -19,28 +19,34 @@ const getScoreInfo = (stroke, par, t) => {
   return { label: t('doubleplus') || 'Dbl Bogey+', color: '#dc2626', bg: '#fef2f2' };
 };
 
-// ===== Scorecard cell renderer (circle/square symbols) =====
+// ===== Scorecard cell — PGA style matching main program (uniform 26x26) =====
+// Eagle: double circle, Birdie: single circle, Par: plain, Bogey: single square, Double+: double square
+const S = 26; // uniform cell size (main program uses 32, viewer compact uses 26)
 function ScoreCell({ stroke, par }) {
   if (stroke == null) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{ fontSize: 13, color: '#d1d5db' }}>·</span>
+        <span style={{ fontSize: 12, color: '#d1d5db' }}>-</span>
       </div>
     );
   }
   const diff = stroke - par;
-  const ns = { fontSize: 14, fontWeight: 800, lineHeight: 1 };
+  const ns = { fontSize: 12, fontWeight: 700, lineHeight: 1, position: 'relative', zIndex: 1 };
 
-  // Eagle or better: double circle
+  // Eagle: double circle (outer + inner border, both round)
   if (diff <= -2) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{
-          width: 26, height: 26, borderRadius: '50%',
-          border: '2px solid #f59e0b', outline: '2px solid #f59e0b', outlineOffset: '1px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          ...ns, color: '#f59e0b'
-        }}>{stroke}</span>
+        <div style={{
+          position: 'relative', width: S, height: S, borderRadius: '50%',
+          background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          {/* outer circle */}
+          <div style={{ position: 'absolute', inset: 0, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          {/* inner circle */}
+          <div style={{ position: 'absolute', inset: 3, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <span style={{ ...ns, color: '#92400e' }}>{stroke}</span>
+        </div>
       </div>
     );
   }
@@ -48,20 +54,27 @@ function ScoreCell({ stroke, par }) {
   if (diff === -1) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{
-          width: 28, height: 28, borderRadius: '50%',
-          border: '2px solid #3b82f6',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          ...ns, color: '#3b82f6'
-        }}>{stroke}</span>
+        <div style={{
+          width: S, height: S, borderRadius: '50%',
+          border: '2px solid #3b82f6', background: '#dbeafe',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <span style={{ ...ns, color: '#1d4ed8' }}>{stroke}</span>
+        </div>
       </div>
     );
   }
-  // Par: plain
+  // Par: plain square (no border)
   if (diff === 0) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
+        <div style={{
+          width: S, height: S, borderRadius: 2,
+          background: '#f3f4f6',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
+        </div>
       </div>
     );
   }
@@ -69,24 +82,29 @@ function ScoreCell({ stroke, par }) {
   if (diff === 1) {
     return (
       <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <span style={{
-          width: 28, height: 28, borderRadius: 4,
-          border: '2px solid #f97316',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          ...ns, color: '#f97316'
-        }}>{stroke}</span>
+        <div style={{
+          width: S, height: S, borderRadius: 2,
+          border: '2px solid #f97316', background: '#fff7ed',
+          display: 'flex', alignItems: 'center', justifyContent: 'center'
+        }}>
+          <span style={{ ...ns, color: '#c2410c' }}>{stroke}</span>
+        </div>
       </div>
     );
   }
-  // Double bogey+: double square
+  // Double bogey+: double square (outer + inner border)
   return (
     <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-      <span style={{
-        width: 26, height: 26, borderRadius: 4,
-        border: '2px solid #dc2626', outline: '2px solid #dc2626', outlineOffset: '1px',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        ...ns, color: '#dc2626'
-      }}>{stroke}</span>
+      <div style={{
+        position: 'relative', width: S, height: S, borderRadius: 2,
+        background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center'
+      }}>
+        {/* outer square */}
+        <div style={{ position: 'absolute', inset: 0, border: '2px solid #dc2626', borderRadius: 2 }} />
+        {/* inner square */}
+        <div style={{ position: 'absolute', inset: 3, border: '2px solid #dc2626', borderRadius: 2 }} />
+        <span style={{ ...ns, color: '#dc2626' }}>{stroke}</span>
+      </div>
     </div>
   );
 }
