@@ -443,14 +443,14 @@ const ViewerGameScreen = memo(({
       {/* Viewer banner */}
       <div style={{
         flexShrink: 0,
-        background: 'linear-gradient(90deg, #7c3aed, #6366f1)',
+        background: 'linear-gradient(90deg, #14532d, #166534)',
         padding: '5px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#e9d5ff', letterSpacing: 2 }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#86efac', letterSpacing: 2 }}>
           👁 VIEW ONLY
         </span>
-        <span style={{ fontSize: 10, fontWeight: 700, color: '#bbf7d0' }}>
+        <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80' }}>
           ● LIVE
         </span>
       </div>
@@ -459,12 +459,13 @@ const ViewerGameScreen = memo(({
       <div style={{
         flexShrink: 0, padding: '6px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderBottom: '1px solid #f3f4f6'
+        borderBottom: '1px solid #f3f4f6',
+        background: 'linear-gradient(90deg, #f0fdf4, #fff)'
       }}>
-        <span style={{ fontSize: 13, fontWeight: 700, color: '#374151' }}>{courseName}</span>
+        <span style={{ fontSize: 13, fontWeight: 700, color: '#14532d' }}>{courseName}</span>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {lastCompletedHole ? (
-            <span style={{ fontSize: 13, fontWeight: 800, color: '#1f2937' }}>
+            <span style={{ fontSize: 13, fontWeight: 800, color: '#166534' }}>
               ✅ {t('hole') || 'Hole'} {lastCompletedHole}
             </span>
           ) : (
@@ -472,7 +473,7 @@ const ViewerGameScreen = memo(({
               ⏳ {t('hole') || 'Hole'} {holeNum}
             </span>
           )}
-          <span style={{ fontSize: 11, color: '#6b7280', fontWeight: 600 }}>Par {barPar}</span>
+          <span style={{ fontSize: 11, color: '#15803d', fontWeight: 600 }}>Par {barPar}</span>
           {barIndex != null && (
             <span style={{
               fontSize: 10, background: '#fef3c7', color: '#b45309',
@@ -485,16 +486,17 @@ const ViewerGameScreen = memo(({
       </div>
 
       {/* Tabs */}
-      <div style={{ flexShrink: 0, display: 'flex', gap: 4, padding: '6px 12px', background: '#f9fafb' }}>
+      <div style={{ flexShrink: 0, display: 'flex', gap: 4, padding: '6px 12px', background: '#f0fdf4' }}>
         {tabList.map(tb => {
           const active = tab === tb.id;
           return (
             <button key={tb.id} onClick={() => setTab(tb.id)} style={{
               flex: 1, padding: '10px 0', borderRadius: 10, border: 'none',
-              background: active ? '#111827' : 'transparent',
-              color: active ? '#fff' : '#9ca3af',
+              background: active ? 'linear-gradient(135deg, #166534, #14532d)' : 'transparent',
+              color: active ? '#fff' : '#6b7280',
               fontSize: 13, fontWeight: 700, cursor: 'pointer',
-              transition: 'all 0.2s ease'
+              transition: 'all 0.2s ease',
+              boxShadow: active ? '0 2px 6px rgba(22,101,52,0.3)' : 'none'
             }}>
               {tb.label}
             </button>
@@ -544,7 +546,7 @@ const ViewerGameScreen = memo(({
       <div style={{
         flexShrink: 0, padding: '8px 12px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        borderTop: '1px solid #f3f4f6'
+        borderTop: '1px solid #dcfce7'
       }}>
         <button
           onClick={() => {
@@ -553,14 +555,14 @@ const ViewerGameScreen = memo(({
             setCurrentSection('home');
           }}
           style={{
-            background: '#f3f4f6', color: '#6b7280', border: 'none',
+            background: '#f0fdf4', color: '#166534', border: '1px solid #bbf7d0',
             borderRadius: 12, padding: '8px 20px',
             fontSize: 12, fontWeight: 600, cursor: 'pointer'
           }}
         >
           {t('exit') || 'Exit'}
         </button>
-        <span style={{ fontSize: 10, color: '#059669', fontWeight: 600 }}>
+        <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 600 }}>
           ● {mp.syncStatus === 'connected' ? 'Syncing' : mp.syncStatus === 'error' ? 'Reconnecting...' : 'Connecting...'}
         </span>
       </div>
