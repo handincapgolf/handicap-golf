@@ -369,9 +369,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.status, mp.multiplayerOn, gameComplete]);
 
-  // Viewer: 房间消失或断线 → 跳转 scorecard（有数据）或 home（无数据）
+  // 任何角色: 房间消失或断线 → 跳转 scorecard（有数据）或 home（无数据）
   useEffect(() => {
-    if (!mp.isViewer || !mp.multiplayerOn) return;
+    if (!mp.multiplayerOn) return;
     if (mp.syncStatus !== 'roomGone') return;
     
     mp.stopPolling();
@@ -384,7 +384,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       mp.setMultiplayerSection(null);
       setCurrentSection('home');
     }
-  }, [mp.syncStatus, mp.isViewer, mp.multiplayerOn, completedHoles.length]);
+  }, [mp.syncStatus, mp.multiplayerOn, completedHoles.length]);
 
   // Joiner/Viewer: 检测 Creator 已完成当前洞 → 自动跟进到下一洞
   useEffect(() => {
@@ -424,6 +424,96 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       }
     }
   }, [mp.remoteGame?.completedHoles?.length, mp.multiplayerOn, mp.multiplayerRole, currentHole, holes, voiceEnabled, activePlayers, gameMode, stake, playHoleResults]);
+
+  // ========== MP Auto-resume after page refresh ==========
+  // When MP reconnects after a refresh and we're still at 'home', navigate automatically
+  useEffect(() => {
+    if (!mp.multiplayerOn || currentSection !== 'home') return;
+    
+    // Path A: Remote game received — navigate based on status
+    if (mp.remoteGame) {
+      const status = mp.remoteGame.status;
+      
+      if (status === 'finished') {
+        // Check localStorage first — only call resumeGame if gameComplete was saved as true
+        // (otherwise let the existing finished effect at line 354 handle it with fresh remote data)
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          try {
+            const parsed = JSON.parse(savedGame);
+            if (parsed.gameComplete) {
+              resumeGame(); // Has complete data + gameComplete=true → goes to scorecard
+              return;
+            }
+          } catch {}
+          // gameComplete was false in localStorage → let finished effect handle it
+          return;
+        }
+        // Viewer without local data: restore from remote
+        if (mp.isViewer) {
+          if (mp.remoteGame.playerNames) setPlayerNames(mp.remoteGame.playerNames);
+          if (mp.remoteGame.holes) setHoles(mp.remoteGame.holes);
+          if (mp.remoteGame.pars) setPars(mp.remoteGame.pars);
+          if (mp.remoteGame.gameMode) setGameMode(mp.remoteGame.gameMode);
+          if (mp.remoteGame.stake !== undefined) setStake(mp.remoteGame.stake);
+          if (mp.remoteGame.selectedCourse) setSelectedCourse(mp.remoteGame.selectedCourse);
+          if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+          if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+          if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+          if (mp.remoteGame.allWater) setAllWater(mp.remoteGame.allWater);
+          if (mp.remoteGame.allOb) setAllOb(mp.remoteGame.allOb);
+          if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+          if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+          if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+          if (mp.remoteGame.totalSpent) setTotalSpent(mp.remoteGame.totalSpent);
+          if (mp.remoteGame.prizePool !== undefined) setPrizePool(mp.remoteGame.prizePool);
+          setGameComplete(true);
+          setCurrentSection('scorecard');
+        }
+        return;
+      }
+      
+      if (status === 'playing') {
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          resumeGame(); // Routes to scorecard or game based on localStorage gameComplete
+          return;
+        }
+        // Viewer without local data: restore basics from remote and enter game
+        if (mp.isViewer) {
+          if (mp.remoteGame.playerNames) setPlayerNames(mp.remoteGame.playerNames);
+          if (mp.remoteGame.holes) setHoles(mp.remoteGame.holes);
+          if (mp.remoteGame.pars) setPars(mp.remoteGame.pars);
+          if (mp.remoteGame.gameMode) setGameMode(mp.remoteGame.gameMode);
+          if (mp.remoteGame.stake !== undefined) setStake(mp.remoteGame.stake);
+          if (mp.remoteGame.selectedCourse) setSelectedCourse(mp.remoteGame.selectedCourse);
+          if (mp.remoteGame.allScores) setAllScores(mp.remoteGame.allScores);
+          if (mp.remoteGame.allPutts) setAllPutts(mp.remoteGame.allPutts);
+          if (mp.remoteGame.allUps) setAllUps(mp.remoteGame.allUps);
+          if (mp.remoteGame.completedHoles) setCompletedHoles(mp.remoteGame.completedHoles);
+          if (mp.remoteGame.totalMoney) setTotalMoney(mp.remoteGame.totalMoney);
+          if (mp.remoteGame.moneyDetails) setMoneyDetails(mp.remoteGame.moneyDetails);
+          setCurrentSection('game');
+        }
+        return;
+      }
+      
+      if (status === 'waiting') {
+        if (mp.multiplayerSection === 'lobby') setCurrentSection('mp-lobby');
+        else if (mp.multiplayerSection === 'joinerClaim') setCurrentSection('mp-claim');
+      }
+      return;
+    }
+    
+    // Path B: Room gone / connection error — use localStorage as fallback
+    if (mp.syncStatus === 'roomGone' || mp.syncStatus === 'error') {
+      const savedGame = localStorage.getItem('golfGameState');
+      if (savedGame) {
+        resumeGame();
+        mp.stopPolling();
+      }
+    }
+  }, [mp.multiplayerOn, mp.remoteGame?.status, mp.syncStatus, currentSection, mp.isViewer, mp.multiplayerSection, resumeGame, mp.stopPolling]);
 
   // Joiner/Viewer：从 allScores + completedHoles 本地重算 totalMoney（不依赖服务器推送）
   useEffect(() => {
@@ -715,7 +805,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setJumboMode(gameState.jumboMode || false);
 		setAdvancePlayers(gameState.advancePlayers || {});
         setEditLog(gameState.editLog || []);
-        setCurrentSection('game');
+        setCurrentSection(gameState.gameComplete ? 'scorecard' : 'game');
       } catch (error) {
         console.error('Failed to resume game:', error);
         showToast('恢复游戏失败', 'error');
@@ -1993,6 +2083,17 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
   }, [gameComplete, completedHoles, selectedCourse, pars, activePlayers,
       allScores, allPutts, totalMoney, totalSpent, gameMode, stake, prizePool]);
 
+// ========== MP: End Game Early 同步到 Worker ==========
+const endGameEarlyMP = useCallback(() => {
+  if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
+    mp.syncNextHole(holes.length, holes.length, {
+      totalMoney, moneyDetails, allScores, allUps, allPutts,
+      allWater, allOb, totalSpent, completedHoles, prizePool,
+      finished: true
+    });
+  }
+}, [mp.multiplayerOn, mp.multiplayerRole, mp.syncNextHole, holes, totalMoney, moneyDetails, allScores, allUps, allPutts, allWater, allOb, totalSpent, completedHoles, prizePool]);
+
 // 彩纸庆祝效果
 const triggerConfetti = useCallback(() => {
   if (!document.getElementById('confetti-style')) {
@@ -2086,7 +2187,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         resetWater={resetWater} resetOb={resetOb} toggleUp={toggleUp} toggleBaccaratUp={toggleBaccaratUp}
         nextHole={nextHole} showConfirm={showConfirm} showToast={showToast}
         setCurrentSection={setCurrentSection} setGameComplete={setGameComplete}
-        triggerConfetti={triggerConfetti} t={t} lang={lang}
+        triggerConfetti={triggerConfetti} endGameEarlyMP={endGameEarlyMP} t={t} lang={lang}
       />
     );
   }
@@ -2284,6 +2385,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           setCurrentSection={setCurrentSection}
           setGameComplete={setGameComplete}
           triggerConfetti={triggerConfetti}
+          endGameEarlyMP={endGameEarlyMP}
           t={t}
           lang={lang}
         />
