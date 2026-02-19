@@ -147,6 +147,24 @@ useEffect(() => {
   return () => style.remove();
 }, []);
 
+// ========== 自动刷新：从后台切回首页时检查更新 ==========
+const lastActiveRef = useRef(Date.now());
+useEffect(() => {
+  const handleVisibility = () => {
+    if (document.visibilityState === 'visible') {
+      const elapsed = Date.now() - lastActiveRef.current;
+      if (elapsed > 30 * 60 * 1000 && currentSection === 'home') {
+        window.location.reload();
+      }
+      lastActiveRef.current = Date.now();
+    } else {
+      lastActiveRef.current = Date.now();
+    }
+  };
+  document.addEventListener('visibilitychange', handleVisibility);
+  return () => document.removeEventListener('visibilitychange', handleVisibility);
+}, [currentSection]);
+
 // ========== 最近使用球场 ==========
 const RECENT_COURSES_KEY = 'handincap_recent_courses';
 const [recentCourses, setRecentCourses] = useState(() => {
