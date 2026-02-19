@@ -183,7 +183,7 @@ const GameSection = ({
 					showToast(t('gameOver'));
 					setCurrentSection('scorecard');
 					triggerConfetti();
-                  }, true);
+                  }, false);
                 }}
                 className="absolute top-4 right-4 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition"
               >
