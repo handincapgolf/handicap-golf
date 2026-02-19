@@ -174,7 +174,7 @@ const GameSection = ({
               {voiceEnabled ? '🔊' : '🔇'}
             </button>
 
-            {!gameComplete && completedHoles.length < holes.length && !mp.isViewer && (
+            {!gameComplete && !mp.isViewer && (
               <button
                 onClick={() => {
                   const message = t('endGameConfirm');
