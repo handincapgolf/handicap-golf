@@ -697,7 +697,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setJumboMode(gameState.jumboMode || false);
 		setAdvancePlayers(gameState.advancePlayers || {});
         setEditLog(gameState.editLog || []);
-        setCurrentSection(gameState.gameComplete ? 'scorecard' : 'game');
+        setCurrentSection('game');
       } catch (error) {
         console.error('Failed to resume game:', error);
         showToast('恢复游戏失败', 'error');
@@ -707,7 +707,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
 
   // 保存游戏状态到localStorage
   useEffect(() => {
-    if (currentSection === 'game' && activePlayers.length > 0) {
+    if ((currentSection === 'game' || currentSection === 'scorecard') && activePlayers.length > 0) {
       const gameState = {
         lang,
         courseType,
