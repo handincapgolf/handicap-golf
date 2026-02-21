@@ -107,6 +107,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const qrVideoRef = useRef(null);
   const qrStreamRef = useRef(null);
   const playHoleIntroRef = useRef(null); // ref to avoid TDZ
+  const saveTimerRef = useRef(null); // debounce save to localStorage
   
   // 语音播报状态
 const [voiceEnabled, setVoiceEnabled] = useState(() => {
@@ -198,58 +199,30 @@ useEffect(() => {
   return () => document.removeEventListener('click', handleClick);
 }, [showAdvanceTooltip, showMpTooltip, showHcpTooltip]);
 
-// 8杆特殊音效（放在 public/assets/ 文件夹）
-const huatAhAudio = new Audio('/assets/huat_ah.m4a');
-const HUAT_AH_DURATION = 7000; // 音效时长 7 秒
-const HUAT_AH_GAP = 2000;      // 音效结束后间隔 2 秒
-
-// UP输了音效
-const upLoseAudio = new Audio('/assets/up_lose.m4a');
-const UP_LOSE_DURATION = 16000; // 音效时长 16 秒
-const UP_LOSE_GAP = 2000;       // 音效结束后间隔 2 秒
-
-// 语音播报函数（支持净杆8和UP输了音效）
-// enableSpecialAudio: 只有 Win123 + 有下注 + 4人或以上 时为 true
-// rankings: Win123 的排名结果，包含 netScore 和 UP 状态
-// isTied: 是否全部平局
+// 语音播报函数（带超时防护，防止 Android TTS 卡死）
+const TTS_TIMEOUT = 8000; // 单个播报最长 8 秒
 const playHoleResults = useCallback((players, holeScores, holePutts, enableSpecialAudio = false, rankings = null, isTied = false, onComplete = null) => {
   if (!voiceEnabled) { if (onComplete) onComplete(); return; }
   if (!('speechSynthesis' in window)) { if (onComplete) onComplete(); return; }
   
-  // 取消之前的播报
+  // 取消之前的播报，延迟 100ms 再开始（Android TTS 需要时间清理）
   speechSynthesis.cancel();
-  huatAhAudio.pause();
-  huatAhAudio.currentTime = 0;
-  upLoseAudio.pause();
-  upLoseAudio.currentTime = 0;
   
-  // 构建UP输了的玩家集合 和 净杆数8的玩家集合
-  const upLosePlayers = new Set();
-  const netScore8Players = new Set();
-  if (rankings && enableSpecialAudio) {
-    rankings.forEach(r => {
-      // UP输了：喊了UP但没赢（平局时所有人都是第1名，不算输）
-      // 只有非平局时，finalRank > 1 才算输
-      if (!isTied && r.up && r.finalRank > 1) {
-        upLosePlayers.add(r.player);
-      }
-      // 净杆数 = 8（不管平局）
-      if (r.netScore === 8) {
-        netScore8Players.add(r.player);
-      }
-    });
-  }
-  
-  // 使用队列方式依次播报，确保前一个完成后再播下一个
+  // 使用队列方式依次播报
   let currentIndex = 0;
+  let ttsTimer = null;
+  
+  const clearTtsTimer = () => {
+    if (ttsTimer) { clearTimeout(ttsTimer); ttsTimer = null; }
+  };
   
   const playNext = () => {
+    clearTtsTimer();
     if (currentIndex >= players.length) { if (onComplete) onComplete(); return; }
     
     const player = players[currentIndex];
     const on = holeScores[player] || 0;
     const putt = holePutts[player] || 0;
-    const totalStrokes = on + putt;
     const puttWord = putt === 1 ? 'putt' : 'putts';
     
     // 从rankings获取该玩家的差点（如果有）
@@ -257,14 +230,13 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     if (rankings) {
       const playerRanking = rankings.find(r => r.player === player);
       if (playerRanking) {
-        handicap = playerRanking.stroke - playerRanking.netScore; // 总杆 - 净杆 = 差点
+        handicap = playerRanking.stroke - playerRanking.netScore;
       }
     }
     
     // 构建播报文字
-    let text;
     const voiceTemplate = handicap > 0 ? t('voiceWithHcp') : t('voiceNoHcp');
-    text = voiceTemplate
+    const text = voiceTemplate
       .replace('{player}', player)
       .replace('{on}', on)
       .replace('{putt}', putt)
@@ -288,42 +260,23 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     );
     if (female) msg.voice = female;
     
-    // 语音播报结束后的处理
+    // 超时防护：Android onend 有时不触发
+    ttsTimer = setTimeout(() => {
+      speechSynthesis.cancel();
+      currentIndex++;
+      playNext();
+    }, TTS_TIMEOUT);
+    
     msg.onend = () => {
-      const isUpLose = upLosePlayers.has(player);
-      const isHuatAh = netScore8Players.has(player);
-      
-      // UP输了优先播放（比8杆更惨）
-      if (isUpLose) {
-        upLoseAudio.currentTime = 0;
-        upLoseAudio.play().catch(e => console.log('Audio play failed:', e));
-        
-        // 音效结束后 + 间隔，再播下一个
-        setTimeout(() => {
-          currentIndex++;
-          playNext();
-        }, UP_LOSE_DURATION + UP_LOSE_GAP);
-      } else if (isHuatAh) {
-        // 8杆音效
-        huatAhAudio.currentTime = 0;
-        huatAhAudio.play().catch(e => console.log('Audio play failed:', e));
-        
-        // 音效结束后 + 间隔，再播下一个
-        setTimeout(() => {
-          currentIndex++;
-          playNext();
-        }, HUAT_AH_DURATION + HUAT_AH_GAP);
-      } else {
-        // 普通玩家，间隔一小段时间后播下一个
-        setTimeout(() => {
-          currentIndex++;
-          playNext();
-        }, 300);
-      }
+      clearTtsTimer();
+      setTimeout(() => {
+        currentIndex++;
+        playNext();
+      }, 300);
     };
     
-    // 播报出错时也继续下一个
     msg.onerror = () => {
+      clearTtsTimer();
       currentIndex++;
       playNext();
     };
@@ -331,8 +284,8 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     speechSynthesis.speak(msg);
   };
   
-  // 开始播报第一个
-  playNext();
+  // 延迟 100ms 开始（等 cancel 清理完）
+  setTimeout(playNext, 100);
 }, [voiceEnabled, lang]);
 
   const activePlayers = useMemo(() => {
@@ -723,45 +676,49 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [showToast]);
 
-  // 保存游戏状态到localStorage
+  // 保存游戏状态到localStorage（debounce 500ms，避免连续 setState 重复序列化）
   useEffect(() => {
     if ((currentSection === 'game' || currentSection === 'scorecard') && activePlayers.length > 0) {
-      const gameState = {
-        lang,
-        courseType,
-        holes,
-        pars,
-        gameMode,
-        playerNames,
-        stake,
-        prizePool,
-        playerHandicaps,
-        advanceMode,
-        currentHole,
-        scores,
-        ups,
-        putts,
-        water,
-        ob,
-        allScores,
-        allUps,
-        allPutts,
-        allWater,
-        allOb,
-        totalMoney,
-        moneyDetails,
-        completedHoles,
-        gameComplete,
-        currentHoleSettlement,
-        totalSpent,
-        selectedCourse,
-        setupMode,
-        jumboMode,
-		advancePlayers,
-        editLog
-      };
-      localStorage.setItem('golfGameState', JSON.stringify(gameState));
-      setHasSavedGame(true);
+      if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
+      saveTimerRef.current = setTimeout(() => {
+        const gameState = {
+          lang,
+          courseType,
+          holes,
+          pars,
+          gameMode,
+          playerNames,
+          stake,
+          prizePool,
+          playerHandicaps,
+          advanceMode,
+          currentHole,
+          scores,
+          ups,
+          putts,
+          water,
+          ob,
+          allScores,
+          allUps,
+          allPutts,
+          allWater,
+          allOb,
+          totalMoney,
+          moneyDetails,
+          completedHoles,
+          gameComplete,
+          currentHoleSettlement,
+          totalSpent,
+          selectedCourse,
+          setupMode,
+          jumboMode,
+          advancePlayers,
+          editLog
+        };
+        localStorage.setItem('golfGameState', JSON.stringify(gameState));
+        setHasSavedGame(true);
+      }, 500);
+      return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
     }
   }, [currentSection, lang, courseType, holes, pars, gameMode, playerNames, stake, prizePool, 
       playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
@@ -1256,6 +1213,8 @@ const getScoreLabel = useCallback((stroke, par) => {
     if (!voiceEnabled) return;
     if (!('speechSynthesis' in window)) return;
     
+    speechSynthesis.cancel();
+    
     const par = pars[holeNum] || 4;
     let holeIndex = null;
     if (selectedCourse && selectedCourse.index && Array.isArray(selectedCourse.index)) {
@@ -1278,7 +1237,6 @@ const getScoreLabel = useCallback((stroke, par) => {
     const introMsg = new SpeechSynthesisUtterance(introText);
     introMsg.lang = t('ttsLang');
     
-    // 尝试使用女声
     const voices = speechSynthesis.getVoices();
     const female = voices.find(v => 
       v.name.includes('Samantha') ||
@@ -1292,8 +1250,11 @@ const getScoreLabel = useCallback((stroke, par) => {
     );
     if (female) introMsg.voice = female;
     
-    // 播报完洞信息后，播报让杆玩家
+    // 超时防护
+    let introTimer = setTimeout(() => { speechSynthesis.cancel(); }, TTS_TIMEOUT);
+    
     introMsg.onend = () => {
+      clearTimeout(introTimer);
       const playersWithHcp = activePlayers.filter(p => getHandicapForHole(p, holeNum, par) > 0);
       if (playersWithHcp.length === 0) return;
       
@@ -1307,12 +1268,15 @@ const getScoreLabel = useCallback((stroke, par) => {
         const hcpMsg = new SpeechSynthesisUtterance(hcpText);
         hcpMsg.lang = t('ttsLang');
         if (female) hcpMsg.voice = female;
+        hcpMsg.onerror = () => {};
+        let hcpTimer = setTimeout(() => { speechSynthesis.cancel(); }, TTS_TIMEOUT);
+        hcpMsg.onend = () => { clearTimeout(hcpTimer); };
         speechSynthesis.speak(hcpMsg);
       }, 500);
     };
     
-    introMsg.onerror = () => {};
-    speechSynthesis.speak(introMsg);
+    introMsg.onerror = () => { clearTimeout(introTimer); };
+    setTimeout(() => { speechSynthesis.speak(introMsg); }, 100);
   }, [voiceEnabled, pars, selectedCourse, activePlayers, getHandicapForHole, t]);
   playHoleIntroRef.current = playHoleIntro;
 
