@@ -2184,7 +2184,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
       )}
 
       <div className="flex-1 overflow-auto">
-        <div className="max-w-md mx-auto p-3">
+        <div className="max-w-2xl mx-auto p-3">
           
           {currentSection === 'home' && (
             <HomeContent
