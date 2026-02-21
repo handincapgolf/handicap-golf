@@ -14,7 +14,7 @@ const PlayersSection = memo(({
   jumboMode, toggleJumboMode,
   gameMode, setGameMode,
   showModeDesc, setShowModeDesc,
-  stake, setStake,
+  stake, setStake, stakeInputRef,
   advanceMode, setAdvanceMode,
   advancePlayers, setAdvancePlayers,
   activePlayers,
@@ -189,6 +189,7 @@ const PlayersSection = memo(({
                       {t('stake')}:
                     </label>
                     <input
+                      ref={stakeInputRef}
                       type="number"
                       value={stake}
                       onChange={(e) => setStake(e.target.value)}

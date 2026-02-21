@@ -108,6 +108,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const qrStreamRef = useRef(null);
   const playHoleIntroRef = useRef(null); // ref to avoid TDZ
   const saveTimerRef = useRef(null); // debounce save to localStorage
+  const stakeInputRef = useRef(null); // focus stake input on validation error
   
   // 语音播报状态
 const [voiceEnabled, setVoiceEnabled] = useState(() => {
@@ -1087,18 +1088,21 @@ const getScoreLabel = useCallback((stroke, par) => {
     } else if (gameMode === 'skins') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
+        if (stakeInputRef.current) { stakeInputRef.current.focus(); stakeInputRef.current.classList.add('ring-2', 'ring-red-500'); setTimeout(() => { stakeInputRef.current?.classList.remove('ring-2', 'ring-red-500'); }, 2000); }
         return;
       }
       setPrizePool(0);
     } else if (gameMode === 'win123') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
+        if (stakeInputRef.current) { stakeInputRef.current.focus(); stakeInputRef.current.classList.add('ring-2', 'ring-red-500'); setTimeout(() => { stakeInputRef.current?.classList.remove('ring-2', 'ring-red-500'); }, 2000); }
         return;
       }
       setPrizePool(0);
     } else if (gameMode === 'baccarat') {
       if (stakeValue <= 0) {
         showToast(t('noStake'), 'error');
+        if (stakeInputRef.current) { stakeInputRef.current.focus(); stakeInputRef.current.classList.add('ring-2', 'ring-red-500'); setTimeout(() => { stakeInputRef.current?.classList.remove('ring-2', 'ring-red-500'); }, 2000); }
         return;
       }
       setPrizePool(0);
@@ -2227,7 +2231,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               jumboMode={jumboMode} toggleJumboMode={toggleJumboMode}
               gameMode={gameMode} setGameMode={setGameMode}
               showModeDesc={showModeDesc} setShowModeDesc={setShowModeDesc}
-              stake={stake} setStake={setStake}
+              stake={stake} setStake={setStake} stakeInputRef={stakeInputRef}
               advanceMode={advanceMode} setAdvanceMode={setAdvanceMode}
               advancePlayers={advancePlayers} setAdvancePlayers={setAdvancePlayers}
               activePlayers={activePlayers}
