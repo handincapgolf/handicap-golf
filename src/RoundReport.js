@@ -417,10 +417,10 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         padding: '12px',
         ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
       }}>
-        <div style={{ textAlign: 'center', fontSize: '13px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
+        <div style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
           Total Score (Par: {totalPar})
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(activePlayers.length, 4)}, 1fr)`, gap: '8px' }}>
+        <div style={{ display: 'flex', gap: '4px' }}>
           {activePlayers.map(name => {
             const total = playerTotals[name];
             const diff = total - totalPar;
@@ -428,22 +428,23 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
             const medal = getMedalRR(rank);
             return (
               <div key={name} style={{
-                textAlign: 'center', padding: '10px 8px', backgroundColor: '#ecfdf5',
-                borderRadius: '8px', border: rank === 1 ? '2px solid #d97706' : '1px solid #e5e7eb'
+                flex: 1, textAlign: 'center', padding: '6px 4px', backgroundColor: '#f9fafb',
+                borderRadius: '8px', border: rank === 1 ? '2px solid #d97706' : '1px solid #e5e7eb',
+                minWidth: 0
               }}>
-                <div style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
+                <div style={{ fontSize: '12px', fontWeight: 500, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {name} {medal}
                 </div>
-                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
-                  <span style={{ fontSize: '26px', fontWeight: 'bold', color: '#111827' }}>
+                <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
+                  <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>
                     {total || '-'}
                   </span>
                   {total > 0 && (
                     <span style={{
-                      fontSize: '13px', fontWeight: 600,
+                      fontSize: '9px', fontWeight: 600,
                       color: diff > 0 ? '#dc2626' : diff === 0 ? '#6b7280' : '#047857'
                     }}>
-                      ({formatDiff(diff)})
+                      {formatDiff(diff)}
                     </span>
                   )}
                 </div>
@@ -459,33 +460,33 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
           backgroundColor: '#fffbeb', borderRadius: '8px', padding: '14px',
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
-          <div style={{ textAlign: 'center', fontSize: '13px', fontWeight: 700, color: '#6b7280', marginBottom: '10px' }}>
+          <div style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
             Final Settlement
           </div>
           {(stake > 0 || prizePool > 0) && (
             <div style={{
-              textAlign: 'center', padding: '6px 12px', backgroundColor: '#fef3c7',
-              borderRadius: '6px', marginBottom: '10px'
+              textAlign: 'center', padding: '6px 12px', backgroundColor: '#f3e8ff',
+              borderRadius: '6px', marginBottom: '8px'
             }}>
-              <span style={{ fontSize: '13px', color: '#92400e' }}>Pot: </span>
-              <span style={{ fontSize: '18px', fontWeight: 700, color: '#92400e' }}>
+              <span style={{ fontSize: '12px', color: '#6b21a8' }}>Pot: </span>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#6b21a8' }}>
                 ${prizePool || 0}
               </span>
             </div>
           )}
-          <div style={{ display: 'flex', gap: '6px' }}>
+          <div style={{ display: 'flex', gap: '4px' }}>
             {players.map(p => {
               const amount = p.money || 0;
               return (
                 <div key={p.name} style={{
-                  flex: 1, textAlign: 'center', padding: '8px 4px',
+                  flex: 1, textAlign: 'center', padding: '6px 4px',
                   backgroundColor: '#fef3c7', borderRadius: '8px', minWidth: 0
                 }}>
-                  <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  <div style={{ fontSize: '12px', fontWeight: 500, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
                     {p.name}
                   </div>
                   <div style={{
-                    fontSize: '20px', fontWeight: 700,
+                    fontSize: '18px', fontWeight: 700,
                     color: amount > 0 ? '#059669' : amount < 0 ? '#dc2626' : '#9ca3af'
                   }}>
                     {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
