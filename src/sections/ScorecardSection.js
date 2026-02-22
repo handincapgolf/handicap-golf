@@ -295,7 +295,7 @@ const ScorecardSection = ({
       {/* Course header */}
       {selectedCourse && (
         <div className="bg-gradient-to-r from-green-600 to-green-700 rounded-lg p-4 text-white shadow-md text-center">
-          <h1 className="text-2xl font-bold mb-1">{selectedCourse.fullName}</h1>
+          <h1 className="text-lg font-bold mb-1">{selectedCourse.fullName}</h1>
           <p className="text-sm text-green-100">{selectedCourse.shortName}</p>
         </div>
       )}

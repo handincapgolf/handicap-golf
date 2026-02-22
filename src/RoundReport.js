@@ -401,11 +401,11 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         <div style={{ fontSize: '11px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
           ROUND REPORT
         </div>
-        <div style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '4px' }}>
+        <div style={{ fontSize: '17px', fontWeight: 'bold', marginBottom: '4px' }}>
           {courseFN || courseSN || 'Golf Course'}
         </div>
         {courseFN && courseSN && courseSN !== courseFN && (
-          <div style={{ fontSize: '14px', opacity: 0.8 }}>{courseSN}</div>
+          <div style={{ fontSize: '12px', opacity: 0.8 }}>{courseSN}</div>
         )}
         <div style={{ fontSize: '13px', opacity: 0.6, marginTop: '8px' }}>{date}</div>
       </div>
