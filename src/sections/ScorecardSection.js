@@ -1,5 +1,67 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { AlertCircle, Edit2, Home } from 'lucide-react';
+
+// ===== PGA-style ScoreCell =====
+const S = 40;
+function ScoreCell({ stroke, par }) {
+  if (stroke == null) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <span style={{ fontSize: 16, color: '#d1d5db' }}>-</span>
+      </div>
+    );
+  }
+  const diff = stroke - par;
+  const ns = { fontSize: 18, fontWeight: 800, lineHeight: 1, position: 'relative', zIndex: 1 };
+
+  if (diff <= -2) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'relative', width: S, height: S, borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', inset: 4, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <span style={{ ...ns, color: '#92400e' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === -1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: '50%', border: '2px solid #3b82f6', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#1d4ed8' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 0) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: 3, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: 3, border: '2px solid #f97316', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#c2410c' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ position: 'relative', width: S, height: S, borderRadius: 3, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', inset: 4, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <span style={{ ...ns, color: '#dc2626' }}>{stroke}</span>
+      </div>
+    </div>
+  );
+}
 
 // ScoreDisplay - moved from main file
 const ScoreDisplay = React.memo(({ score, par }) => {
@@ -41,6 +103,20 @@ const ScorecardSection = ({
   goHome,
   t,
 }) => {
+  const [scorecardView, setScorecardView] = useState('horizontal');
+
+  // Helper for vertical view
+  const getStroke = (player, h) => {
+    const on = allScores[player]?.[h];
+    const pt = allPutts[player]?.[h];
+    if (on == null) return null;
+    return on + (pt || 0);
+  };
+  const getVsColor = (total, totalPar) => {
+    const diff = total - totalPar;
+    return diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
+  };
+
   return (
             <div className="space-y-3 py-3">
               {selectedCourse && (
@@ -51,6 +127,20 @@ const ScorecardSection = ({
                   <p className="text-sm text-green-100">
                     {selectedCourse.shortName}
                   </p>
+                </div>
+              )}
+
+              {/* View Toggle */}
+              {gameComplete && completedHoles.length > 0 && (
+                <div className="flex gap-1 p-1 bg-white rounded-xl shadow-sm">
+                  <button onClick={() => setScorecardView('horizontal')}
+                    className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
+                      scorecardView === 'horizontal' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                    }`}>📋 Horizontal</button>
+                  <button onClick={() => setScorecardView('vertical')}
+                    className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
+                      scorecardView === 'vertical' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
+                    }`}>📊 Vertical</button>
                 </div>
               )}
 
@@ -168,8 +258,9 @@ const ScorecardSection = ({
                 </div>
               )}
 
-                  {/* 前九/后九 Scorecard 表格 */}
-                  {(() => {
+                  {/* 前九/后九 Scorecard 表格 OR 竖向记分卡 */}
+                  {scorecardView === 'horizontal' ? (
+                  (() => {
                     const frontNine = completedHoles.filter(h => h <= 9).sort((a, b) => a - b);
                     const backNine = completedHoles.filter(h => h > 9).sort((a, b) => a - b);
                     
@@ -289,7 +380,77 @@ return (
                         )}
                       </>
                     );
-                  })()}
+                  })()
+                  ) : (
+                    /* ===== Vertical Scorecard ===== */
+                    (() => {
+                      const displayHoles = [...completedHoles].sort((a, b) => holes.indexOf(a) - holes.indexOf(b));
+                      const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
+                      const getPlayerTotal = (p) => completedHoles.reduce((s, h) => s + (allScores[p]?.[h] || 0) + (allPutts[p]?.[h] || 0), 0);
+                      const getVsPar = (p) => { const d = getPlayerTotal(p) - totalPar; return d === 0 ? 'E' : d > 0 ? `+${d}` : `${d}`; };
+
+                      return (
+                        <>
+                        <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                          <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
+                            <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
+                            <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
+                            {activePlayers.map(p => (
+                              <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+                            ))}
+                          </div>
+                          {displayHoles.map((h, rowIdx) => {
+                            const hp = pars[h] || 4;
+                            const isFirst10 = h === 10;
+                            return (
+                              <div key={h}>
+                                {isFirst10 && (
+                                  <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
+                                    <div style={{ width: 42, flexShrink: 0 }} />
+                                    <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
+                                      {completedHoles.filter(x => x <= 9).reduce((s, x) => s + (pars[x] || 4), 0)}
+                                    </div>
+                                    {activePlayers.map(p => {
+                                      const ft = completedHoles.filter(x => x <= 9).reduce((s, x) => s + (allScores[p]?.[x] || 0) + (allPutts[p]?.[x] || 0), 0);
+                                      return <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 800, color: '#166534' }}>{ft || '-'}</div>;
+                                    })}
+                                  </div>
+                                )}
+                                <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                  <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
+                                  <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                                  {activePlayers.map(p => <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />)}
+                                </div>
+                              </div>
+                            );
+                          })}
+                          {completedHoles.length > 0 && (
+                            <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
+                              <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+                              <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
+                              {activePlayers.map(p => (
+                                <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+                                  <div style={{ fontSize: 22, fontWeight: 900, color: getVsColor(getPlayerTotal(p), totalPar) }}>{getPlayerTotal(p)}</div>
+                                  <div style={{ fontSize: 13, fontWeight: 700, color: getVsColor(getPlayerTotal(p), totalPar) }}>{getVsPar(p)}</div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                        {/* PGA Legend */}
+                        <div className="bg-white rounded-lg p-3 shadow-sm">
+                          <div className="flex items-center justify-center gap-3 flex-wrap">
+                            <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: '50%', position: 'relative', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ position: 'absolute', inset: 0, border: '1.5px solid #f59e0b', borderRadius: '50%' }} /><div style={{ position: 'absolute', inset: 2, border: '1.5px solid #f59e0b', borderRadius: '50%' }} /></div><span className="text-xs text-gray-500">Eagle</span></div>
+                            <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid #3b82f6', background: '#dbeafe' }} /><span className="text-xs text-gray-500">Birdie</span></div>
+                            <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, background: '#f3f4f6' }} /><span className="text-xs text-gray-500">Par</span></div>
+                            <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, border: '1.5px solid #f97316', background: '#fff7ed' }} /><span className="text-xs text-gray-500">Bogey</span></div>
+                            <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, position: 'relative', background: '#fef2f2' }}><div style={{ position: 'absolute', inset: 0, border: '1.5px solid #dc2626', borderRadius: 2 }} /><div style={{ position: 'absolute', inset: 2, border: '1.5px solid #dc2626', borderRadius: 2 }} /></div><span className="text-xs text-gray-500">Dbl+</span></div>
+                          </div>
+                        </div>
+                        </>
+                      );
+                    })()
+                  )}
                 </>
               ) : (
                 // ===== 原版 Scorecard (advanceMode === 'off') =====
@@ -428,6 +589,7 @@ return (
               )}
 
                         {hasData ? (
+                          scorecardView === 'horizontal' ? (
                           <>
                             {frontNine.length > 0 && (
                               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
@@ -561,6 +723,75 @@ return (
                               </div>
                             )}
                           </>
+                          ) : (
+                            /* ===== Normal Mode Vertical Scorecard ===== */
+                            (() => {
+                              const displayHoles = [...completedHoles].sort((a, b) => holes.indexOf(a) - holes.indexOf(b));
+                              const vtotalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
+                              const getPlayerTotal = (p) => completedHoles.reduce((s, h) => s + (allScores[p]?.[h] || 0) + (allPutts[p]?.[h] || 0), 0);
+                              const getVsPar2 = (p) => { const d = getPlayerTotal(p) - vtotalPar; return d === 0 ? 'E' : d > 0 ? `+${d}` : `${d}`; };
+
+                              return (
+                                <>
+                                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                                  <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
+                                    <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
+                                    <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
+                                    {activePlayers.map(p => (
+                                      <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+                                    ))}
+                                  </div>
+                                  {displayHoles.map((h, rowIdx) => {
+                                    const hp = pars[h] || 4;
+                                    const isFirst10 = h === 10;
+                                    return (
+                                      <div key={h}>
+                                        {isFirst10 && (
+                                          <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
+                                            <div style={{ width: 42, flexShrink: 0 }} />
+                                            <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
+                                              {completedHoles.filter(x => x <= 9).reduce((s, x) => s + (pars[x] || 4), 0)}
+                                            </div>
+                                            {activePlayers.map(p => {
+                                              const ft = completedHoles.filter(x => x <= 9).reduce((s, x) => s + (allScores[p]?.[x] || 0) + (allPutts[p]?.[x] || 0), 0);
+                                              return <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 800, color: '#166534' }}>{ft || '-'}</div>;
+                                            })}
+                                          </div>
+                                        )}
+                                        <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                                          <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
+                                          <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                                          {activePlayers.map(p => <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />)}
+                                        </div>
+                                      </div>
+                                    );
+                                  })}
+                                  {completedHoles.length > 0 && (
+                                    <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
+                                      <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+                                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{vtotalPar}</div>
+                                      {activePlayers.map(p => (
+                                        <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+                                          <div style={{ fontSize: 22, fontWeight: 900, color: getVsColor(getPlayerTotal(p), vtotalPar) }}>{getPlayerTotal(p)}</div>
+                                          <div style={{ fontSize: 13, fontWeight: 700, color: getVsColor(getPlayerTotal(p), vtotalPar) }}>{getVsPar2(p)}</div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  )}
+                                </div>
+                                <div className="bg-white rounded-lg p-3 shadow-sm">
+                                  <div className="flex items-center justify-center gap-3 flex-wrap">
+                                    <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: '50%', position: 'relative', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><div style={{ position: 'absolute', inset: 0, border: '1.5px solid #f59e0b', borderRadius: '50%' }} /><div style={{ position: 'absolute', inset: 2, border: '1.5px solid #f59e0b', borderRadius: '50%' }} /></div><span className="text-xs text-gray-500">Eagle</span></div>
+                                    <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid #3b82f6', background: '#dbeafe' }} /><span className="text-xs text-gray-500">Birdie</span></div>
+                                    <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, background: '#f3f4f6' }} /><span className="text-xs text-gray-500">Par</span></div>
+                                    <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, border: '1.5px solid #f97316', background: '#fff7ed' }} /><span className="text-xs text-gray-500">Bogey</span></div>
+                                    <div className="flex items-center gap-1"><div style={{ width: 18, height: 18, borderRadius: 2, position: 'relative', background: '#fef2f2' }}><div style={{ position: 'absolute', inset: 0, border: '1.5px solid #dc2626', borderRadius: 2 }} /><div style={{ position: 'absolute', inset: 2, border: '1.5px solid #dc2626', borderRadius: 2 }} /></div><span className="text-xs text-gray-500">Dbl+</span></div>
+                                  </div>
+                                </div>
+                                </>
+                              );
+                            })()
+                          )
                         ) : (
                           <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
                             <AlertCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
