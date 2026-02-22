@@ -234,10 +234,10 @@ export const buildRoundReportData = ({
   };
 };
 
-export const generateRoundReportUrl = (data) => {
+export const generateRoundReportUrl = (data, vertical = false) => {
   const encoded = encodeRoundReport(data);
   if (!encoded) return null;
-  return `${window.location.origin}?r=${encoded}`;
+  return `${window.location.origin}?r=${encoded}${vertical ? '&v=1' : ''}`;
 };
 
 
@@ -261,6 +261,64 @@ const getScoreBg = (score, par) => {
   return '#fef2f2';
 };
 
+// PGA-style score cell for vertical layout (matches ScorecardSection ScoreCell)
+const PGA_S = 40;
+const PGAScoreCellRR = ({ stroke, par }) => {
+  if (stroke == null || stroke === 0) {
+    return <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><span style={{ fontSize: 16, color: '#d1d5db' }}>-</span></div>;
+  }
+  const diff = stroke - par;
+  const ns = { fontSize: 18, fontWeight: 800, lineHeight: 1, position: 'relative', zIndex: 1 };
+
+  if (diff <= -2) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'relative', width: PGA_S, height: PGA_S, borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', inset: 4, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <span style={{ ...ns, color: '#92400e' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === -1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: PGA_S, height: PGA_S, borderRadius: '50%', border: '2px solid #3b82f6', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#1d4ed8' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 0) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: PGA_S, height: PGA_S, borderRadius: 3, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: PGA_S, height: PGA_S, borderRadius: 3, border: '2px solid #f97316', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#c2410c' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ position: 'relative', width: PGA_S, height: PGA_S, borderRadius: 3, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', inset: 4, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <span style={{ ...ns, color: '#dc2626' }}>{stroke}</span>
+      </div>
+    </div>
+  );
+};
+
 const getMedalRR = (rank) => {
   if (rank === 1) return '🥇';
   if (rank === 2) return '🥈';
@@ -281,7 +339,7 @@ const formatDiff = (diff) => {
  * RoundReportCard - 用于截图和 URL 查看的完整报告
  * 接收解码后的数据结构
  */
-export const RoundReportCard = memo(({ data, forCapture = false }) => {
+export const RoundReportCard = memo(({ data, forCapture = false, vertical = false }) => {
   const {
     courseSN, courseFN, date, gameMode, stake, prizePool,
     players, holes, pars, allScores, allPutts
@@ -309,15 +367,6 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
       ? scoreRanks[sortedByScore[i-1]] : i + 1;
   });
 
-  // 结算排名
-  const sortedByMoney = [...players].sort((a, b) => b.money - a.money);
-  const moneyRanks = {};
-  sortedByMoney.forEach((p, i) => {
-    if (i === 0) moneyRanks[p.name] = 1;
-    else moneyRanks[p.name] = p.money === sortedByMoney[i-1].money 
-      ? moneyRanks[sortedByMoney[i-1].name] : i + 1;
-  });
-
   const hasSettlement = players.some(p => p.money !== 0);
 
   const calcTotal = (name, holeList) => 
@@ -325,6 +374,11 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
   
   const calcParTotal = (holeList) => 
     holeList.reduce((sum, h) => sum + (pars[h] || 4), 0);
+
+  const getVsColor = (total, parTotal) => {
+    const diff = total - parTotal;
+    return diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
+  };
 
   const containerStyle = forCapture ? {
     width: '100%',
@@ -344,16 +398,16 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         textAlign: 'center',
         position: 'relative'
       }}>
-        <div style={{ fontSize: '10px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
+        <div style={{ fontSize: '11px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
           ROUND REPORT
         </div>
-        <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px' }}>
+        <div style={{ fontSize: '22px', fontWeight: 'bold', marginBottom: '4px' }}>
           {courseFN || courseSN || 'Golf Course'}
         </div>
         {courseFN && courseSN && courseSN !== courseFN && (
-          <div style={{ fontSize: '13px', opacity: 0.8 }}>{courseSN}</div>
+          <div style={{ fontSize: '14px', opacity: 0.8 }}>{courseSN}</div>
         )}
-        <div style={{ fontSize: '12px', opacity: 0.6, marginTop: '8px' }}>{date}</div>
+        <div style={{ fontSize: '13px', opacity: 0.6, marginTop: '8px' }}>{date}</div>
       </div>
 
       {/* ===== Total Score Summary ===== */}
@@ -363,7 +417,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         padding: '12px',
         ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
       }}>
-        <div style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
+        <div style={{ textAlign: 'center', fontSize: '13px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
           Total Score (Par: {totalPar})
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: `repeat(${Math.min(activePlayers.length, 4)}, 1fr)`, gap: '8px' }}>
@@ -374,19 +428,19 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
             const medal = getMedalRR(rank);
             return (
               <div key={name} style={{
-                textAlign: 'center', padding: '8px', backgroundColor: '#ecfdf5',
+                textAlign: 'center', padding: '10px 8px', backgroundColor: '#ecfdf5',
                 borderRadius: '8px', border: rank === 1 ? '2px solid #d97706' : '1px solid #e5e7eb'
               }}>
-                <div style={{ fontSize: '13px', fontWeight: 600, color: '#374151' }}>
+                <div style={{ fontSize: '14px', fontWeight: 600, color: '#374151' }}>
                   {name} {medal}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '4px' }}>
-                  <span style={{ fontSize: '24px', fontWeight: 'bold', color: '#111827' }}>
+                  <span style={{ fontSize: '26px', fontWeight: 'bold', color: '#111827' }}>
                     {total || '-'}
                   </span>
                   {total > 0 && (
                     <span style={{
-                      fontSize: '12px', fontWeight: 600,
+                      fontSize: '13px', fontWeight: 600,
                       color: diff > 0 ? '#dc2626' : diff === 0 ? '#6b7280' : '#047857'
                     }}>
                       ({formatDiff(diff)})
@@ -399,7 +453,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         </div>
       </div>
 
-      {/* ===== Final Settlement ===== */}
+      {/* ===== Final Settlement (before scorecard, matching ScorecardSection position) ===== */}
       {hasSettlement && (
         <div style={{
           backgroundColor: '#fffbeb', borderRadius: '8px', padding: '14px',
@@ -443,64 +497,128 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         </div>
       )}
 
-      {/* ===== Scorecard Tables ===== */}
-      {[
-        { label: 'OUT', holeList: frontNine },
-        { label: 'IN', holeList: backNine }
-      ].filter(s => s.holeList.length > 0).map(({ label, holeList }) => (
-        <div key={label} style={{
+      {/* ===== Scorecard ===== */}
+      {vertical ? (
+        /* ===== VERTICAL PGA-style (matching ScorecardSection sizes) ===== */
+        <div style={{
           backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '10px' }}>
-            <thead>
-              <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
-                <th style={{ padding: '6px 4px', textAlign: 'left', fontWeight: 600, minWidth: '35px' }}>{label}</th>
-                {holeList.map(h => (
-                  <th key={h} style={{ padding: '6px 0', textAlign: 'center', fontWeight: 600, minWidth: '18px' }}>{h}</th>
-                ))}
-                <th style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 700, minWidth: '24px' }}>Tot</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ backgroundColor: '#ecfdf5' }}>
-                <td style={{ padding: '5px 4px', fontWeight: 600, color: '#111827' }}>Par</td>
-                {holeList.map(h => (
-                  <td key={h} style={{ padding: '5px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
-                ))}
-                <td style={{ padding: '5px 4px', textAlign: 'center', fontWeight: 700, color: '#111827' }}>
-                  {calcParTotal(holeList)}
-                </td>
-              </tr>
-              {activePlayers.map((name, idx) => (
-                <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#ecfdf5' }}>
-                  <td style={{ padding: '5px 4px', fontWeight: 600, color: '#4b5563', fontSize: '9px' }}>{name}</td>
-                  {holeList.map(h => {
-                    const on = allScores[name]?.[h] || 0;
-                    const putt = allPutts[name]?.[h] || 0;
-                    const score = on + putt;
-                    const par = pars[h] || 4;
-                    return (
-                      <td key={h} style={{
-                        padding: '5px 0', textAlign: 'center',
-                        color: score ? getScoreColor(score, par) : '#9ca3af',
-                        fontWeight: score && score !== par ? 700 : 400
-                      }}>
-                        {score || '-'}
-                      </td>
-                    );
-                  })}
-                  <td style={{
-                    padding: '5px 4px', textAlign: 'center', fontWeight: 700, color: '#111827'
-                  }}>
-                    {calcTotal(name, holeList) || '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Header row — matches: #=42px, P=34px, fontSize 14 */}
+          <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
+            <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
+            <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
+            {activePlayers.map(p => (
+              <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+            ))}
+          </div>
+          {/* Hole rows — matches: #=17px/900, P=15px/700, padding 4px */}
+          {holes.map((h, rowIdx) => {
+            const hp = pars[h] || 4;
+            const isFirst10 = h === 10;
+            const getStroke = (name) => {
+              const on = allScores[name]?.[h] || 0;
+              const pt = allPutts[name]?.[h] || 0;
+              return on > 0 ? on + pt : null;
+            };
+            return (
+              <div key={h}>
+                {/* Front-nine subtotal before hole 10 — matches: fontSize 16/800 */}
+                {isFirst10 && frontNine.length > 0 && (
+                  <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
+                    <div style={{ width: 42, flexShrink: 0 }} />
+                    <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
+                      {calcParTotal(frontNine)}
+                    </div>
+                    {activePlayers.map(p => (
+                      <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 800, color: '#166534' }}>
+                        {calcTotal(p, frontNine) || '-'}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                  <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
+                  <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                  {activePlayers.map(p => <PGAScoreCellRR key={p} stroke={getStroke(p)} par={hp} />)}
+                </div>
+              </div>
+            );
+          })}
+          {/* Grand total row — matches: TOT 14px, total 22px/900, vsPar 13px */}
+          <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
+            <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+            <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
+            {activePlayers.map(p => (
+              <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 22, fontWeight: 900, color: getVsColor(playerTotals[p], totalPar) }}>{playerTotals[p]}</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: getVsColor(playerTotals[p], totalPar) }}>{formatDiff(playerTotals[p] - totalPar)}</div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      ) : (
+        /* ===== HORIZONTAL Tables (matching ScorecardSection: 14px, tableLayout fixed) ===== */
+        <>
+          {[
+            { label: 'OUT', holeList: frontNine },
+            { label: 'IN', holeList: backNine }
+          ].filter(s => s.holeList.length > 0).map(({ label, holeList }) => (
+            <div key={label} style={{
+              backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
+              ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'fixed' }}>
+                <thead>
+                  <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
+                    <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700, width: '55px' }}>{label}</th>
+                    {holeList.map(h => (
+                      <th key={h} style={{ padding: '8px 0', textAlign: 'center', fontWeight: 700 }}>{h}</th>
+                    ))}
+                    <th style={{ padding: '8px 4px', textAlign: 'center', fontWeight: 700, width: '35px' }}>Tot</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ backgroundColor: '#f9fafb' }}>
+                    <td style={{ padding: '8px 4px', fontWeight: 700, color: '#111827' }}>Par</td>
+                    {holeList.map(h => (
+                      <td key={h} style={{ padding: '8px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
+                    ))}
+                    <td style={{ padding: '8px 4px', textAlign: 'center', fontWeight: 700, color: '#111827' }}>
+                      {calcParTotal(holeList)}
+                    </td>
+                  </tr>
+                  {activePlayers.map((name, idx) => (
+                    <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#f9fafb' }}>
+                      <td style={{ padding: '6px 4px', fontWeight: 700, color: '#374151', fontSize: '12px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{name}</td>
+                      {holeList.map(h => {
+                        const on = allScores[name]?.[h] || 0;
+                        const putt = allPutts[name]?.[h] || 0;
+                        const score = on + putt;
+                        const par = pars[h] || 4;
+                        return (
+                          <td key={h} style={{
+                            padding: '8px 0', textAlign: 'center',
+                            color: score ? getScoreColor(score, par) : '#9ca3af',
+                            fontWeight: score && score !== par ? 700 : 400
+                          }}>
+                            {score || '-'}
+                          </td>
+                        );
+                      })}
+                      <td style={{
+                        padding: '8px 4px', textAlign: 'center', fontWeight: 700, color: '#111827'
+                      }}>
+                        {calcTotal(name, holeList) || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </>
+      )}
 
       {/* ===== Footer ===== */}
       <div style={{
@@ -509,7 +627,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         borderTop: forCapture ? '1px solid #d1fae5' : 'none'
       }}>
         <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
-        <span style={{ fontSize: '12px', fontWeight: 600, color: '#6b7280' }}>
+        <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
           Powered by <span style={{ color: '#047857' }}>HandinCap.golf</span>
         </span>
       </div>
@@ -525,7 +643,7 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
  * Props:
  *   isOpen, onClose, reportData (已解码的数据), lang, showToast
  */
-export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast }) => {
+export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast, linkOnly = false }) => {
   const captureRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
 
@@ -582,7 +700,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
   // URL 链接分享
   const handleLinkShare = () => {
-    const url = generateRoundReportUrl(reportData);
+    const url = generateRoundReportUrl(reportData, linkOnly);
     if (!url) {
       showToast?.(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
       return;
@@ -637,19 +755,21 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
         {/* Share Buttons */}
         <div style={{ display: 'flex', gap: '10px', padding: '12px 16px' }}>
-          <button
-            onClick={handleImageShare}
-            disabled={capturing}
-            style={{
-              flex: 1, padding: '12px', borderRadius: '10px',
-              backgroundColor: capturing ? '#d1d5db' : '#047857', color: 'white',
-              border: 'none', cursor: capturing ? 'not-allowed' : 'pointer',
-              fontWeight: 600, fontSize: '14px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
-            }}
-          >
-            {capturing ? '⏳' : '📷'} {lang === 'zh' ? '分享图片' : 'Share Image'}
-          </button>
+          {!linkOnly && (
+            <button
+              onClick={handleImageShare}
+              disabled={capturing}
+              style={{
+                flex: 1, padding: '12px', borderRadius: '10px',
+                backgroundColor: capturing ? '#d1d5db' : '#047857', color: 'white',
+                border: 'none', cursor: capturing ? 'not-allowed' : 'pointer',
+                fontWeight: 600, fontSize: '14px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
+              }}
+            >
+              {capturing ? '⏳' : '📷'} {lang === 'zh' ? '分享图片' : 'Share Image'}
+            </button>
+          )}
           <button
             onClick={handleLinkShare}
             style={{
@@ -665,9 +785,9 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         </div>
 
         {/* Preview / Capture Area */}
-        <div style={{ padding: '0 12px 12px', maxHeight: '60vh', overflowY: 'auto' }}>
+        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
-            <RoundReportCard data={reportData} forCapture={true} />
+            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
           </div>
         </div>
       </div>
@@ -678,7 +798,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
 // ========== Round Report 独立查看页 (URL 打开) ==========
 
-export const RoundReportPage = memo(({ encoded }) => {
+export const RoundReportPage = memo(({ encoded, vertical = false }) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
 
@@ -745,7 +865,7 @@ export const RoundReportPage = memo(({ encoded }) => {
       padding: '16px'
     }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
-        <RoundReportCard data={data} />
+        <RoundReportCard data={data} vertical={vertical} />
         
         {/* Open in App button */}
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
