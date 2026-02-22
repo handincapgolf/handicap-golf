@@ -402,7 +402,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         padding: '12px',
         ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
       }}>
-        <div style={{ textAlign: 'center', fontSize: forCapture ? '16px' : '12px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
+        <div style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
           Total Score (Par: {totalPar})
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
@@ -415,16 +415,16 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
                 borderRadius: '8px', border: '1px solid #e5e7eb',
                 minWidth: 0
               }}>
-                <div style={{ fontSize: forCapture ? '20px' : '16px', fontWeight: 700, color: '#111827', ...(forCapture ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }), padding: '0 2px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
                   {name}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
-                  <span style={{ fontSize: forCapture ? '28px' : '18px', fontWeight: 'bold', color: '#111827' }}>
+                  <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>
                     {total || '-'}
                   </span>
                   {total > 0 && (
                     <span style={{
-                      fontSize: forCapture ? '14px' : '9px', fontWeight: 600,
+                      fontSize: '9px', fontWeight: 600,
                       color: diff > 0 ? '#dc2626' : diff === 0 ? '#6b7280' : '#047857'
                     }}>
                       {formatDiff(diff)}
@@ -443,7 +443,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
           backgroundColor: '#fffbeb', borderRadius: '8px', padding: '14px',
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
-          <div style={{ textAlign: 'center', fontSize: forCapture ? '16px' : '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
+          <div style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
             Final Settlement
           </div>
           {(stake > 0 || prizePool > 0) && (
@@ -451,8 +451,8 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
               textAlign: 'center', padding: '6px 12px', backgroundColor: '#f3e8ff',
               borderRadius: '6px', marginBottom: '8px'
             }}>
-              <span style={{ fontSize: forCapture ? '16px' : '12px', color: '#6b21a8' }}>Pot: </span>
-              <span style={{ fontSize: forCapture ? '22px' : '14px', fontWeight: 700, color: '#6b21a8' }}>
+              <span style={{ fontSize: '12px', color: '#6b21a8' }}>Pot: </span>
+              <span style={{ fontSize: '14px', fontWeight: 700, color: '#6b21a8' }}>
                 ${prizePool || 0}
               </span>
             </div>
@@ -465,11 +465,11 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
                   flex: 1, textAlign: 'center', padding: '6px 4px',
                   backgroundColor: '#fef3c7', borderRadius: '8px', minWidth: 0
                 }}>
-                  <div style={{ fontSize: forCapture ? '20px' : '16px', fontWeight: 700, color: '#111827', ...(forCapture ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }), padding: '0 4px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
                     {p.name}
                   </div>
                   <div style={{
-                    fontSize: forCapture ? '28px' : '18px', fontWeight: 700,
+                    fontSize: '18px', fontWeight: 700,
                     color: amount > 0 ? '#059669' : amount < 0 ? '#dc2626' : '#9ca3af'
                   }}>
                     {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
@@ -848,7 +848,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false }) => {
       background: 'linear-gradient(to bottom, #064e3b, #022c22)',
       padding: '16px'
     }}>
-      <div style={{ maxWidth: '768px', width: '100%', margin: '0 auto' }}>
+      <div style={{ width: '100%', margin: '0 auto' }}>
         <RoundReportCard data={data} vertical={vertical} />
         
         {/* Open in App button */}
