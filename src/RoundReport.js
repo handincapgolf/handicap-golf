@@ -319,13 +319,6 @@ const PGAScoreCellRR = ({ stroke, par }) => {
   );
 };
 
-const getMedalRR = (rank) => {
-  if (rank === 1) return '🥇';
-  if (rank === 2) return '🥈';
-  if (rank === 3) return '🥉';
-  return '';
-};
-
 const formatDiff = (diff) => {
   if (diff > 0) return `+${diff}`;
   if (diff === 0) return 'E';
@@ -358,14 +351,6 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
   });
 
   const totalPar = holes.reduce((sum, h) => sum + (pars[h] || 4), 0);
-
-  const sortedByScore = [...activePlayers].sort((a, b) => playerTotals[a] - playerTotals[b]);
-  const scoreRanks = {};
-  sortedByScore.forEach((p, i) => {
-    if (i === 0) scoreRanks[p] = 1;
-    else scoreRanks[p] = playerTotals[p] === playerTotals[sortedByScore[i-1]] 
-      ? scoreRanks[sortedByScore[i-1]] : i + 1;
-  });
 
   const hasSettlement = players.some(p => p.money !== 0);
 
@@ -401,7 +386,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         <div style={{ fontSize: '11px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
           ROUND REPORT
         </div>
-        <div style={{ fontSize: '17px', fontWeight: 'bold', marginBottom: '4px' }}>
+        <div style={{ fontSize: (courseFN || courseSN || '').length > 25 ? '14px' : '17px', fontWeight: 'bold', marginBottom: '4px' }}>
           {courseFN || courseSN || 'Golf Course'}
         </div>
         {courseFN && courseSN && courseSN !== courseFN && (
@@ -424,16 +409,14 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
           {activePlayers.map(name => {
             const total = playerTotals[name];
             const diff = total - totalPar;
-            const rank = scoreRanks[name];
-            const medal = getMedalRR(rank);
             return (
               <div key={name} style={{
                 flex: 1, textAlign: 'center', padding: '6px 4px', backgroundColor: '#f9fafb',
-                borderRadius: '8px', border: rank === 1 ? '2px solid #d97706' : '1px solid #e5e7eb',
+                borderRadius: '8px', border: '1px solid #e5e7eb',
                 minWidth: 0
               }}>
-                <div style={{ fontSize: '12px', fontWeight: 500, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                  {name} {medal}
+                <div style={{ fontSize: '12px', fontWeight: 600, color: '#374151', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
+                  {name}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
                   <span style={{ fontSize: '18px', fontWeight: 'bold', color: '#111827' }}>
