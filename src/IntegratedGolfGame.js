@@ -2305,6 +2305,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               activePlayers={activePlayers}
               allScores={allScores}
               allPutts={allPutts}
+              allWater={allWater}
+              allOb={allOb}
               pars={pars}
               holes={holes}
               totalMoney={totalMoney}
