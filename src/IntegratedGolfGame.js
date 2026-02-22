@@ -2159,7 +2159,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
   // ========== 检测 Round Report 链接 ==========
   const roundParam = urlParams.get('r');
   if (roundParam) {
-    return <RoundReportPage encoded={roundParam} />;
+    const verticalParam = urlParams.get('v') === '1';
+    return <RoundReportPage encoded={roundParam} vertical={verticalParam} />;
   }
 
   // Viewer mode: render outside Tailwind wrapper to avoid width issues

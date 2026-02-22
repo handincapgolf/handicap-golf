@@ -234,10 +234,10 @@ export const buildRoundReportData = ({
   };
 };
 
-export const generateRoundReportUrl = (data) => {
+export const generateRoundReportUrl = (data, vertical = false) => {
   const encoded = encodeRoundReport(data);
   if (!encoded) return null;
-  return `${window.location.origin}?r=${encoded}`;
+  return `${window.location.origin}?r=${encoded}${vertical ? '&v=1' : ''}`;
 };
 
 
@@ -261,6 +261,64 @@ const getScoreBg = (score, par) => {
   return '#fef2f2';
 };
 
+// PGA-style score cell for vertical layout (inline-style version for RoundReport)
+const PGAScoreCellRR = ({ stroke, par }) => {
+  if (stroke == null || stroke === 0) {
+    return <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}><span style={{ fontSize: 15, color: '#d1d5db' }}>-</span></div>;
+  }
+  const diff = stroke - par;
+  const S = 34;
+  const ns = { fontSize: 16, fontWeight: 800, lineHeight: 1, position: 'relative', zIndex: 1 };
+
+  if (diff <= -2) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ position: 'relative', width: S, height: S, borderRadius: '50%', background: '#fef3c7', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ position: 'absolute', inset: 0, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <div style={{ position: 'absolute', inset: 3, border: '2px solid #f59e0b', borderRadius: '50%' }} />
+          <span style={{ ...ns, color: '#92400e' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === -1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: '50%', border: '2px solid #3b82f6', background: '#dbeafe', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#1d4ed8' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 0) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: 3, background: '#f3f4f6', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#374151' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  if (diff === 1) {
+    return (
+      <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+        <div style={{ width: S, height: S, borderRadius: 3, border: '2px solid #f97316', background: '#fff7ed', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <span style={{ ...ns, color: '#c2410c' }}>{stroke}</span>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ flex: 1, display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+      <div style={{ position: 'relative', width: S, height: S, borderRadius: 3, background: '#fef2f2', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div style={{ position: 'absolute', inset: 0, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <div style={{ position: 'absolute', inset: 3, border: '2px solid #dc2626', borderRadius: 3 }} />
+        <span style={{ ...ns, color: '#dc2626' }}>{stroke}</span>
+      </div>
+    </div>
+  );
+};
+
 const getMedalRR = (rank) => {
   if (rank === 1) return '🥇';
   if (rank === 2) return '🥈';
@@ -281,7 +339,7 @@ const formatDiff = (diff) => {
  * RoundReportCard - 用于截图和 URL 查看的完整报告
  * 接收解码后的数据结构
  */
-export const RoundReportCard = memo(({ data, forCapture = false }) => {
+export const RoundReportCard = memo(({ data, forCapture = false, vertical = false }) => {
   const {
     courseSN, courseFN, date, gameMode, stake, prizePool,
     players, holes, pars, allScores, allPutts
@@ -325,6 +383,11 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
   
   const calcParTotal = (holeList) => 
     holeList.reduce((sum, h) => sum + (pars[h] || 4), 0);
+
+  const getVsColor = (total, parTotal) => {
+    const diff = total - parTotal;
+    return diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
+  };
 
   const containerStyle = forCapture ? {
     width: '100%',
@@ -399,64 +462,128 @@ export const RoundReportCard = memo(({ data, forCapture = false }) => {
         </div>
       </div>
 
-      {/* ===== Scorecard Tables ===== */}
-      {[
-        { label: 'OUT', holeList: frontNine },
-        { label: 'IN', holeList: backNine }
-      ].filter(s => s.holeList.length > 0).map(({ label, holeList }) => (
-        <div key={label} style={{
+      {/* ===== Scorecard ===== */}
+      {vertical ? (
+        /* ===== VERTICAL PGA-style Scorecard ===== */
+        <div style={{
           backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
-            <thead>
-              <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
-                <th style={{ padding: '7px 4px', textAlign: 'left', fontWeight: 700, minWidth: '38px' }}>{label}</th>
-                {holeList.map(h => (
-                  <th key={h} style={{ padding: '7px 0', textAlign: 'center', fontWeight: 700, minWidth: '20px' }}>{h}</th>
-                ))}
-                <th style={{ padding: '7px 4px', textAlign: 'center', fontWeight: 800, minWidth: '26px' }}>Tot</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr style={{ backgroundColor: '#ecfdf5' }}>
-                <td style={{ padding: '6px 4px', fontWeight: 700, color: '#111827' }}>Par</td>
-                {holeList.map(h => (
-                  <td key={h} style={{ padding: '6px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
-                ))}
-                <td style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#111827' }}>
-                  {calcParTotal(holeList)}
-                </td>
-              </tr>
-              {activePlayers.map((name, idx) => (
-                <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#ecfdf5' }}>
-                  <td style={{ padding: '6px 4px', fontWeight: 700, color: '#4b5563', fontSize: '11px' }}>{name}</td>
-                  {holeList.map(h => {
-                    const on = allScores[name]?.[h] || 0;
-                    const putt = allPutts[name]?.[h] || 0;
-                    const score = on + putt;
-                    const par = pars[h] || 4;
-                    return (
-                      <td key={h} style={{
-                        padding: '6px 0', textAlign: 'center',
-                        color: score ? getScoreColor(score, par) : '#9ca3af',
-                        fontWeight: score && score !== par ? 700 : 400
-                      }}>
-                        {score || '-'}
-                      </td>
-                    );
-                  })}
-                  <td style={{
-                    padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#111827'
-                  }}>
-                    {calcTotal(name, holeList) || '-'}
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          {/* Header row */}
+          <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
+            <div style={{ width: 38, flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
+            <div style={{ width: 30, flexShrink: 0, fontSize: 13, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
+            {activePlayers.map(p => (
+              <div key={p} style={{ flex: 1, fontSize: 13, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+            ))}
+          </div>
+          {/* Hole rows */}
+          {holes.map((h, rowIdx) => {
+            const hp = pars[h] || 4;
+            const isFirst10 = h === 10;
+            const getStroke = (name) => {
+              const on = allScores[name]?.[h] || 0;
+              const pt = allPutts[name]?.[h] || 0;
+              return on > 0 ? on + pt : null;
+            };
+            return (
+              <div key={h}>
+                {/* Front-nine subtotal before hole 10 */}
+                {isFirst10 && frontNine.length > 0 && (
+                  <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
+                    <div style={{ width: 38, flexShrink: 0 }} />
+                    <div style={{ width: 30, flexShrink: 0, fontSize: 13, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
+                      {calcParTotal(frontNine)}
+                    </div>
+                    {activePlayers.map(p => (
+                      <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 15, fontWeight: 800, color: '#166534' }}>
+                        {calcTotal(p, frontNine) || '-'}
+                      </div>
+                    ))}
+                  </div>
+                )}
+                <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '3px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                  <div style={{ width: 38, flexShrink: 0, textAlign: 'center', fontSize: 15, fontWeight: 900, color: '#374151' }}>{h}</div>
+                  <div style={{ width: 30, flexShrink: 0, fontSize: 14, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                  {activePlayers.map(p => <PGAScoreCellRR key={p} stroke={getStroke(p)} par={hp} />)}
+                </div>
+              </div>
+            );
+          })}
+          {/* Grand total row */}
+          <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
+            <div style={{ width: 38, flexShrink: 0, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#166534' }}>TOT</div>
+            <div style={{ width: 30, flexShrink: 0, fontSize: 13, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
+            {activePlayers.map(p => (
+              <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: 20, fontWeight: 900, color: getVsColor(playerTotals[p], totalPar) }}>{playerTotals[p]}</div>
+                <div style={{ fontSize: 12, fontWeight: 700, color: getVsColor(playerTotals[p], totalPar) }}>{formatDiff(playerTotals[p] - totalPar)}</div>
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      ) : (
+        /* ===== HORIZONTAL Scorecard Tables ===== */
+        <>
+          {[
+            { label: 'OUT', holeList: frontNine },
+            { label: 'IN', holeList: backNine }
+          ].filter(s => s.holeList.length > 0).map(({ label, holeList }) => (
+            <div key={label} style={{
+              backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
+              ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
+            }}>
+              <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                <thead>
+                  <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
+                    <th style={{ padding: '7px 4px', textAlign: 'left', fontWeight: 700, minWidth: '38px' }}>{label}</th>
+                    {holeList.map(h => (
+                      <th key={h} style={{ padding: '7px 0', textAlign: 'center', fontWeight: 700, minWidth: '20px' }}>{h}</th>
+                    ))}
+                    <th style={{ padding: '7px 4px', textAlign: 'center', fontWeight: 800, minWidth: '26px' }}>Tot</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr style={{ backgroundColor: '#ecfdf5' }}>
+                    <td style={{ padding: '6px 4px', fontWeight: 700, color: '#111827' }}>Par</td>
+                    {holeList.map(h => (
+                      <td key={h} style={{ padding: '6px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
+                    ))}
+                    <td style={{ padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#111827' }}>
+                      {calcParTotal(holeList)}
+                    </td>
+                  </tr>
+                  {activePlayers.map((name, idx) => (
+                    <tr key={name} style={{ backgroundColor: idx % 2 === 0 ? 'white' : '#ecfdf5' }}>
+                      <td style={{ padding: '6px 4px', fontWeight: 700, color: '#4b5563', fontSize: '11px' }}>{name}</td>
+                      {holeList.map(h => {
+                        const on = allScores[name]?.[h] || 0;
+                        const putt = allPutts[name]?.[h] || 0;
+                        const score = on + putt;
+                        const par = pars[h] || 4;
+                        return (
+                          <td key={h} style={{
+                            padding: '6px 0', textAlign: 'center',
+                            color: score ? getScoreColor(score, par) : '#9ca3af',
+                            fontWeight: score && score !== par ? 700 : 400
+                          }}>
+                            {score || '-'}
+                          </td>
+                        );
+                      })}
+                      <td style={{
+                        padding: '6px 4px', textAlign: 'center', fontWeight: 800, color: '#111827'
+                      }}>
+                        {calcTotal(name, holeList) || '-'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          ))}
+        </>
+      )}
 
       {/* ===== Final Settlement ===== */}
       {hasSettlement && (
@@ -583,7 +710,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
   // URL 链接分享
   const handleLinkShare = () => {
-    const url = generateRoundReportUrl(reportData);
+    const url = generateRoundReportUrl(reportData, linkOnly);
     if (!url) {
       showToast?.(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
       return;
@@ -668,9 +795,9 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         </div>
 
         {/* Preview / Capture Area */}
-        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '50vh' : '60vh', overflowY: 'auto' }}>
+        <div style={{ padding: '0 12px 12px', maxHeight: '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
-            <RoundReportCard data={reportData} forCapture={!linkOnly} />
+            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
           </div>
         </div>
       </div>
@@ -681,7 +808,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
 // ========== Round Report 独立查看页 (URL 打开) ==========
 
-export const RoundReportPage = memo(({ encoded }) => {
+export const RoundReportPage = memo(({ encoded, vertical = false }) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
 
@@ -748,7 +875,7 @@ export const RoundReportPage = memo(({ encoded }) => {
       padding: '16px'
     }}>
       <div style={{ maxWidth: '480px', margin: '0 auto' }}>
-        <RoundReportCard data={data} />
+        <RoundReportCard data={data} vertical={vertical} />
         
         {/* Open in App button */}
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
