@@ -415,7 +415,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
                 borderRadius: '8px', border: '1px solid #e5e7eb',
                 minWidth: 0
               }}>
-                <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>
+                <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', ...(forCapture ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }), padding: '0 2px' }}>
                   {name}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'center', gap: '2px' }}>
@@ -465,7 +465,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
                   flex: 1, textAlign: 'center', padding: '6px 4px',
                   backgroundColor: '#fef3c7', borderRadius: '8px', minWidth: 0
                 }}>
-                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 4px' }}>
+                  <div style={{ fontSize: '14px', fontWeight: 700, color: '#111827', ...(forCapture ? {} : { overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }), padding: '0 4px' }}>
                     {p.name}
                   </div>
                   <div style={{
@@ -645,7 +645,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
       const canvas = await html2canvas(el, {
         backgroundColor: '#f0fdf4',
-        scale: 3,
+        scale: 5,
         useCORS: true,
         logging: false
       });
