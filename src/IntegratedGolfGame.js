@@ -102,6 +102,7 @@ const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
   const [showRoundReport, setShowRoundReport] = useState(false);
+  const [roundReportLinkOnly, setRoundReportLinkOnly] = useState(false);
   const [hasSavedGame, setHasSavedGame] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const qrVideoRef = useRef(null);
@@ -2059,7 +2060,8 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
   }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast, advancePlayers]);
 
   // ========== Round Report 分享 ==========
-  const handleShareRoundReport = useCallback(() => {
+  const handleShareRoundReport = useCallback((linkOnly = false) => {
+    setRoundReportLinkOnly(linkOnly);
     setShowRoundReport(true);
   }, []);
 
@@ -2401,6 +2403,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         advancePlayers={advancePlayers}
         getMedal={getMedal}
         showRoundReport={showRoundReport}
+        roundReportLinkOnly={roundReportLinkOnly}
         setShowRoundReport={setShowRoundReport}
         roundReportData={roundReportData}
         lang={lang}

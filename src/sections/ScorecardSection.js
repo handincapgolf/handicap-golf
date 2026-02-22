@@ -356,7 +356,7 @@ const ScorecardSection = ({
             </div>
             {gameComplete && (
               <button
-                onClick={handleShareRoundReport}
+                onClick={() => handleShareRoundReport(scorecardView === 'vertical')}
                 className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
               >
                 📊 {t('shareRoundReport')}

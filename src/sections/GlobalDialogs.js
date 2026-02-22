@@ -26,6 +26,7 @@ const GlobalDialogs = ({
   getMedal,
   // Round report
   showRoundReport,
+  roundReportLinkOnly,
   setShowRoundReport,
   roundReportData,
   lang,
@@ -131,6 +132,7 @@ const GlobalDialogs = ({
         reportData={roundReportData}
         lang={lang}
         showToast={showToast}
+        linkOnly={roundReportLinkOnly}
       />
 
       {toast && (
