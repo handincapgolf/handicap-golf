@@ -93,28 +93,26 @@ const ScorecardSection = ({
                         <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
                           {t('totalScore')} ({t('standardPar')}: {totalPar})
                         </h3>
-                        <div className="grid grid-cols-2 gap-2">
+                        <div className="flex gap-1">
                           {activePlayers.map(player => {
                             const total = playerTotals[player];
                             const diff = total - totalPar;
                             const diffStr = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
-                            const rank = scoreRankings[player];
-                            const medal = getMedal(rank);
                             
                             return (
-                              <div key={player} className="text-center p-2 bg-gray-50 rounded-lg">
+                              <div key={player} className="flex-1 text-center py-1.5 bg-gray-50 rounded-lg min-w-0">
   <div 
-    className="cursor-pointer hover:bg-gray-100 rounded p-1 -m-1"
+    className="cursor-pointer hover:bg-gray-100 rounded px-1"
     onClick={() => handleAdvancePlayerClick(player)}
   >
-    <div className="text-sm font-medium flex items-center justify-center gap-1 text-blue-600 underline">
-      {player} {medal} <span className="text-xs">📊</span>
+    <div className="text-xs font-medium text-blue-600 underline truncate">
+      {player}
     </div>
-    <div className="flex items-baseline justify-center gap-1">
-      <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
+    <div className="flex items-baseline justify-center gap-0.5">
+      <span className="text-lg font-bold text-gray-900">{total || '-'}</span>
       {total > 0 && (
-        <span className={`text-xs font-semibold ${diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600'}`}>
-          ({diffStr})
+        <span className={`font-semibold ${diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600'}`} style={{ fontSize: 9 }}>
+          {diffStr}
         </span>
       )}
     </div>
@@ -122,9 +120,9 @@ const ScorecardSection = ({
   {gameComplete && (
     <button
       onClick={(e) => { e.stopPropagation(); handleSharePlayer(player); }}
-      className="mt-1.5 px-2 py-1 bg-green-100 hover:bg-green-200 text-green-700 rounded text-xs font-medium flex items-center justify-center gap-1 mx-auto"
+      className="mt-0.5 px-1.5 py-0.5 bg-green-100 hover:bg-green-200 text-green-700 rounded font-medium mx-auto flex items-center gap-0.5 justify-center" style={{ fontSize: 10 }}
     >
-      <span>📤</span> Share
+      📤 Share
     </button>
   )}
 </div>
@@ -142,6 +140,33 @@ const ScorecardSection = ({
                       </div>
                     );
                   })()}
+
+              {(gameComplete || completedHoles.length === holes.length) && (Number(stake) > 0 || (gameMode === 'skins' && prizePool > 0)) && (
+                <div className="bg-yellow-50 rounded-lg p-3 shadow-sm">
+                  <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
+                    {t('finalSettlement')}
+                  </h3>
+                  {(gameMode === 'skins' || gameMode === 'win123') && prizePool > 0 && (
+                    <div className="mb-2 text-center p-1.5 bg-purple-100 rounded">
+                      <span className="text-xs text-purple-700">{gameMode === 'win123' ? t('penaltyPot') : t('prizePool')}: </span>
+                      <span className="text-sm font-bold text-purple-800 ml-1">${prizePool}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-1">
+                    {activePlayers.map(player => {
+                      const amount = totalMoney[player] || 0;
+                      return (
+                        <div key={player} className="flex-1 text-center py-1.5 bg-yellow-100 rounded-lg min-w-0">
+                          <div className="text-xs font-medium text-gray-700 truncate px-1">{player}</div>
+                          <div className={`text-lg font-bold ${amount > 0 ? 'text-green-600' : amount < 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                            {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
                   {/* 前九/后九 Scorecard 表格 */}
                   {(() => {
@@ -178,7 +203,7 @@ const ScorecardSection = ({
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>OUT</th>
                                   {frontNine.map(h => (
-                                    <th key={h} className="px-0 py-2 text-center font-bold" style={{  }}>{h}</th>
+                                    <th key={h} className="px-0 py-2 text-center font-bold">{h}</th>
                                   ))}
                                   <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>{t('total')}</th>
                                 </tr>
@@ -224,7 +249,7 @@ return (
                                 <tr className="bg-green-600 text-white">
                                   <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>IN</th>
                                   {backNine.map(h => (
-                                    <th key={h} className="px-0 py-2 text-center font-bold" style={{  }}>{h}</th>
+                                    <th key={h} className="px-0 py-2 text-center font-bold">{h}</th>
                                   ))}
                                   <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>{t('total')}</th>
                                 </tr>
@@ -413,7 +438,7 @@ return (
                                         {t('out')}
                                       </th>
                                       {frontNine.map(hole => (
-                                        <th key={hole} className="px-0 py-2 text-center font-bold" style={{  }}>
+                                        <th key={hole} className="px-0 py-2 text-center font-bold">
                                           {hole}
                                         </th>
                                       ))}
@@ -479,7 +504,7 @@ return (
                                         {t('in')}
                                       </th>
                                       {backNine.map(hole => (
-                                        <th key={hole} className="px-0 py-2 text-center font-bold" style={{  }}>
+                                        <th key={hole} className="px-0 py-2 text-center font-bold">
                                           {hole}
                                         </th>
                                       ))}
