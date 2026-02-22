@@ -167,6 +167,17 @@ useEffect(() => {
   return () => document.removeEventListener('visibilitychange', handleVisibility);
 }, [currentSection]);
 
+// ========== 比赛结束自动弹出 Edit Log，10秒后自动关闭 ==========
+useEffect(() => {
+  if (gameComplete && editLog.length > 0 && currentSection === 'scorecard') {
+    setEditLogDialog({ isOpen: true, hole: null });
+    const timer = setTimeout(() => {
+      setEditLogDialog({ isOpen: false, hole: null });
+    }, 10000);
+    return () => clearTimeout(timer);
+  }
+}, [gameComplete, currentSection]);
+
 // ========== 最近使用球场 ==========
 const RECENT_COURSES_KEY = 'handincap_recent_courses';
 const [recentCourses, setRecentCourses] = useState(() => {

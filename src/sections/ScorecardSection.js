@@ -173,27 +173,27 @@ const ScorecardSection = ({
                       <>
                         {frontNine.length > 0 && (
                           <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-3">
-                            <table className="w-full" style={{ fontSize: '10px' }}>
+                            <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                               <thead>
                                 <tr className="bg-green-600 text-white">
-                                  <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>OUT</th>
+                                  <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>OUT</th>
                                   {frontNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
+                                    <th key={h} className="px-0 py-2 text-center font-bold" style={{  }}>{h}</th>
                                   ))}
-                                  <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
+                                  <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>{t('total')}</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr className="bg-gray-50">
-                                  <td className="px-1 py-1.5 font-semibold text-gray-900">Par</td>
+                                  <td className="px-1 py-2 font-bold text-gray-900">Par</td>
                                   {frontNine.map(h => (
-                                    <td key={h} className="px-0 py-1.5 text-center text-gray-900">{pars[h] || 4}</td>
+                                    <td key={h} className="px-0 py-2 text-center text-gray-900">{pars[h] || 4}</td>
                                   ))}
-                                  <td className="px-1 py-1.5 text-center font-bold text-gray-900">{calculateParTotal(frontNine)}</td>
+                                  <td className="px-1 py-2 text-center font-bold text-gray-900">{calculateParTotal(frontNine)}</td>
                                 </tr>
                                 {activePlayers.map((player, idx) => (
                                   <tr key={player} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                    <td className="px-1 py-1.5 font-semibold text-gray-700 truncate" style={{ fontSize: '9px' }}>
+                                    <td className="px-1 py-1.5 font-bold text-gray-700 truncate" style={{ fontSize: '12px' }}>
                                       {player}
                                     </td>
                                     {frontNine.map(h => {
@@ -202,12 +202,12 @@ const puttScore = allPutts[player]?.[h] || 0;
 const score = onScore + puttScore;
 const par = pars[h] || 4;
 return (
-  <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
+  <td key={h} className={`px-0 py-2 text-center ${score ? getScoreColor(score, par) : ''}`}>
     {score || '-'}
                                         </td>
                                       );
                                     })}
-                                    <td className="px-1 py-1.5 text-center font-bold text-gray-900">
+                                    <td className="px-1 py-2 text-center font-bold text-gray-900">
                                       {calculateTotal(player, frontNine) || '-'}
                                     </td>
                                   </tr>
@@ -219,27 +219,27 @@ return (
 
                         {backNine.length > 0 && (
                           <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                            <table className="w-full" style={{ fontSize: '10px' }}>
+                            <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                               <thead>
                                 <tr className="bg-green-600 text-white">
-                                  <th className="px-1 py-1.5 text-left font-semibold" style={{ minWidth: '35px' }}>IN</th>
+                                  <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>IN</th>
                                   {backNine.map(h => (
-                                    <th key={h} className="px-0 py-1.5 text-center font-semibold" style={{ minWidth: '18px' }}>{h}</th>
+                                    <th key={h} className="px-0 py-2 text-center font-bold" style={{  }}>{h}</th>
                                   ))}
-                                  <th className="px-1 py-1.5 text-center font-semibold" style={{ minWidth: '22px' }}>{t('total')}</th>
+                                  <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>{t('total')}</th>
                                 </tr>
                               </thead>
                               <tbody>
                                 <tr className="bg-gray-50">
-                                  <td className="px-1 py-1.5 font-semibold text-gray-900">Par</td>
+                                  <td className="px-1 py-2 font-bold text-gray-900">Par</td>
                                   {backNine.map(h => (
-                                    <td key={h} className="px-0 py-1.5 text-center text-gray-900">{pars[h] || 4}</td>
+                                    <td key={h} className="px-0 py-2 text-center text-gray-900">{pars[h] || 4}</td>
                                   ))}
-                                  <td className="px-1 py-1.5 text-center font-bold text-gray-900">{calculateParTotal(backNine)}</td>
+                                  <td className="px-1 py-2 text-center font-bold text-gray-900">{calculateParTotal(backNine)}</td>
                                 </tr>
                                 {activePlayers.map((player, idx) => (
                                   <tr key={player} className={idx % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                    <td className="px-1 py-1.5 font-semibold text-gray-700 truncate" style={{ fontSize: '9px' }}>
+                                    <td className="px-1 py-1.5 font-bold text-gray-700 truncate" style={{ fontSize: '12px' }}>
                                       {player}
                                     </td>
                                     {backNine.map(h => {
@@ -248,12 +248,12 @@ const puttScore = allPutts[player]?.[h] || 0;
 const score = onScore + puttScore;
 const par = pars[h] || 4;
 return (
-  <td key={h} className={`px-0 py-1.5 text-center ${score ? getScoreColor(score, par) : ''}`}>
+  <td key={h} className={`px-0 py-2 text-center ${score ? getScoreColor(score, par) : ''}`}>
     {score || '-'}
                                         </td>
                                       );
                                     })}
-                                    <td className="px-1 py-1.5 text-center font-bold text-gray-900">
+                                    <td className="px-1 py-2 text-center font-bold text-gray-900">
                                       {calculateTotal(player, backNine) || '-'}
                                     </td>
                                   </tr>
@@ -333,29 +333,31 @@ return (
                             <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
                               {t('totalScore')} ({t('standardPar')}: {totalPar})
                             </h3>
-                            <div className="grid grid-cols-2 gap-2">
+                            <div className="flex gap-1">
                               {activePlayers.map(player => {
                                 const total = playerTotals[player];
                                 const diff = total - totalPar;
                                 const diffText = diff > 0 ? `+${diff}` : diff === 0 ? 'E' : `${diff}`;
                                 const diffColor = diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600';
-                                const rank = scoreRankings[player];
-                                const medal = getMedal(rank);
                                 
                                 return (
-                                  <div key={player} className="text-center p-2 bg-gray-50 rounded">
-                                    <div className="text-xs font-medium text-gray-700 flex items-center justify-center gap-1">
-                                      {player}
-                                      {medal && <span className="text-sm">{medal}</span>}
+                                  <div key={player} className="flex-1 text-center py-1.5 bg-gray-50 rounded-lg min-w-0">
+                                    <div className="cursor-pointer hover:bg-gray-100 rounded px-1" onClick={() => handleAdvancePlayerClick(player)}>
+                                      <div className="text-xs font-medium text-blue-600 underline truncate">
+                                        {player}
+                                      </div>
+                                      <div className="flex items-baseline justify-center gap-0.5">
+                                        <span className="text-lg font-bold text-gray-900">{total || '-'}</span>
+                                        {total > 0 && (
+                                          <span className={`font-semibold ${diffColor}`} style={{ fontSize: 9 }}>
+                                            {diffText}
+                                          </span>
+                                        )}
+                                      </div>
                                     </div>
-                                    <div className="flex items-baseline justify-center gap-1">
-                                      <span className="text-xl font-bold text-gray-900">{total || '-'}</span>
-                                      {total > 0 && (
-                                        <span className={`text-xs font-semibold ${diffColor}`}>
-                                          ({diffText})
-                                        </span>
-                                      )}
-                                    </div>
+                                    <button onClick={() => handleSharePlayer(player)} className="mt-0.5 px-1.5 py-0.5 bg-green-100 hover:bg-green-200 text-green-700 rounded font-medium mx-auto flex items-center gap-0.5 justify-center" style={{ fontSize: 10 }}>
+                                      📤 {t('share') || 'Share'}
+                                    </button>
                                   </div>
                                 );
                               })}
@@ -371,41 +373,70 @@ return (
                           </div>
                         )}
 
+              {(gameComplete || completedHoles.length === holes.length) && (Number(stake) > 0 || (gameMode === 'skins' && prizePool > 0)) && (
+                <div className="bg-yellow-50 rounded-lg p-3 shadow-sm">
+                  <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
+                    {t('finalSettlement')}
+                  </h3>
+                  {(gameMode === 'skins' || gameMode === 'win123') && prizePool > 0 && (
+                    <div className="mb-2 text-center p-1.5 bg-purple-100 rounded">
+                      <span className="text-xs text-purple-700">
+                        {gameMode === 'win123' ? t('penaltyPot') : t('prizePool')}: 
+                      </span>
+                      <span className="text-sm font-bold text-purple-800 ml-1">${prizePool}</span>
+                    </div>
+                  )}
+                  <div className="flex gap-1">
+                    {activePlayers.map(player => {
+                      const amount = totalMoney[player] || 0;
+                      return (
+                        <div key={player} className="flex-1 text-center py-1.5 bg-yellow-100 rounded-lg min-w-0">
+                          <div className="text-xs font-medium text-gray-700 truncate px-1">{player}</div>
+                          <div className={`text-lg font-bold ${amount > 0 ? 'text-green-600' : amount < 0 ? 'text-red-600' : 'text-gray-400'}`}>
+                            {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
                         {hasData ? (
                           <>
                             {frontNine.length > 0 && (
                               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <table className="w-full" style={{ fontSize: '10px' }}>
+                                <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                                   <thead>
                                     <tr className="bg-green-600 text-white">
-                                      <th className="px-1 py-1 text-left font-semibold" style={{ minWidth: '35px' }}>
+                                      <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>
                                         {t('out')}
                                       </th>
                                       {frontNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
+                                        <th key={hole} className="px-0 py-2 text-center font-bold" style={{  }}>
                                           {hole}
                                         </th>
                                       ))}
-                                      <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
+                                      <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>
                                         {t('total')}
                                       </th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     <tr className="bg-gray-50">
-                                      <td className="px-1 py-1 font-semibold text-gray-900">{t('par')}</td>
+                                      <td className="px-1 py-2 font-bold text-gray-900">{t('par')}</td>
                                       {frontNine.map(hole => (
-                                        <td key={hole} className="px-0 py-1 text-center text-gray-900">
+                                        <td key={hole} className="px-0 py-2 text-center text-gray-900">
                                           {pars[hole] || 4}
                                         </td>
                                       ))}
-                                      <td className="px-1 py-1 text-center font-bold text-gray-900">
+                                      <td className="px-1 py-2 text-center font-bold text-gray-900">
                                         {calculateParTotal(frontNine)}
                                       </td>
                                     </tr>
                                     {activePlayers.map((player, index) => (
                                       <tr key={player} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="px-1 py-1 font-semibold text-gray-900 truncate" style={{ fontSize: '9px' }}>
+                                        <td className="px-1 py-1 font-bold text-gray-900 truncate" style={{ fontSize: '12px' }}>
                                           {player}
                                         </td>
                                         {frontNine.map(hole => {
@@ -429,7 +460,7 @@ return (
                                             </td>
                                           );
                                         })}
-                                        <td className="px-1 py-1 text-center font-bold text-gray-900">
+                                        <td className="px-1 py-2 text-center font-bold text-gray-900">
                                           {calculateTotal(player, frontNine) || '-'}
                                         </td>
                                       </tr>
@@ -441,37 +472,37 @@ return (
 
                             {backNine.length > 0 && (
                               <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                                <table className="w-full" style={{ fontSize: '10px' }}>
+                                <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                                   <thead>
                                     <tr className="bg-green-600 text-white">
-                                      <th className="px-1 py-1 text-left font-semibold" style={{ minWidth: '35px' }}>
+                                      <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>
                                         {t('in')}
                                       </th>
                                       {backNine.map(hole => (
-                                        <th key={hole} className="px-0 py-1 text-center font-semibold" style={{ minWidth: '20px' }}>
+                                        <th key={hole} className="px-0 py-2 text-center font-bold" style={{  }}>
                                           {hole}
                                         </th>
                                       ))}
-                                      <th className="px-1 py-1 text-center font-semibold" style={{ minWidth: '25px' }}>
+                                      <th className="px-1 py-2 text-center font-bold" style={{ width: '35px' }}>
                                         {t('total')}
                                       </th>
                                     </tr>
                                   </thead>
                                   <tbody>
                                     <tr className="bg-gray-50">
-                                      <td className="px-1 py-1 font-semibold text-gray-900">{t('par')}</td>
+                                      <td className="px-1 py-2 font-bold text-gray-900">{t('par')}</td>
                                       {backNine.map(hole => (
-                                        <td key={hole} className="px-0 py-1 text-center text-gray-900">
+                                        <td key={hole} className="px-0 py-2 text-center text-gray-900">
                                           {pars[hole] || 4}
                                         </td>
                                       ))}
-                                      <td className="px-1 py-1 text-center font-bold text-gray-900">
+                                      <td className="px-1 py-2 text-center font-bold text-gray-900">
                                         {calculateParTotal(backNine)}
                                       </td>
                                     </tr>
                                     {activePlayers.map((player, index) => (
                                       <tr key={player} className={index % 2 === 0 ? 'bg-white' : 'bg-gray-50'}>
-                                        <td className="px-1 py-1 font-semibold text-gray-900 truncate" style={{ fontSize: '9px' }}>
+                                        <td className="px-1 py-1 font-bold text-gray-900 truncate" style={{ fontSize: '12px' }}>
                                           {player}
                                         </td>
                                         {backNine.map(hole => {
@@ -495,7 +526,7 @@ return (
                                             </td>
                                           );
                                         })}
-                                        <td className="px-1 py-1 text-center font-bold text-gray-900">
+                                        <td className="px-1 py-2 text-center font-bold text-gray-900">
                                           {calculateTotal(player, backNine) || '-'}
                                         </td>
                                       </tr>
@@ -526,73 +557,6 @@ return (
                   📋 {t('editLogTitle')}
                   <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
                 </button>
-              )}
-
-              {(gameComplete || completedHoles.length === holes.length) && (Number(stake) > 0 || (gameMode === 'skins' && prizePool > 0)) && (
-                <div className="bg-yellow-50 rounded-lg p-4 shadow-sm">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-3 text-center">
-                    {t('finalSettlement')}
-                  </h3>
-                  {(gameMode === 'skins' || gameMode === 'win123') && prizePool > 0 && (
-                    <div className="mb-3 text-center p-2 bg-purple-100 rounded">
-                      <span className="text-sm text-purple-700">
-                        {gameMode === 'win123' ? t('penaltyPot') : t('prizePool')}: 
-                      </span>
-                      <span className="text-lg font-bold text-purple-800 ml-2">
-                        ${prizePool}
-                      </span>
-                    </div>
-                  )}
-                  <div className="space-y-2">
-                    {(() => {
-                      const playerTotals = {};
-                      activePlayers.forEach(player => {
-  playerTotals[player] = completedHoles.reduce((total, hole) => {
-    return total + (allScores[player]?.[hole] || 0) + (allPutts[player]?.[hole] || 0);
-  }, 0);
-});
-
-                      const moneyRankings = activePlayers
-                        .map(player => ({ player, money: totalMoney[player] }))
-                        .sort((a, b) => b.money - a.money)
-                        .reduce((acc, { player }, index, arr) => {
-                          if (index === 0) {
-                            acc[player] = 1;
-                          } else {
-                            const prevPlayer = arr[index - 1].player;
-                            if (totalMoney[player] === totalMoney[prevPlayer]) {
-                              acc[player] = acc[prevPlayer];
-                            } else {
-                              acc[player] = index + 1;
-                            }
-                          }
-                          return acc;
-                        }, {});
-
-                      return activePlayers.map(player => {
-                        const amount = totalMoney[player] || 0;
-                        const rank = moneyRankings[player];
-                        const medal = getMedal(rank);
-                        
-                        return (
-                          <div key={player} className="border-b border-yellow-200 last:border-b-0 pb-2">
-                            <div className="flex justify-between items-center">
-                              <span className="font-semibold text-gray-900 flex items-center gap-1">
-                                {player}
-                                {amount > 0 && medal && <span className="text-base">{medal}</span>}
-                              </span>
-                              <span className={`font-bold ${
-                                amount > 0 ? 'text-green-600' : amount < 0 ? 'text-red-600' : 'text-gray-500'
-                              }`}>
-                                {amount === 0 ? '$0' : amount > 0 ? `+$${amount.toFixed(1)}` : `-$${Math.abs(amount).toFixed(1)}`}
-                              </span>
-                            </div>
-                          </div>
-                        );
-                      });
-                    })()}
-                  </div>
-                </div>
               )}
 
               <div className="flex gap-3">
