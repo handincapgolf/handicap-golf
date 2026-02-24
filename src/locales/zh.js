@@ -234,7 +234,37 @@ export const zh = {
   mpViewerBanner: '仅观战 — 无法输入杆数',
   mpViewerReminder: '你正在观看此比赛',
   mpViewerReminderDesc: '成绩实时更新，你无法输入或修改杆数。',
-  exit: '退出'
+  exit: '退出',
+  // Scorecard Section 记分卡
+  scorecardHorizontal: '📋 横向',
+  scorecardVertical: '📊 纵向',
+  shareBtn: '分享',
+  penalties: '罚杆',
+  // Feedback 反馈
+  feedbackBtn: '💬 反馈意见',
+  feedbackTitle: '💬 意见反馈',
+  feedbackSubtitle: '帮助我们改进 HandinCap',
+  feedbackRateLabel: '整体体验评分',
+  feedbackCatLabel: '您希望改进的方面（可多选）',
+  feedbackCatNewModes: '🎮 增加比赛类型',
+  feedbackCatUI: '📱 界面优化',
+  feedbackCatSpeed: '⚡ 速度/性能',
+  feedbackCatCourse: '⛳ 球场数据',
+  feedbackCatScoring: '📊 计分功能',
+  feedbackCatMultiplayer: '👥 多人模式',
+  feedbackCatBug: '🐛 Bug 报告',
+  feedbackCatOther: '💡 其他建议',
+  feedbackCommentPlaceholder: '请告诉我们您的想法...\n例如：希望增加 Nassau 玩法',
+  feedbackSubmit: '提交反馈',
+  feedbackSubmitting: '提交中...',
+  feedbackThanks: '🎉 感谢您的反馈！',
+  feedbackThanksDetail: '我们会认真阅读每一条建议',
+  feedbackSkip: '以后再说',
+  feedbackStar1: '很差',
+  feedbackStar2: '一般',
+  feedbackStar3: '还行',
+  feedbackStar4: '很好',
+  feedbackStar5: '太棒了！'
 };
 
 export default zh;

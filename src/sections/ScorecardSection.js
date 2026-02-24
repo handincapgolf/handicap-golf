@@ -74,7 +74,7 @@ const getScoreColor = (score, par) => {
 };
 
 // ===== PGA Legend =====
-const PGALegend = () => (
+const PGALegend = ({ t }) => (
   <div className="bg-white rounded-lg p-3 shadow-sm">
     <div className="flex items-center justify-center gap-3 flex-wrap">
       <div className="flex items-center gap-1">
@@ -82,26 +82,26 @@ const PGALegend = () => (
           <div style={{ position: 'absolute', inset: 0, border: '1.5px solid #f59e0b', borderRadius: '50%' }} />
           <div style={{ position: 'absolute', inset: 2, border: '1.5px solid #f59e0b', borderRadius: '50%' }} />
         </div>
-        <span className="text-xs text-gray-500">Eagle</span>
+        <span className="text-xs text-gray-500">{t('eagle')}</span>
       </div>
       <div className="flex items-center gap-1">
         <div style={{ width: 18, height: 18, borderRadius: '50%', border: '1.5px solid #3b82f6', background: '#dbeafe' }} />
-        <span className="text-xs text-gray-500">Birdie</span>
+        <span className="text-xs text-gray-500">{t('birdie')}</span>
       </div>
       <div className="flex items-center gap-1">
         <div style={{ width: 18, height: 18, borderRadius: 2, background: '#f3f4f6' }} />
-        <span className="text-xs text-gray-500">Par</span>
+        <span className="text-xs text-gray-500">{t('parLabel')}</span>
       </div>
       <div className="flex items-center gap-1">
         <div style={{ width: 18, height: 18, borderRadius: 2, border: '1.5px solid #f97316', background: '#fff7ed' }} />
-        <span className="text-xs text-gray-500">Bogey</span>
+        <span className="text-xs text-gray-500">{t('bogey')}</span>
       </div>
       <div className="flex items-center gap-1">
         <div style={{ width: 18, height: 18, borderRadius: 2, position: 'relative', background: '#fef2f2' }}>
           <div style={{ position: 'absolute', inset: 0, border: '1.5px solid #dc2626', borderRadius: 2 }} />
           <div style={{ position: 'absolute', inset: 2, border: '1.5px solid #dc2626', borderRadius: 2 }} />
         </div>
-        <span className="text-xs text-gray-500">Dbl+</span>
+        <span className="text-xs text-gray-500">{t('doubleplus')}</span>
       </div>
     </div>
   </div>
@@ -248,6 +248,7 @@ const ScorecardSection = ({
   setCurrentSection,
   setHoleSelectDialog,
   setEditLogDialog,
+  setFeedbackDialog,
   goHome,
   t,
 }) => {
@@ -306,11 +307,11 @@ const ScorecardSection = ({
           <button onClick={() => setScorecardView('horizontal')}
             className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
               scorecardView === 'horizontal' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            }`}>📋 Horizontal</button>
+            }`}>{t('scorecardHorizontal')}</button>
           <button onClick={() => setScorecardView('vertical')}
             className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
               scorecardView === 'vertical' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            }`}>📊 Vertical</button>
+            }`}>{t('scorecardVertical')}</button>
         </div>
       )}
 
@@ -347,7 +348,7 @@ const ScorecardSection = ({
                         className="mt-0.5 px-1.5 py-0.5 bg-green-100 hover:bg-green-200 text-green-700 rounded font-medium mx-auto flex items-center gap-0.5 justify-center"
                         style={{ fontSize: 10 }}
                       >
-                        📤 Share
+                        📤 {t('shareBtn')}
                       </button>
                     )}
                   </div>
@@ -409,7 +410,7 @@ const ScorecardSection = ({
                   <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                     <thead>
                       <tr className="bg-green-600 text-white">
-                        <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>OUT</th>
+                        <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>{t('out')}</th>
                         {frontNine.map(h => (
                           <th key={h} className="px-0 py-2 text-center font-bold">{h}</th>
                         ))}
@@ -418,7 +419,7 @@ const ScorecardSection = ({
                     </thead>
                     <tbody>
                       <tr className="bg-gray-50">
-                        <td className="px-1 py-2 font-bold text-gray-900">Par</td>
+                        <td className="px-1 py-2 font-bold text-gray-900">{t('parLabel')}</td>
                         {frontNine.map(h => (
                           <td key={h} className="px-0 py-2 text-center text-gray-900">{pars[h] || 4}</td>
                         ))}
@@ -455,7 +456,7 @@ const ScorecardSection = ({
                   <table className="w-full" style={{ fontSize: '14px', tableLayout: 'fixed' }}>
                     <thead>
                       <tr className="bg-green-600 text-white">
-                        <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>IN</th>
+                        <th className="px-1 py-2 text-left font-bold" style={{ width: '55px' }}>{t('in')}</th>
                         {backNine.map(h => (
                           <th key={h} className="px-0 py-2 text-center font-bold">{h}</th>
                         ))}
@@ -464,7 +465,7 @@ const ScorecardSection = ({
                     </thead>
                     <tbody>
                       <tr className="bg-gray-50">
-                        <td className="px-1 py-2 font-bold text-gray-900">Par</td>
+                        <td className="px-1 py-2 font-bold text-gray-900">{t('parLabel')}</td>
                         {backNine.map(h => (
                           <td key={h} className="px-0 py-2 text-center text-gray-900">{pars[h] || 4}</td>
                         ))}
@@ -538,7 +539,7 @@ const ScorecardSection = ({
                 {/* Grand total row */}
                 {completedHoles.length > 0 && (
                   <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
-                    <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+                    <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>{t('total')}</div>
                     <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
                     {activePlayers.map(p => (
                       <div key={p} style={{ flex: 1, textAlign: 'center' }}>
@@ -549,7 +550,7 @@ const ScorecardSection = ({
                   </div>
                 )}
               </div>
-              <PGALegend />
+              <PGALegend t={t} />
             </>
           )}
         </>
@@ -569,6 +570,17 @@ const ScorecardSection = ({
         >
           📋 {t('editLogTitle')}
           <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
+        </button>
+      )}
+
+      {/* Feedback button (game complete only) */}
+      {gameComplete && (
+        <button
+          onClick={() => setFeedbackDialog(true)}
+          style={{ border: '2px dashed #f59e0b', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)' }}
+          className="w-full text-amber-800 py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-[15px]"
+        >
+          {t('feedbackBtn')}
         </button>
       )}
 

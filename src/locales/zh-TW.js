@@ -228,7 +228,37 @@ export const zhTW = {
   mpViewerBanner: '僅觀戰 — 無法輸入桿數',
   mpViewerReminder: '你正在觀看此比賽',
   mpViewerReminderDesc: '成績即時更新，你無法輸入或修改桿數。',
-  exit: '退出'
+  exit: '退出',
+  // Scorecard Section 記分卡
+  scorecardHorizontal: '📋 橫向',
+  scorecardVertical: '📊 縱向',
+  shareBtn: '分享',
+  penalties: '罰桿',
+  // Feedback 意見回饋
+  feedbackBtn: '💬 意見回饋',
+  feedbackTitle: '💬 意見回饋',
+  feedbackSubtitle: '幫助我們改進 HandinCap',
+  feedbackRateLabel: '整體體驗評分',
+  feedbackCatLabel: '您希望改進的方面（可多選）',
+  feedbackCatNewModes: '🎮 增加比賽類型',
+  feedbackCatUI: '📱 介面優化',
+  feedbackCatSpeed: '⚡ 速度/效能',
+  feedbackCatCourse: '⛳ 球場資料',
+  feedbackCatScoring: '📊 計分功能',
+  feedbackCatMultiplayer: '👥 多人模式',
+  feedbackCatBug: '🐛 Bug 回報',
+  feedbackCatOther: '💡 其他建議',
+  feedbackCommentPlaceholder: '請告訴我們您的想法...\n例如：希望增加 Nassau 玩法',
+  feedbackSubmit: '提交回饋',
+  feedbackSubmitting: '提交中...',
+  feedbackThanks: '🎉 感謝您的回饋！',
+  feedbackThanksDetail: '我們會認真閱讀每一條建議',
+  feedbackSkip: '以後再說',
+  feedbackStar1: '很差',
+  feedbackStar2: '一般',
+  feedbackStar3: '還行',
+  feedbackStar4: '很好',
+  feedbackStar5: '太棒了！'
 };
 
 export default zhTW;

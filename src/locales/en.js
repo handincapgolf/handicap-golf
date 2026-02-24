@@ -233,7 +233,37 @@ export const en = {
   mpViewerBanner: 'VIEW ONLY — score input disabled',
   mpViewerReminder: 'You are viewing this game',
   mpViewerReminderDesc: 'Scores update in real-time. You cannot input or modify scores.',
-  exit: 'Exit'
+  exit: 'Exit',
+  // Scorecard Section
+  scorecardHorizontal: '📋 Horizontal',
+  scorecardVertical: '📊 Vertical',
+  shareBtn: 'Share',
+  penalties: 'Penalties',
+  // Feedback
+  feedbackBtn: '💬 Give Feedback',
+  feedbackTitle: '💬 Feedback',
+  feedbackSubtitle: 'Help us improve HandinCap',
+  feedbackRateLabel: 'Rate your experience',
+  feedbackCatLabel: 'What would you like improved? (multi-select)',
+  feedbackCatNewModes: '🎮 More game modes',
+  feedbackCatUI: '📱 UI / Layout',
+  feedbackCatSpeed: '⚡ Performance',
+  feedbackCatCourse: '⛳ Course data',
+  feedbackCatScoring: '📊 Scoring',
+  feedbackCatMultiplayer: '👥 Multiplayer',
+  feedbackCatBug: '🐛 Bug report',
+  feedbackCatOther: '💡 Other',
+  feedbackCommentPlaceholder: 'Tell us what you think...\ne.g. Would love Nassau mode',
+  feedbackSubmit: 'Submit Feedback',
+  feedbackSubmitting: 'Submitting...',
+  feedbackThanks: '🎉 Thank you!',
+  feedbackThanksDetail: 'We read every piece of feedback',
+  feedbackSkip: 'Maybe later',
+  feedbackStar1: 'Poor',
+  feedbackStar2: 'Fair',
+  feedbackStar3: 'Good',
+  feedbackStar4: 'Great',
+  feedbackStar5: 'Amazing!'
 };
 
 export default en;

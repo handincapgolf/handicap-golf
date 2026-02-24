@@ -228,7 +228,37 @@ export const ko = {
   mpViewerBanner: '관전 전용 — 스코어 입력 비활성화',
   mpViewerReminder: '이 게임을 관전 중입니다',
   mpViewerReminderDesc: '스코어가 실시간 업데이트됩니다. 입력이나 수정은 불가합니다.',
-  exit: '나가기'
+  exit: '나가기',
+  // Scorecard Section
+  scorecardHorizontal: '📋 가로',
+  scorecardVertical: '📊 세로',
+  shareBtn: '공유',
+  penalties: '페널티',
+  // Feedback 피드백
+  feedbackBtn: '💬 피드백',
+  feedbackTitle: '💬 피드백',
+  feedbackSubtitle: 'HandinCap 개선에 도움을 주세요',
+  feedbackRateLabel: '경험 평가',
+  feedbackCatLabel: '개선이 필요한 부분은? (복수 선택 가능)',
+  feedbackCatNewModes: '🎮 새 게임 모드',
+  feedbackCatUI: '📱 UI / 레이아웃',
+  feedbackCatSpeed: '⚡ 성능',
+  feedbackCatCourse: '⛳ 코스 데이터',
+  feedbackCatScoring: '📊 스코어링',
+  feedbackCatMultiplayer: '👥 멀티플레이어',
+  feedbackCatBug: '🐛 버그 신고',
+  feedbackCatOther: '💡 기타',
+  feedbackCommentPlaceholder: '의견을 알려주세요...\n예: Nassau 모드 추가 희망',
+  feedbackSubmit: '피드백 보내기',
+  feedbackSubmitting: '전송 중...',
+  feedbackThanks: '🎉 감사합니다!',
+  feedbackThanksDetail: '모든 피드백을 확인합니다',
+  feedbackSkip: '나중에',
+  feedbackStar1: '나쁨',
+  feedbackStar2: '보통',
+  feedbackStar3: '괜찮음',
+  feedbackStar4: '좋음',
+  feedbackStar5: '최고!'
 };
 
 export default ko;

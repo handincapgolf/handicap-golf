@@ -228,7 +228,37 @@ export const ms = {
   mpViewerBanner: 'TONTONAN SAHAJA — input skor dilumpuhkan',
   mpViewerReminder: 'Anda sedang menonton permainan ini',
   mpViewerReminderDesc: 'Skor dikemas kini secara langsung. Anda tidak boleh memasukkan atau mengubah skor.',
-  exit: 'Keluar'
+  exit: 'Keluar',
+  // Scorecard Section
+  scorecardHorizontal: '📋 Mendatar',
+  scorecardVertical: '📊 Menegak',
+  shareBtn: 'Kongsi',
+  penalties: 'Penalti',
+  // Feedback Maklum Balas
+  feedbackBtn: '💬 Maklum Balas',
+  feedbackTitle: '💬 Maklum Balas',
+  feedbackSubtitle: 'Bantu kami perbaiki HandinCap',
+  feedbackRateLabel: 'Nilaikan pengalaman anda',
+  feedbackCatLabel: 'Apa yang perlu diperbaiki? (boleh pilih banyak)',
+  feedbackCatNewModes: '🎮 Mod permainan baru',
+  feedbackCatUI: '📱 Antara muka',
+  feedbackCatSpeed: '⚡ Prestasi',
+  feedbackCatCourse: '⛳ Data padang',
+  feedbackCatScoring: '📊 Pemarkahan',
+  feedbackCatMultiplayer: '👥 Multiplayer',
+  feedbackCatBug: '🐛 Laporan bug',
+  feedbackCatOther: '💡 Lain-lain',
+  feedbackCommentPlaceholder: 'Beritahu kami pendapat anda...\nContoh: Mahu mod Nassau',
+  feedbackSubmit: 'Hantar Maklum Balas',
+  feedbackSubmitting: 'Menghantar...',
+  feedbackThanks: '🎉 Terima kasih!',
+  feedbackThanksDetail: 'Kami membaca setiap maklum balas',
+  feedbackSkip: 'Nanti',
+  feedbackStar1: 'Teruk',
+  feedbackStar2: 'Biasa',
+  feedbackStar3: 'OK',
+  feedbackStar4: 'Bagus',
+  feedbackStar5: 'Hebat!'
 };
 
 export default ms;

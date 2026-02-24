@@ -228,7 +228,37 @@ export const ja = {
   mpViewerBanner: '観戦のみ — スコア入力無効',
   mpViewerReminder: 'この試合を観戦中',
   mpViewerReminderDesc: 'スコアはリアルタイム更新。入力・修正はできません。',
-  exit: '退出'
+  exit: '退出',
+  // Scorecard Section
+  scorecardHorizontal: '📋 横表示',
+  scorecardVertical: '📊 縦表示',
+  shareBtn: '共有',
+  penalties: 'ペナルティ',
+  // Feedback フィードバック
+  feedbackBtn: '💬 フィードバック',
+  feedbackTitle: '💬 フィードバック',
+  feedbackSubtitle: 'HandinCapの改善にご協力ください',
+  feedbackRateLabel: '体験を評価',
+  feedbackCatLabel: '改善してほしい点は？（複数選択可）',
+  feedbackCatNewModes: '🎮 新しいゲームモード',
+  feedbackCatUI: '📱 UI・レイアウト',
+  feedbackCatSpeed: '⚡ パフォーマンス',
+  feedbackCatCourse: '⛳ コースデータ',
+  feedbackCatScoring: '📊 スコアリング',
+  feedbackCatMultiplayer: '👥 マルチプレーヤー',
+  feedbackCatBug: '🐛 バグ報告',
+  feedbackCatOther: '💡 その他',
+  feedbackCommentPlaceholder: 'ご意見をお聞かせください...\n例：Nassauモードが欲しい',
+  feedbackSubmit: '送信',
+  feedbackSubmitting: '送信中...',
+  feedbackThanks: '🎉 ありがとうございます！',
+  feedbackThanksDetail: 'すべてのフィードバックを確認します',
+  feedbackSkip: 'また今度',
+  feedbackStar1: '悪い',
+  feedbackStar2: '普通',
+  feedbackStar3: '良い',
+  feedbackStar4: 'とても良い',
+  feedbackStar5: '最高！'
 };
 
 export default ja;

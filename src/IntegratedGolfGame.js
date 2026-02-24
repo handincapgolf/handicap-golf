@@ -24,6 +24,7 @@ import ScorecardSection from './sections/ScorecardSection';
 import GameSection from './sections/GameSection';
 import { HomeLangBar, HomeContent } from './sections/HomeSection';
 import GlobalDialogs from './sections/GlobalDialogs';
+import FeedbackDialog from './components/FeedbackDialog';
 
 const courses = {
   f9: [1,2,3,4,5,6,7,8,9],
@@ -55,6 +56,7 @@ function IntegratedGolfGame() {
   const [editLog, setEditLog] = useState([]);
   const [editToastData, setEditToastData] = useState(null);
   const [editLogDialog, setEditLogDialog] = useState({ isOpen: false, hole: null });
+  const [feedbackDialog, setFeedbackDialog] = useState(false);
   // Advance Mode 报告弹窗状态
 const [advanceReportPlayer, setAdvanceReportPlayer] = useState(null);
 const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
@@ -2327,6 +2329,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               setCurrentSection={setCurrentSection}
               setHoleSelectDialog={setHoleSelectDialog}
               setEditLogDialog={setEditLogDialog}
+              setFeedbackDialog={setFeedbackDialog}
               goHome={goHome}
               t={t}
             />
@@ -2440,6 +2443,13 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         setPuttsWarningDialog={setPuttsWarningDialog}
         handlePuttsWarningConfirm={handlePuttsWarningConfirm}
         t={t}
+      />
+
+      <FeedbackDialog
+        isOpen={feedbackDialog}
+        onClose={() => setFeedbackDialog(false)}
+        t={t}
+        courseName={selectedCourse?.fullName || selectedCourse?.shortName || ''}
       />
     </div>
   );
