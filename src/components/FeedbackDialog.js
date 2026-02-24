@@ -5,7 +5,7 @@ const CATEGORY_KEYS = [
   'feedbackCatScoring', 'feedbackCatMultiplayer', 'feedbackCatBug', 'feedbackCatOther',
 ];
 
-const WORKER_URL = 'https://handincap-sync.your-subdomain.workers.dev'; // ← 改成你的 Worker URL
+const WORKER_URL = 'https://handincap.golf'; // ← 改成你的 Worker URL
 
 const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
   const [rating, setRating] = useState(0);
