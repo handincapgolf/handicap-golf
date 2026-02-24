@@ -154,17 +154,16 @@ export const HomeContent = ({
       )}
     </div>
   
-    {/* Feedback */}
-    <button
-      onClick={() => setFeedbackDialog(true)}
-      className="mt-6 text-amber-700 text-sm font-medium hover:text-amber-800 transition"
-    >
-      💬 {t('feedbackBtn')}
-    </button>
-
     {/* 页脚版权 */}
-    <footer className="absolute bottom-4 text-center text-gray-400 text-xs">
-      © 2025 HandinCap. All rights reserved. {window.APP_VERSION}
+    <footer className="absolute bottom-4 left-0 right-0 flex flex-col items-center gap-3 px-4">
+      <button
+        onClick={() => setFeedbackDialog(true)}
+        style={{ border: '2px dashed #f59e0b', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)' }}
+        className="w-full max-w-xs text-amber-800 py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-[15px]"
+      >
+        {t('feedbackBtn')}
+      </button>
+      <span className="text-gray-400 text-xs">© 2025 HandinCap. All rights reserved. {window.APP_VERSION}</span>
     </footer>
   </div>
 );
