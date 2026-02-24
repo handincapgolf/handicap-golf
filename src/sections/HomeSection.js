@@ -54,6 +54,7 @@ export const HomeContent = ({
   qrVideoRef,
   mp,
   showToast,
+  setFeedbackDialog,
   t,
 }) => (
   <div className="h-full flex flex-col items-center justify-center px-4">
@@ -153,6 +154,14 @@ export const HomeContent = ({
       )}
     </div>
   
+    {/* Feedback */}
+    <button
+      onClick={() => setFeedbackDialog(true)}
+      className="mt-6 text-amber-700 text-sm font-medium hover:text-amber-800 transition"
+    >
+      💬 {t('feedbackBtn')}
+    </button>
+
     {/* 页脚版权 */}
     <footer className="absolute bottom-4 text-center text-gray-400 text-xs">
       © 2025 HandinCap. All rights reserved. {window.APP_VERSION}

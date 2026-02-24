@@ -2216,6 +2216,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               qrVideoRef={qrVideoRef}
               mp={mp}
               showToast={showToast}
+              setFeedbackDialog={setFeedbackDialog}
               t={t}
             />
           )}
