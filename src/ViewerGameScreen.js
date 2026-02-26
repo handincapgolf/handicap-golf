@@ -316,6 +316,10 @@ const TabCard = memo(({
   const holeOrder = holes.slice(0); // all holes in play order
   displayHoles.sort((a, b) => holeOrder.indexOf(a) - holeOrder.indexOf(b));
 
+  // Split into front/back nine
+  const frontNine = displayHoles.filter(h => h <= 9);
+  const backNine = displayHoles.filter(h => h > 9);
+
   // Get stroke for a player at a hole
   const getStroke = (player, h) => {
     if (h === holeNum && !completedHoles.includes(h)) {
@@ -334,6 +338,8 @@ const TabCard = memo(({
 
   // Totals
   const totalPar = completedHoles.reduce((sum, h) => sum + (pars[h] || 4), 0);
+  const calcSectionTotal = (p, holeList) => holeList.filter(h => completedHoles.includes(h)).reduce((sum, h) =>
+    sum + (allScores[p]?.[h] || 0) + (allPutts[p]?.[h] || 0), 0);
   const getPlayerTotal = (p) => completedHoles.reduce((sum, h) =>
     sum + (allScores[p]?.[h] || 0) + (allPutts[p]?.[h] || 0), 0);
   const getVsPar = (p) => {
@@ -346,46 +352,72 @@ const TabCard = memo(({
     return diff < 0 ? '#059669' : diff === 0 ? '#6b7280' : '#dc2626';
   };
 
+  const sections = [
+    { label: 'OUT', holeList: frontNine, bg: '#166534' },
+    { label: 'IN', holeList: backNine, bg: '#7f1d1d' }
+  ].filter(s => s.holeList.length > 0);
+
   return (
     <div style={{ flex: 1, width: '100%', alignSelf: 'stretch', minHeight: 0, overflowY: 'auto', overflowX: 'hidden', WebkitOverflowScrolling: 'touch' }}>
-      {/* Header */}
-      <div style={{
-        display: 'flex', width: '100%', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
-        position: 'sticky', top: 0, background: '#fff', zIndex: 2
-      }}>
-        <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>#</div>
-        <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#9ca3af', textAlign: 'center' }}>P</div>
-        {activePlayers.map(p => (
-          <div key={p} style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#6b7280', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-            {p}
-          </div>
-        ))}
-      </div>
-
-      {/* Hole rows */}
-      {displayHoles.map(h => {
-        const hp = pars[h] || 4;
-        const isCurrent = h === holeNum && !completedHoles.includes(h);
+      {sections.map(({ label, holeList, bg }) => {
+        const sectionCompletedPar = holeList.filter(h => completedHoles.includes(h)).reduce((s, h) => s + (pars[h] || 4), 0);
         return (
-          <div key={h} style={{
-            display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0',
-            borderBottom: '1px solid #f3f4f6',
-            background: isCurrent ? '#fffbeb' : 'transparent'
-          }}>
-            <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 900, color: isCurrent ? '#b45309' : '#374151' }}>
-              {h}
+          <div key={label} style={{ marginBottom: 8 }}>
+            {/* Header */}
+            <div style={{
+              display: 'flex', width: '100%', padding: '6px 0', borderBottom: '2px solid #e5e7eb',
+              position: 'sticky', top: 0, background: bg, zIndex: 2
+            }}>
+              <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
+              <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>P</div>
+              {activePlayers.map(p => (
+                <div key={p} style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                  {p}
+                </div>
+              ))}
             </div>
-            <div style={{ width: 28, flexShrink: 0, fontSize: 12, color: '#9ca3af', textAlign: 'center', fontWeight: 600 }}>
-              {hp}
-            </div>
-            {activePlayers.map(p => (
-              <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />
-            ))}
+
+            {/* Hole rows */}
+            {holeList.map(h => {
+              const hp = pars[h] || 4;
+              const isCurrent = h === holeNum && !completedHoles.includes(h);
+              return (
+                <div key={h} style={{
+                  display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0',
+                  borderBottom: '1px solid #f3f4f6',
+                  background: isCurrent ? '#fffbeb' : 'transparent'
+                }}>
+                  <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 900, color: isCurrent ? '#b45309' : '#374151' }}>
+                    {h}
+                  </div>
+                  <div style={{ width: 28, flexShrink: 0, fontSize: 12, color: '#9ca3af', textAlign: 'center', fontWeight: 600 }}>
+                    {hp}
+                  </div>
+                  {activePlayers.map(p => (
+                    <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />
+                  ))}
+                </div>
+              );
+            })}
+
+            {/* Section subtotal row */}
+            {holeList.some(h => completedHoles.includes(h)) && (
+              <div style={{
+                display: 'flex', width: '100%', alignItems: 'center', padding: '6px 0',
+                background: '#f0fdf4', borderTop: '2px solid #bbf7d0'
+              }}>
+                <div style={{ width: 36, flexShrink: 0, textAlign: 'center', fontSize: 10, fontWeight: 700, color: '#166534' }}>{label}</div>
+                <div style={{ width: 28, flexShrink: 0, fontSize: 10, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{sectionCompletedPar}</div>
+                {activePlayers.map(p => (
+                  <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 15, fontWeight: 800, color: '#166534' }}>{calcSectionTotal(p, holeList) || '-'}</div>
+                ))}
+              </div>
+            )}
           </div>
         );
       })}
 
-      {/* Total row */}
+      {/* Grand total row */}
       {completedHoles.length > 0 && (
         <div style={{
           display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0',

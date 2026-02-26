@@ -498,46 +498,51 @@ const ScorecardSection = ({
               )}
             </>
           ) : (
-            // ===== VERTICAL (PGA-style ScoreCell) =====
+            // ===== VERTICAL (PGA-style ScoreCell) — Front 9 / Back 9 split =====
             <>
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                {/* Header row */}
-                <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
-                  <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
-                  <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
-                  {activePlayers.map(p => (
-                    <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
-                  ))}
-                </div>
-                {/* Hole rows */}
-                {displayHoles.map((h, rowIdx) => {
-                  const hp = pars[h] || 4;
-                  const isFirst10 = h === 10;
-                  return (
-                    <div key={h}>
-                      {/* Front-nine subtotal before hole 10 */}
-                      {isFirst10 && (
-                        <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
-                          <div style={{ width: 42, flexShrink: 0 }} />
-                          <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
-                            {completedHoles.filter(x => x <= 9).reduce((s, x) => s + (pars[x] || 4), 0)}
-                          </div>
-                          {activePlayers.map(p => {
-                            const ft = completedHoles.filter(x => x <= 9).reduce((s, x) => s + (allScores[p]?.[x] || 0) + (allPutts[p]?.[x] || 0), 0);
-                            return <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 800, color: '#166534' }}>{ft || '-'}</div>;
-                          })}
-                        </div>
-                      )}
-                      <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
-                        <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
-                        <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
-                        {activePlayers.map(p => <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />)}
-                      </div>
+              {/* Reusable vertical table block */}
+              {[
+                { label: t('out') || 'OUT', holeList: frontNine, bg: '#166534' },
+                { label: t('in') || 'IN', holeList: backNine, bg: '#7f1d1d' }
+              ].filter(s => s.holeList.length > 0).map(({ label, holeList, bg }) => {
+                const sectionPar = calculateParTotal(holeList);
+                return (
+                  <div key={label} className="bg-white rounded-lg shadow-sm overflow-hidden mb-3">
+                    {/* Header row */}
+                    <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
+                      <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
+                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>P</div>
+                      {activePlayers.map(p => (
+                        <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+                      ))}
                     </div>
-                  );
-                })}
-                {/* Grand total row */}
-                {completedHoles.length > 0 && (
+                    {/* Hole rows */}
+                    {holeList.map((h, rowIdx) => {
+                      const hp = pars[h] || 4;
+                      return (
+                        <div key={h} style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                          <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
+                          <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                          {activePlayers.map(p => <ScoreCell key={p} stroke={getStroke(p, h)} par={hp} />)}
+                        </div>
+                      );
+                    })}
+                    {/* Section subtotal row */}
+                    <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0' }}>
+                      <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#166534' }}>{label}</div>
+                      <div style={{ width: 34, flexShrink: 0, fontSize: 13, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{sectionPar}</div>
+                      {activePlayers.map(p => {
+                        const st = calculateTotal(p, holeList);
+                        return <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 800, color: '#166534' }}>{st || '-'}</div>;
+                      })}
+                    </div>
+                  </div>
+                );
+              })}
+
+              {/* Grand total row — only when both nines have data */}
+              {completedHoles.length > 0 && (
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
                     <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>{t('total')}</div>
                     <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
@@ -548,8 +553,8 @@ const ScorecardSection = ({
                       </div>
                     ))}
                   </div>
-                )}
-              </div>
+                </div>
+              )}
               <PGALegend t={t} />
             </>
           )}

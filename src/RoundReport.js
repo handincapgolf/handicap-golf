@@ -483,64 +483,71 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
 
       {/* ===== Scorecard ===== */}
       {vertical ? (
-        /* ===== VERTICAL PGA-style (matching ScorecardSection sizes) ===== */
-        <div style={{
-          backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
-          ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
-        }}>
-          {/* Header row — matches: #=42px, P=34px, fontSize 14 */}
-          <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: '#166534' }}>
-            <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>#</div>
-            <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#bbf7d0', textAlign: 'center' }}>P</div>
-            {activePlayers.map(p => (
-              <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
-            ))}
-          </div>
-          {/* Hole rows — matches: #=17px/900, P=15px/700, padding 4px */}
-          {holes.map((h, rowIdx) => {
-            const hp = pars[h] || 4;
-            const isFirst10 = h === 10;
-            const getStroke = (name) => {
-              const on = allScores[name]?.[h] || 0;
-              const pt = allPutts[name]?.[h] || 0;
-              return on > 0 ? on + pt : null;
-            };
+        /* ===== VERTICAL PGA-style — Front 9 / Back 9 split ===== */
+        <>
+          {[
+            { label: 'OUT', holeList: frontNine, bg: '#166534' },
+            { label: 'IN', holeList: backNine, bg: '#7f1d1d' }
+          ].filter(s => s.holeList.length > 0).map(({ label, holeList, bg }) => {
+            const sectionPar = calcParTotal(holeList);
             return (
-              <div key={h}>
-                {/* Front-nine subtotal before hole 10 — matches: fontSize 16/800 */}
-                {isFirst10 && frontNine.length > 0 && (
-                  <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0', borderBottom: '1px solid #dcfce7' }}>
-                    <div style={{ width: 42, flexShrink: 0 }} />
-                    <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>
-                      {calcParTotal(frontNine)}
+              <div key={label} style={{
+                backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', marginBottom: 10,
+                ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
+              }}>
+                {/* Header row */}
+                <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
+                  <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
+                  <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>P</div>
+                  {activePlayers.map(p => (
+                    <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
+                  ))}
+                </div>
+                {/* Hole rows */}
+                {holeList.map((h, rowIdx) => {
+                  const hp = pars[h] || 4;
+                  const getStroke = (name) => {
+                    const on = allScores[name]?.[h] || 0;
+                    const pt = allPutts[name]?.[h] || 0;
+                    return on > 0 ? on + pt : null;
+                  };
+                  return (
+                    <div key={h} style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
+                      <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
+                      <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
+                      {activePlayers.map(p => <PGAScoreCellRR key={p} stroke={getStroke(p)} par={hp} />)}
                     </div>
-                    {activePlayers.map(p => (
-                      <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 16, fontWeight: 800, color: '#166534' }}>
-                        {calcTotal(p, frontNine) || '-'}
-                      </div>
-                    ))}
-                  </div>
-                )}
-                <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '4px 0', borderBottom: '1px solid #f3f4f6', background: rowIdx % 2 === 0 ? '#fff' : '#fafafa' }}>
-                  <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 17, fontWeight: 900, color: '#374151' }}>{h}</div>
-                  <div style={{ width: 34, flexShrink: 0, fontSize: 15, color: '#9ca3af', textAlign: 'center', fontWeight: 700 }}>{hp}</div>
-                  {activePlayers.map(p => <PGAScoreCellRR key={p} stroke={getStroke(p)} par={hp} />)}
+                  );
+                })}
+                {/* Section subtotal row */}
+                <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '8px 0', background: '#f0fdf4', borderTop: '2px solid #bbf7d0' }}>
+                  <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 13, fontWeight: 700, color: '#166534' }}>{label}</div>
+                  <div style={{ width: 34, flexShrink: 0, fontSize: 13, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{sectionPar}</div>
+                  {activePlayers.map(p => (
+                    <div key={p} style={{ flex: 1, textAlign: 'center', fontSize: 17, fontWeight: 800, color: '#166534' }}>{calcTotal(p, holeList) || '-'}</div>
+                  ))}
                 </div>
               </div>
             );
           })}
-          {/* Grand total row — matches: TOT 14px, total 22px/900, vsPar 13px */}
-          <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
-            <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
-            <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
-            {activePlayers.map(p => (
-              <div key={p} style={{ flex: 1, textAlign: 'center' }}>
-                <div style={{ fontSize: 22, fontWeight: 900, color: getVsColor(playerTotals[p], totalPar) }}>{playerTotals[p]}</div>
-                <div style={{ fontSize: 13, fontWeight: 700, color: getVsColor(playerTotals[p], totalPar) }}>{formatDiff(playerTotals[p] - totalPar)}</div>
-              </div>
-            ))}
+
+          {/* Grand total row */}
+          <div style={{
+            backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
+            ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
+          }}>
+            <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
+              <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+              <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
+              {activePlayers.map(p => (
+                <div key={p} style={{ flex: 1, textAlign: 'center' }}>
+                  <div style={{ fontSize: 22, fontWeight: 900, color: getVsColor(playerTotals[p], totalPar) }}>{playerTotals[p]}</div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: getVsColor(playerTotals[p], totalPar) }}>{formatDiff(playerTotals[p] - totalPar)}</div>
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
+        </>
       ) : (
         /* ===== HORIZONTAL Tables (matching ScorecardSection: 14px, tableLayout fixed) ===== */
         <>
