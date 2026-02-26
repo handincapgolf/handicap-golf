@@ -507,7 +507,7 @@ const ScorecardSection = ({
               ].filter(s => s.holeList.length > 0).map(({ label, holeList, bg }) => {
                 const sectionPar = calculateParTotal(holeList);
                 return (
-                  <div key={label} className="bg-white rounded-lg shadow-sm overflow-hidden mb-3">
+                  <div key={label} className="bg-white rounded-lg shadow-sm overflow-hidden mb-5">
                     {/* Header row */}
                     <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
                       <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>

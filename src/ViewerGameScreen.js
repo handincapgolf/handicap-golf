@@ -362,7 +362,7 @@ const TabCard = memo(({
       {sections.map(({ label, holeList, bg }) => {
         const sectionCompletedPar = holeList.filter(h => completedHoles.includes(h)).reduce((s, h) => s + (pars[h] || 4), 0);
         return (
-          <div key={label} style={{ marginBottom: 8 }}>
+          <div key={label} style={{ marginBottom: 16 }}>
             {/* Header */}
             <div style={{
               display: 'flex', width: '100%', padding: '6px 0', borderBottom: '2px solid #e5e7eb',

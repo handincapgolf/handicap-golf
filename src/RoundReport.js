@@ -492,7 +492,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
             const sectionPar = calcParTotal(holeList);
             return (
               <div key={label} style={{
-                backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', marginBottom: 10,
+                backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', marginBottom: 20,
                 ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
               }}>
                 {/* Header row */}
