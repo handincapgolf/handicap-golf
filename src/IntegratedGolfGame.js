@@ -692,8 +692,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   }, [showToast]);
 
   // 保存游戏状态到localStorage（debounce 500ms，避免连续 setState 重复序列化）
+  // Viewer 不保存 golfGameState — viewer 应该永远从 remoteGame 恢复，避免刷新后误走 solo 路径
   useEffect(() => {
-    if ((currentSection === 'game' || currentSection === 'scorecard') && activePlayers.length > 0) {
+    if ((currentSection === 'game' || currentSection === 'scorecard') && activePlayers.length > 0 && !mp.isViewer) {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
       saveTimerRef.current = setTimeout(() => {
         const gameState = {
@@ -739,7 +740,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
       allScores, allUps, allPutts, allWater, allOb, totalMoney, 
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
-      selectedCourse, setupMode, jumboMode, activePlayers.length, editLog]);
+      selectedCourse, setupMode, jumboMode, activePlayers.length, editLog, mp.isViewer]);
 
   // ========== MP Auto-resume after page refresh ==========
   // When MP reconnects after a refresh and we're still at 'home', navigate automatically
@@ -751,17 +752,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       const status = mp.remoteGame.status;
       
       if (status === 'finished') {
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          try {
-            const parsed = JSON.parse(savedGame);
-            if (parsed.gameComplete) {
-              resumeGame();
-              return;
-            }
-          } catch {}
-          return;
-        }
+        // Viewer 永远从 remoteGame 恢复，不走 localStorage
         if (mp.isViewer) {
           const rg = mp.remoteGame;
           if (rg.playerNames || rg.players) {
@@ -788,16 +779,24 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           if (rg.prizePool !== undefined) setPrizePool(rg.prizePool);
           setGameComplete(true);
           setCurrentSection('scorecard');
+          return;
+        }
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          try {
+            const parsed = JSON.parse(savedGame);
+            if (parsed.gameComplete) {
+              resumeGame();
+              return;
+            }
+          } catch {}
+          return;
         }
         return;
       }
       
       if (status === 'playing') {
-        const savedGame = localStorage.getItem('golfGameState');
-        if (savedGame) {
-          resumeGame();
-          return;
-        }
+        // Viewer 永远从 remoteGame 恢复，不走 localStorage
         if (mp.isViewer) {
           const rg = mp.remoteGame;
           if (rg.playerNames || rg.players) {
@@ -819,6 +818,12 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           if (rg.totalMoney) setTotalMoney(rg.totalMoney);
           if (rg.moneyDetails) setMoneyDetails(rg.moneyDetails);
           setCurrentSection('game');
+          return;
+        }
+        const savedGame = localStorage.getItem('golfGameState');
+        if (savedGame) {
+          resumeGame();
+          return;
         }
         return;
       }
@@ -831,7 +836,9 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
     
     // Path B: Room gone / connection error — use localStorage as fallback
+    // Viewer 不走此路径 — viewer 没有本地数据，应等服务器重连
     if (mp.syncStatus === 'roomGone' || mp.syncStatus === 'error') {
+      if (mp.isViewer) return; // Viewer 继续等待重连，不降级到 solo
       const savedGame = localStorage.getItem('golfGameState');
       if (savedGame) {
         resumeGame();
