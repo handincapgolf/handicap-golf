@@ -2,7 +2,7 @@
 <html lang="zh">
 <head>
     <meta charset="UTF-8">
-	<script>window.APP_VERSION = 'v1.0.2.6';</script>
+	<script>window.APP_VERSION = 'v1.0.2.7';</script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>HandinCap - Your Handicap in Hand</title>
     
@@ -20,6 +20,12 @@
     <!-- Icons -->
     <link rel="icon" type="image/png" sizes="192x192" href="/logo192.png">
     <link rel="apple-touch-icon" href="/logo192.png">
+    
+    <!-- PWA viewport lock — prevent bounce scroll after reload -->
+    <style>
+      html, body { margin:0; padding:0; height:100%; overflow:hidden; overscroll-behavior:none; position:fixed; width:100%; }
+      #root { height:100%; overflow:hidden; }
+    </style>
     
     <!-- Original Scripts -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -42,22 +48,7 @@
               registration.addEventListener('updatefound', () => {
                 const newWorker = registration.installing;
                 console.log('New SW installing...');
-                
-                newWorker.addEventListener('statechange', () => {
-                  if (newWorker.state === 'activated') {
-                    // 新版本已激活
-                    console.log('New SW activated!');
-                    
-                    // 显示更新提示
-                    const lang = localStorage.getItem('handincap_lang') || 'en';
-                    const msg = lang === 'zh' 
-                      ? '🎉 发现新版本！点击确定刷新页面加载最新版本'
-                      : '🎉 New version available! Click OK to refresh and load the latest version';
-                    if (confirm(msg)) {
-                      window.location.reload();
-                    }
-                  }
-                });
+                // controllerchange 会自动刷新页面，这里不需要额外操作
               });
               
               // 每次打开页面检查更新
