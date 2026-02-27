@@ -808,6 +808,11 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
             <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
+            {editLog && editLog.length > 0 && (
+              <div style={{ marginTop: linkOnly ? 16 : 0, padding: !linkOnly ? '0 4px 8px' : 0 }}>
+                <EditLogInline logs={editLog} forCapture={!linkOnly} />
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -817,7 +822,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
 
 // ========== Inline Edit Log (for shared pages) ==========
-export const EditLogInline = memo(({ logs }) => {
+export const EditLogInline = memo(({ logs, forCapture = false }) => {
   if (!logs || logs.length === 0) return null;
   
   const fieldLabel = (f) => ({ score: 'Score', putts: 'Putts', up: 'UP' }[f] || f);
@@ -834,12 +839,12 @@ export const EditLogInline = memo(({ logs }) => {
   };
 
   return (
-    <div style={{ backgroundColor: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
-      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #f3f4f6' }}>
+    <div style={{ backgroundColor: forCapture ? '#f9fafb' : 'white', borderRadius: forCapture ? 0 : 12, overflow: 'hidden', ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }) }}>
+      <div style={{ padding: forCapture ? '10px 12px 6px' : '14px 16px 10px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: 18 }}>📋</span>
-            <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>Edit Log</span>
+            <span style={{ fontSize: forCapture ? 14 : 18 }}>📋</span>
+            <span style={{ fontSize: forCapture ? 13 : 16, fontWeight: 700, color: '#111827' }}>Edit Log</span>
           </div>
           <span style={{ fontSize: 12, color: '#9ca3af', background: '#f3f4f6', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>
             {logs.length} edit{logs.length !== 1 ? 's' : ''}
