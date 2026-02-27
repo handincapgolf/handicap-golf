@@ -511,7 +511,7 @@ const ScorecardSection = ({
                     {/* Header row */}
                     <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
                       <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
-                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>P</div>
+                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>Par</div>
                       {activePlayers.map(p => (
                         <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
                       ))}

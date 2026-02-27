@@ -369,7 +369,7 @@ const TabCard = memo(({
               position: 'sticky', top: 0, background: bg, zIndex: 2
             }}>
               <div style={{ width: 36, flexShrink: 0, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
-              <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>P</div>
+              <div style={{ width: 28, flexShrink: 0, fontSize: 11, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>Par</div>
               {activePlayers.map(p => (
                 <div key={p} style={{ flex: 1, fontSize: 11, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                   {p}
