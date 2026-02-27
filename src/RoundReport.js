@@ -234,10 +234,37 @@ export const buildRoundReportData = ({
   };
 };
 
-export const generateRoundReportUrl = (data, vertical = false) => {
+export const generateRoundReportUrl = (data, vertical = false, editLog = []) => {
   const encoded = encodeRoundReport(data);
   if (!encoded) return null;
-  return `${window.location.origin}?r=${encoded}${vertical ? '&v=1' : ''}`;
+  let url = `${window.location.origin}?r=${encoded}${vertical ? '&v=1' : ''}`;
+  // Append edit log if present
+  if (editLog && editLog.length > 0) {
+    try {
+      const compact = editLog.map(l => ({
+        h: l.hole, t: l.timestamp, b: l.editedByLabel || '',
+        c: l.changes.map(c => ({ p: c.player, f: c.field, o: c.from, n: c.to }))
+      }));
+      const json = JSON.stringify(compact);
+      const b64 = btoa(unescape(encodeURIComponent(json))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      url += `&e=${b64}`;
+    } catch (e) { console.warn('EditLog encode error:', e); }
+  }
+  return url;
+};
+
+export const decodeEditLog = (encoded) => {
+  if (!encoded) return [];
+  try {
+    let b64 = encoded.replace(/-/g, '+').replace(/_/g, '/');
+    while (b64.length % 4) b64 += '=';
+    const json = decodeURIComponent(escape(atob(b64)));
+    const compact = JSON.parse(json);
+    return compact.map((l, i) => ({
+      id: i + 1, hole: l.h, timestamp: l.t, editedByLabel: l.b || '',
+      changes: l.c.map(c => ({ player: c.p, field: c.f, from: c.o, to: c.n }))
+    }));
+  } catch (e) { console.warn('EditLog decode error:', e); return []; }
 };
 
 
@@ -634,7 +661,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
  * Props:
  *   isOpen, onClose, reportData (已解码的数据), lang, showToast
  */
-export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast, linkOnly = false }) => {
+export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast, linkOnly = false, editLog = [] }) => {
   const captureRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
 
@@ -691,7 +718,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
   // URL 链接分享
   const handleLinkShare = () => {
-    const url = generateRoundReportUrl(reportData, linkOnly);
+    const url = generateRoundReportUrl(reportData, linkOnly, editLog);
     if (!url) {
       showToast?.(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
       return;
@@ -715,7 +742,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         position: 'fixed', inset: 0, zIndex: 50,
         backgroundColor: 'rgba(0,0,0,0.6)',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '20px 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch'
+        padding: '20px 0', overflowY: 'auto'
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -776,7 +803,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         </div>
 
         {/* Preview / Capture Area */}
-        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
             <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
           </div>
@@ -787,23 +814,176 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 });
 
 
+// ========== Inline Edit Log (for shared pages) ==========
+export const EditLogInline = memo(({ logs }) => {
+  if (!logs || logs.length === 0) return null;
+  
+  const fieldLabel = (f) => ({ score: 'Score', putts: 'Putts', up: 'UP' }[f] || f);
+  const fmtVal = (f, v) => {
+    if (f === 'up') {
+      if (typeof v === 'string') return v;
+      return v ? '✓' : '✗';
+    }
+    return v;
+  };
+  const fmtTime = (ts) => {
+    try { return new Date(ts).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }); }
+    catch { return ''; }
+  };
+
+  return (
+    <div style={{ backgroundColor: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <span style={{ fontSize: 18 }}>📋</span>
+            <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>Edit Log</span>
+          </div>
+          <span style={{ fontSize: 12, color: '#9ca3af', background: '#f3f4f6', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>
+            {logs.length} edit{logs.length !== 1 ? 's' : ''}
+          </span>
+        </div>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>All score modifications are recorded</p>
+      </div>
+      <div style={{ padding: '8px 12px' }}>
+        {logs.map((log) => (
+          <div key={log.id} style={{ background: '#f9fafb', borderRadius: 10, padding: 12, marginBottom: 8, border: '1px solid #f3f4f6' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Hole {log.hole}</span>
+                {log.editedByLabel && (
+                  <span style={{ padding: '2px 8px', background: '#dbeafe', color: '#1d4ed8', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{log.editedByLabel}</span>
+                )}
+              </div>
+              <span style={{ fontSize: 11, color: '#9ca3af' }}>{fmtTime(log.timestamp)}</span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+              {log.changes.map((c, ci) => (
+                <div key={ci} style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'white', borderRadius: 8, padding: '6px 10px', border: '1px solid #f3f4f6' }}>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: '#374151', minWidth: 36 }}>{c.player}</span>
+                  <span style={{
+                    padding: '2px 6px', borderRadius: 4, fontSize: 11, fontWeight: 600,
+                    background: c.field === 'score' ? '#dcfce7' : c.field === 'putts' ? '#ede9fe' : '#fef3c7',
+                    color: c.field === 'score' ? '#166534' : c.field === 'putts' ? '#6d28d9' : '#92400e',
+                  }}>{fieldLabel(c.field)}</span>
+                  <div style={{ flex: 1 }} />
+                  <span style={{ color: '#ef4444', textDecoration: 'line-through', fontSize: 13, fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
+                  <span style={{ color: '#d1d5db', fontSize: 11 }}>→</span>
+                  <span style={{ color: '#059669', fontWeight: 700, fontSize: 13, fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+});
+
+// ========== Inline Feedback (for shared pages) ==========
+export const FeedbackInline = memo(({ courseName = '' }) => {
+  const [rating, setRating] = useState(0);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const activeRating = hoverRating || rating;
+  const starLabels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
+  const CATS = [
+    { key: 'modes', label: '🎮 New Modes' }, { key: 'ui', label: '🎨 UI/UX' },
+    { key: 'speed', label: '⚡ Speed' }, { key: 'course', label: '⛳ Course DB' },
+    { key: 'scoring', label: '📊 Scoring' }, { key: 'mp', label: '👥 Multiplayer' },
+    { key: 'bug', label: '🐛 Bug Report' }, { key: 'other', label: '💬 Other' },
+  ];
+  const toggleCat = (k) => setCategories(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
+
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await fetch('https://handincap.golf/api/feedback', {
+        method: 'POST', headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          rating, categories: categories.map(k => k), comment,
+          course: courseName, lang: navigator.language || 'en',
+          ts: new Date().toISOString(), ua: navigator.userAgent,
+        }),
+      });
+    } catch (e) { console.warn('Feedback error:', e); }
+    setSubmitting(false);
+    setSubmitted(true);
+  };
+
+  if (submitted) {
+    return (
+      <div style={{ backgroundColor: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', textAlign: 'center', padding: '32px 20px' }}>
+        <div style={{ fontSize: 56, marginBottom: 12 }}>🎉</div>
+        <h3 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 6 }}>Thank You!</h3>
+        <p style={{ fontSize: 14, color: '#6b7280' }}>Your feedback helps us improve HandinCap</p>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ backgroundColor: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
+      <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #f3f4f6' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <span style={{ fontSize: 18 }}>💬</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>Rate Your Experience</span>
+        </div>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Help us improve HandinCap</p>
+      </div>
+      <div style={{ padding: '12px 16px 20px' }}>
+        <div style={{ marginBottom: 16 }}>
+          <div style={{ display: 'flex', gap: 4, alignItems: 'center' }}>
+            {[1,2,3,4,5].map(s => (
+              <span key={s} onClick={() => setRating(s)} onMouseEnter={() => setHoverRating(s)} onMouseLeave={() => setHoverRating(0)}
+                style={{ fontSize: 36, cursor: 'pointer', userSelect: 'none', transition: 'transform 0.15s', transform: activeRating >= s ? 'scale(1.1)' : 'scale(1)' }}>
+                {activeRating >= s ? '⭐' : '☆'}
+              </span>
+            ))}
+            {activeRating > 0 && <span style={{ fontSize: 13, color: '#059669', fontWeight: 600, marginLeft: 8 }}>{starLabels[activeRating]}</span>}
+          </div>
+        </div>
+        <div style={{ marginBottom: 16 }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 8 }}>What can we improve?</label>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+            {CATS.map(({ key, label }) => {
+              const active = categories.includes(key);
+              return (
+                <div key={key} onClick={() => toggleCat(key)} style={{
+                  padding: '10px 12px', borderRadius: 10, cursor: 'pointer', userSelect: 'none',
+                  border: `2px solid ${active ? '#059669' : '#e5e7eb'}`, background: active ? '#ecfdf5' : 'white',
+                  color: active ? '#065f46' : '#374151', fontWeight: active ? 600 : 500, fontSize: 13,
+                  display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.2s',
+                }}>{active && <span style={{ color: '#059669' }}>✓</span>}{label}</div>
+              );
+            })}
+          </div>
+        </div>
+        <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Any additional thoughts? (optional)" rows={3}
+          style={{ width: '100%', padding: 12, borderRadius: 10, border: '2px solid #e5e7eb', fontSize: 14, resize: 'vertical', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', marginBottom: 12 }}
+          onFocus={(e) => e.target.style.borderColor = '#059669'} onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+        />
+        <button onClick={handleSubmit} disabled={submitting || rating === 0} style={{
+          width: '100%', padding: 14, borderRadius: 12, border: 'none', cursor: (submitting || rating === 0) ? 'not-allowed' : 'pointer',
+          background: (submitting || rating === 0) ? '#d1d5db' : 'linear-gradient(135deg, #059669, #047857)',
+          color: 'white', fontSize: 15, fontWeight: 700,
+          boxShadow: rating > 0 ? '0 4px 14px rgba(5,150,105,0.4)' : 'none', transition: 'all 0.2s',
+        }}>{submitting ? '⏳ Submitting...' : '📨 Submit Feedback'}</button>
+      </div>
+    </div>
+  );
+});
+
+
 // ========== Round Report 独立查看页 (URL 打开) ==========
 
-export const RoundReportPage = memo(({ encoded, vertical = false }) => {
+export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded = null }) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
-
-  // Force body/html scrollable — injectGameStyles() may set overflow:hidden on body
-  useEffect(() => {
-    const prevBody = document.body.style.overflow;
-    const prevHtml = document.documentElement.style.overflow;
-    document.body.style.overflow = 'unset';
-    document.documentElement.style.overflow = 'unset';
-    return () => {
-      document.body.style.overflow = prevBody;
-      document.documentElement.style.overflow = prevHtml;
-    };
-  }, []);
+  const [editLogs, setEditLogs] = useState([]);
 
   useEffect(() => {
     try {
@@ -813,7 +993,11 @@ export const RoundReportPage = memo(({ encoded, vertical = false }) => {
     } catch {
       setError(true);
     }
-  }, [encoded]);
+    // Decode edit log from URL param
+    if (editLogEncoded) {
+      setEditLogs(decodeEditLog(editLogEncoded));
+    }
+  }, [encoded, editLogEncoded]);
 
   if (error) {
     return (
@@ -863,16 +1047,25 @@ export const RoundReportPage = memo(({ encoded, vertical = false }) => {
 
   return (
     <div style={{
-      position: 'fixed',
-      inset: 0,
-      overflowY: 'auto',
-      WebkitOverflowScrolling: 'touch',
+      minHeight: '100vh',
       background: 'linear-gradient(to bottom, #064e3b, #022c22)',
       padding: '16px'
     }}>
       <div style={{ width: '100%', margin: '0 auto' }}>
         <RoundReportCard data={data} vertical={vertical} />
         
+        {/* Edit Log (if present in URL) */}
+        {editLogs.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <EditLogInline logs={editLogs} />
+          </div>
+        )}
+
+        {/* Feedback */}
+        <div style={{ marginTop: 16 }}>
+          <FeedbackInline courseName={data.courseFN || data.courseSN || ''} />
+        </div>
+
         {/* Open in App button */}
         <div style={{ textAlign: 'center', marginTop: '16px' }}>
           <a 
