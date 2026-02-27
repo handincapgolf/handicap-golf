@@ -342,6 +342,8 @@ export function useMultiplayerSync() {
     const result = await apiCall(`/game/${gameCode}/start`, 'PUT', {});
     if (result.ok) {
       setRemoteGame(result.game);
+      // ★ Sync claimed + devices from response (was missing — caused stale claimed on Creator)
+      syncDevicesFromRemote(result.game);
       // Reset confirmed for ALL devices
       const resetConfirmed = {};
       Object.keys(result.game.devices || devices).forEach(devId => {
@@ -350,7 +352,7 @@ export function useMultiplayerSync() {
       setConfirmed(resetConfirmed);
     }
     return result;
-  }, [gameCode, devices]);
+  }, [gameCode, devices, syncDevicesFromRemote]);
 
   // Submit scores for current hole
   const submitScores = useCallback(async (hole, data) => {

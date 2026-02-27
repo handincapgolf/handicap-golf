@@ -80,7 +80,7 @@ const GameSection = ({
   }
 
   return (
-        <div className="min-h-screen bg-gradient-to-b from-green-600 to-green-800 text-white">
+        <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }} className="bg-gradient-to-b from-green-600 to-green-800 text-white">
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
             <h1 className="text-2xl font-bold mb-2">
   {t('hole')} {holes[currentHole]}
@@ -195,6 +195,15 @@ const GameSection = ({
           </div>
 
           <div className="bg-white text-gray-900 p-3"> 
+          {/* DEBUG: 6-player freeze diagnosis — remove after fix confirmed */}
+          {mp.multiplayerOn && (
+            <div style={{ background: '#fef3c7', border: '1px solid #f59e0b', borderRadius: 6, padding: '4px 8px', marginBottom: 8, fontSize: 11, fontFamily: 'monospace', color: '#92400e' }}>
+              <div>myPlayers: {mp.getMyPlayers(activePlayers).join(', ') || '⚠️ EMPTY'} ({mp.getMyPlayers(activePlayers).length})</div>
+              <div>otherPlayers: {mp.getOtherPlayers(activePlayers).join(', ') || 'none'} ({mp.getOtherPlayers(activePlayers).length})</div>
+              <div>deviceId: {mp.deviceId?.slice(-8)}</div>
+              <div>claimed: {JSON.stringify(Object.fromEntries(Object.entries(mp.claimed).map(([k,v]) => [k, v?.slice(-8)])))}</div>
+            </div>
+          )}
 		  <div className="grid gap-3">
               {(() => {
                 const myPlayers = mp.multiplayerOn ? mp.getMyPlayers(activePlayers) : activePlayers;
