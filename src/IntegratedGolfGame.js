@@ -2206,7 +2206,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         />
       )}
 
-      <div className="flex-1 overflow-auto">
+      <div className="flex-1 overflow-auto" style={{ WebkitOverflowScrolling: 'touch', touchAction: 'pan-y' }}>
         <div className="max-w-2xl mx-auto p-3">
           
           {currentSection === 'home' && (
@@ -2302,7 +2302,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               mp={mp} showToast={showToast}
               setGameMode={setGameMode} setStake={setStake} setJumboMode={setJumboMode} setPlayerHandicaps={setPlayerHandicaps}
               setAdvanceMode={setAdvanceMode} setAdvancePlayers={setAdvancePlayers} setPlayerNames={setPlayerNames}
-              setSelectedCourse={setSelectedCourse} setPars={setPars}
+              setSelectedCourse={setSelectedCourse} setPars={setPars} setHoles={setHoles}
               setTotalMoney={setTotalMoney} setMoneyDetails={setMoneyDetails} setAllScores={setAllScores} setAllUps={setAllUps} setAllPutts={setAllPutts}
               setAllWater={setAllWater} setAllOb={setAllOb} setTotalSpent={setTotalSpent}
               setCurrentHole={setCurrentHole} setScores={setScores} setUps={setUps} setPutts={setPutts} setWater={setWater} setOb={setOb}

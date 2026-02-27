@@ -386,7 +386,7 @@ const MpClaimSection = memo(({
   mp, showToast,
   setGameMode, setStake, setJumboMode, setPlayerHandicaps,
   setAdvanceMode, setAdvancePlayers, setPlayerNames,
-  setSelectedCourse, setPars,
+  setSelectedCourse, setPars, setHoles,
   setTotalMoney, setMoneyDetails, setAllScores, setAllUps, setAllPutts,
   setAllWater, setAllOb, setTotalSpent,
   setCurrentHole, setScores, setUps, setPutts, setWater, setOb,
@@ -452,6 +452,11 @@ const MpClaimSection = memo(({
                         g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
                         setPars(newPars);
                       }
+                    }
+                    
+                    // Sync holes list from remote game
+                    if (g.holesList) {
+                      setHoles(g.holesList);
                     }
 
                     const result = await mp.claimPlayers(selected);

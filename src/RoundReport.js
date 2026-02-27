@@ -715,7 +715,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         position: 'fixed', inset: 0, zIndex: 50,
         backgroundColor: 'rgba(0,0,0,0.6)',
         display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        padding: '20px 0', overflowY: 'auto'
+        padding: '20px 0', overflowY: 'auto', WebkitOverflowScrolling: 'touch'
       }}
       onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}
     >
@@ -776,7 +776,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         </div>
 
         {/* Preview / Capture Area */}
-        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
+        <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto', WebkitOverflowScrolling: 'touch' }}>
           <div ref={captureRef}>
             <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
           </div>
@@ -792,6 +792,18 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 export const RoundReportPage = memo(({ encoded, vertical = false }) => {
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
+
+  // Force body/html scrollable — injectGameStyles() may set overflow:hidden on body
+  useEffect(() => {
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
+    document.body.style.overflow = 'unset';
+    document.documentElement.style.overflow = 'unset';
+    return () => {
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
+    };
+  }, []);
 
   useEffect(() => {
     try {
@@ -851,7 +863,10 @@ export const RoundReportPage = memo(({ encoded, vertical = false }) => {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      position: 'fixed',
+      inset: 0,
+      overflowY: 'auto',
+      WebkitOverflowScrolling: 'touch',
       background: 'linear-gradient(to bottom, #064e3b, #022c22)',
       padding: '16px'
     }}>
