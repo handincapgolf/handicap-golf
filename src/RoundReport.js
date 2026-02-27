@@ -359,7 +359,7 @@ const formatDiff = (diff) => {
  * RoundReportCard - 用于截图和 URL 查看的完整报告
  * 接收解码后的数据结构
  */
-export const RoundReportCard = memo(({ data, forCapture = false, vertical = false }) => {
+export const RoundReportCard = memo(({ data, forCapture = false, vertical = false, hideFooter = false }) => {
   const {
     courseSN, courseFN, date, gameMode, stake, prizePool,
     players, holes, pars, allScores, allPutts
@@ -639,6 +639,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
       )}
 
       {/* ===== Footer ===== */}
+      {!hideFooter && (
       <div style={{
         textAlign: 'center', padding: '10px',
         backgroundColor: forCapture ? '#f0fdf4' : 'transparent',
@@ -649,6 +650,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
           Powered by <span style={{ color: '#047857' }}>HandinCap.golf</span>
         </span>
       </div>
+      )}
     </div>
   );
 });
@@ -1053,7 +1055,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
       padding: '16px'
     }}>
       <div style={{ width: '100%', margin: '0 auto' }}>
-        <RoundReportCard data={data} vertical={vertical} />
+        <RoundReportCard data={data} vertical={vertical} hideFooter />
         
         {/* Edit Log (if present in URL) */}
         {editLogs.length > 0 && (
@@ -1079,6 +1081,14 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
           >
             ⛳ Open HandinCap
           </a>
+        </div>
+
+        {/* Powered by footer */}
+        <div style={{ textAlign: 'center', padding: '16px 0' }}>
+          <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
+          <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
+            Powered by <span style={{ color: '#22c55e' }}>HandinCap.golf</span>
+          </span>
         </div>
       </div>
     </div>
