@@ -1047,7 +1047,8 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
 
   return (
     <div style={{
-      minHeight: '100vh',
+      position: 'fixed', inset: 0, zIndex: 10,
+      overflowY: 'auto', WebkitOverflowScrolling: 'touch',
       background: 'linear-gradient(to bottom, #064e3b, #022c22)',
       padding: '16px'
     }}>

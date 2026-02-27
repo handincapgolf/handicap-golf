@@ -219,7 +219,7 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
   const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
 
   return (
-  <div className="bg-white min-h-screen flex flex-col">
+  <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }} className="bg-white flex flex-col">
       {/* Header */}
       <div className="classic-header text-white relative">
         <div className="pt-5 pb-4 px-4 relative z-10">
@@ -421,7 +421,7 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
   };
 
   return (
-  <div className="bg-white min-h-screen flex flex-col">
+  <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }} className="bg-white flex flex-col">
       {/* Compact Header */}
       <div className="classic-header text-white relative">
         <div className="py-3 px-4 relative z-10">
