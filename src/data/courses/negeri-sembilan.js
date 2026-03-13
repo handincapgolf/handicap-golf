@@ -30,16 +30,16 @@ export const NEGERI_SEMBILAN_COURSES = {
     shortName: "NSGCC-IP",
     fullName: "Nilai Springs Golf & Country Club (Island + Pines)",
     location: ["Nilai", "Negeri Sembilan", "Malaysia"],
-    pars: [5,4,4,3,4,4,3,5,4, 4,5,3,4,5,4,4,3,4],
-    index: [1,15,7,9,3,17,11,13,5, 10,18,16,4,14,12,2,18,6]
+    pars: [5,4,3,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
+    index: [3,13,7,5,11,15,9,17,1, 10,8,16,4,14,12,2,18,6]
   },
 
   "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_ISLAND": {
     shortName: "NSGCC-MI",
     fullName: "Nilai Springs Golf & Country Club (Mango + Island)",
     location: ["Nilai", "Negeri Sembilan", "Malaysia"],
-    pars: [5,4,3,4,4,3,5,4,4, 5,4,4,3,4,4,3,5,4],
-    index: [3,13,7,5,11,15,9,17,1, 2,16,8,10,4,18,12,14,6]
+    pars: [5,4,3,4,4,3,5,4,4, 5,4,3,4,4,3,5,4,4],
+    index: [3,13,7,5,11,15,9,17,1, 4,14,8,6,12,16,10,18,2]
   },
 
   "NILAI_SPRINGS_GOLF_AND_COUNTRY_CLUB_MANGO_PINES": {
@@ -47,7 +47,7 @@ export const NEGERI_SEMBILAN_COURSES = {
     fullName: "Nilai Springs Golf & Country Club (Mango + Pines)",
     location: ["Nilai", "Negeri Sembilan", "Malaysia"],
     pars: [5,4,3,4,4,3,5,4,4, 4,5,3,4,5,4,4,3,4],
-    index: [3,13,7,5,11,15,9,17,1, 10,18,16,4,14,12,2,18,6]
+    index: [3,13,7,5,11,15,9,17,1, 10,8,16,4,14,12,2,18,6]
   },
 
   "PORT_DICKSON_GOLF_AND_COUNTRY_CLUB": {
@@ -64,14 +64,6 @@ export const NEGERI_SEMBILAN_COURSES = {
     location: ["Port Dickson", "Negeri Sembilan", "Malaysia"],
     pars: [4,5,3,4,4,5,4,3,4, 5,4,4,3,4,4,3,5,4],
     index: [17,3,9,5,1,7,11,15,13, 12,14,4,16,2,18,10,6,8]
-  },
-
-  "Royal_Seri_Menanti_Golf_Club": {
-    shortName: "RSMGCC",
-    fullName: "Royal Seri Menanti Golf Club",
-    location: ["Kuala Pilah", "Negeri Sembilan", "Malaysia"],
-    pars: [5,4,3,4,4,4,5,4,3, 5,3,4,4,4,4,3,4,5],
-    index: [15,11,3,1,13,7,17,9,5, 2,18,4,16,12,8,14,6,10]
   },
 
   "ROYAL_SERI_MENANTI_GOLF_AND_COUNTRY_CLUB": {

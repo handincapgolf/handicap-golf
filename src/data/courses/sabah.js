@@ -95,15 +95,15 @@ export const SABAH_COURSES = {
     fullName: "Sibuga Golf Club",
     location: ["Sandakan", "Sabah", "Malaysia"],
     pars: [5,4,4,3,4,4,4,3,3],
-    index: [,,,,,,,,, ,,,,,,,,]
+    index: [,,,,,,,,]
   },
 
   "SIGALONG_GOLF_AND_COUNTRY_CLUB": {
     shortName: "SGCC",
     fullName: "Sigalong Golf & Country Club",
     location: ["Semporna", "Sabah", "Malaysia"],
-    pars: [4,4,3,4,5,3,5,4,4, 4,4,4,5,4,5,3,4,3],
-    index: [17,7,15,9,1,11,5,17,13, 8,4,12,6,2,4,14,16,10]
+    pars: [4,5,3,4,5,4,4,3,4, 4,4,5,4,3,5,4,3,4],
+    index: [17,9,5,1,3,11,15,13,7, 18,8,12,2,16,6,10,4,14]
   },
 
   "SUTERA_HARBOUR_GOLF_AND_COUNTRY_CLUB_HERITAGE_GARDEN": {

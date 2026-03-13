@@ -23,7 +23,7 @@ export const OTHER_COURSES = {
     fullName: "Labuan International Golf Club",
     location: ["Labuan", "Labuan", "Malaysia"],
     pars: [4,5,5,4,3,4,3,4,4, 5,4,4,3,5,4,3,4,4],
-    index: [9,3,1,13,17,11,15,5,7, 4,10,6,16,2,8,18,14,12],
+    index: [9,3,1,13,17,11,15,5,7, 4,10,6,16,2,8,18,14,12]
   }
 };
 

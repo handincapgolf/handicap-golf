@@ -10,7 +10,7 @@ export const SARAWAK_COURSES = {
     index: [11,1,15,5,13,9,17,7,3, 12,18,14,6,16,10,8,2,4]
   },
 
-  "BORNEO_GOLF&_COUNTRY_CLUB": {
+  "BORNEO_GOLF_AND_COUNTRY_CLUB": {
     shortName: "BGCC",
     fullName: "Borneo Golf & Country Club",
     location: ["Kuching", "Sarawak", "Malaysia"],
