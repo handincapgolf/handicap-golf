@@ -394,6 +394,8 @@ const MpClaimSection = memo(({
   setCurrentSection,
   t
 }) => {
+  const [isClaimingPlayers, setIsClaimingPlayers] = React.useState(false);
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-blue-50 to-indigo-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
@@ -407,106 +409,162 @@ const MpClaimSection = memo(({
                 </div>
 
                 <div className="bg-white rounded-xl p-4 shadow-md space-y-2">
-                  {(mp.remoteGame.players || []).map(player => (
-                    <label key={player} className="flex items-center gap-3 py-3 px-3 rounded-lg hover:bg-gray-50 cursor-pointer border border-gray-100">
-                      <input
-                        type="checkbox"
-                        checked={mp.claimChecked[player] || false}
-                        onChange={(e) => mp.setClaimChecked(prev => ({ ...prev, [player]: e.target.checked }))}
-                        className="w-5 h-5 rounded text-blue-600"
-                      />
-                      <span className="font-medium text-gray-900 text-lg">{player}</span>
-                      {mp.claimed[player] && mp.claimed[player] !== mp.deviceId && (
-                        <span className={`ml-auto text-xs ${mp.getDeviceBgClass(mp.claimed[player])} px-2 py-0.5 rounded`}>{mp.getDeviceLabel(mp.claimed[player])}</span>
-                      )}
-                    </label>
-                  ))}
+                  {!mp.remoteGame || !mp.remoteGame.players || mp.remoteGame.players.length === 0 ? (
+                    <div className="text-center py-6 text-gray-500">
+                      <p>{t('mpNoPlayers') || 'No players available'}</p>
+                    </div>
+                  ) : (
+                    mp.remoteGame.players.map(player => {
+                      const claimedBy = mp.claimed[player];
+                      const creatorDev = mp.remoteGame?.creatorDevice;
+                      // Only disable if claimed by another JOINER (not by creator's default claim)
+                      const isClaimedByOtherJoiner = claimedBy && claimedBy !== mp.deviceId && claimedBy !== creatorDev;
+                      const isDisabled = isClaimedByOtherJoiner || isClaimingPlayers;
+
+                      return (
+                        <label
+                          key={player}
+                          className={`flex items-center gap-3 py-3 px-3 rounded-lg border border-gray-100 transition ${
+                            isDisabled
+                              ? 'bg-gray-50 cursor-not-allowed opacity-60'
+                              : 'hover:bg-gray-50 cursor-pointer'
+                          }`}
+                        >
+                          <input
+                            type="checkbox"
+                            checked={mp.claimChecked[player] || false}
+                            disabled={isDisabled}
+                            onChange={(e) => {
+                              if (!isDisabled) {
+                                mp.setClaimChecked(prev => ({ ...prev, [player]: e.target.checked }));
+                              }
+                            }}
+                            className="w-5 h-5 rounded text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                          />
+                          <span className={`font-medium text-lg ${isDisabled ? 'text-gray-500' : 'text-gray-900'}`}>
+                            {player}
+                          </span>
+                          {isClaimedByOtherJoiner && (
+                            <span className={`ml-auto text-xs ${mp.getDeviceBgClass(claimedBy)} px-2 py-0.5 rounded`}>
+                              {mp.getDeviceLabel(claimedBy)} {t('mpClaimed') || 'Claimed'}
+                            </span>
+                          )}
+                        </label>
+                      );
+                    })
+                  )}
                 </div>
 
                 <button
                   onClick={async () => {
+                    if (isClaimingPlayers) return; // Prevent double-click
+
                     const selected = Object.entries(mp.claimChecked).filter(([,v]) => v).map(([k]) => k);
                     if (selected.length === 0) {
                       showToast(t('mpSelectOne'), 'error');
                       return;
                     }
-                    // Apply remote game settings locally
-                    const g = mp.remoteGame;
-                    setGameMode(g.gameMode || 'matchPlay');
-                    setStake(String(g.stake || ''));
-                    setJumboMode(g.jumboMode || false);
-                    setPlayerHandicaps(g.handicaps || {});
-                    setAdvanceMode(g.advanceMode || 'off');
-                    setAdvancePlayers(g.advancePlayers || {});
-                    
-                    // Set player names
-                    const names = [...(g.players || [])];
-                    while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
-                    setPlayerNames(names);
-                    
-                    // Apply course if available
-                    if (g.course && g.course.fullName) {
-                      setSelectedCourse(g.course);
-                      if (g.course.pars) {
-                        const newPars = {};
-                        g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
-                        setPars(newPars);
-                      }
-                    }
-                    
-                    // Sync holes list from remote game
-                    if (g.holesList) {
-                      setHoles(g.holesList);
-                    }
 
-                    const result = await mp.claimPlayers(selected);
-                    if (result.ok) {
-                      // Initialize game state locally like startGame does
-                      const allP = g.players || [];
-                      const initMoney = {};
-                      const initDetails = {};
-                      const initAllScores = {};
-                      const initSpent = {};
-                      const initAllPutts = {};
-                      const initAllWater = {};
-                      const initAllOb = {};
-                      allP.forEach(player => {
-                        initMoney[player] = 0;
-                        initDetails[player] = { fromPool: 0, fromPlayers: {} };
-                        initAllScores[player] = {};
-                        initSpent[player] = 0;
-                        initAllPutts[player] = {};
-                        initAllWater[player] = {};
-                        initAllOb[player] = {};
-                        allP.forEach(other => {
-                          if (other !== player) initDetails[player].fromPlayers[other] = 0;
+                    try {
+                      setIsClaimingPlayers(true);
+
+                      // Apply remote game settings locally
+                      const g = mp.remoteGame;
+                      if (!g) {
+                        showToast('Game data not available. Please try again.', 'error');
+                        return;
+                      }
+
+                      setGameMode(g.gameMode || 'matchPlay');
+                      setStake(String(g.stake || ''));
+                      setJumboMode(g.jumboMode || false);
+                      setPlayerHandicaps(g.handicaps || {});
+                      setAdvanceMode(g.advanceMode || 'off');
+                      setAdvancePlayers(g.advancePlayers || {});
+
+                      // Set player names
+                      const names = [...(g.players || [])];
+                      while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
+                      setPlayerNames(names);
+
+                      // Apply course if available
+                      if (g.course && g.course.fullName) {
+                        setSelectedCourse(g.course);
+                        if (g.course.pars) {
+                          const newPars = {};
+                          g.course.pars.forEach((p, i) => { newPars[i + 1] = p; });
+                          setPars(newPars);
+                        }
+                      }
+
+                      // Sync holes list from remote game
+                      if (g.holesList) {
+                        setHoles(g.holesList);
+                      }
+
+                      const result = await mp.claimPlayers(selected);
+
+                      if (result.ok) {
+                        // Initialize game state locally like startGame does
+                        const allP = g.players || [];
+                        const initMoney = {};
+                        const initDetails = {};
+                        const initAllScores = {};
+                        const initSpent = {};
+                        const initAllPutts = {};
+                        const initAllWater = {};
+                        const initAllOb = {};
+                        allP.forEach(player => {
+                          initMoney[player] = 0;
+                          initDetails[player] = { fromPool: 0, fromPlayers: {} };
+                          initAllScores[player] = {};
+                          initSpent[player] = 0;
+                          initAllPutts[player] = {};
+                          initAllWater[player] = {};
+                          initAllOb[player] = {};
+                          allP.forEach(other => {
+                            if (other !== player) initDetails[player].fromPlayers[other] = 0;
+                          });
                         });
-                      });
-                      setTotalMoney(initMoney);
-                      setMoneyDetails(initDetails);
-                      setAllScores(initAllScores);
-                      setAllUps({});
-                      setAllPutts(initAllPutts);
-                      setAllWater(initAllWater);
-                      setAllOb(initAllOb);
-                      setTotalSpent(initSpent);
-                      setCurrentHole(0);
-                      setScores({});
-                      setUps({});
-                      setPutts({});
-                      setWater({});
-                      setOb({});
-                      setCompletedHoles([]);
-                      setGameComplete(false);
-                      setCurrentHoleSettlement(null);
-                      
-                      mp.setMultiplayerSection('lobby');
-                      setCurrentSection('mp-lobby');
+                        setTotalMoney(initMoney);
+                        setMoneyDetails(initDetails);
+                        setAllScores(initAllScores);
+                        setAllUps({});
+                        setAllPutts(initAllPutts);
+                        setAllWater(initAllWater);
+                        setAllOb(initAllOb);
+                        setTotalSpent(initSpent);
+                        setCurrentHole(0);
+                        setScores({});
+                        setUps({});
+                        setPutts({});
+                        setWater({});
+                        setOb({});
+                        setCompletedHoles([]);
+                        setGameComplete(false);
+                        setCurrentHoleSettlement(null);
+
+                        mp.setMultiplayerSection('lobby');
+                        setCurrentSection('mp-lobby');
+                      } else {
+                        // Show error if claim failed
+                        showToast(result.error || 'Failed to claim players. Please try again.', 'error');
+                      }
+                    } catch (error) {
+                      console.error('Error claiming players:', error);
+                      showToast('An error occurred. Please try again.', 'error');
+                    } finally {
+                      setIsClaimingPlayers(false);
                     }
                   }}
-                  className="w-full bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold text-lg hover:bg-blue-700"
+                  disabled={isClaimingPlayers}
+                  className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition ${
+                    isClaimingPlayers
+                      ? 'bg-blue-400 text-white cursor-not-allowed'
+                      : 'bg-blue-600 text-white hover:bg-blue-700'
+                  }`}
                 >
-                  {t('mpConfirmClaim')}
+                  {isClaimingPlayers ? t('mpProcessing') || 'Processing...' : t('mpConfirmClaim')}
                 </button>
 
                 <button

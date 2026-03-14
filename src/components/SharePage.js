@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, memo } from 'react';
-import { FeedbackInline } from '../RoundReport';
+
 
 // ========== 分享页面样式 ==========
 const sharePageStyles = `
@@ -388,11 +388,6 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
         </button>
       </div>
 
-      {/* Feedback */}
-      <div style={{ padding: '0 12px 12px' }}>
-        <FeedbackInline courseName={data.f || data.c || ''} />
-      </div>
-      
       <BrandFooter />
     </div>
   );
@@ -543,11 +538,6 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
         </div>
       </div>
 
-      {/* Feedback */}
-      <div style={{ padding: '12px' }}>
-        <FeedbackInline courseName={data.c || ''} />
-      </div>
-      
       <BrandFooter />
     </div>
   );

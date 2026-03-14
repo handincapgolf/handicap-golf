@@ -2303,7 +2303,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               mp={mp} showToast={showToast}
               setGameMode={setGameMode} setStake={setStake} setJumboMode={setJumboMode} setPlayerHandicaps={setPlayerHandicaps}
               setAdvanceMode={setAdvanceMode} setAdvancePlayers={setAdvancePlayers} setPlayerNames={setPlayerNames}
-              setSelectedCourse={setSelectedCourse} setPars={setPars}
+              setSelectedCourse={setSelectedCourse} setPars={setPars} setHoles={setHoles}
               setTotalMoney={setTotalMoney} setMoneyDetails={setMoneyDetails} setAllScores={setAllScores} setAllUps={setAllUps} setAllPutts={setAllPutts}
               setAllWater={setAllWater} setAllOb={setAllOb} setTotalSpent={setTotalSpent}
               setCurrentHole={setCurrentHole} setScores={setScores} setUps={setUps} setPutts={setPutts} setWater={setWater} setOb={setOb}
