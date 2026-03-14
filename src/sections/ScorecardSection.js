@@ -137,7 +137,7 @@ const PenaltyWidget = ({ activePlayers, completedHoles, allWater, allOb, holes, 
         <div className="flex items-center gap-2">
           <span style={{ fontSize: 16 }}>⚠️</span>
           <span className="text-sm font-semibold text-red-800">
-            {t('penalties') || 'Penalties'} (OB / {t('water') || 'Water'})
+            {t('penalties')} ({t('ob')} / {t('water')})
           </span>
         </div>
         <div className="flex items-center gap-2">
@@ -502,8 +502,8 @@ const ScorecardSection = ({
             <>
               {/* Reusable vertical table block */}
               {[
-                { label: t('out') || 'OUT', holeList: frontNine, bg: '#166534' },
-                { label: t('in') || 'IN', holeList: backNine, bg: '#7f1d1d' }
+                { label: t('out'), holeList: frontNine, bg: '#166534' },
+                { label: t('in'), holeList: backNine, bg: '#7f1d1d' }
               ].filter(s => s.holeList.length > 0).map(({ label, holeList, bg }) => {
                 const sectionPar = calculateParTotal(holeList);
                 return (
@@ -511,7 +511,7 @@ const ScorecardSection = ({
                     {/* Header row */}
                     <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
                       <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
-                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>Par</div>
+                      <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>{t('parLabel')}</div>
                       {activePlayers.map(p => (
                         <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
                       ))}

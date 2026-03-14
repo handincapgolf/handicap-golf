@@ -85,7 +85,7 @@ const GameSection = ({
             <h1 className="text-2xl font-bold mb-2">
   {t('hole')} {holes[currentHole]}
   <span className="ml-2 px-2 py-0.5 bg-white bg-opacity-20 rounded text-lg">
-    PAR {pars[holes[currentHole]] || 4}
+    {t('par')} {pars[holes[currentHole]] || 4}
   </span>
   {selectedCourse?.index && (
     <span className="ml-2 px-2 py-0.5 bg-amber-400 text-amber-900 rounded text-sm font-bold">
@@ -239,6 +239,7 @@ const GameSection = ({
   getScoreLabel={getScoreLabel}
   gameMode={gameMode}
   upOrder={upOrder}
+  t={t}
 />
                   </div>
                   );
@@ -302,7 +303,7 @@ const GameSection = ({
         {/* 右侧：On + Putts 控制器 */}
         <div className="flex flex-col gap-2 ml-2">
           <div className="flex items-center">
-            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">On</span>
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">{t('onLabel')}</span>
             <button
               onClick={() => changeOn(player, -1)}
               disabled={playerScore <= 1}
@@ -323,7 +324,7 @@ const GameSection = ({
             </button>
           </div>
           <div className="flex items-center">
-            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">Putts</span>
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">{t('puttsPutts')}</span>
             <button
               onClick={() => changePutts(player, -1)}
               disabled={playerPutts <= 0}
@@ -364,7 +365,7 @@ const GameSection = ({
                            style={allOtherConfirmed ? { background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' } : {}}>
                         {allOtherConfirmed && (
                           <div className="text-xs font-semibold text-green-700 flex items-center gap-1 px-2 py-1">
-                            ✅ All Confirmed ✓
+                            ✅ {t('allConfirmed')} ✓
                           </div>
                         )}
                         {!allOtherConfirmed && otherDeviceIds.length > 0 && (
@@ -415,7 +416,7 @@ const GameSection = ({
               totalAmt < 0 ? 'text-red-400' : 
               'text-gray-400'
             }`}>
-              Total: {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
+              {t('totalLabel')}: {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
             </div>
           </div>
         );
@@ -437,10 +438,10 @@ const GameSection = ({
                   <Eye className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="text-sm font-semibold text-purple-700">
-                      {t('mpViewerReminder') || 'You are viewing this game'}
+                      {t('mpViewerReminder')}
                     </div>
                     <div className="text-xs text-purple-500 mt-0.5">
-                      {t('mpViewerReminderDesc') || 'Scores update in real-time. You cannot input or modify scores.'}
+                      {t('mpViewerReminderDesc')}
                     </div>
                   </div>
                 </div>
@@ -476,11 +477,11 @@ const GameSection = ({
                     }}
                     className="flex-1 bg-gray-200 text-gray-700 py-3 px-4 rounded-lg font-semibold hover:bg-gray-300 transition"
                   >
-                    {t('exit') || 'Exit'}
+                    {t('exit')}
                   </button>
                   <div className="flex items-center gap-1.5 px-3 bg-green-50 rounded-lg text-xs text-green-700">
                     <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
-                    Live syncing
+                    {t('liveSyncing')}
                   </div>
                   <button
                     onClick={() => setCurrentSection('scorecard')}

@@ -20,10 +20,10 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
   const timeAgo = (ts) => {
     const d = typeof ts === 'string' ? new Date(ts) : new Date(ts);
     const mins = Math.floor((Date.now() - d.getTime()) / 60000);
-    if (mins < 1) return t('editLogScore') === 'Score' ? 'just now' : '刚刚';
-    if (mins < 60) return t('editLogScore') === 'Score' ? `${mins}m ago` : `${mins}分钟前`;
+    if (mins < 1) return t('justNow');
+    if (mins < 60) return t('minsAgo').replace('{n}', mins);
     const hrs = Math.floor(mins / 60);
-    return t('editLogScore') === 'Score' ? `${hrs}h ago` : `${hrs}小时前`;
+    return t('hrsAgo').replace('{n}', hrs);
   };
   const fmtTime = (ts) => {
     const d = typeof ts === 'string' ? new Date(ts) : new Date(ts);

@@ -104,7 +104,7 @@ const CourseSection = memo(({
                                 <div className="flex gap-4">
                                   <div className="w-16 h-16 bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
                                     <span className="text-xl font-bold">{coursePar}</span>
-                                    <span className="text-xs uppercase tracking-wide opacity-90">Par</span>
+                                    <span className="text-xs uppercase tracking-wide opacity-90">{t('parLabel')}</span>
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h4 className="font-semibold text-sm text-gray-900 mb-1">
@@ -152,7 +152,7 @@ const CourseSection = memo(({
                           </div>
                           <div className="text-right">
                             <span className="text-sm font-bold text-green-600">
-                              PAR {calculateTotalPar()}
+                              {t('par')} {calculateTotalPar()}
                             </span>
                           </div>
                         </div>
@@ -207,13 +207,13 @@ const CourseSection = memo(({
                                     pars[hole] === 5 ? 'bg-orange-300 text-black' :
                                     'bg-gray-300 text-black'
                                   }`}>
-                                    Par {pars[hole]}
+                                    {t('parLabel')} {pars[hole]}
                                   </div>
                                 </div>
                               ))}
                             </div>
                           </div>
-                          
+
                           {holes.length > 9 && (
                             <div className="border-2 border-green-600 rounded-lg overflow-hidden">
                               <div className="bg-green-600 text-white text-xs font-bold py-1.5 text-center">
@@ -230,7 +230,7 @@ const CourseSection = memo(({
                                       pars[hole] === 5 ? 'bg-orange-300 text-black' :
                                       'bg-gray-300 text-black'
                                     }`}>
-                                      Par {pars[hole]}
+                                      {t('parLabel')} {pars[hole]}
                                     </div>
                                   </div>
                                 ))}
@@ -388,7 +388,7 @@ const CourseSection = memo(({
                           <div className="flex gap-3">
                             <div className="w-12 h-12 bg-gradient-to-br from-green-500 to-emerald-700 rounded-xl flex flex-col items-center justify-center text-white shadow-md flex-shrink-0">
                               <span className="text-base font-bold">{coursePar}</span>
-                              <span style={{ fontSize: 8 }} className="uppercase tracking-wide opacity-90">Par</span>
+                              <span style={{ fontSize: 8 }} className="uppercase tracking-wide opacity-90">{t('parLabel')}</span>
                             </div>
                             <div className="flex-1 min-w-0">
                               <h4 className="font-semibold text-xs text-gray-900 mb-0.5 leading-snug">

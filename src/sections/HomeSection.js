@@ -112,7 +112,7 @@ export const HomeContent = ({
               }
               const result = await mp.joinGame(mp.joinerCode);
               if (!result.ok) {
-                showToast(result.error || 'Room not found', 'error');
+                showToast(result.error || t('roomNotFound'), 'error');
               } else {
                 setCurrentSection('mp-role');
               }

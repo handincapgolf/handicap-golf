@@ -258,7 +258,30 @@ export const ms = {
   feedbackStar2: 'Biasa',
   feedbackStar3: 'OK',
   feedbackStar4: 'Bagus',
-  feedbackStar5: 'Hebat!'
+  feedbackStar5: 'Hebat!',
+  // Share page
+  shareInvalidLink: 'Pautan Tidak Sah',
+  shareInvalidDesc: 'Pautan kongsi ini tidak sah atau telah tamat tempoh.',
+  shareGoTo: 'Pergi ke HandinCap',
+  poweredBy: 'Dikuasakan oleh',
+  onLabel: 'On',
+  avg: 'Purata',
+  totalLabel: 'Jumlah',
+  // Multiplayer extras
+  mpConnectionStatus: 'Status Sambungan',
+  mpPlayersJoined: 'Pemain menyertai',
+  mpViewersJoined: 'Penonton menyertai',
+  mpNoPlayersYet: 'Tiada pemain menyertai lagi. Anda masih boleh mula — anda akan skor semua pemain sendiri.',
+  mpProcessing: 'Memproses...',
+  mpClaimed: 'Dituntut',
+  mpNoPlayers: 'Tiada pemain tersedia',
+  ob: 'OB',
+  allConfirmed: 'Semua Disahkan',
+  liveSyncing: 'Segerak langsung',
+  justNow: 'baru sahaja',
+  minsAgo: '{n}m lalu',
+  hrsAgo: '{n}j lalu',
+  roomNotFound: 'Bilik tidak dijumpai',
 };
 
 export default ms;

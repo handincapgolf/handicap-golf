@@ -263,7 +263,31 @@ export const en = {
   feedbackStar2: 'Fair',
   feedbackStar3: 'Good',
   feedbackStar4: 'Great',
-  feedbackStar5: 'Amazing!'
+  feedbackStar5: 'Amazing!',
+  // Share page
+  shareInvalidLink: 'Invalid Link',
+  shareInvalidDesc: 'This share link is invalid or expired.',
+  shareGoTo: 'Go to HandinCap',
+  poweredBy: 'Powered by',
+  onLabel: 'On',
+  avg: 'Avg',
+  totalLabel: 'Total',
+  // Multiplayer extras
+  mpConnectionStatus: 'Connection Status',
+  mpPlayersJoined: 'Players joined',
+  mpViewersJoined: 'Viewers joined',
+  mpNoPlayersYet: "No players joined yet. You can still start — you'll score all players yourself.",
+  mpProcessing: 'Processing...',
+  mpClaimed: 'Claimed',
+  mpNoPlayers: 'No players available',
+  // Additional UI
+  ob: 'OB',
+  allConfirmed: 'All Confirmed',
+  liveSyncing: 'Live syncing',
+  justNow: 'just now',
+  minsAgo: '{n}m ago',
+  hrsAgo: '{n}h ago',
+  roomNotFound: 'Room not found',
 };
 
 export default en;

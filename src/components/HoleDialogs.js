@@ -259,11 +259,11 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
 
   const getScoreLabel = (stroke, par) => {
     const diff = stroke - par;
-    if (diff <= -2) return { text: 'Eagle', numClass: 'bg-purple-500 text-white', labelClass: 'bg-purple-500 text-white' };
-    if (diff === -1) return { text: 'Birdie', numClass: 'bg-blue-500 text-white', labelClass: 'bg-blue-500 text-white' };
-    if (diff === 0) return { text: 'Par', numClass: 'bg-gray-100 text-gray-800', labelClass: 'bg-gray-200 text-gray-600' };
-    if (diff === 1) return { text: 'Bogey', numClass: 'bg-orange-500 text-white', labelClass: 'bg-orange-500 text-white' };
-    return { text: 'Dbl+', numClass: 'bg-red-500 text-white', labelClass: 'bg-red-500 text-white' };
+    if (diff <= -2) return { text: t('eagle'), numClass: 'bg-purple-500 text-white', labelClass: 'bg-purple-500 text-white' };
+    if (diff === -1) return { text: t('birdie'), numClass: 'bg-blue-500 text-white', labelClass: 'bg-blue-500 text-white' };
+    if (diff === 0) return { text: t('parLabel'), numClass: 'bg-gray-100 text-gray-800', labelClass: 'bg-gray-200 text-gray-600' };
+    if (diff === 1) return { text: t('bogey'), numClass: 'bg-orange-500 text-white', labelClass: 'bg-orange-500 text-white' };
+    return { text: t('doubleplus'), numClass: 'bg-red-500 text-white', labelClass: 'bg-red-500 text-white' };
   };
 
   // 卡片样式
@@ -279,7 +279,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
       <div className="bg-white rounded-xl p-3 w-full max-w-sm shadow-2xl">
         <div className="flex justify-between items-center mb-2">
           <h3 className="text-base font-bold text-gray-900">
-            {t('editHole')} {hole} (PAR {par})
+            {t('editHole')} {hole} ({t('par')} {par})
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
             <X className="w-5 h-5" />
@@ -331,7 +331,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
 
                   <div className="flex-1 space-y-1">
                     <div className="flex items-center justify-end">
-                      <span className="text-xs font-semibold text-gray-500 w-8">On</span>
+                      <span className="text-xs font-semibold text-gray-500 w-8">{t('onLabel')}</span>
                       <button
                         onClick={() => changeScore(player, -1)}
                         disabled={playerOn <= 1}
@@ -351,7 +351,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
                     </div>
                     
                     <div className="flex items-center justify-end">
-                      <span className="text-xs font-semibold text-gray-500 w-8">Putts</span>
+                      <span className="text-xs font-semibold text-gray-500 w-8">{t('puttsPutts')}</span>
                       <button
                         onClick={() => changePutts(player, -1)}
                         disabled={playerPutts <= 0}

@@ -258,7 +258,30 @@ export const ko = {
   feedbackStar2: '보통',
   feedbackStar3: '괜찮음',
   feedbackStar4: '좋음',
-  feedbackStar5: '최고!'
+  feedbackStar5: '최고!',
+  // Share page
+  shareInvalidLink: '잘못된 링크',
+  shareInvalidDesc: '이 공유 링크는 유효하지 않거나 만료되었습니다.',
+  shareGoTo: 'HandinCap으로 이동',
+  poweredBy: 'Powered by',
+  onLabel: '온',
+  avg: '평균',
+  totalLabel: '합계',
+  // Multiplayer extras
+  mpConnectionStatus: '연결 상태',
+  mpPlayersJoined: '참가한 플레이어',
+  mpViewersJoined: '참가한 관전자',
+  mpNoPlayersYet: '아직 참가한 플레이어가 없습니다. 시작할 수 있습니다 — 모든 플레이어의 스코어를 직접 입력합니다.',
+  mpProcessing: '처리 중...',
+  mpClaimed: '배정됨',
+  mpNoPlayers: '플레이어 없음',
+  ob: 'OB',
+  allConfirmed: '전체 확인됨',
+  liveSyncing: '실시간 동기화',
+  justNow: '방금',
+  minsAgo: '{n}분 전',
+  hrsAgo: '{n}시간 전',
+  roomNotFound: '방을 찾을 수 없습니다',
 };
 
 export default ko;

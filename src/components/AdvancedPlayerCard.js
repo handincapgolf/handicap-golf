@@ -21,7 +21,8 @@ const AdvancedPlayerCard = memo(({
   onToggleUp, 
   getScoreLabel,
   gameMode = 'win123',
-  upOrder = []
+  upOrder = [],
+  t
 }) => {
   const stroke = playerOn + playerPutts;
   const label = getScoreLabel(stroke, par);
@@ -114,8 +115,8 @@ const AdvancedPlayerCard = memo(({
         {/* 右侧：On + Putts 控制器 */}
         <div className="flex flex-col gap-2 ml-2">
           <div className="flex items-center">
-            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">On</span>
-            <button 
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">{t ? t('onLabel') : 'On'}</span>
+            <button
               onClick={() => onChangeOn(-1)} 
               disabled={playerOn <= 1}
               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${
@@ -133,8 +134,8 @@ const AdvancedPlayerCard = memo(({
             </button>
           </div>
           <div className="flex items-center">
-            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">Putts</span>
-            <button 
+            <span className="text-[11px] font-bold text-gray-500 w-10 mr-1">{t ? t('puttsPutts') : 'Putts'}</span>
+            <button
               onClick={() => onChangePutts(-1)} 
               disabled={playerPutts <= 0}
               className={`w-10 h-10 rounded-full flex items-center justify-center shadow-md btn-press text-xl font-bold transition ${

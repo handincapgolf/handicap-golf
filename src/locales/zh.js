@@ -264,7 +264,30 @@ export const zh = {
   feedbackStar2: '一般',
   feedbackStar3: '还行',
   feedbackStar4: '很好',
-  feedbackStar5: '太棒了！'
+  feedbackStar5: '太棒了！',
+  // 分享页面
+  shareInvalidLink: '无效链接',
+  shareInvalidDesc: '此分享链接无效或已过期。',
+  shareGoTo: '前往 HandinCap',
+  poweredBy: '由',
+  onLabel: '上果岭',
+  avg: '平均',
+  totalLabel: '总计',
+  // 多人模式补充
+  mpConnectionStatus: '连接状态',
+  mpPlayersJoined: '已加入球员',
+  mpViewersJoined: '已加入观众',
+  mpNoPlayersYet: '还没有球员加入。你仍可以开始——你将为所有球员记分。',
+  mpProcessing: '处理中...',
+  mpClaimed: '已认领',
+  mpNoPlayers: '暂无可用球员',
+  ob: 'OB',
+  allConfirmed: '全部已确认',
+  liveSyncing: '实时同步中',
+  justNow: '刚刚',
+  minsAgo: '{n}分钟前',
+  hrsAgo: '{n}小时前',
+  roomNotFound: '房间未找到',
 };
 
 export default zh;

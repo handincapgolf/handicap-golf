@@ -258,7 +258,30 @@ export const ja = {
   feedbackStar2: '普通',
   feedbackStar3: '良い',
   feedbackStar4: 'とても良い',
-  feedbackStar5: '最高！'
+  feedbackStar5: '最高！',
+  // Share page
+  shareInvalidLink: '無効なリンク',
+  shareInvalidDesc: 'この共有リンクは無効または期限切れです。',
+  shareGoTo: 'HandinCapへ',
+  poweredBy: 'Powered by',
+  onLabel: 'オン',
+  avg: '平均',
+  totalLabel: '合計',
+  // Multiplayer extras
+  mpConnectionStatus: '接続状況',
+  mpPlayersJoined: '参加プレーヤー',
+  mpViewersJoined: '参加観戦者',
+  mpNoPlayersYet: 'まだプレーヤーが参加していません。開始可能です — 全プレーヤーのスコアを入力できます。',
+  mpProcessing: '処理中...',
+  mpClaimed: '割り当て済み',
+  mpNoPlayers: 'プレーヤーなし',
+  ob: 'OB',
+  allConfirmed: '全員確認済み',
+  liveSyncing: 'ライブ同期中',
+  justNow: 'たった今',
+  minsAgo: '{n}分前',
+  hrsAgo: '{n}時間前',
+  roomNotFound: 'ルームが見つかりません',
 };
 
 export default ja;

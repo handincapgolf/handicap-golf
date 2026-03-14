@@ -258,7 +258,30 @@ export const zhTW = {
   feedbackStar2: '一般',
   feedbackStar3: '還行',
   feedbackStar4: '很好',
-  feedbackStar5: '太棒了！'
+  feedbackStar5: '太棒了！',
+  // 分享頁面
+  shareInvalidLink: '無效連結',
+  shareInvalidDesc: '此分享連結無效或已過期。',
+  shareGoTo: '前往 HandinCap',
+  poweredBy: '由',
+  onLabel: '上果嶺',
+  avg: '平均',
+  totalLabel: '總計',
+  // 多人模式補充
+  mpConnectionStatus: '連線狀態',
+  mpPlayersJoined: '已加入球員',
+  mpViewersJoined: '已加入觀眾',
+  mpNoPlayersYet: '還沒有球員加入。你仍可以開始——你將為所有球員記分。',
+  mpProcessing: '處理中...',
+  mpClaimed: '已認領',
+  mpNoPlayers: '暫無可用球員',
+  ob: 'OB',
+  allConfirmed: '全部已確認',
+  liveSyncing: '即時同步中',
+  justNow: '剛剛',
+  minsAgo: '{n}分鐘前',
+  hrsAgo: '{n}小時前',
+  roomNotFound: '房間未找到',
 };
 
 export default zhTW;

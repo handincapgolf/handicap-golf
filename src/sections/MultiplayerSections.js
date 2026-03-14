@@ -63,10 +63,10 @@ const MpLobbySection = memo(({
                   <div className="flex items-center justify-between py-2 border-b">
                     <span className="text-sm text-gray-500">{t('mpMode')}</span>
                     <span className="font-medium text-sm">
-                      {mp.remoteGame.gameMode === 'matchPlay' ? '🏆 Match Play' :
-                       mp.remoteGame.gameMode === 'win123' ? '💵 Win123' :
-                       mp.remoteGame.gameMode === 'skins' ? '💰 Skins' :
-                       '♠ Baccarat'}
+                      {mp.remoteGame.gameMode === 'matchPlay' ? `🏆 ${t('matchPlay')}` :
+                       mp.remoteGame.gameMode === 'win123' ? `💵 ${t('win123')}` :
+                       mp.remoteGame.gameMode === 'skins' ? `💰 ${t('skins')}` :
+                       `♠ ${t('baccarat')}`}
                     </span>
                   </div>
                   {mp.remoteGame.stake > 0 && (
@@ -83,10 +83,10 @@ const MpLobbySection = memo(({
                     <div className="flex items-center justify-between py-2">
                       <span className="text-sm text-gray-500">{t('mpHolesLabel')}</span>
                       <span className="font-medium text-sm">
-                        {mp.remoteGame.holesList.length === 18 ? '18 Holes' :
-                         mp.remoteGame.holesList[0] === 1 && mp.remoteGame.holesList.length === 9 ? 'Front 9' :
-                         mp.remoteGame.holesList[0] === 10 && mp.remoteGame.holesList.length === 9 ? 'Back 9' :
-                         `${mp.remoteGame.holesList.length} Holes (${mp.remoteGame.holesList[0]}-${mp.remoteGame.holesList[mp.remoteGame.holesList.length - 1]})`}
+                        {mp.remoteGame.holesList.length === 18 ? t('f18') :
+                         mp.remoteGame.holesList[0] === 1 && mp.remoteGame.holesList.length === 9 ? t('front9') :
+                         mp.remoteGame.holesList[0] === 10 && mp.remoteGame.holesList.length === 9 ? t('back9') :
+                         `${mp.remoteGame.holesList.length} (${mp.remoteGame.holesList[0]}-${mp.remoteGame.holesList[mp.remoteGame.holesList.length - 1]})`}
                       </span>
                     </div>
                   )}
@@ -143,12 +143,12 @@ const MpLobbySection = memo(({
                 {mp.multiplayerRole === 'creator' && (
                   <div className="bg-white rounded-xl p-4 shadow-md">
                     <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                      Connection Status
+                      {t('mpConnectionStatus')}
                     </h3>
                     <div className="flex items-center justify-between py-2 border-b">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">🎯</span>
-                        <span className="text-sm text-gray-600">Players joined</span>
+                        <span className="text-sm text-gray-600">{t('mpPlayersJoined')}</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
                         mp.playerDeviceCount > 0 ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-400'
@@ -159,7 +159,7 @@ const MpLobbySection = memo(({
                     <div className="flex items-center justify-between py-2">
                       <div className="flex items-center gap-2">
                         <span className="text-lg">👁</span>
-                        <span className="text-sm text-gray-600">Viewers joined</span>
+                        <span className="text-sm text-gray-600">{t('mpViewersJoined')}</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
                         mp.viewerDeviceCount > 0 ? 'bg-purple-100 text-purple-700' : 'bg-gray-100 text-gray-400'
@@ -169,7 +169,7 @@ const MpLobbySection = memo(({
                     </div>
                     {mp.playerDeviceCount === 0 && (
                       <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2">
-                        💡 No players joined yet. You can still start — you'll score all players yourself.
+                        💡 {t('mpNoPlayersYet')}
                       </p>
                     )}
                   </div>
@@ -196,7 +196,7 @@ const MpLobbySection = memo(({
                   <div className="text-center">
                     {mp.multiplayerRole === 'viewer' && (
                       <div className="mb-2 inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                        <Eye className="w-4 h-4" /> {t('mpViewerRole') || 'Viewer'}
+                        <Eye className="w-4 h-4" /> {t('mpViewerRole')}
                       </div>
                     )}
                     <p className="text-sm text-gray-500">
@@ -301,10 +301,10 @@ const MpRoleSection = memo(({
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
                   <h2 className="text-xl font-bold text-gray-900">
-                    {t('mpRoleTitle') || 'Join Room'}
+                    {t('mpRoleTitle')}
                   </h2>
                   <p className="text-sm text-gray-500 mt-1">
-                    {t('mpRoleDesc') || 'How would you like to join?'}
+                    {t('mpRoleDesc')}
                   </p>
                   <div className="mt-2 inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-mono">
                     🏠 {mp.gameCode}
@@ -319,17 +319,17 @@ const MpRoleSection = memo(({
                   >
                     <div className="text-3xl mb-2">🎯</div>
                     <div className="text-lg font-bold text-blue-700 mb-1">
-                      {t('mpPlayerRole') || 'Player'}
+                      {t('mpPlayerRole')}
                     </div>
                     <p className="text-xs text-gray-500 mb-3">
-                      {t('mpPlayerRoleDesc') || 'Claim players and input scores'}
+                      {t('mpPlayerRoleDesc')}
                     </p>
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 flex items-center gap-1">
-                        ✏️ <span>{t('mpPlayerTagInput') || 'Input scores'}</span>
+                        ✏️ <span>{t('mpPlayerTagInput')}</span>
                       </div>
                       <div className="text-xs text-blue-600 flex items-center gap-1">
-                        👤 <span>{t('mpPlayerTagClaim') || 'Claim players'}</span>
+                        👤 <span>{t('mpPlayerTagClaim')}</span>
                       </div>
                     </div>
                   </button>
@@ -350,17 +350,17 @@ const MpRoleSection = memo(({
                   >
                     <div className="text-3xl mb-2">👁</div>
                     <div className="text-lg font-bold text-purple-700 mb-1">
-                      {t('mpViewerRole') || 'Viewer'}
+                      {t('mpViewerRole')}
                     </div>
                     <p className="text-xs text-gray-500 mb-3">
-                      {t('mpViewerRoleDesc') || 'Watch the game live, read-only'}
+                      {t('mpViewerRoleDesc')}
                     </p>
                     <div className="space-y-1">
                       <div className="text-xs text-purple-600 flex items-center gap-1">
-                        👁 <span>{t('mpViewerTagLive') || 'Live scores'}</span>
+                        👁 <span>{t('mpViewerTagLive')}</span>
                       </div>
                       <div className="text-xs text-gray-400 flex items-center gap-1 line-through">
-                        ✏️ <span>{t('mpViewerTagNoInput') || 'No input'}</span>
+                        ✏️ <span>{t('mpViewerTagNoInput')}</span>
                       </div>
                     </div>
                   </button>
@@ -411,7 +411,7 @@ const MpClaimSection = memo(({
                 <div className="bg-white rounded-xl p-4 shadow-md space-y-2">
                   {!mp.remoteGame || !mp.remoteGame.players || mp.remoteGame.players.length === 0 ? (
                     <div className="text-center py-6 text-gray-500">
-                      <p>{t('mpNoPlayers') || 'No players available'}</p>
+                      <p>{t('mpNoPlayers')}</p>
                     </div>
                   ) : (
                     mp.remoteGame.players.map(player => {
@@ -446,7 +446,7 @@ const MpClaimSection = memo(({
                           </span>
                           {isClaimedByOtherJoiner && (
                             <span className={`ml-auto text-xs ${mp.getDeviceBgClass(claimedBy)} px-2 py-0.5 rounded`}>
-                              {mp.getDeviceLabel(claimedBy)} {t('mpClaimed') || 'Claimed'}
+                              {mp.getDeviceLabel(claimedBy)} {t('mpClaimed')}
                             </span>
                           )}
                         </label>
@@ -471,7 +471,7 @@ const MpClaimSection = memo(({
                       // Apply remote game settings locally
                       const g = mp.remoteGame;
                       if (!g) {
-                        showToast('Game data not available. Please try again.', 'error');
+                        showToast(t('mpError'), 'error');
                         return;
                       }
 
@@ -548,11 +548,11 @@ const MpClaimSection = memo(({
                         setCurrentSection('mp-lobby');
                       } else {
                         // Show error if claim failed
-                        showToast(result.error || 'Failed to claim players. Please try again.', 'error');
+                        showToast(result.error || t('mpError'), 'error');
                       }
                     } catch (error) {
                       console.error('Error claiming players:', error);
-                      showToast('An error occurred. Please try again.', 'error');
+                      showToast(t('mpError'), 'error');
                     } finally {
                       setIsClaimingPlayers(false);
                     }
@@ -564,7 +564,7 @@ const MpClaimSection = memo(({
                       : 'bg-blue-600 text-white hover:bg-blue-700'
                   }`}
                 >
-                  {isClaimingPlayers ? t('mpProcessing') || 'Processing...' : t('mpConfirmClaim')}
+                  {isClaimingPlayers ? t('mpProcessing') : t('mpConfirmClaim')}
                 </button>
 
                 <button

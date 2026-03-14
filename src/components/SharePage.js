@@ -1,12 +1,12 @@
 /**
  * 分享页面组件 (Share Pages)
- * 
+ *
  * 包含：SharePage (主容器), ShareReportPage, ShareDetailPage, CourseLogo, BrandFooter
  * 从 IntegratedGolfGame.js 提取
  */
 
 import React, { useState, useEffect, memo } from 'react';
-
+import { useTranslation, detectLanguage } from '../locales';
 
 // ========== 分享页面样式 ==========
 const sharePageStyles = `
@@ -149,7 +149,7 @@ export const getShareScoreClass = (score, par) => {
 // ========== 球场 Logo 组件 ==========
 export const CourseLogo = memo(({ shortName, fullName }) => {
   const [imgError, setImgError] = useState(false);
-  
+
   const getLogoName = () => {
     if (shortName && shortName.length <= 15 && !shortName.includes('Golf')) {
       return shortName.toLowerCase();
@@ -163,19 +163,19 @@ export const CourseLogo = memo(({ shortName, fullName }) => {
     }
     return null;
   };
-  
+
   const logoName = getLogoName();
   const logoPath = logoName ? `/images/courses/${logoName}.png` : null;
-  
+
   if (!logoPath || imgError) {
     return (
       <div className="logo-large"><span>⛳</span></div>
     );
   }
-  
+
   return (
     <div className="logo-large" style={{ padding: '4px' }}>
-      <img 
+      <img
         src={logoPath}
         alt={shortName || fullName}
         onError={() => setImgError(true)}
@@ -186,35 +186,35 @@ export const CourseLogo = memo(({ shortName, fullName }) => {
 });
 
 // ========== 品牌 Footer ==========
-export const BrandFooter = memo(() => (
+export const BrandFooter = memo(({ t }) => (
   <div className="text-center py-3 bg-gray-50 border-t">
     <div className="flex items-center justify-center gap-2">
       <span className="text-green-600 text-lg">⛳</span>
       <span className="text-sm font-semibold text-gray-600">
-        Powered by <span className="text-green-600">HandinCap.golf</span>
+        {t ? t('poweredBy') : 'Powered by'} <span className="text-green-600">HandinCap.golf</span>
       </span>
     </div>
   </div>
 ));
 
 // ========== 分享报告页面 ==========
-export const ShareReportPage = memo(({ data, onViewFull }) => {
+export const ShareReportPage = memo(({ data, onViewFull, t }) => {
   const holes = data.h || [];
   const front9 = holes.filter(h => h.h <= 9);
   const back9 = holes.filter(h => h.h > 9);
   const front9Total = front9.reduce((sum, h) => sum + h.o + h.t, 0);
   const back9Total = back9.reduce((sum, h) => sum + h.o + h.t, 0);
-  
+
   const totalPutts = holes.reduce((sum, h) => sum + h.t, 0);
   const avgPutts = holes.length > 0 ? (totalPutts / holes.length).toFixed(1) : '0';
   const onePutts = holes.filter(h => h.t === 1).length;
   const threePutts = holes.filter(h => h.t >= 3).length;
-  
+
   const birdies = holes.filter(h => (h.o + h.t) - h.p === -1).length;
   const pars = holes.filter(h => (h.o + h.t) - h.p === 0).length;
   const bogeys = holes.filter(h => (h.o + h.t) - h.p === 1).length;
   const doubles = holes.filter(h => (h.o + h.t) - h.p >= 2).length;
-  
+
   const toPar = data.s - data.p;
   const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
 
@@ -249,13 +249,13 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
       <div className="flex-1 p-4 space-y-3 overflow-auto">
         {/* Hole by Hole */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
-          <div className="text-sm font-semibold text-gray-500 mb-2">📋 Hole by Hole</div>
-          
+          <div className="text-sm font-semibold text-gray-500 mb-2">📋 {t('holeByHole')}</div>
+
           {front9.length > 0 && (
   <div className="mb-4">
     <div className="flex justify-between items-center mb-2">
-      <span className="text-xs text-gray-400">Front 9 OUT</span>
-      <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Total}</span></span>
+      <span className="text-xs text-gray-400">{t('front9')} {t('out')}</span>
+      <span className="text-sm text-gray-500">{t('totalLabel')} <span className="font-bold text-green-600">{front9Total}</span></span>
     </div>
     <div className="flex justify-between mb-1">
       {front9.map(d => (
@@ -280,8 +280,8 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
 {back9.length > 0 && (
   <div>
     <div className="flex justify-between items-center mb-2">
-      <span className="text-xs text-gray-400">Back 9 IN</span>
-      <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Total}</span></span>
+      <span className="text-xs text-gray-400">{t('back9')} {t('in')}</span>
+      <span className="text-sm text-gray-500">{t('totalLabel')} <span className="font-bold text-green-600">{back9Total}</span></span>
     </div>
     <div className="flex justify-between mb-1">
       {back9.map(d => (
@@ -306,49 +306,49 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
 
         {/* Score Distribution */}
 <div className="bg-white border border-gray-200 rounded-xl p-3">
-  <div className="text-sm font-semibold text-gray-500 mb-2">🎯 Score Distribution</div>
+  <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
   <div className="flex justify-around">
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-        Birdie
+        {t('birdie')}
       </span>
-      <div 
+      <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }}
       >
         <span className="text-2xl font-extrabold text-white">{birdies}</span>
       </div>
     </div>
-    
+
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold">
-        Par
+        {t('parLabel')}
       </span>
-      <div 
+      <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ background: 'linear-gradient(135deg, #9ca3af 0%, #6b7280 100%)' }}
       >
         <span className="text-2xl font-extrabold text-white">{pars}</span>
       </div>
     </div>
-    
+
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
-        Bogey
+        {t('bogey')}
       </span>
-      <div 
+      <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ background: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)' }}
       >
         <span className="text-2xl font-extrabold text-white">{bogeys}</span>
       </div>
     </div>
-    
+
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
-        Dbl+
+        {t('doubleplus')}
       </span>
-      <div 
+      <div
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
         style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)' }}
       >
@@ -360,23 +360,23 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
 
         {/* Putting Analysis */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
-          <div className="text-sm font-semibold text-gray-500 mb-2">📊 Putting Analysis</div>
+          <div className="text-sm font-semibold text-gray-500 mb-2">📊 {t('puttingAnalysis')}</div>
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-2 bg-gray-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Total</div>
+              <div className="text-xs text-gray-500 mb-1">{t('totalLabel')}</div>
               <div className="text-xl font-bold text-gray-800">{totalPutts}</div>
             </div>
             <div className="text-center p-2 bg-blue-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">Avg</div>
+              <div className="text-xs text-gray-500 mb-1">{t('avg')}</div>
               <div className="text-xl font-bold text-blue-600">{avgPutts}</div>
             </div>
             <div className="text-center p-2 bg-green-50 rounded-lg">
-              <div className="text-xs text-gray-500 mb-1">1-Putt</div>
+              <div className="text-xs text-gray-500 mb-1">{t('onePutt')}</div>
               <div className="text-xl font-bold text-green-600">{onePutts}</div>
             </div>
           </div>
           {threePutts > 0 && (
-            <div className="mt-2 text-center text-sm text-red-500">⚠️ 3-Putts: {threePutts}</div>
+            <div className="mt-2 text-center text-sm text-red-500">⚠️ {t('threePutts')}: {threePutts}</div>
           )}
         </div>
       </div>
@@ -384,25 +384,25 @@ export const ShareReportPage = memo(({ data, onViewFull }) => {
       {/* View Full Detail */}
       <div className="flex-shrink-0 p-4 border-t" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
         <button onClick={onViewFull} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition">
-          View Full Detail →
+          {t('viewFullDetail')} →
         </button>
       </div>
 
-      <BrandFooter />
+      <BrandFooter t={t} />
     </div>
   );
 });
 
 // ========== 分享完整明细页面 ==========
-export const ShareDetailPage = memo(({ data, onBack }) => {
+export const ShareDetailPage = memo(({ data, onBack, t }) => {
   const holes = data.h || [];
   const front9 = holes.filter(h => h.h <= 9);
   const back9 = holes.filter(h => h.h > 9);
-  
+
   const totalPutts = holes.reduce((sum, h) => sum + h.t, 0);
   const totalWater = holes.reduce((sum, h) => sum + (h.w || 0), 0);
   const totalOb = holes.reduce((sum, h) => sum + (h.b || 0), 0);
-  
+
   const toPar = data.s - data.p;
   const diffText = toPar > 0 ? `+${toPar}` : toPar === 0 ? 'E' : `${toPar}`;
 
@@ -441,15 +441,15 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
       <div className="flex-1 overflow-auto">
         {front9.length > 0 && (
           <>
-            <div className="px-3 py-2 bg-green-50 text-xs font-semibold text-green-700 sticky top-0 z-10">Front 9 OUT</div>
+            <div className="px-3 py-2 bg-green-50 text-xs font-semibold text-green-700 sticky top-0 z-10">{t('front9')} {t('out')}</div>
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Hole</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Par</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">On</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Putt</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Tot</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('hole')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('standardPar')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('onLabel')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('putt')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('total')}</th>
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>}
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>}
                 </tr>
@@ -477,15 +477,15 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
 
         {back9.length > 0 && (
           <>
-            <div className="px-3 py-2 bg-blue-50 text-xs font-semibold text-blue-700 sticky top-0 z-10">Back 9 IN</div>
+            <div className="px-3 py-2 bg-blue-50 text-xs font-semibold text-blue-700 sticky top-0 z-10">{t('back9')} {t('in')}</div>
             <table className="w-full text-sm">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Hole</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Par</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">On</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Putt</th>
-                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">Tot</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('hole')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('standardPar')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('onLabel')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('putt')}</th>
+                  <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('total')}</th>
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>}
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>}
                 </tr>
@@ -516,11 +516,11 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
       <div className="flex-shrink-0 bg-gray-100 p-3 border-t" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
         <div className={`grid gap-2 text-center ${data.a ? 'grid-cols-4' : 'grid-cols-2'}`}>
           <div className="bg-white rounded-lg p-2 shadow-sm">
-            <div className="text-gray-500 text-xs">Total</div>
+            <div className="text-gray-500 text-xs">{t('totalLabel')}</div>
             <div className="font-bold text-xl text-gray-800">{data.s}</div>
           </div>
           <div className="bg-white rounded-lg p-2 shadow-sm">
-            <div className="text-gray-500 text-xs">Putt</div>
+            <div className="text-gray-500 text-xs">{t('putt')}</div>
             <div className="font-bold text-xl text-blue-600">{totalPutts}</div>
           </div>
           {data.a && (
@@ -538,7 +538,7 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
         </div>
       </div>
 
-      <BrandFooter />
+      <BrandFooter t={t} />
     </div>
   );
 });
@@ -546,6 +546,8 @@ export const ShareDetailPage = memo(({ data, onBack }) => {
 // ========== 主分享页面容器 ==========
 const SharePage = memo(({ data, PWAInstallPrompt }) => {
   const [view, setView] = useState('report');
+  const lang = detectLanguage();
+  const t = useTranslation(lang);
 
   // 注入样式
   useEffect(() => {
@@ -567,10 +569,10 @@ const SharePage = memo(({ data, PWAInstallPrompt }) => {
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl p-6 text-center shadow-lg">
           <div className="text-4xl mb-3">❌</div>
-          <h2 className="text-lg font-bold text-gray-800 mb-2">Invalid Link</h2>
-          <p className="text-gray-600 text-sm">This share link is invalid or expired.</p>
+          <h2 className="text-lg font-bold text-gray-800 mb-2">{t('shareInvalidLink')}</h2>
+          <p className="text-gray-600 text-sm">{t('shareInvalidDesc')}</p>
           <a href="/" className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
-            Go to HandinCap
+            {t('shareGoTo')}
           </a>
         </div>
       </div>
@@ -580,11 +582,11 @@ const SharePage = memo(({ data, PWAInstallPrompt }) => {
   return (
   <div className="min-h-screen bg-gradient-to-b from-gray-700 to-gray-900">
     {view === 'report' ? (
-      <ShareReportPage data={data} onViewFull={() => setView('detail')} />
+      <ShareReportPage data={data} onViewFull={() => setView('detail')} t={t} />
     ) : (
-      <ShareDetailPage data={data} onBack={() => setView('report')} />
+      <ShareDetailPage data={data} onBack={() => setView('report')} t={t} />
     )}
-    {PWAInstallPrompt && <PWAInstallPrompt lang="en" />}
+    {PWAInstallPrompt && <PWAInstallPrompt lang={lang} />}
   </div>
 );
 });

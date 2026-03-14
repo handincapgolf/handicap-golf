@@ -258,7 +258,30 @@ export const th = {
   feedbackStar2: 'พอใช้',
   feedbackStar3: 'ดี',
   feedbackStar4: 'ดีมาก',
-  feedbackStar5: 'ยอดเยี่ยม!'
+  feedbackStar5: 'ยอดเยี่ยม!',
+  // Share page
+  shareInvalidLink: 'ลิงก์ไม่ถูกต้อง',
+  shareInvalidDesc: 'ลิงก์แชร์นี้ไม่ถูกต้องหรือหมดอายุ',
+  shareGoTo: 'ไปที่ HandinCap',
+  poweredBy: 'ขับเคลื่อนโดย',
+  onLabel: 'On',
+  avg: 'เฉลี่ย',
+  totalLabel: 'รวม',
+  // Multiplayer extras
+  mpConnectionStatus: 'สถานะการเชื่อมต่อ',
+  mpPlayersJoined: 'ผู้เล่นเข้าร่วม',
+  mpViewersJoined: 'ผู้ชมเข้าร่วม',
+  mpNoPlayersYet: 'ยังไม่มีผู้เล่นเข้าร่วม คุณยังสามารถเริ่มได้ — คุณจะบันทึกสกอร์ผู้เล่นทั้งหมดเอง',
+  mpProcessing: 'กำลังประมวลผล...',
+  mpClaimed: 'ถูกเลือกแล้ว',
+  mpNoPlayers: 'ไม่มีผู้เล่น',
+  ob: 'OB',
+  allConfirmed: 'ทั้งหมดยืนยันแล้ว',
+  liveSyncing: 'ซิงค์สด',
+  justNow: 'เมื่อสักครู่',
+  minsAgo: '{n}นาทีที่แล้ว',
+  hrsAgo: '{n}ชั่วโมงที่แล้ว',
+  roomNotFound: 'ไม่พบห้อง',
 };
 
 export default th;

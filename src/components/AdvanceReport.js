@@ -81,7 +81,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
               <div className="mb-4">
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-gray-400">{t('front9')} OUT</span>
-                  <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{front9Score}</span></span>
+                  <span className="text-sm text-gray-500">{t('totalLabel')} <span className="font-bold text-green-600">{front9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
   {front9Details.map(d => (
@@ -107,7 +107,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
               <div>
                 <div className="flex justify-between items-center mb-2">
                   <span className="text-xs text-gray-400">{t('back9')} IN</span>
-                  <span className="text-sm text-gray-500">Total <span className="font-bold text-green-600">{back9Score}</span></span>
+                  <span className="text-sm text-gray-500">{t('totalLabel')} <span className="font-bold text-green-600">{back9Score}</span></span>
                 </div>
                 <div className="flex justify-between mb-1">
   {back9Details.map(d => (
@@ -137,7 +137,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
     {/* Birdie */}
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
-        Birdie
+        {t('birdie')}
       </span>
       <div 
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
@@ -150,7 +150,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
     {/* Par */}
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-gray-200 text-gray-700 rounded-full text-xs font-bold">
-        Par
+        {t('parLabel')}
       </span>
       <div 
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
@@ -163,7 +163,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
     {/* Bogey */}
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-orange-100 text-orange-700 rounded-full text-xs font-bold">
-        Bogey
+        {t('bogey')}
       </span>
       <div 
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
@@ -176,7 +176,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
     {/* Double+ */}
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-bold">
-        Dbl+
+        {t('doubleplus')}
       </span>
       <div 
         className="w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg"
@@ -222,7 +222,7 @@ export const AdvanceReportCard = memo(({ player, rank, onClose, onViewFull, allS
                   <div className="text-xl font-bold text-cyan-600">{totalWater}</div>
                 </div>
                 <div className="bg-yellow-50 rounded-lg p-2 flex items-center justify-between">
-                  <div className="text-yellow-600 text-sm">OB</div>
+                  <div className="text-yellow-600 text-sm">{t('ob')}</div>
                   <div className="text-xl font-bold text-yellow-600">{totalOb}</div>
                 </div>
               </div>
@@ -324,13 +324,13 @@ export const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, all
                 <thead className="bg-gray-50 sticky top-7">
                   <tr>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('hole')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">On</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('parLabel')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('onLabel')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Total</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('totalLabel')}</th>
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
-                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
-                    {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('ob')}</th>}
+                    {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('editLogUp')}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -361,13 +361,13 @@ export const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, all
                 <thead className="bg-gray-50 sticky top-7">
                   <tr>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('hole')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Par</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">On</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('parLabel')}</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('onLabel')}</th>
                     <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('putt')}</th>
-                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">Total</th>
+                    <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('totalLabel')}</th>
                     {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">💧</th>}
-                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">OB</th>}
-                    {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">UP</th>}
+                    {isAdvancePlayer && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('ob')}</th>}
+                    {isWin123 && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600 w-10">{t('editLogUp')}</th>}
                   </tr>
                 </thead>
                 <tbody>
@@ -395,7 +395,7 @@ export const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, all
         <div className="flex-shrink-0 bg-gray-100 p-3 border-t" style={{ paddingBottom: 'max(12px, env(safe-area-inset-bottom))' }}>
           <div className={`grid gap-2 text-center`} style={{ gridTemplateColumns: `repeat(${2 + (isAdvancePlayer ? 2 : 0) + (isWin123 ? 1 : 0)}, 1fr)` }}>
             <div className="bg-white rounded-lg p-2 shadow-sm">
-              <div className="text-gray-500 text-xs">Total</div>
+              <div className="text-gray-500 text-xs">{t('totalLabel')}</div>
               <div className="font-bold text-xl text-gray-800">{playerTotal}</div>
             </div>
             <div className="bg-white rounded-lg p-2 shadow-sm">
@@ -410,13 +410,13 @@ export const AdvanceFullDetailModal = memo(({ player, rank, onClose, onBack, all
             )}
             {isAdvancePlayer && (
               <div className="bg-white rounded-lg p-2 shadow-sm">
-                <div className="text-gray-500 text-xs">OB</div>
+                <div className="text-gray-500 text-xs">{t('ob')}</div>
                 <div className="font-bold text-xl text-yellow-600">{totalOb}</div>
               </div>
             )}
             {isWin123 && (
               <div className="bg-white rounded-lg p-2 shadow-sm">
-                <div className="text-gray-500 text-xs">UP</div>
+                <div className="text-gray-500 text-xs">{t('editLogUp')}</div>
                 <div className="font-bold text-xl text-green-600">{totalUp}</div>
               </div>
             )}
