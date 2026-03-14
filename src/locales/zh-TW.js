@@ -177,7 +177,7 @@ export const zhTW = {
   endGame: '終止',
   advancedTag: '📊 進階',
   advancedSelectDesc: '勾選的玩家將記錄推桿、水障礙、OB等詳細數據',
-  shareRoundReport: '分享 Round Report',
+  shareRoundReport: '分享回合報告',
   allDataCleared: '所有比賽數據將被清除',
   endGameConfirm: '確定要終止比賽嗎？\n未完成的洞將不計入成績',
   holeLabel: '{n}洞',

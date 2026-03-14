@@ -182,7 +182,7 @@ export const zh = {
   endGame: '终止',
   advancedTag: '📊 高级',
   advancedSelectDesc: '勾选的玩家将记录推杆、水障碍、OB等详细数据',
-  shareRoundReport: '分享 Round Report',
+  shareRoundReport: '分享回合报告',
   allDataCleared: '所有比赛数据将被清除',
   endGameConfirm: '确定要终止比赛吗？\n未完成的洞将不计入成绩',
   holeLabel: '{n}洞',
