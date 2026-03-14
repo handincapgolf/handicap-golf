@@ -282,6 +282,17 @@ export const zhTW = {
   minsAgo: '{n}分鐘前',
   hrsAgo: '{n}小時前',
   roomNotFound: '房間未找到',
+  // Round Report
+  rrTitle: '回合報告',
+  rrGolfCourse: '高爾夫球場',
+  rrTotalScorePar: '總成績 (標準桿: {n})',
+  rrShareImage: '分享圖片',
+  rrShareLink: '分享連結',
+  rrImageDownloaded: '圖片已下載',
+  rrImageFailed: '產生圖片失敗',
+  rrScreenshotFailed: '截圖失敗，請手動截圖',
+  rrOpenApp: '開啟 HandinCap',
+  loading: '載入中...',
 };
 
 export default zhTW;

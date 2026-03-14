@@ -288,6 +288,17 @@ export const zh = {
   minsAgo: '{n}分钟前',
   hrsAgo: '{n}小时前',
   roomNotFound: '房间未找到',
+  // Round Report
+  rrTitle: '回合报告',
+  rrGolfCourse: '高尔夫球场',
+  rrTotalScorePar: '总成绩 (标准杆: {n})',
+  rrShareImage: '分享图片',
+  rrShareLink: '分享链接',
+  rrImageDownloaded: '图片已下载',
+  rrImageFailed: '生成图片失败',
+  rrScreenshotFailed: '截图失败，请手动截屏',
+  rrOpenApp: '打开 HandinCap',
+  loading: '加载中...',
 };
 
 export default zh;

@@ -288,6 +288,17 @@ export const en = {
   minsAgo: '{n}m ago',
   hrsAgo: '{n}h ago',
   roomNotFound: 'Room not found',
+  // Round Report
+  rrTitle: 'ROUND REPORT',
+  rrGolfCourse: 'Golf Course',
+  rrTotalScorePar: 'Total Score (Par: {n})',
+  rrShareImage: 'Share Image',
+  rrShareLink: 'Share Link',
+  rrImageDownloaded: 'Image downloaded',
+  rrImageFailed: 'Failed to generate image',
+  rrScreenshotFailed: 'Screenshot failed, please take a manual screenshot',
+  rrOpenApp: 'Open HandinCap',
+  loading: 'Loading...',
 };
 
 export default en;

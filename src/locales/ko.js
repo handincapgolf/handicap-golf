@@ -282,6 +282,17 @@ export const ko = {
   minsAgo: '{n}분 전',
   hrsAgo: '{n}시간 전',
   roomNotFound: '방을 찾을 수 없습니다',
+  // Round Report
+  rrTitle: '라운드 리포트',
+  rrGolfCourse: '골프 코스',
+  rrTotalScorePar: '총 스코어 (Par: {n})',
+  rrShareImage: '이미지 공유',
+  rrShareLink: '링크 공유',
+  rrImageDownloaded: '이미지 다운로드 완료',
+  rrImageFailed: '이미지 생성 실패',
+  rrScreenshotFailed: '캡처 실패, 수동으로 스크린샷을 찍어주세요',
+  rrOpenApp: 'HandinCap 열기',
+  loading: '로딩 중...',
 };
 
 export default ko;

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
+import { useTranslation, detectLanguage } from './locales';
 
 // ============================================================
 // Round Report - 完整回合报告组件
@@ -359,7 +360,9 @@ const formatDiff = (diff) => {
  * RoundReportCard - 用于截图和 URL 查看的完整报告
  * 接收解码后的数据结构
  */
-export const RoundReportCard = memo(({ data, forCapture = false, vertical = false, hideFooter = false }) => {
+export const RoundReportCard = memo(({ data, forCapture = false, vertical = false, hideFooter = false, t: tProp }) => {
+  const fallbackT = useTranslation('en');
+  const t = tProp || fallbackT;
   const {
     courseSN, courseFN, date, gameMode, stake, prizePool,
     players, holes, pars, allScores, allPutts
@@ -411,10 +414,10 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         position: 'relative'
       }}>
         <div style={{ fontSize: '11px', opacity: 0.7, marginBottom: '4px', letterSpacing: '3px', fontWeight: 600, color: 'rgba(236,253,245,0.6)' }}>
-          ROUND REPORT
+          {t('rrTitle')}
         </div>
         <div style={{ fontSize: (courseFN || courseSN || '').length > 25 ? '14px' : '17px', fontWeight: 'bold', marginBottom: '4px' }}>
-          {courseFN || courseSN || 'Golf Course'}
+          {courseFN || courseSN || t('rrGolfCourse')}
         </div>
         {courseFN && courseSN && courseSN !== courseFN && (
           <div style={{ fontSize: '12px', opacity: 0.8 }}>{courseSN}</div>
@@ -430,7 +433,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
       }}>
         <div style={{ textAlign: 'center', fontSize: '12px', color: '#6b7280', marginBottom: '8px', fontWeight: 600 }}>
-          Total Score (Par: {totalPar})
+          {t('rrTotalScorePar').replace('{n}', totalPar)}
         </div>
         <div style={{ display: 'flex', gap: '4px' }}>
           {activePlayers.map(name => {
@@ -471,14 +474,14 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
           ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
         }}>
           <div style={{ textAlign: 'center', fontSize: '12px', fontWeight: 600, color: '#6b7280', marginBottom: '8px' }}>
-            Final Settlement
+            {t('finalSettlement')}
           </div>
           {(stake > 0 || prizePool > 0) && (
             <div style={{
               textAlign: 'center', padding: '6px 12px', backgroundColor: '#f3e8ff',
               borderRadius: '6px', marginBottom: '8px'
             }}>
-              <span style={{ fontSize: '12px', color: '#6b21a8' }}>Pot: </span>
+              <span style={{ fontSize: '12px', color: '#6b21a8' }}>{t('penaltyPot')}: </span>
               <span style={{ fontSize: '14px', fontWeight: 700, color: '#6b21a8' }}>
                 ${prizePool || 0}
               </span>
@@ -513,19 +516,19 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         /* ===== VERTICAL PGA-style — Front 9 / Back 9 split ===== */
         <>
           {[
-            { label: 'OUT', holeList: frontNine, bg: '#166534' },
-            { label: 'IN', holeList: backNine, bg: '#7f1d1d' }
-          ].filter(s => s.holeList.length > 0).map(({ label, holeList, bg }) => {
+            { key: 'out', label: t('out'), holeList: frontNine, bg: '#166534' },
+            { key: 'in', label: t('in'), holeList: backNine, bg: '#7f1d1d' }
+          ].filter(s => s.holeList.length > 0).map(({ key, label, holeList, bg }) => {
             const sectionPar = calcParTotal(holeList);
             return (
-              <div key={label} style={{
+              <div key={key} style={{
                 backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden', marginBottom: 20,
                 ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
               }}>
                 {/* Header row */}
                 <div style={{ display: 'flex', width: '100%', padding: '10px 0', borderBottom: '2px solid #e5e7eb', background: bg }}>
                   <div style={{ width: 42, flexShrink: 0, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center' }}>{label}</div>
-                  <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>Par</div>
+                  <div style={{ width: 34, flexShrink: 0, fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,0.7)', textAlign: 'center' }}>{t('parLabel')}</div>
                   {activePlayers.map(p => (
                     <div key={p} style={{ flex: 1, fontSize: 14, fontWeight: 700, color: '#fff', textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', padding: '0 2px' }}>{p}</div>
                   ))}
@@ -564,7 +567,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
             ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
           }}>
             <div style={{ display: 'flex', width: '100%', alignItems: 'center', padding: '10px 0', background: '#f0fdf4', borderTop: '2px solid #166534' }}>
-              <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>TOT</div>
+              <div style={{ width: 42, flexShrink: 0, textAlign: 'center', fontSize: 14, fontWeight: 700, color: '#166534' }}>{t('total')}</div>
               <div style={{ width: 34, flexShrink: 0, fontSize: 14, color: '#166534', textAlign: 'center', fontWeight: 700 }}>{totalPar}</div>
               {activePlayers.map(p => (
                 <div key={p} style={{ flex: 1, textAlign: 'center' }}>
@@ -579,26 +582,26 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         /* ===== HORIZONTAL Tables (matching ScorecardSection: 14px, tableLayout fixed) ===== */
         <>
           {[
-            { label: 'OUT', holeList: frontNine },
-            { label: 'IN', holeList: backNine }
-          ].filter(s => s.holeList.length > 0).map(({ label, holeList }) => (
-            <div key={label} style={{
+            { key: 'out', label: t('out'), holeList: frontNine },
+            { key: 'in', label: t('in'), holeList: backNine }
+          ].filter(s => s.holeList.length > 0).map(({ key, label, holeList }) => (
+            <div key={key} style={{
               backgroundColor: 'white', borderRadius: '8px', overflow: 'hidden',
               ...(forCapture ? {} : { boxShadow: '0 1px 3px rgba(0,0,0,0.1)' })
             }}>
               <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px', tableLayout: 'fixed' }}>
                 <thead>
-                  <tr style={{ backgroundColor: label === 'OUT' ? '#047857' : '#b91c1c', color: 'white' }}>
+                  <tr style={{ backgroundColor: key === 'out' ? '#047857' : '#b91c1c', color: 'white' }}>
                     <th style={{ padding: '8px 4px', textAlign: 'left', fontWeight: 700, width: '55px' }}>{label}</th>
                     {holeList.map(h => (
                       <th key={h} style={{ padding: '8px 0', textAlign: 'center', fontWeight: 700 }}>{h}</th>
                     ))}
-                    <th style={{ padding: '8px 4px', textAlign: 'center', fontWeight: 700, width: '35px' }}>Tot</th>
+                    <th style={{ padding: '8px 4px', textAlign: 'center', fontWeight: 700, width: '35px' }}>{t('total')}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr style={{ backgroundColor: '#f9fafb' }}>
-                    <td style={{ padding: '8px 4px', fontWeight: 700, color: '#111827' }}>Par</td>
+                    <td style={{ padding: '8px 4px', fontWeight: 700, color: '#111827' }}>{t('parLabel')}</td>
                     {holeList.map(h => (
                       <td key={h} style={{ padding: '8px 0', textAlign: 'center', color: '#111827' }}>{pars[h] || 4}</td>
                     ))}
@@ -647,7 +650,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
       }}>
         <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
         <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
-          Powered by <span style={{ color: '#047857' }}>HandinCap.golf</span>
+          {t('poweredBy')} <span style={{ color: '#047857' }}>HandinCap.golf</span>
         </span>
       </div>
       )}
@@ -663,7 +666,9 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
  * Props:
  *   isOpen, onClose, reportData (已解码的数据), lang, showToast
  */
-export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast, linkOnly = false, editLog = [] }) => {
+export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang = 'en', showToast, linkOnly = false, editLog = [], t: tProp }) => {
+  const fallbackT = useTranslation(lang);
+  const t = tProp || fallbackT;
   const captureRef = useRef(null);
   const [capturing, setCapturing] = useState(false);
 
@@ -688,7 +693,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
       canvas.toBlob(async (blob) => {
         if (!blob) {
-          showToast?.(lang === 'zh' ? '生成图片失败' : 'Failed to generate image', 'error');
+          showToast?.(t('rrImageFailed'), 'error');
           setCapturing(false);
           return;
         }
@@ -707,13 +712,13 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
           }
         } else {
           downloadBlob(blob, 'round-report.png');
-          showToast?.(lang === 'zh' ? '图片已下载' : 'Image downloaded');
+          showToast?.(t('rrImageDownloaded'));
         }
         setCapturing(false);
       }, 'image/png');
     } catch (e) {
       console.error('Screenshot error:', e);
-      showToast?.(lang === 'zh' ? '截图失败，请手动截屏' : 'Screenshot failed. Please take a manual screenshot.', 'error');
+      showToast?.(t('rrScreenshotFailed'), 'error');
       setCapturing(false);
     }
   };
@@ -722,7 +727,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
   const handleLinkShare = () => {
     const url = generateRoundReportUrl(reportData, linkOnly, editLog);
     if (!url) {
-      showToast?.(lang === 'zh' ? '生成链接失败' : 'Failed to generate link', 'error');
+      showToast?.(t('generateLinkFailed'), 'error');
       return;
     }
 
@@ -731,9 +736,9 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
       navigator.share({ url }).catch(() => {});
     } else {
       navigator.clipboard.writeText(url).then(() => {
-        showToast?.(lang === 'zh' ? '链接已复制' : 'Link copied!');
+        showToast?.(t('mpLinkCopied'));
       }).catch(() => {
-        showToast?.(lang === 'zh' ? '复制失败' : 'Copy failed', 'error');
+        showToast?.(t('copyFailed'), 'error');
       });
     }
   };
@@ -758,7 +763,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
           padding: '14px 16px', borderBottom: '1px solid #e5e7eb'
         }}>
           <span style={{ fontWeight: 700, fontSize: '16px', color: '#111827' }}>
-            📊 Round Report
+            📊 {t('rrTitle')}
           </span>
           <button
             onClick={onClose}
@@ -787,7 +792,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
               }}
             >
-              {capturing ? '⏳' : '📷'} {lang === 'zh' ? '分享图片' : 'Share Image'}
+              {capturing ? '⏳' : '📷'} {t('rrShareImage')}
             </button>
           )}
           <button
@@ -800,17 +805,17 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
             }}
           >
-            🔗 {lang === 'zh' ? '分享链接' : 'Share Link'}
+            🔗 {t('rrShareLink')}
           </button>
         </div>
 
         {/* Preview / Capture Area */}
         <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
-            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} />
+            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} t={t} />
             {editLog && editLog.length > 0 && (
               <div style={{ marginTop: linkOnly ? 16 : 0, padding: !linkOnly ? '0 4px 8px' : 0 }}>
-                <EditLogInline logs={editLog} forCapture={!linkOnly} />
+                <EditLogInline logs={editLog} forCapture={!linkOnly} t={t} />
               </div>
             )}
           </div>
@@ -822,10 +827,12 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
 
 
 // ========== Inline Edit Log (for shared pages) ==========
-export const EditLogInline = memo(({ logs, forCapture = false }) => {
+export const EditLogInline = memo(({ logs, forCapture = false, t: tProp }) => {
+  const fallbackT = useTranslation('en');
+  const t = tProp || fallbackT;
   if (!logs || logs.length === 0) return null;
-  
-  const fieldLabel = (f) => ({ score: 'Score', putts: 'Putts', up: 'UP' }[f] || f);
+
+  const fieldLabel = (f) => ({ score: t('editLogScore'), putts: t('editLogPutts'), up: t('editLogUp') }[f] || f);
   const fmtVal = (f, v) => {
     if (f === 'up') {
       if (typeof v === 'string') return v;
@@ -844,20 +851,20 @@ export const EditLogInline = memo(({ logs, forCapture = false }) => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: forCapture ? 14 : 18 }}>📋</span>
-            <span style={{ fontSize: forCapture ? 13 : 16, fontWeight: 700, color: '#111827' }}>Edit Log</span>
+            <span style={{ fontSize: forCapture ? 13 : 16, fontWeight: 700, color: '#111827' }}>{t('editLogTitle')}</span>
           </div>
           <span style={{ fontSize: 12, color: '#9ca3af', background: '#f3f4f6', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>
-            {logs.length} edit{logs.length !== 1 ? 's' : ''}
+            {t('editLogCount').replace('{n}', logs.length)}
           </span>
         </div>
-        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>All score modifications are recorded</p>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{t('editLogAllRecorded')}</p>
       </div>
       <div style={{ padding: '8px 12px' }}>
         {logs.map((log) => (
           <div key={log.id} style={{ background: '#f9fafb', borderRadius: 10, padding: 12, marginBottom: 8, border: '1px solid #f3f4f6' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>Hole {log.hole}</span>
+                <span style={{ fontSize: 14, fontWeight: 700, color: '#111827' }}>{t('hole')} {log.hole}</span>
                 {log.editedByLabel && (
                   <span style={{ padding: '2px 8px', background: '#dbeafe', color: '#1d4ed8', borderRadius: 6, fontSize: 11, fontWeight: 600 }}>{log.editedByLabel}</span>
                 )}
@@ -988,6 +995,8 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
 // ========== Round Report 独立查看页 (URL 打开) ==========
 
 export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded = null }) => {
+  const lang = detectLanguage();
+  const t = useTranslation(lang);
   const [data, setData] = useState(null);
   const [error, setError] = useState(false);
   const [editLogs, setEditLogs] = useState([]);
@@ -1018,10 +1027,10 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
         }}>
           <div style={{ fontSize: '48px', marginBottom: '12px' }}>❌</div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>
-            Invalid Link
+            {t('shareInvalidLink')}
           </h2>
           <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '16px' }}>
-            This Round Report link is invalid or expired.
+            {t('shareInvalidDesc')}
           </p>
           <a 
             href="/"
@@ -1031,7 +1040,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
               textDecoration: 'none', fontWeight: 600, fontSize: '14px'
             }}
           >
-            Go to HandinCap
+            {t('shareGoTo')}
           </a>
         </div>
       </div>
@@ -1046,7 +1055,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
       }}>
         <div style={{ textAlign: 'center', color: '#6b7280' }}>
           <div style={{ fontSize: '32px', marginBottom: '8px' }}>⛳</div>
-          Loading...
+          {t('loading')}
         </div>
       </div>
     );
@@ -1060,12 +1069,12 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
       padding: '16px'
     }}>
       <div style={{ width: '100%', margin: '0 auto' }}>
-        <RoundReportCard data={data} vertical={vertical} hideFooter />
+        <RoundReportCard data={data} vertical={vertical} hideFooter t={t} />
         
         {/* Edit Log (if present in URL) */}
         {editLogs.length > 0 && (
           <div style={{ marginTop: 16 }}>
-            <EditLogInline logs={editLogs} />
+            <EditLogInline logs={editLogs} t={t} />
           </div>
         )}
 
@@ -1084,7 +1093,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
               textDecoration: 'none', fontWeight: 600, fontSize: '14px'
             }}
           >
-            ⛳ Open HandinCap
+            ⛳ {t('rrOpenApp')}
           </a>
         </div>
 
@@ -1092,7 +1101,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
           <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
-            Powered by <span style={{ color: '#22c55e' }}>HandinCap.golf</span>
+            {t('poweredBy')} <span style={{ color: '#22c55e' }}>HandinCap.golf</span>
           </span>
         </div>
       </div>

@@ -134,6 +134,7 @@ const GlobalDialogs = ({
         showToast={showToast}
         linkOnly={roundReportLinkOnly}
         editLog={editLog}
+        t={t}
       />
 
       {toast && (

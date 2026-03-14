@@ -282,6 +282,17 @@ export const ja = {
   minsAgo: '{n}分前',
   hrsAgo: '{n}時間前',
   roomNotFound: 'ルームが見つかりません',
+  // Round Report
+  rrTitle: 'ラウンドレポート',
+  rrGolfCourse: 'ゴルフコース',
+  rrTotalScorePar: '合計スコア (パー: {n})',
+  rrShareImage: '画像を共有',
+  rrShareLink: 'リンクを共有',
+  rrImageDownloaded: '画像をダウンロードしました',
+  rrImageFailed: '画像の生成に失敗しました',
+  rrScreenshotFailed: 'スクリーンショットに失敗しました。手動で撮影してください',
+  rrOpenApp: 'HandinCapを開く',
+  loading: '読み込み中...',
 };
 
 export default ja;

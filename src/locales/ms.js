@@ -282,6 +282,17 @@ export const ms = {
   minsAgo: '{n}m lalu',
   hrsAgo: '{n}j lalu',
   roomNotFound: 'Bilik tidak dijumpai',
+  // Round Report
+  rrTitle: 'LAPORAN PUSINGAN',
+  rrGolfCourse: 'Padang Golf',
+  rrTotalScorePar: 'Jumlah Skor (Par: {n})',
+  rrShareImage: 'Kongsi Gambar',
+  rrShareLink: 'Kongsi Pautan',
+  rrImageDownloaded: 'Gambar dimuat turun',
+  rrImageFailed: 'Gagal menjana gambar',
+  rrScreenshotFailed: 'Tangkap skrin gagal, sila tangkap secara manual',
+  rrOpenApp: 'Buka HandinCap',
+  loading: 'Memuatkan...',
 };
 
 export default ms;

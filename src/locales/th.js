@@ -282,6 +282,17 @@ export const th = {
   minsAgo: '{n}นาทีที่แล้ว',
   hrsAgo: '{n}ชั่วโมงที่แล้ว',
   roomNotFound: 'ไม่พบห้อง',
+  // Round Report
+  rrTitle: 'รายงานรอบ',
+  rrGolfCourse: 'สนามกอล์ฟ',
+  rrTotalScorePar: 'คะแนนรวม (Par: {n})',
+  rrShareImage: 'แชร์รูปภาพ',
+  rrShareLink: 'แชร์ลิงก์',
+  rrImageDownloaded: 'ดาวน์โหลดรูปภาพแล้ว',
+  rrImageFailed: 'สร้างรูปภาพไม่สำเร็จ',
+  rrScreenshotFailed: 'จับภาพหน้าจอไม่สำเร็จ กรุณาจับภาพด้วยตนเอง',
+  rrOpenApp: 'เปิด HandinCap',
+  loading: 'กำลังโหลด...',
 };
 
 export default th;
