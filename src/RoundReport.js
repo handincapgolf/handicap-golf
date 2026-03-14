@@ -895,7 +895,9 @@ export const EditLogInline = memo(({ logs, forCapture = false, t: tProp }) => {
 });
 
 // ========== Inline Feedback (for shared pages) ==========
-export const FeedbackInline = memo(({ courseName = '' }) => {
+export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
+  const fallbackT = useTranslation('en');
+  const t = tProp || fallbackT;
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [categories, setCategories] = useState([]);
@@ -904,12 +906,12 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
   const [submitted, setSubmitted] = useState(false);
 
   const activeRating = hoverRating || rating;
-  const starLabels = ['', 'Poor', 'Fair', 'Good', 'Great', 'Excellent!'];
+  const starLabels = ['', t('feedbackStar1'), t('feedbackStar2'), t('feedbackStar3'), t('feedbackStar4'), t('feedbackStar5')];
   const CATS = [
-    { key: 'modes', label: '🎮 New Modes' }, { key: 'ui', label: '🎨 UI/UX' },
-    { key: 'speed', label: '⚡ Speed' }, { key: 'course', label: '⛳ Course DB' },
-    { key: 'scoring', label: '📊 Scoring' }, { key: 'mp', label: '👥 Multiplayer' },
-    { key: 'bug', label: '🐛 Bug Report' }, { key: 'other', label: '💬 Other' },
+    { key: 'modes', label: t('feedbackCatNewModes') }, { key: 'ui', label: t('feedbackCatUI') },
+    { key: 'speed', label: t('feedbackCatSpeed') }, { key: 'course', label: t('feedbackCatCourse') },
+    { key: 'scoring', label: t('feedbackCatScoring') }, { key: 'mp', label: t('feedbackCatMultiplayer') },
+    { key: 'bug', label: t('feedbackCatBug') }, { key: 'other', label: t('feedbackCatOther') },
   ];
   const toggleCat = (k) => setCategories(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
 
@@ -933,8 +935,8 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
     return (
       <div style={{ backgroundColor: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', textAlign: 'center', padding: '32px 20px' }}>
         <div style={{ fontSize: 56, marginBottom: 12 }}>🎉</div>
-        <h3 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 6 }}>Thank You!</h3>
-        <p style={{ fontSize: 14, color: '#6b7280' }}>Your feedback helps us improve HandinCap</p>
+        <h3 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{t('feedbackThanks')}</h3>
+        <p style={{ fontSize: 14, color: '#6b7280' }}>{t('feedbackThanksDetail')}</p>
       </div>
     );
   }
@@ -944,9 +946,9 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
       <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #f3f4f6' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ fontSize: 18 }}>💬</span>
-          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>Rate Your Experience</span>
+          <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>{t('feedbackRateLabel')}</span>
         </div>
-        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>Help us improve HandinCap</p>
+        <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{t('feedbackSubtitle')}</p>
       </div>
       <div style={{ padding: '12px 16px 20px' }}>
         <div style={{ marginBottom: 16 }}>
@@ -961,7 +963,7 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
           </div>
         </div>
         <div style={{ marginBottom: 16 }}>
-          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 8 }}>What can we improve?</label>
+          <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 8 }}>{t('feedbackCatLabel')}</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
             {CATS.map(({ key, label }) => {
               const active = categories.includes(key);
@@ -976,7 +978,7 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
             })}
           </div>
         </div>
-        <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder="Any additional thoughts? (optional)" rows={3}
+        <textarea value={comment} onChange={(e) => setComment(e.target.value)} placeholder={t('feedbackCommentPlaceholder')} rows={3}
           style={{ width: '100%', padding: 12, borderRadius: 10, border: '2px solid #e5e7eb', fontSize: 14, resize: 'vertical', fontFamily: 'inherit', outline: 'none', boxSizing: 'border-box', marginBottom: 12 }}
           onFocus={(e) => e.target.style.borderColor = '#059669'} onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
         />
@@ -985,7 +987,7 @@ export const FeedbackInline = memo(({ courseName = '' }) => {
           background: (submitting || rating === 0) ? '#d1d5db' : 'linear-gradient(135deg, #059669, #047857)',
           color: 'white', fontSize: 15, fontWeight: 700,
           boxShadow: rating > 0 ? '0 4px 14px rgba(5,150,105,0.4)' : 'none', transition: 'all 0.2s',
-        }}>{submitting ? '⏳ Submitting...' : '📨 Submit Feedback'}</button>
+        }}>{submitting ? `⏳ ${t('feedbackSubmitting')}` : `📨 ${t('feedbackSubmit')}`}</button>
       </div>
     </div>
   );
@@ -1080,7 +1082,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
 
         {/* Feedback */}
         <div style={{ marginTop: 16 }}>
-          <FeedbackInline courseName={data.courseFN || data.courseSN || ''} />
+          <FeedbackInline courseName={data.courseFN || data.courseSN || ''} t={t} />
         </div>
 
         {/* Open in App button */}
