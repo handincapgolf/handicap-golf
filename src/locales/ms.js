@@ -177,7 +177,7 @@ export const ms = {
   endGame: 'Tamat',
   advancedTag: '📊 Lanjutan',
   advancedSelectDesc: 'Pemain terpilih akan jejak putt, air, butiran OB',
-  shareRoundReport: 'Kongsi Round Report',
+  shareRoundReport: 'Kongsi Laporan Pusingan',
   allDataCleared: 'Semua data permainan akan dipadam',
   endGameConfirm: 'Tamatkan permainan sekarang?\nLubang tidak siap tidak akan dikira',
   holeLabel: 'Lubang {n}',

@@ -177,7 +177,7 @@ export const th = {
   endGame: 'จบ',
   advancedTag: '📊 ขั้นสูง',
   advancedSelectDesc: 'ผู้เล่นที่เลือกจะติดตามพัตต์ น้ำ OB อย่างละเอียด',
-  shareRoundReport: 'แชร์ Round Report',
+  shareRoundReport: 'แชร์รายงานรอบ',
   allDataCleared: 'ข้อมูลเกมทั้งหมดจะถูกลบ',
   endGameConfirm: 'จบเกมตอนนี้?\nหลุมที่ไม่เสร็จจะไม่ถูกนับ',
   holeLabel: 'หลุม {n}',
