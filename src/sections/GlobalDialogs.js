@@ -157,7 +157,7 @@ const GlobalDialogs = ({
           if (mp.multiplayerOn && mp.gameCode) mp.startPolling(mp.gameCode);
         }}
         hole={editHoleDialog.hole}
-        players={activePlayers}
+        players={mp.multiplayerOn ? mp.getMyPlayers(activePlayers) : activePlayers}
         allScores={allScores}
         allUps={allUps}
         allUpOrders={allUpOrders}
