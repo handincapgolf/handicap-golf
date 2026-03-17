@@ -207,13 +207,14 @@ const GameSection = ({
                 const netScore = playerScore - playerHandicapValue;
                 const scoreLabel = getScoreLabel(netScore, par);
                 const isMyPlayer = !isOther;
-                const hideBtns = mp.isViewer || (isOther && otherConfirmed);
+                const myConfirmed = mp.multiplayerOn && mp.isMyConfirmed();
+                const hideBtns = mp.isViewer || (isOther && otherConfirmed) || (isMyPlayer && myConfirmed);
 
   const stroke = playerScore + playerPutts;
   const strokeLabel = getScoreLabel(stroke, par);
   
   return (
-    <div key={player} className={isOther ? 'mp-locked-card' : ''} style={isOther ? { pointerEvents: 'none' } : {}}>
+    <div key={player} className={(isOther || (isMyPlayer && myConfirmed)) ? 'mp-locked-card' : ''} style={(isOther || (isMyPlayer && myConfirmed)) ? { pointerEvents: 'none' } : {}}>
     <div className={`rounded-lg px-3 py-2.5 shadow-sm transition-all ${
       gameMode === 'baccarat' 
         ? getBaccaratCardClass(player, upOrder)
