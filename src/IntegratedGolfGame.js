@@ -98,6 +98,8 @@ function IntegratedGolfGame() {
   const [showRoundReport, setShowRoundReport] = useState(false);
   const [roundReportLinkOnly, setRoundReportLinkOnly] = useState(false);
   const [hasSavedGame, setHasSavedGame] = useState(false);
+  const [reportPlayer, setReportPlayer] = useState(null);
+  const [showFullDetail, setShowFullDetail] = useState(false);
   const [showQrScanner, setShowQrScanner] = useState(false);
   const qrVideoRef = useRef(null);
   const qrStreamRef = useRef(null);
@@ -2029,6 +2031,11 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     return '';
   }, []);
 
+  const handlePlayerClick = useCallback((player) => {
+    setReportPlayer(player);
+    setShowFullDetail(false);
+  }, []);
+
 // ========== 分享功能 ==========
   const handleSharePlayer = useCallback((player) => {
     const data = generatePlayerShareData(
@@ -2314,6 +2321,7 @@ const triggerConfetti = useCallback(() => {
               getMedal={getMedal}
               handleSharePlayer={handleSharePlayer}
               handleShareRoundReport={handleShareRoundReport}
+              handlePlayerClick={handlePlayerClick}
               setCurrentSection={setCurrentSection}
               setHoleSelectDialog={setHoleSelectDialog}
               setEditLogDialog={setEditLogDialog}
@@ -2387,6 +2395,10 @@ const triggerConfetti = useCallback(() => {
         pars={pars}
         gameMode={gameMode}
         getMedal={getMedal}
+        reportPlayer={reportPlayer}
+        setReportPlayer={setReportPlayer}
+        showFullDetail={showFullDetail}
+        setShowFullDetail={setShowFullDetail}
         showRoundReport={showRoundReport}
         roundReportLinkOnly={roundReportLinkOnly}
         setShowRoundReport={setShowRoundReport}

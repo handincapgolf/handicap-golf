@@ -244,6 +244,7 @@ const ScorecardSection = ({
   getMedal,
   handleSharePlayer,
   handleShareRoundReport,
+  handlePlayerClick,
   setCurrentSection,
   setHoleSelectDialog,
   setEditLogDialog,
@@ -330,7 +331,10 @@ const ScorecardSection = ({
                 return (
                   <div key={player} className="flex-1 text-center py-1.5 bg-gray-50 rounded-lg min-w-0">
                     <div className="rounded px-1">
-                      <div className="text-xs font-medium text-gray-700 truncate">{player}</div>
+                      <div
+                        className="text-xs font-medium text-blue-600 underline truncate cursor-pointer"
+                        onClick={(e) => { e.stopPropagation(); handlePlayerClick(player); }}
+                      >{player}</div>
                       <div className="flex items-baseline justify-center gap-0.5">
                         <span className="text-lg font-bold text-gray-900">{total || '-'}</span>
                         {total > 0 && (
@@ -359,6 +363,7 @@ const ScorecardSection = ({
                 📊 {t('shareRoundReport')}
               </button>
             )}
+            <p className="text-xs text-gray-400 text-center mt-1">💡 {t('clickNameToView')}</p>
           </div>
 
           {/* ── Settlement ── */}

@@ -4,6 +4,7 @@ import { Toast, EditToast } from '../components/Toasts';
 import { EditLogDialog } from '../components/EditLogDialog';
 import { ConfirmDialog, PuttsWarningDialog } from '../components/ConfirmDialogs';
 import { HoleScoreConfirmDialog, HoleSelectDialog, EditHoleDialog } from '../components/HoleDialogs';
+import { PersonalReportCard, PersonalFullDetailModal } from '../components/PersonalReport';
 import { PWAInstallPrompt } from '../components/PWAInstallPrompt';
 
 const GlobalDialogs = ({
@@ -17,6 +18,11 @@ const GlobalDialogs = ({
   pars,
   gameMode,
   getMedal,
+  // Personal report
+  reportPlayer,
+  setReportPlayer,
+  showFullDetail,
+  setShowFullDetail,
   // Round report
   showRoundReport,
   roundReportLinkOnly,
@@ -65,6 +71,18 @@ const GlobalDialogs = ({
   // General
   t,
 }) => {
+  // Calculate player rank for personal report
+  const getPlayerRank = (player) => {
+    if (!completedHoles.length) return 0;
+    const totals = activePlayers.map(p => ({
+      player: p,
+      total: completedHoles.reduce((sum, h) => sum + (allScores[p]?.[h] || 0) + (allPutts[p]?.[h] || 0), 0)
+    }));
+    totals.sort((a, b) => a.total - b.total);
+    const idx = totals.findIndex(t => t.player === player);
+    return idx + 1;
+  };
+
   return (
     <>
       {/* Round Report 分享弹窗 */}
@@ -180,6 +198,40 @@ const GlobalDialogs = ({
         t={t}
         lang={lang}
       />
+
+      {reportPlayer && !showFullDetail && (
+        <PersonalReportCard
+          player={reportPlayer}
+          rank={getPlayerRank(reportPlayer)}
+          onClose={() => setReportPlayer(null)}
+          onViewFull={() => setShowFullDetail(true)}
+          allScores={allScores}
+          allPutts={allPutts}
+          allUps={allUps}
+          pars={pars}
+          completedHoles={completedHoles}
+          gameMode={gameMode}
+          t={t}
+          getMedal={getMedal}
+        />
+      )}
+
+      {reportPlayer && showFullDetail && (
+        <PersonalFullDetailModal
+          player={reportPlayer}
+          rank={getPlayerRank(reportPlayer)}
+          onClose={() => { setReportPlayer(null); setShowFullDetail(false); }}
+          onBack={() => setShowFullDetail(false)}
+          allScores={allScores}
+          allPutts={allPutts}
+          allUps={allUps}
+          pars={pars}
+          completedHoles={completedHoles}
+          gameMode={gameMode}
+          t={t}
+          getMedal={getMedal}
+        />
+      )}
 
       <PWAInstallPrompt lang={lang} />
     </>
