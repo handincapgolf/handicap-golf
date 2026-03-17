@@ -1,13 +1,17 @@
 import React, { memo } from 'react';
-import { Eye } from 'lucide-react';
+import { Eye, Share2, Copy } from 'lucide-react';
 
 // ========== mp-lobby: Creator 大厅 / Joiner 等待 ==========
 const MpLobbySection = memo(({
   activePlayers, playerHandicaps,
   mp, showToast,
   setCurrentSection,
+  startSoloGame,
   t
 }) => {
+  const joinUrl = `https://handincap.golf?join=${mp.gameCode}`;
+  const hasJoiners = mp.playerDeviceCount > 0 || mp.viewerDeviceCount > 0;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-amber-50 to-orange-50 py-6">
               <div className="max-w-md mx-auto px-4 space-y-4">
@@ -16,8 +20,8 @@ const MpLobbySection = memo(({
                     {mp.multiplayerRole === 'creator' ? t('mpWaitingPartner') : t('mpWaitingStart')}
                   </h2>
                 </div>
-                
-                {/* Creator: Game Code + QR Code */}
+
+                {/* Creator: Game Code + QR Code + Share Link */}
                 {mp.multiplayerRole === 'creator' && (
                 <div className="bg-white rounded-xl p-6 shadow-md text-center">
                   <p className="text-sm text-gray-500 mb-2">
@@ -26,20 +30,36 @@ const MpLobbySection = memo(({
                   <div className="text-4xl font-mono font-bold tracking-[0.3em] text-amber-600 bg-amber-50 rounded-lg py-3">
                     {mp.gameCode}
                   </div>
-                  <button
-                    onClick={() => {
-                      navigator.clipboard?.writeText(mp.gameCode);
-                      showToast(t('mpCopied'), 'success');
-                    }}
-                    className="mt-3 text-sm text-blue-500 underline"
-                  >
-                    {t('mpCopyCode')}
-                  </button>
-                  
+
+                  {/* Share / Copy buttons */}
+                  <div className="flex gap-2 mt-3 justify-center">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard?.writeText(joinUrl);
+                        showToast(t('mpLinkCopied'), 'success');
+                      }}
+                      className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
+                    >
+                      <Copy className="w-4 h-4" />
+                      {t('mpCopyLink')}
+                    </button>
+                    {navigator.share && (
+                      <button
+                        onClick={() => {
+                          navigator.share({ url: joinUrl }).catch(() => {});
+                        }}
+                        className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+                      >
+                        <Share2 className="w-4 h-4" />
+                        {t('mpShareLink')}
+                      </button>
+                    )}
+                  </div>
+
                   {/* QR Code */}
                   <div className="mt-3">
-                    <img 
-                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent('https://handincap.golf?join=' + mp.gameCode)}`}
+                    <img
+                      src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(joinUrl)}`}
                       alt="QR Code"
                       className="mx-auto w-40 h-40 rounded-lg"
                     />
@@ -175,19 +195,31 @@ const MpLobbySection = memo(({
                   </div>
                 )}
 
-                {/* Creator: Start Game button (always available — creator can score all players solo) */}
+                {/* Creator: Start Game button — solo if no joiners, multiplayer if anyone joined */}
                 {mp.multiplayerRole === 'creator' && (
                   <button
                     onClick={async () => {
-                      const result = await mp.startMultiplayerGame();
-                      if (result.ok) {
-                        setCurrentSection('game');
-                        mp.setMultiplayerSection(null);
+                      if (hasJoiners) {
+                        // Multiplayer mode: someone joined
+                        mp.setMultiplayerOn(true);
+                        const result = await mp.startMultiplayerGame();
+                        if (result.ok) {
+                          setCurrentSection('game');
+                          mp.setMultiplayerSection(null);
+                        }
+                      } else {
+                        // Solo mode: no one joined
+                        mp.resetMultiplayer();
+                        startSoloGame();
                       }
                     }}
-                    className="w-full bg-green-600 text-white py-3 px-4 rounded-lg font-semibold hover:bg-green-700 text-lg"
+                    className={`w-full py-3 px-4 rounded-lg font-semibold text-lg transition ${
+                      hasJoiners
+                        ? 'bg-green-600 hover:bg-green-700 text-white'
+                        : 'bg-blue-600 hover:bg-blue-700 text-white'
+                    }`}
                   >
-                    {t('mpStartGame')}
+                    {hasJoiners ? t('mpStartGame') : t('startSolo')}
                   </button>
                 )}
 

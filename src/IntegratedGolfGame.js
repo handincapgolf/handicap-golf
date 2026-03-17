@@ -188,7 +188,6 @@ const saveRecentCourse = useCallback((course) => {
   });
 }, []);
 
-const [showMpTooltip, setShowMpTooltip] = useState(false);
 const [showHcpTooltip, setShowHcpTooltip] = useState(false);
 
 // ========== 多人同步 ==========
@@ -199,11 +198,11 @@ const mp = useMultiplayerSync();
 
 // 点击外部关闭气泡
 useEffect(() => {
-  if (!showMpTooltip && !showHcpTooltip) return;
-  const handleClick = () => { setShowMpTooltip(false); setShowHcpTooltip(false); };
+  if (!showHcpTooltip) return;
+  const handleClick = () => { setShowHcpTooltip(false); };
   setTimeout(() => document.addEventListener('click', handleClick), 0);
   return () => document.removeEventListener('click', handleClick);
-}, [showMpTooltip, showHcpTooltip]);
+}, [showHcpTooltip]);
 
 // 语音播报函数（带超时防护，防止 Android TTS 卡死）
 const TTS_TIMEOUT = 8000; // 单个播报最长 8 秒
@@ -1157,33 +1156,32 @@ const getScoreLabel = useCallback((stroke, par) => {
     setGameComplete(false);
     setCurrentHoleSettlement(null);
     
-    // ===== 多人模式：创建房间 =====
-    if (mp.multiplayerOn) {
-      const gameSetup = {
-        course: selectedCourse || {},
-        gameMode,
-        stake: Number(stake) || 0,
-        jumboMode,
-        players: activePlayers,
-        playerNames: [...playerNames],
-        pars: { ...pars },
-        handicaps: playerHandicaps,
-        holesList: [...holes],
-      };
-      mp.createGame(gameSetup).then(result => {
-        if (!result.ok) {
-          showToast('Failed to create game room', 'error');
-        } else {
-          setCurrentSection('mp-lobby');
-        }
-      });
-      return; // Don't go to game section yet — go to lobby
-    }
-    
-    setCurrentSection('game');
-    // 开局播报第一洞信息（延迟1秒等UI渲染）
-    setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[0]); }, 1000);
+    // ===== 始终创建房间，进入大厅等待 =====
+    const gameSetup = {
+      course: selectedCourse || {},
+      gameMode,
+      stake: Number(stake) || 0,
+      jumboMode,
+      players: activePlayers,
+      playerNames: [...playerNames],
+      pars: { ...pars },
+      handicaps: playerHandicaps,
+      holesList: [...holes],
+    };
+    mp.createGame(gameSetup).then(result => {
+      if (!result.ok) {
+        showToast('Failed to create game room', 'error');
+      } else {
+        setCurrentSection('mp-lobby');
+      }
+    });
   }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, lang, holes]);
+
+  // Solo mode: 大厅无人加入时，直接开始本地游戏
+  const startSoloGame = useCallback(() => {
+    setCurrentSection('game');
+    setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[0]); }, 1000);
+  }, [holes]);
 
   // 基于 Index 的让杆计算
   // holeNum: 实际洞号 (1-18)
@@ -2236,8 +2234,6 @@ const triggerConfetti = useCallback(() => {
               stake={stake} setStake={setStake} stakeInputRef={stakeInputRef}
               activePlayers={activePlayers}
               showHcpTooltip={showHcpTooltip} setShowHcpTooltip={setShowHcpTooltip}
-              showMpTooltip={showMpTooltip} setShowMpTooltip={setShowMpTooltip}
-              mp={mp}
               startGame={startGame}
               setCurrentSection={setCurrentSection}
               t={t}
@@ -2251,6 +2247,7 @@ const triggerConfetti = useCallback(() => {
               mp={mp}
               showToast={showToast}
               setCurrentSection={setCurrentSection}
+              startSoloGame={startSoloGame}
               t={t}
             />
           )}

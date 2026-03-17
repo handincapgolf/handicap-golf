@@ -233,6 +233,7 @@ export function useMultiplayerSync() {
       if (result.ok) {
         setGameCode(result.code);
         setMultiplayerRole('creator');
+        setMultiplayerOn(true);
         setRemoteGame(result.game);
         syncDevicesFromRemote(result.game);
         setSyncStatus('connected');

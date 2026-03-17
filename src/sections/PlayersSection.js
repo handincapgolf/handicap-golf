@@ -17,8 +17,6 @@ const PlayersSection = memo(({
   stake, setStake, stakeInputRef,
   activePlayers,
   showHcpTooltip, setShowHcpTooltip,
-  showMpTooltip, setShowMpTooltip,
-  mp,
   startGame,
   setCurrentSection,
   t
@@ -66,7 +64,7 @@ const PlayersSection = memo(({
                         <div className="flex items-center gap-1 relative">
                           {i === 0 ? (
                             <span className="text-xs text-gray-500 border-b border-dashed border-gray-400 cursor-pointer"
-                              onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); setShowMpTooltip(false); }}
+                              onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); }}
                             >HCP</span>
                           ) : (
                             <span className="text-xs text-gray-500">HCP</span>
@@ -195,48 +193,6 @@ const PlayersSection = memo(({
                     />
                   </div>
 
-				  {/* 多人同步开关 */}
-                  <div className="flex items-center justify-between mt-3">
-                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1 relative">
-                      {t('mpSync')}:
-                      <button
-                        type="button"
-                        onClick={() => setShowMpTooltip(!showMpTooltip)}
-                        className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
-                      >
-                        ?
-                      </button>
-                      {showMpTooltip && (
-                        <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div>{t('mpSyncBubble')}</div>
-                          <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
-                        </div>
-                      )}
-                    </label>
-                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
-                      <button
-                        onClick={() => mp.setMultiplayerOn(false)}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          !mp.multiplayerOn
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('off')}
-                      </button>
-                      <button
-                        onClick={() => mp.setMultiplayerOn(true)}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          mp.multiplayerOn
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('on')}
-                      </button>
-                    </div>
-                  </div>
-
                 </div>
               </div>
 
@@ -253,7 +209,7 @@ const PlayersSection = memo(({
                   onClick={startGame}
                   className="flex-1 bg-green-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-green-700"
                 >
-                  {mp.multiplayerOn ? t('mpCreateRoom') : t('start')}
+                  {t('start')}
                 </button>
               </div>
               
