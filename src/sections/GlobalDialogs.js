@@ -4,15 +4,9 @@ import { Toast, EditToast } from '../components/Toasts';
 import { EditLogDialog } from '../components/EditLogDialog';
 import { ConfirmDialog, PuttsWarningDialog } from '../components/ConfirmDialogs';
 import { HoleScoreConfirmDialog, HoleSelectDialog, EditHoleDialog } from '../components/HoleDialogs';
-import { AdvanceReportCard, AdvanceFullDetailModal } from '../components/AdvanceReport';
 import { PWAInstallPrompt } from '../components/PWAInstallPrompt';
 
 const GlobalDialogs = ({
-  // Advance report
-  advanceReportPlayer,
-  showAdvanceFullDetail,
-  setAdvanceReportPlayer,
-  setShowAdvanceFullDetail,
   activePlayers,
   completedHoles,
   allScores,
@@ -22,7 +16,6 @@ const GlobalDialogs = ({
   allUps,
   pars,
   gameMode,
-  advancePlayers,
   getMedal,
   // Round report
   showRoundReport,
@@ -72,59 +65,8 @@ const GlobalDialogs = ({
   // General
   t,
 }) => {
-  // Shared rank calculation for advance report
-  const getPlayerRank = (player) => {
-    const playerTotals = {};
-    activePlayers.forEach(p => {
-      playerTotals[p] = completedHoles.reduce((sum, h) => sum + (allScores[p]?.[h] || 0), 0);
-    });
-    const sorted = activePlayers.slice().sort((a, b) => playerTotals[a] - playerTotals[b]);
-    return sorted.indexOf(player) + 1;
-  };
-
   return (
     <>
-      {/* Advance Mode 报告弹窗 */}
-      {advanceReportPlayer && !showAdvanceFullDetail && (
-        <AdvanceReportCard
-          player={advanceReportPlayer}
-          rank={getPlayerRank(advanceReportPlayer)}
-          onClose={() => setAdvanceReportPlayer(null)}
-          onViewFull={() => setShowAdvanceFullDetail(true)}
-          allScores={allScores}
-          allPutts={allPutts}
-          allWater={allWater}
-          allOb={allOb}
-          allUps={allUps}
-          pars={pars}
-          completedHoles={completedHoles}
-          gameMode={gameMode}
-          t={t}
-          getMedal={getMedal}
-          isAdvancePlayer={advancePlayers[advanceReportPlayer] || false}
-        />
-      )}
-
-      {advanceReportPlayer && showAdvanceFullDetail && (
-        <AdvanceFullDetailModal
-          player={advanceReportPlayer}
-          rank={getPlayerRank(advanceReportPlayer)}
-          onClose={() => { setAdvanceReportPlayer(null); setShowAdvanceFullDetail(false); }}
-          onBack={() => setShowAdvanceFullDetail(false)}
-          allScores={allScores}
-          allPutts={allPutts}
-          allWater={allWater}
-          allOb={allOb}
-          allUps={allUps}
-          pars={pars}
-          completedHoles={completedHoles}
-          gameMode={gameMode}
-          t={t}
-          getMedal={getMedal}
-          isAdvancePlayer={advancePlayers[advanceReportPlayer] || false}
-        />
-      )}
-
       {/* Round Report 分享弹窗 */}
       <RoundReportShareModal
         isOpen={showRoundReport}

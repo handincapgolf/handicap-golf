@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Users, Trophy, DollarSign, CircleDollarSign, BarChart3 } from 'lucide-react';
+import { Users, Trophy, DollarSign, CircleDollarSign } from 'lucide-react';
 
 // SpadeIcon inline (tiny, no need for separate file)
 const SpadeIcon = ({ className }) => (
@@ -15,11 +15,8 @@ const PlayersSection = memo(({
   gameMode, setGameMode,
   showModeDesc, setShowModeDesc,
   stake, setStake, stakeInputRef,
-  advanceMode, setAdvanceMode,
-  advancePlayers, setAdvancePlayers,
   activePlayers,
   showHcpTooltip, setShowHcpTooltip,
-  showAdvanceTooltip, setShowAdvanceTooltip,
   showMpTooltip, setShowMpTooltip,
   mp,
   startGame,
@@ -69,7 +66,7 @@ const PlayersSection = memo(({
                         <div className="flex items-center gap-1 relative">
                           {i === 0 ? (
                             <span className="text-xs text-gray-500 border-b border-dashed border-gray-400 cursor-pointer"
-                              onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); setShowAdvanceTooltip(false); setShowMpTooltip(false); }}
+                              onClick={(e) => { e.stopPropagation(); setShowHcpTooltip(!showHcpTooltip); setShowMpTooltip(false); }}
                             >HCP</span>
                           ) : (
                             <span className="text-xs text-gray-500">HCP</span>
@@ -198,54 +195,13 @@ const PlayersSection = memo(({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <label className="text-xs font-medium text-gray-700 flex items-center gap-1 relative">
-                      {t('advance')}:
-                      <button
-                        type="button"
-                        onClick={() => { setShowAdvanceTooltip(!showAdvanceTooltip); setShowMpTooltip(false); }}
-                        className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
-                      >
-                        ?
-                      </button>
-                      {showAdvanceTooltip && (
-                        <div className="absolute left-0 top-0 mt-[-8px] translate-y-[-100%] z-50 w-56 p-3 bg-gray-800 text-white text-xs rounded-lg shadow-lg">
-                          <div>{t('advanceBubble')}</div>
-                          <div className="absolute bottom-[-4px] left-12 w-2 h-2 bg-gray-800 rotate-45"></div>
-                        </div>
-                      )}
-                    </label>
-                    <div className="flex rounded-md border border-gray-300 overflow-hidden">
-                      <button
-                        onClick={() => setAdvanceMode('off')}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          advanceMode === 'off'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('off')}
-                      </button>
-                      <button
-                        onClick={() => setAdvanceMode('on')}
-                        className={`px-3 py-1 font-medium text-sm transition ${
-                          advanceMode === 'on'
-                            ? 'bg-green-600 text-white'
-                            : 'bg-white text-gray-700 hover:bg-gray-50'
-                        }`}
-                      >
-                        {t('on')}
-</button>
-                    </div>
-                  </div>
-				  
 				  {/* 多人同步开关 */}
                   <div className="flex items-center justify-between mt-3">
                     <label className="text-xs font-medium text-gray-700 flex items-center gap-1 relative">
                       {t('mpSync')}:
                       <button
                         type="button"
-                        onClick={() => { setShowMpTooltip(!showMpTooltip); setShowAdvanceTooltip(false); }}
+                        onClick={() => setShowMpTooltip(!showMpTooltip)}
                         className="w-4 h-4 rounded-full bg-gray-300 text-gray-600 text-xs font-bold hover:bg-gray-400 transition"
                       >
                         ?
@@ -281,41 +237,6 @@ const PlayersSection = memo(({
                     </div>
                   </div>
 
-				  {/* Advance 玩家选择 */}
-                  {advanceMode === 'on' && activePlayers.length > 0 && (
-                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-                      <div className="text-sm font-semibold text-blue-800 mb-2 flex items-center gap-2">
-                        <BarChart3 className="w-4 h-4" />
-                        {t('mpSelectAdvanced')}
-                      </div>
-                      <div className="space-y-2">
-                        {activePlayers.map(player => (
-                          <label key={player} className="flex items-center gap-3 p-2 bg-white rounded-lg cursor-pointer hover:bg-gray-50 transition">
-                            <input
-                              type="checkbox"
-                              checked={advancePlayers[player] || false}
-                              onChange={(e) => {
-                                setAdvancePlayers(prev => ({
-                                  ...prev,
-                                  [player]: e.target.checked
-                                }));
-                              }}
-                              className="w-5 h-5 text-green-600 rounded border-gray-300 focus:ring-green-500"
-                            />
-                            <span className="font-medium text-gray-900">{player}</span>
-                            {advancePlayers[player] && (
-                              <span className="ml-auto text-xs text-green-600 font-medium">
-                                {t('advancedTag')}
-                              </span>
-                            )}
-                          </label>
-                        ))}
-                      </div>
-                      <p className="text-xs text-gray-500 mt-2">
-                        {t('advancedSelectDesc')}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
 

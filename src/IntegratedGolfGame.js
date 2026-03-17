@@ -57,10 +57,6 @@ function IntegratedGolfGame() {
   const [editToastData, setEditToastData] = useState(null);
   const [editLogDialog, setEditLogDialog] = useState({ isOpen: false, hole: null });
   const [feedbackDialog, setFeedbackDialog] = useState(false);
-  // Advance Mode 报告弹窗状态
-const [advanceReportPlayer, setAdvanceReportPlayer] = useState(null);
-const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
-  
   const [setupMode, setSetupMode] = useState('auto');
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCourse, setSelectedCourse] = useState(null);
@@ -77,11 +73,7 @@ const [showAdvanceFullDetail, setShowAdvanceFullDetail] = useState(false);
   const [stake, setStake] = useState('');
   const [prizePool, setPrizePool] = useState(0);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
-  const [advanceMode, setAdvanceMode] = useState('off');
-  const [advancePlayers, setAdvancePlayers] = useState({});
   const [puttsWarningDialog, setPuttsWarningDialog] = useState({ isOpen: false, players: [] });
-  // 新增：展开说明的状态
-const [showAdvanceInfo, setShowAdvanceInfo] = useState(false);
   
   const [currentHole, setCurrentHole] = useState(1);
   const [scores, setScores] = useState({});  
@@ -196,7 +188,6 @@ const saveRecentCourse = useCallback((course) => {
   });
 }, []);
 
-const [showAdvanceTooltip, setShowAdvanceTooltip] = useState(false);
 const [showMpTooltip, setShowMpTooltip] = useState(false);
 const [showHcpTooltip, setShowHcpTooltip] = useState(false);
 
@@ -208,11 +199,11 @@ const mp = useMultiplayerSync();
 
 // 点击外部关闭气泡
 useEffect(() => {
-  if (!showAdvanceTooltip && !showMpTooltip && !showHcpTooltip) return;
-  const handleClick = () => { setShowAdvanceTooltip(false); setShowMpTooltip(false); setShowHcpTooltip(false); };
+  if (!showMpTooltip && !showHcpTooltip) return;
+  const handleClick = () => { setShowMpTooltip(false); setShowHcpTooltip(false); };
   setTimeout(() => document.addEventListener('click', handleClick), 0);
   return () => document.removeEventListener('click', handleClick);
-}, [showAdvanceTooltip, showMpTooltip, showHcpTooltip]);
+}, [showMpTooltip, showHcpTooltip]);
 
 // 语音播报函数（带超时防护，防止 Android TTS 卡死）
 const TTS_TIMEOUT = 8000; // 单个播报最长 8 秒
@@ -660,7 +651,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setStake(gameState.stake || '');
         setPrizePool(gameState.prizePool ?? 0);
         setPlayerHandicaps(gameState.playerHandicaps || {});
-        setAdvanceMode(gameState.advanceMode || 'off');
         setCurrentHole(gameState.currentHole || 0);
         setScores(gameState.scores || {});
         setUps(gameState.ups || {});
@@ -681,7 +671,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
         setSelectedCourse(gameState.selectedCourse || null);
         setSetupMode(gameState.setupMode || 'auto');
         setJumboMode(gameState.jumboMode || false);
-		setAdvancePlayers(gameState.advancePlayers || {});
         setEditLog(gameState.editLog || []);
         setCurrentSection(gameState.gameComplete ? 'scorecard' : 'game');
       } catch (error) {
@@ -707,7 +696,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           stake,
           prizePool,
           playerHandicaps,
-          advanceMode,
           currentHole,
           scores,
           ups,
@@ -728,7 +716,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
           selectedCourse,
           setupMode,
           jumboMode,
-          advancePlayers,
           editLog
         };
         localStorage.setItem('golfGameState', JSON.stringify(gameState));
@@ -737,7 +724,7 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       return () => { if (saveTimerRef.current) clearTimeout(saveTimerRef.current); };
     }
   }, [currentSection, lang, courseType, holes, pars, gameMode, playerNames, stake, prizePool, 
-      playerHandicaps, advanceMode, currentHole, scores, ups, putts, water, ob,
+      playerHandicaps, currentHole, scores, ups, putts, water, ob,
       allScores, allUps, allPutts, allWater, allOb, totalMoney, 
       moneyDetails, completedHoles, gameComplete, currentHoleSettlement, totalSpent, 
       selectedCourse, setupMode, jumboMode, activePlayers.length, editLog, mp.isViewer]);
@@ -1181,8 +1168,6 @@ const getScoreLabel = useCallback((stroke, par) => {
         playerNames: [...playerNames],
         pars: { ...pars },
         handicaps: playerHandicaps,
-        advanceMode,
-        advancePlayers,
         holesList: [...holes],
       };
       mp.createGame(gameSetup).then(result => {
@@ -1198,7 +1183,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     setCurrentSection('game');
     // 开局播报第一洞信息（延迟1秒等UI渲染）
     setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[0]); }, 1000);
-  }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, advanceMode, advancePlayers, lang, holes]);
+  }, [activePlayers, stake, gameMode, showToast, t, mp, selectedCourse, jumboMode, playerHandicaps, lang, holes]);
 
   // 基于 Index 的让杆计算
   // holeNum: 实际洞号 (1-18)
@@ -1760,7 +1745,7 @@ activePlayers.forEach(player => {
     isOpen: true, 
     action: proceedToNextHole
   });
-}, [gameMode, currentHole, holes, scores, ups, putts, activePlayers, pars, calculateWin123, proceedToNextHole, advanceMode, advancePlayers]);
+}, [gameMode, currentHole, holes, scores, ups, putts, activePlayers, pars, calculateWin123, proceedToNextHole]);
 
 const handlePuttsWarningConfirm = useCallback(() => {
   setPuttsWarningDialog({ isOpen: false, players: [] });
@@ -1994,8 +1979,6 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
       setStake('');
       setPrizePool('');
       setPlayerHandicaps({});
-      setAdvanceMode('off');
-	  setAdvancePlayers({});
       setCourseType('f18');
       setHoles(courses.f18);
       setPars(courses.f18.reduce((acc, hole) => ({...acc, [hole]: 4}), {}));
@@ -2044,7 +2027,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     const data = generatePlayerShareData(
       player, selectedCourse, completedHoles, pars,
       allScores, allPutts, allWater || {}, allOb || {}, completedHoles,
-      advancePlayers[player] || false
+      false
     );
     const url = generateShareUrl(data);
     
@@ -2066,7 +2049,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
         showToast(t('mpLinkCopied'));
       }).catch(() => showToast(t('copyFailed'), 'error'));
     }
-  }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast, advancePlayers]);
+  }, [selectedCourse, completedHoles, pars, allScores, allPutts, allWater, allOb, lang, showToast]);
 
   // ========== Round Report 分享 ==========
   const handleShareRoundReport = useCallback((linkOnly = false) => {
@@ -2149,11 +2132,6 @@ const triggerConfetti = useCallback(() => {
   }, 6000);
 }, []);
 
-// 处理 Advance 报告弹窗的玩家点击
-const handleAdvancePlayerClick = useCallback((playerName) => {
-  setAdvanceReportPlayer(playerName);
-  setShowAdvanceFullDetail(false);
-}, []);
 
 // ========== 检测分享链接 ==========
   const urlParams = new URLSearchParams(window.location.search);
@@ -2181,7 +2159,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         scores={scores} putts={putts} water={water} ob={ob} ups={ups} upOrder={upOrder}
         pars={pars} holes={holes} currentHole={currentHole} completedHoles={completedHoles}
         gameMode={gameMode} stake={stake} prizePool={prizePool}
-        advanceMode={advanceMode} advancePlayers={advancePlayers}
         selectedCourse={selectedCourse} totalMoney={totalMoney} moneyDetails={moneyDetails}
         totalSpent={totalSpent} currentHoleSettlement={currentHoleSettlement}
         gameComplete={gameComplete} voiceEnabled={voiceEnabled} setVoiceEnabled={setVoiceEnabled}
@@ -2257,11 +2234,8 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               gameMode={gameMode} setGameMode={setGameMode}
               showModeDesc={showModeDesc} setShowModeDesc={setShowModeDesc}
               stake={stake} setStake={setStake} stakeInputRef={stakeInputRef}
-              advanceMode={advanceMode} setAdvanceMode={setAdvanceMode}
-              advancePlayers={advancePlayers} setAdvancePlayers={setAdvancePlayers}
               activePlayers={activePlayers}
               showHcpTooltip={showHcpTooltip} setShowHcpTooltip={setShowHcpTooltip}
-              showAdvanceTooltip={showAdvanceTooltip} setShowAdvanceTooltip={setShowAdvanceTooltip}
               showMpTooltip={showMpTooltip} setShowMpTooltip={setShowMpTooltip}
               mp={mp}
               startGame={startGame}
@@ -2286,7 +2260,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
             <MpRoleSection
               mp={mp}
               setGameMode={setGameMode} setStake={setStake} setJumboMode={setJumboMode} setPlayerHandicaps={setPlayerHandicaps}
-              setAdvanceMode={setAdvanceMode} setAdvancePlayers={setAdvancePlayers} setPlayerNames={setPlayerNames}
+              setPlayerNames={setPlayerNames}
               setSelectedCourse={setSelectedCourse} setPars={setPars} setHoles={setHoles}
               setTotalMoney={setTotalMoney} setMoneyDetails={setMoneyDetails} setAllScores={setAllScores} setAllUps={setAllUps} setAllPutts={setAllPutts}
               setAllWater={setAllWater} setAllOb={setAllOb} setTotalSpent={setTotalSpent}
@@ -2302,7 +2276,7 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
             <MpClaimSection
               mp={mp} showToast={showToast}
               setGameMode={setGameMode} setStake={setStake} setJumboMode={setJumboMode} setPlayerHandicaps={setPlayerHandicaps}
-              setAdvanceMode={setAdvanceMode} setAdvancePlayers={setAdvancePlayers} setPlayerNames={setPlayerNames}
+              setPlayerNames={setPlayerNames}
               setSelectedCourse={setSelectedCourse} setPars={setPars} setHoles={setHoles}
               setTotalMoney={setTotalMoney} setMoneyDetails={setMoneyDetails} setAllScores={setAllScores} setAllUps={setAllUps} setAllPutts={setAllPutts}
               setAllWater={setAllWater} setAllOb={setAllOb} setTotalSpent={setTotalSpent}
@@ -2332,7 +2306,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
               mp={mp}
               getHandicapForHole={getHandicapForHole}
               getMedal={getMedal}
-              handleAdvancePlayerClick={handleAdvancePlayerClick}
               handleSharePlayer={handleSharePlayer}
               handleShareRoundReport={handleShareRoundReport}
               setCurrentSection={setCurrentSection}
@@ -2365,8 +2338,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
           gameMode={gameMode}
           stake={stake}
           prizePool={prizePool}
-          advanceMode={advanceMode}
-          advancePlayers={advancePlayers}
           selectedCourse={selectedCourse}
           totalMoney={totalMoney}
           moneyDetails={moneyDetails}
@@ -2400,10 +2371,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
 
 
       <GlobalDialogs
-        advanceReportPlayer={advanceReportPlayer}
-        showAdvanceFullDetail={showAdvanceFullDetail}
-        setAdvanceReportPlayer={setAdvanceReportPlayer}
-        setShowAdvanceFullDetail={setShowAdvanceFullDetail}
         activePlayers={activePlayers}
         completedHoles={completedHoles}
         allScores={allScores}
@@ -2413,7 +2380,6 @@ const handleAdvancePlayerClick = useCallback((playerName) => {
         allUps={allUps}
         pars={pars}
         gameMode={gameMode}
-        advancePlayers={advancePlayers}
         getMedal={getMedal}
         showRoundReport={showRoundReport}
         roundReportLinkOnly={roundReportLinkOnly}

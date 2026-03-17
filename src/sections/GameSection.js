@@ -1,7 +1,6 @@
 import React from 'react';
 import { TrendingUp, BarChart3, Eye } from 'lucide-react';
 import ViewerGameScreen from '../ViewerGameScreen';
-import AdvancedPlayerCard from '../components/AdvancedPlayerCard';
 import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from '../gameModes/BaccaratComponents';
 
 const GameSection = ({
@@ -22,8 +21,6 @@ const GameSection = ({
   gameMode,
   stake,
   prizePool,
-  advanceMode,
-  advancePlayers,
   selectedCourse,
   totalMoney,
   moneyDetails,
@@ -100,9 +97,6 @@ const GameSection = ({
                   <span className="ml-4">
                     {gameMode === 'win123' ? t('penaltyPot') : t('poolBalance')}: ${gameMode === 'skins' ? prizePool + (Number(stake) || 0) * activePlayers.length : prizePool}
                   </span>
-                )}
-                {advanceMode === 'on' && (
-                  <span className="ml-2 px-2 py-0.5 bg-gray-600 rounded text-xs">Adv</span>
                 )}
               </div>
             )}
@@ -212,38 +206,9 @@ const GameSection = ({
                 const playerHandicapValue = getHandicapForHole(player, holeNum, par);
                 const netScore = playerScore - playerHandicapValue;
                 const scoreLabel = getScoreLabel(netScore, par);
-                const isAdvancePlayer = advanceMode === 'on' && advancePlayers[player];
                 const isMyPlayer = !isOther;
                 const hideBtns = mp.isViewer || (isOther && otherConfirmed);
-                
-                if (isAdvancePlayer) {
-                  return (
-                    <div key={player} className={isOther ? 'mp-locked-card' : ''} style={isOther ? { pointerEvents: 'none' } : {}}>
-                    <AdvancedPlayerCard
-  key={player}
-  player={player}
-  playerOn={playerScore}
-  playerPutts={playerPutts}
-  playerWater={playerWater}
-  playerOb={playerOb}
-  playerUp={gameMode === 'baccarat' ? upOrder.includes(player) : playerUp}
-  par={par}
-  showUp={(gameMode === 'win123' || gameMode === 'baccarat') && Number(stake) > 0}
-  onChangeOn={(delta) => changeOn(player, delta)}
-  onChangePutts={(delta) => changePutts(player, delta)}
-  onChangeWater={() => changeWater(player)}
-  onChangeOb={() => changeOb(player)}
-  onResetWater={() => resetWater(player)}
-  onResetOb={() => resetOb(player)}
-  onToggleUp={() => gameMode === 'baccarat' ? toggleBaccaratUp(player) : toggleUp(player)}
-  getScoreLabel={getScoreLabel}
-  gameMode={gameMode}
-  upOrder={upOrder}
-  t={t}
-/>
-                  </div>
-                  );
-} else {
+
   const stroke = playerScore + playerPutts;
   const strokeLabel = getScoreLabel(stroke, par);
   
@@ -350,7 +315,6 @@ const GameSection = ({
     </div>
     </div>
   );
-}
                 };
                 
                 return (

@@ -226,7 +226,7 @@ const MpLobbySection = memo(({
 const MpRoleSection = memo(({
   mp,
   setGameMode, setStake, setJumboMode, setPlayerHandicaps,
-  setAdvanceMode, setAdvancePlayers, setPlayerNames,
+  setPlayerNames,
   setSelectedCourse, setPars, setHoles,
   setTotalMoney, setMoneyDetails, setAllScores, setAllUps, setAllPutts,
   setAllWater, setAllOb, setTotalSpent,
@@ -241,8 +241,6 @@ const MpRoleSection = memo(({
     setStake(String(g.stake || ''));
     setJumboMode(g.jumboMode || false);
     setPlayerHandicaps(g.handicaps || {});
-    setAdvanceMode(g.advanceMode || 'off');
-    setAdvancePlayers(g.advancePlayers || {});
     
     const names = [...(g.players || [])];
     while (names.length < (g.jumboMode ? 8 : 4)) names.push('');
@@ -385,7 +383,7 @@ const MpRoleSection = memo(({
 const MpClaimSection = memo(({
   mp, showToast,
   setGameMode, setStake, setJumboMode, setPlayerHandicaps,
-  setAdvanceMode, setAdvancePlayers, setPlayerNames,
+  setPlayerNames,
   setSelectedCourse, setPars, setHoles,
   setTotalMoney, setMoneyDetails, setAllScores, setAllUps, setAllPutts,
   setAllWater, setAllOb, setTotalSpent,
@@ -479,9 +477,6 @@ const MpClaimSection = memo(({
                       setStake(String(g.stake || ''));
                       setJumboMode(g.jumboMode || false);
                       setPlayerHandicaps(g.handicaps || {});
-                      setAdvanceMode(g.advanceMode || 'off');
-                      setAdvancePlayers(g.advancePlayers || {});
-
                       // Set player names
                       const names = [...(g.players || [])];
                       while (names.length < (g.jumboMode ? 8 : 4)) names.push('');

@@ -242,7 +242,6 @@ const ScorecardSection = ({
   mp,
   getHandicapForHole,
   getMedal,
-  handleAdvancePlayerClick,
   handleSharePlayer,
   handleShareRoundReport,
   setCurrentSection,
@@ -317,9 +316,6 @@ const ScorecardSection = ({
 
       {hasData ? (
         <>
-          {/* Hint text */}
-          <p className="text-xs text-gray-400 text-center mb-2">💡 {t('clickNameToView')}</p>
-
           {/* ── Total Score Summary ── */}
           <div className="bg-white rounded-lg p-3 shadow-sm mb-3">
             <h3 className="text-xs font-semibold text-gray-600 mb-2 text-center">
@@ -333,8 +329,8 @@ const ScorecardSection = ({
                 const diffColor = diff > 0 ? 'text-red-600' : diff === 0 ? 'text-gray-600' : 'text-green-600';
                 return (
                   <div key={player} className="flex-1 text-center py-1.5 bg-gray-50 rounded-lg min-w-0">
-                    <div className="cursor-pointer hover:bg-gray-100 rounded px-1" onClick={() => handleAdvancePlayerClick(player)}>
-                      <div className="text-xs font-medium text-blue-600 underline truncate">{player}</div>
+                    <div className="rounded px-1">
+                      <div className="text-xs font-medium text-gray-700 truncate">{player}</div>
                       <div className="flex items-baseline justify-center gap-0.5">
                         <span className="text-lg font-bold text-gray-900">{total || '-'}</span>
                         {total > 0 && (
