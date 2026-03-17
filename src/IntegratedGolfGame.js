@@ -530,14 +530,23 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     }
   }, [mp.remoteGame?.lastUpdate, mp.multiplayerOn, mp.multiplayerRole, mp.claimed, activePlayers, currentHole, holes, gameMode]);
 
-  // 检测 URL 参数 ?join=XXXXXX（QR码扫描）
+  // 检测 URL 参数 ?join=XXXXXX（QR码扫描 / 分享链接）→ 自动加入房间
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const joinCode = params.get('join');
     if (joinCode && joinCode.length === 6) {
-      mp.setJoinerCode(joinCode.toUpperCase());
-      // Clean URL
+      const code = joinCode.toUpperCase();
+      // Clean URL first
       window.history.replaceState({}, '', window.location.pathname);
+      // Auto-join the room
+      mp.joinGame(code).then(result => {
+        if (result.ok) {
+          setCurrentSection('mp-role');
+        } else {
+          mp.setJoinerCode(code);
+          showToast(result.error || t('roomNotFound'), 'error');
+        }
+      });
     }
   }, []);
 
