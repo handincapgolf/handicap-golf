@@ -543,7 +543,8 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
       // Auto-join the room
       mp.joinGame(code).then(result => {
         if (result.ok) {
-          setCurrentSection('mp-role');
+          // autoViewer: stay on home — existing useEffect syncs remoteGame and navigates to game
+          if (!result.autoViewer) setCurrentSection('mp-role');
         } else {
           mp.setJoinerCode(code);
           showToast(result.error || t('roomNotFound'), 'error');

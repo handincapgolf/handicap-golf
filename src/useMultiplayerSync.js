@@ -250,21 +250,24 @@ export function useMultiplayerSync() {
     }
   }, [startPolling, syncDevicesFromRemote]);
 
-  // Joiner: Join game
+  // Joiner: Join game (auto-viewer if game already started)
   const joinGame = useCallback(async (code) => {
     try {
       setSyncStatus('syncing');
       const result = await apiCall(`/game/${code}`);
       if (result.ok) {
+        const gameStarted = result.game?.status !== 'lobby';
+
         setGameCode(code);
-        setMultiplayerRole('joiner');
+        setMultiplayerRole(gameStarted ? 'viewer' : 'joiner');
         setMultiplayerOn(true);
         setRemoteGame(result.game);
         syncDevicesFromRemote(result.game);
 
-        // Register this joiner device — Worker assigns index/label
+        // Register device — as viewer if game already started
         const joinResult = await apiCall(`/game/${code}/join`, 'PUT', {
           deviceId: deviceId.current,
+          ...(gameStarted ? { role: 'viewer' } : {}),
         });
         if (joinResult.ok && joinResult.game) {
           setRemoteGame(joinResult.game);
@@ -273,8 +276,8 @@ export function useMultiplayerSync() {
 
         setSyncStatus('connected');
         startPolling(code);
-        setMultiplayerSection('joinerClaim');
-        return result;
+        setMultiplayerSection(gameStarted ? 'lobby' : 'joinerClaim');
+        return { ...result, autoViewer: gameStarted };
       } else {
         setSyncStatus('error');
         return result;

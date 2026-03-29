@@ -115,6 +115,8 @@ export const HomeContent = ({
               const result = await mp.joinGame(mp.joinerCode);
               if (!result.ok) {
                 showToast(result.error || t('roomNotFound'), 'error');
+              } else if (result.autoViewer) {
+                // stay on home — existing useEffect will sync remoteGame data and navigate to game
               } else {
                 setCurrentSection('mp-role');
               }
