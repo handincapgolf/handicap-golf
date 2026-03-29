@@ -35,7 +35,7 @@
 ## Components (`src/components/`)
 - `SharePage.js` — Share pages for `?p=` URL (ShareReportPage + ShareDetailPage)
 - `HoleDialogs.js` — Score confirm, hole select, edit hole dialogs
-- `AdvanceReport.js` / `AdvancedPlayerCard.js` — Advance mode UI
+- `PersonalReport.js` — Personal report card per player (tap name on scorecard)
 - `FeedbackDialog.js` — Feedback collection → Cloudflare KV
 - `ConfirmDialogs.js`, `EditLogDialog.js`, `Toasts.js`, `PWAInstallPrompt.js`
 
@@ -49,13 +49,15 @@ Each exports `config` + `calculate()`: matchPlay, win123, skins, baccarat
 - `src/styles/gameStyles.js` — PGA-style score display (eagle/birdie/par/bogey)
 
 ## Multiplayer Flow
-1. Creator: `createGame()` → lobby (show code + QR)
-2. Joiner: `joinGame(code)` → role select → claim players → lobby
-3. Creator starts → all devices switch to `game` section
-4. Server auto-claims all players to creator on room creation (`worker.js`)
+1. Creator: `createGame()` → lobby (show 4-digit room code + QR)
+2. Joiner (before game starts): `joinGame(code)` → role select → claim players → lobby
+3. Joiner (after game starts): `joinGame(code)` → auto-viewer mode → live game view
+4. Creator starts → all devices switch to `game` section
+5. Server auto-claims all players to creator on room creation (`worker.js`)
 
 ## Backend (`handincap-worker/worker.js`)
 - Durable Object: GameRoom (per-game persistent state)
+- Room code: 4-digit numeric (route regex: `\d{4}`)
 - Endpoints: `/init`, `/state`, `/join`, `/claim`, `/start`, `/score`, `/next`, `/edit`
 - Device tracking: each device gets unique `deviceId` (localStorage)
 
@@ -63,4 +65,5 @@ Each exports `config` + `calculate()`: matchPlay, win123, skins, baccarat
 - Components wrapped in `memo()`, state setters passed as props
 - API calls via `apiCall(path, method, body)` helper in useMultiplayerSync
 - localStorage keys: `handincap_mp`, `handincap_device_id`, `handincap_lang`, `golfGameState`
-- Share URLs: `?p=` (player score), `?r=` (round report)
+- Share URLs: `?p=` (player score), `?r=` (round report), `?v=1` (vertical layout), `?e=` (edit log)
+- Layout: `100dvh` for mobile browser compatibility (avoids address bar cutoff)
