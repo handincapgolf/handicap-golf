@@ -467,7 +467,7 @@ const ViewerGameScreen = memo(({
 
   return (
     <div style={{
-      height: '100vh', display: 'flex', flexDirection: 'column',
+      height: '100dvh', display: 'flex', flexDirection: 'column',
       background: '#fff', color: '#1f2937',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       maxWidth: 430, margin: '0 auto', overflow: 'hidden'

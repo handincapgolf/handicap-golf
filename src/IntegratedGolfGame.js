@@ -2189,7 +2189,7 @@ const triggerConfetti = useCallback(() => {
   }
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+    <div className="bg-gray-50 flex flex-col" style={{ height: '100dvh' }}>
       {currentSection === 'home' && (
         <HomeLangBar
           lang={lang}
