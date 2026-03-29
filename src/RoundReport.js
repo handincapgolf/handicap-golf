@@ -812,10 +812,22 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
         {/* Preview / Capture Area */}
         <div style={{ padding: '0 12px 12px', maxHeight: linkOnly ? '70vh' : '60vh', overflowY: 'auto' }}>
           <div ref={captureRef}>
-            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} t={t} />
+            <RoundReportCard data={reportData} forCapture={!linkOnly} vertical={linkOnly} hideFooter={editLog && editLog.length > 0} t={t} />
             {editLog && editLog.length > 0 && (
               <div style={{ marginTop: linkOnly ? 16 : 0, padding: !linkOnly ? '0 4px 8px' : 0 }}>
                 <EditLogInline logs={editLog} forCapture={!linkOnly} t={t} />
+              </div>
+            )}
+            {editLog && editLog.length > 0 && !linkOnly && (
+              <div style={{
+                textAlign: 'center', padding: '10px',
+                backgroundColor: '#f0fdf4',
+                borderTop: '1px solid #d1fae5'
+              }}>
+                <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
+                <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
+                  {t('poweredBy')} <span style={{ color: '#047857' }}>HandinCap.golf</span>
+                </span>
               </div>
             )}
           </div>

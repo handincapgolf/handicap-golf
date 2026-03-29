@@ -1784,9 +1784,11 @@ activePlayers.forEach(player => {
 
   // 编辑洞成绩并重新计算金额
 const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUpOrder = []) => {
+    // 多人模式下只处理自己claimed的玩家，保留其他玩家的数据
+    const editedPlayers = mp.multiplayerOn ? mp.getMyPlayers(activePlayers) : activePlayers;
     // ===== Edit Log: 对比新旧值，记录差异 =====
     const changes = [];
-    activePlayers.forEach(player => {
+    editedPlayers.forEach(player => {
       const oldScore = allScores[player]?.[hole];
       const newScore = newScores[player];
       if (oldScore !== undefined && newScore !== undefined && oldScore !== newScore) {
@@ -1837,7 +1839,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
     const updatedAllPutts = { ...allPutts };
     const updatedAllUpOrders = { ...allUpOrders };
     
-    activePlayers.forEach(player => {
+    editedPlayers.forEach(player => {
       if (!updatedAllScores[player]) updatedAllScores[player] = {};
       if (!updatedAllUps[player]) updatedAllUps[player] = {};
       if (!updatedAllPutts[player]) updatedAllPutts[player] = {};
@@ -1954,7 +1956,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
       const holeUpdate = {
         scores: {}, putts: {}, ups: {}, upOrder: newUpOrder,
       };
-      activePlayers.forEach(p => {
+      editedPlayers.forEach(p => {
         holeUpdate.scores[p] = newScores[p];
         holeUpdate.putts[p] = newPutts[p] || 0;
         holeUpdate.ups[p] = newUps[p] || false;
