@@ -129,7 +129,7 @@ export const ko = {
   mpMultiplayer: '📡 멀티플레이어',
   mpSync: '멀티플레이어 동기화',
   mpCodePlaceholder: '코드',
-  mpEnter6Digit: '6자리 코드 입력',
+  mpEnter6Digit: '4자리 코드 입력',
   mpJoin: '참가',
   mpPointQr: 'QR 코드를 향하세요',
   mpQrLoadFail: 'QR 라이브러리 로드 실패',

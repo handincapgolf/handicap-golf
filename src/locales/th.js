@@ -129,7 +129,7 @@ export const th = {
   mpMultiplayer: '📡 หลายผู้เล่น',
   mpSync: 'ซิงค์หลายผู้เล่น',
   mpCodePlaceholder: 'รหัส',
-  mpEnter6Digit: 'กรอกรหัส 6 หลัก',
+  mpEnter6Digit: 'กรอกรหัส 4 หลัก',
   mpJoin: 'เข้าร่วม',
   mpPointQr: 'ชี้ไปที่ QR โค้ด',
   mpQrLoadFail: 'โหลด QR ไม่ได้',

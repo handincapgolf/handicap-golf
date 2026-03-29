@@ -129,7 +129,7 @@ export const ja = {
   mpMultiplayer: '📡 マルチプレーヤー',
   mpSync: 'マルチプレーヤー同期',
   mpCodePlaceholder: 'コード',
-  mpEnter6Digit: '6桁のコードを入力',
+  mpEnter6Digit: '4桁のコードを入力',
   mpJoin: '参加',
   mpPointQr: 'QRコードに向けてください',
   mpQrLoadFail: 'QRライブラリの読み込みに失敗',

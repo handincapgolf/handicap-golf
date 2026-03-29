@@ -129,7 +129,7 @@ export const zhTW = {
   mpMultiplayer: '📡 多人同步',
   mpSync: '多人同步',
   mpCodePlaceholder: '房間碼',
-  mpEnter6Digit: '請輸入6位房間碼',
+  mpEnter6Digit: '請輸入4位房間碼',
   mpJoin: '加入',
   mpPointQr: '對準QR碼掃描',
   mpQrLoadFail: 'QR庫載入失敗',

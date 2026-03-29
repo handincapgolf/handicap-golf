@@ -133,7 +133,7 @@ export const zh = {
   mpMultiplayer: '📡 多人同步',
   mpSync: '多人同步',
   mpCodePlaceholder: '房间码',
-  mpEnter6Digit: '请输入6位房间码',
+  mpEnter6Digit: '请输入4位房间码',
   mpJoin: '加入',
   mpPointQr: '对准QR码扫描',
   mpQrLoadFail: 'QR库加载失败',

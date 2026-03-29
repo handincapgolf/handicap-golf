@@ -536,8 +536,8 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const joinCode = params.get('join');
-    if (joinCode && joinCode.length === 6) {
-      const code = joinCode.toUpperCase();
+    if (joinCode && joinCode.length === 4) {
+      const code = joinCode;
       // Clean URL first
       window.history.replaceState({}, '', window.location.pathname);
       // Auto-join the room
@@ -603,10 +603,10 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
               const qr = window.jsQR(imageData.data, canvas.width, canvas.height);
               if (qr && qr.data) {
                 const val = qr.data;
-                const match = val.match(/[?&]join=([A-Z0-9]{6})/i);
-                const code = match ? match[1] : (/^[A-Z0-9]{6}$/i.test(val.trim()) ? val.trim() : null);
+                const match = val.match(/[?&]join=(\d{4})/);
+                const code = match ? match[1] : (/^\d{4}$/.test(val.trim()) ? val.trim() : null);
                 if (code) {
-                  mp.setJoinerCode(code.toUpperCase());
+                  mp.setJoinerCode(code);
                   stopQrScanner();
                   showToast('QR scanned!', 'success');
                   return;

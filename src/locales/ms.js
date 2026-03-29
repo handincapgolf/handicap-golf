@@ -129,7 +129,7 @@ export const ms = {
   mpMultiplayer: '📡 Multiplayer',
   mpSync: 'Multiplayer Sync',
   mpCodePlaceholder: 'KOD',
-  mpEnter6Digit: 'Masukkan kod 6 digit',
+  mpEnter6Digit: 'Masukkan kod 4 digit',
   mpJoin: 'Sertai',
   mpPointQr: 'Halakan ke kod QR',
   mpQrLoadFail: 'QR gagal dimuat',

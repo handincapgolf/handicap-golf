@@ -98,15 +98,17 @@ export const HomeContent = ({
         <div className="flex gap-1.5">
           <input
             type="text"
-            maxLength={6}
+            type="tel"
+            inputMode="numeric"
+            maxLength={4}
             value={mp.joinerCode}
-            onChange={(e) => mp.setJoinerCode(e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, ''))}
+            onChange={(e) => mp.setJoinerCode(e.target.value.replace(/[^0-9]/g, ''))}
             placeholder={t('mpCodePlaceholder')}
             className="w-0 flex-1 min-w-0 text-center text-base font-mono font-bold tracking-wider py-2 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
           />
           <button
             onClick={async () => {
-              if (mp.joinerCode.length !== 6) {
+              if (mp.joinerCode.length !== 4) {
                 showToast(t('mpEnter6Digit'), 'error');
                 return;
               }
@@ -117,9 +119,9 @@ export const HomeContent = ({
                 setCurrentSection('mp-role');
               }
             }}
-            disabled={mp.joinerCode.length !== 6}
+            disabled={mp.joinerCode.length !== 4}
             className={`px-3 py-2 rounded-lg font-semibold text-sm whitespace-nowrap transition ${
-              mp.joinerCode.length === 6
+              mp.joinerCode.length === 4
                 ? 'bg-blue-600 text-white hover:bg-blue-700'
                 : 'bg-gray-200 text-gray-400 cursor-not-allowed'
             }`}

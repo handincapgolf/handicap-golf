@@ -133,7 +133,7 @@ export const en = {
   mpMultiplayer: '📡 Multiplayer',
   mpSync: 'Multiplayer Sync',
   mpCodePlaceholder: 'CODE',
-  mpEnter6Digit: 'Enter 6-digit code',
+  mpEnter6Digit: 'Enter 4-digit code',
   mpJoin: 'Join',
   mpPointQr: 'Point at QR code',
   mpQrLoadFail: 'QR lib load failed',
