@@ -281,7 +281,7 @@ var worker_default = {
           body: JSON.stringify({ game })
         }));
       }
-      const gameMatch = path.match(/^\/api\/game\/([A-Z0-9]{6})(\/.*)?$/);
+      const gameMatch = path.match(/^\/api\/game\/(\d{4})(\/.*)?$/);
       if (gameMatch) {
         const code = gameMatch[1];
         const subPath = gameMatch[2] || "";
