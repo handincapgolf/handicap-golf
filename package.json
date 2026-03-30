@@ -26,6 +26,7 @@
       "react-app/jest"
     ]
   },
+  "proxy": "https://handincap.golf",
   "browserslist": {
     "production": [
       ">0.2%",

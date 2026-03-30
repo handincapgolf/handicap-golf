@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: transparent; overflow: hidden; }
+  #container { position: fixed; inset: 0; }
+  canvas { display: block; width: 100%; height: 100%; }
+  .shake { animation: camShake 0.35s ease-out; }
+  @keyframes camShake {
+    0%,100% { transform: translate(0,0); }
+    10% { transform: translate(-12px,10px); }
+    20% { transform: translate(10px,-12px); }
+    30% { transform: translate(-10px,6px); }
+    40% { transform: translate(6px,-10px); }
+    50% { transform: translate(-6px,10px); }
+    60% { transform: translate(10px,-4px); }
+    70% { transform: translate(-4px,6px); }
+    80% { transform: translate(6px,-4px); }
+    90% { transform: translate(-4px,4px); }
+  }
+</style>
+</head>
+<body>
+<div id="container"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+
+const container = document.getElementById('container');
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 1, 8000);
+camera.position.set(0, 300, 650);
+camera.lookAt(0, 100, 0);
+
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.5;
+renderer.setClearColor(0x000000, 0);
+container.appendChild(renderer.domElement);
+
+window.addEventListener('resize', () => {
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+});
+
+// Lighting
+scene.add(new THREE.AmbientLight(0x553322, 0.6));
+const dirLight = new THREE.DirectionalLight(0xffcc88, 2.5);
+dirLight.position.set(0, 500, 300);
+scene.add(dirLight);
+const rimLight = new THREE.DirectionalLight(0xff8844, 1.0);
+rimLight.position.set(0, 200, -300);
+scene.add(rimLight);
+
+// Load fist model
+const loader = new GLTFLoader();
+let fistGroup = null;
+const FIST_SCALE = 0.5;
+let fistMixer = null, fistAction = null;
+
+const sndDeath = new Audio('sounds/death.ogg');
+const sndChoir = new Audio('sounds/choir.ogg');
+[sndDeath, sndChoir].forEach(s => { s.preload = 'auto'; s.load(); });
+
+const modelPromise = new Promise(resolve => {
+  loader.load('fist.glb', gltf => {
+    fistGroup = gltf.scene;
+    fistGroup.traverse(child => {
+      if (child.isMesh) {
+        child.material = new THREE.MeshStandardMaterial({
+          color: 0xdaa520, metalness: 0.85, roughness: 0.15,
+          emissive: 0x664400, emissiveIntensity: 0.4,
+        });
+      }
+    });
+    fistGroup.scale.set(FIST_SCALE, FIST_SCALE, FIST_SCALE);
+    fistGroup.visible = false;
+    scene.add(fistGroup);
+    if (gltf.animations && gltf.animations.length > 0) {
+      fistMixer = new THREE.AnimationMixer(fistGroup);
+      fistAction = fistMixer.clipAction(gltf.animations[0]);
+      fistAction.setLoop(THREE.LoopOnce);
+      fistAction.clampWhenFinished = true;
+    }
+    resolve();
+  }, undefined, () => resolve());
+});
+
+// Effect state
+let fistPhase = 'idle', fistTime = 0;
+
+function playEffect() {
+  fistPhase = 'playing';
+  fistTime = 0;
+
+  if (fistGroup) {
+    fistGroup.visible = true;
+    fistGroup.position.set(0, 0, 0);
+    fistGroup.rotation.y = -Math.PI / 2;
+    fistGroup.traverse(c => { if (c.isMesh) { c.material.transparent = false; c.material.opacity = 1; } });
+    if (fistAction) { fistAction.reset(); fistAction.play(); }
+  }
+
+  // Sound
+  sndDeath.currentTime = 0; sndDeath.volume = 0.8; sndDeath.play().catch(() => {});
+  setTimeout(() => { sndChoir.currentTime = 0; sndChoir.volume = 0.7; sndChoir.play().catch(() => {}); }, 300);
+
+  // Screen shake at impact (~600ms)
+  setTimeout(() => {
+    container.classList.add('shake');
+    setTimeout(() => container.classList.remove('shake'), 400);
+  }, 600);
+
+  // Done after 3s
+  setTimeout(() => {
+    fistPhase = 'done';
+    if (fistGroup) fistGroup.visible = false;
+    window.parent.postMessage({ type: 'fistOfSolDone' }, '*');
+  }, 3000);
+}
+
+// Animation loop
+const clock = new THREE.Clock();
+function animate() {
+  requestAnimationFrame(animate);
+  const dt = clock.getDelta();
+  if (fistMixer) fistMixer.update(dt);
+
+  // Fade out at 2.25s
+  if (fistGroup && fistPhase === 'playing') {
+    fistTime += dt;
+    if (fistTime > 2.25) {
+      const fadeT = Math.min((fistTime - 2.25) / 0.25, 1);
+      fistGroup.traverse(c => { if (c.isMesh) { c.material.transparent = true; c.material.opacity = 1 - fadeT; } });
+      if (fadeT >= 1) { fistPhase = 'done'; fistGroup.visible = false; }
+    }
+  }
+
+  renderer.render(scene, camera);
+}
+
+// Auto-play on load
+modelPromise.then(() => {
+  animate();
+  setTimeout(playEffect, 200);
+});
+</script>
+</body>
+</html>

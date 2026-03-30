@@ -25,6 +25,7 @@ import GameSection from './sections/GameSection';
 import { HomeLangBar, HomeContent } from './sections/HomeSection';
 import GlobalDialogs from './sections/GlobalDialogs';
 import FeedbackDialog from './components/FeedbackDialog';
+import FistOfSol from './components/FistOfSol';
 
 const courses = {
   f9: [1,2,3,4,5,6,7,8,9],
@@ -93,6 +94,7 @@ function IntegratedGolfGame() {
   const [completedHoles, setCompletedHoles] = useState([]);
   const [pendingRankings, setPendingRankings] = useState(null);
   const [gameComplete, setGameComplete] = useState(false);
+  const [showFistOfSol, setShowFistOfSol] = useState(false);
   const [currentHoleSettlement, setCurrentHoleSettlement] = useState(null);
   const [totalSpent, setTotalSpent] = useState({});
   const [showRoundReport, setShowRoundReport] = useState(false);
@@ -1559,6 +1561,7 @@ const getScoreLabel = useCallback((stroke, par) => {
     const currentHoleOb = {};
     let win123Rankings = null; // 用于保存Win123排名结果
     let win123IsTied = false;  // 用于保存是否平局
+    let hasUpWin = false;  // UP player won — triggers Fist of Sol + delays voice
     
     activePlayers.forEach(player => {
       currentHoleScores[player] = scores[player] || par;
@@ -1629,7 +1632,10 @@ const getScoreLabel = useCallback((stroke, par) => {
         
       } else if (gameMode === 'win123') {
         const { results, poolChange, rankings, isTied } = calculateWin123(currentHoleScores, currentHolePutts, currentHoleUps, holeNum);
-        
+
+        // Fist of Sol: detect UP win (effect triggered after voice finishes)
+        hasUpWin = rankings.some(r => r.up && r.finalRank === 1);
+
         // 保存rankings和isTied供播报使用
         win123Rankings = rankings;
         win123IsTied = isTied;
@@ -1668,9 +1674,15 @@ const getScoreLabel = useCallback((stroke, par) => {
     // 播报完成绩后，如果还有下一洞，等10秒再播报下一洞信息
     const nextHoleIdx = currentHole + 1;
     const hasNextHole = nextHoleIdx < holes.length;
-    playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied, 
-      hasNextHole ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextHoleIdx]); }, 10000); } : null
-    );
+    const nextHoleIntro = hasNextHole ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextHoleIdx]); }, 10000); } : null;
+    if (hasUpWin) {
+      // UP win: voice plays first → after last player announced → fist effect → next hole
+      playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied,
+        () => { setShowFistOfSol(true); if (nextHoleIntro) setTimeout(nextHoleIntro, 4000); }
+      );
+    } else {
+      playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied, nextHoleIntro);
+    }
     setCompletedHoles([...completedHoles, holeNum]);
     
     const newCompletedHoles = [...completedHoles, holeNum];
@@ -2446,6 +2458,10 @@ const triggerConfetti = useCallback(() => {
         onClose={() => setFeedbackDialog(false)}
         t={t}
         courseName={selectedCourse?.fullName || selectedCourse?.shortName || ''}
+      />
+      <FistOfSol
+        show={showFistOfSol}
+        onComplete={() => setShowFistOfSol(false)}
       />
     </div>
   );
