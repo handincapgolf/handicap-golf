@@ -2,7 +2,7 @@
 // Pahang Golf Courses
 
 export const PAHANG_COURSES = {
-  "AWANA_GENTING_HIGHLANDS_Golf_AND_COUNTRY_RESORT": {
+  "AWANA_GENTING_HIGHLANDS_GOLF_AND_COUNTRY_RESORT": {
     shortName: "AGHGCR",
     fullName: "Awana Genting Highlands Golf & Country Resort",
     location: ["Genting Highlands", "Pahang", "Malaysia"],
@@ -34,7 +34,7 @@ export const PAHANG_COURSES = {
     index: [11,3,17,1,5,13,15,7,9, 8,10,12,6,16,2,18,4,14]
   },
 
-  "FRASER_HILL_GOLF_ AND_COUNTRY_CLUB": {
+  "FRASER_HILL_GOLF_AND_COUNTRY_CLUB": {
     shortName: "FHGCC",
     fullName: "FRASER'S HILL GOLF & COUNTRY CLUB",
     location: ["Fraser's Hill", "Pahang", "Malaysia"],
@@ -74,7 +74,7 @@ export const PAHANG_COURSES = {
     index: [4,3,5,6,1,7,9,2,8]
   },
 
-  "Indera_Kuantan_Golf_Club": {
+  "INDERA_KUANTAN_GOLF_CLUB": {
     shortName: "IKGC",
     fullName: "Indera Kuantan Golf Club",
     location: ["Kuantan", "Pahang", "Malaysia"],
@@ -130,7 +130,7 @@ export const PAHANG_COURSES = {
     index: [13,15,5,17,3,9,7,11,1, 6,12,8,4,14,16,18,10,2]
   },
 
-  "VILLEA_ROMPIN_RESORT_&_GOLF": {
+  "VILLEA_ROMPIN_RESORT_AND_GOLF": {
     shortName: "VRRG",
     fullName: "Villea Rompin Resort & Golf",
     location: ["Rompin", "Pahang", "Malaysia"],

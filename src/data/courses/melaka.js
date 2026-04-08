@@ -10,7 +10,7 @@ export const MELAKA_COURSES = {
     index: [12,4,18,14,8,10,2,16,6, 3,13,17,1,5,9,15,11,7]
   },
 
-  "AFAMOSA_GOLF_RESORT_Crocodile_Rocky": {
+  "AFAMOSA_GOLF_RESORT_CROCODILE_ROCKY": {
     shortName: "AGR-RC",
     fullName: "A'Famosa Golf Resort (Crocodile + Rocky)",
     location: ["Alor Gajah", "Melaka", "Malaysia"],
@@ -34,7 +34,7 @@ export const MELAKA_COURSES = {
     index: [15,17,5,9,3,1,13,11,7, 8,18,4,2,6,14,12,16,10]
   },
 
-  "AYER_KEROH_COUNTRY_CLUB_Governor_Tunku": {
+  "AYER_KEROH_COUNTRY_CLUB_GOVERNOR_TUNKU": {
     shortName: "AKCC-TG",
     fullName: "Ayer Keroh Country Club (Governor + Tunku)",
     location: ["Ayer Keroh", "Melaka", "Malaysia"],
@@ -42,7 +42,7 @@ export const MELAKA_COURSES = {
     index: [15,17,5,9,3,1,13,11,7, 18,6,4,12,8,10,16,14,2]
   },
 
-  "AYER_KEROH_COUNTRY_CLUB_TUNKU_Ghaffar": {
+  "AYER_KEROH_COUNTRY_CLUB_TUNKU_GHAFFAR": {
     shortName: "AKCC-Tunku + Ghaffar",
     fullName: "Ayer Keroh Country Club (Tunku + Ghaffar)",
     location: ["Ayer Keroh", "Melaka", "Malaysia"],

@@ -23,7 +23,7 @@ export const KUALA_LUMPUR_COURSES = {
     fullName: "Kelab Rekreasi Angkatan Tentera (Kuala Lumpur)",
     location: ["Kuala Lumpur", "Kuala Lumpur", "Malaysia"],
     pars: [4,3,4,3,3,5,4,4,3, 4,3,4,3,3,5,4,4,3],
-    index: [,,,,,,,,, ,,,,,,,,]
+    index: [,,,,,,,, ,,,,,,,,]
   },
 
   "KUALA_LUMPUR_GOLF_AND_COUNTRY_CLUB_EAST": {

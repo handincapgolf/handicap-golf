@@ -14,7 +14,8 @@ export const PENANG_COURSES = {
     shortName: "BGC",
     fullName: "Butterworth Golf Club",
     location: ["Butterworth", "Penang", "Malaysia"],
-    pars: [4,4,5,3,4,4,5,3,4]
+    pars: [4,4,5,3,4,4,5,3,4],
+    index: [,,,,,,,,]
   },
 
   "MOUNTAIN_VIEW_GOLF_RESORT": {
