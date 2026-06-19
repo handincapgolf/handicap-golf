@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { AlertCircle, CheckCircle, X } from 'lucide-react';
+import Icon from './Icon';
 
 // ========== 通用 Toast ==========
 export const Toast = memo(({ message, type, onClose }) => {
@@ -43,7 +44,7 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
     const map = { score: t('editLogScore'), putts: t('editLogPutts'), up: t('editLogUp') };
     return map[f] || f;
   };
-  const fmtVal = (f, v) => (f === 'up' ? (v ? '✓' : '✗') : v);
+  const fmtVal = (f, v) => (f === 'up' ? (v ? <Icon name="check" size={13} /> : <Icon name="x" size={13} />) : v);
 
   return (
     <div className="fixed left-3 right-3 z-50" style={{
@@ -63,7 +64,7 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
             width: 32, height: 32, borderRadius: 8,
             background: 'linear-gradient(135deg, #166534, #15803d)',
             display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0,
-          }}>⛳</div>
+          }}><Icon name="flag" size={18} /></div>
           <div style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
               <span style={{ color: '#f5f5f5', fontWeight: 600, fontSize: 13 }}>
@@ -75,7 +76,7 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
             </div>
           </div>
           <button onClick={(e) => { e.stopPropagation(); onClose(); }}
-            style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer', padding: 4 }}>×</button>
+            style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer', padding: 4 }}><Icon name="x" size={16} /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 42 }}>
           {log.changes.map((c, i) => (
@@ -85,7 +86,7 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
                 {fieldLabel(c.field)}
               </span>
               <span style={{ color: '#ef4444', textDecoration: 'line-through', opacity: 0.7, fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
-              <span style={{ color: '#666', fontSize: 11 }}>→</span>
+              <span style={{ color: '#666', fontSize: 11 }}><Icon name="arrow-right" size={11} /></span>
               <span style={{ color: '#4ade80', fontWeight: 600, fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
             </div>
           ))}
