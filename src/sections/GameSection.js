@@ -339,7 +339,7 @@ const GameSection = ({
                           <div className="flex items-center gap-1 px-2 py-1 flex-wrap">
                             {otherDeviceIds.map(devId => (
                               <span key={devId} className={`text-xs px-1.5 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
-                                {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
+                                <Badge {...mp.getDeviceBadge(devId)} size={16} className="inline-flex align-text-bottom mr-0.5" /> {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
                               </span>
                             ))}
                           </div>
@@ -422,7 +422,7 @@ const GameSection = ({
                 <div className="flex gap-1 flex-wrap">
                   {mp.getActiveDeviceIds().map(devId => (
                     <span key={devId} className={`px-2 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
-                      {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
+                      <Badge {...mp.getDeviceBadge(devId)} size={16} className="inline-flex align-text-bottom mr-0.5" /> {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
                     </span>
                   ))}
                 </div>

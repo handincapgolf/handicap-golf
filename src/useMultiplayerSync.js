@@ -8,9 +8,9 @@
 //   confirmed: { creator: true, joiner: false }
 //
 // NEW: N devices — each identified by deviceId
-//   devices:   { "dev_abc": { role:"creator", label:"🅰️", color:"green", name:"Host" },
-//                "dev_def": { role:"joiner",  label:"🅱️", color:"blue",  name:"Buggy 2" },
-//                "dev_ghi": { role:"joiner",  label:"🅲",  color:"purple", name:"Buggy 3" } }
+//   devices:   { "dev_abc": { role:"creator", index:0, color:"green", name:"Host" },
+//                "dev_def": { role:"joiner",  index:1, color:"blue",  name:"Buggy 2" },
+//                "dev_ghi": { role:"joiner",  index:2, color:"purple", name:"Buggy 3" } }
 //   claimed:   { "Alice": "dev_abc", "Bob": "dev_def", "Charlie": "dev_ghi" }
 //   confirmed: { "dev_abc": true, "dev_def": false, "dev_ghi": true }
 // ===========================
@@ -19,16 +19,16 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 
 const API_BASE = '/api';
 
-// Device labels and colors for up to 8 devices
+// Device letters and colors for up to 8 devices (rendered as <Badge>)
 const DEVICE_STYLES = [
-  { label: '🅰️', letter: 'A', hex: '#16a34a', color: 'green',  bgClass: 'bg-green-100 text-green-700',  dotClass: 'bg-green-500' },
-  { label: '🅱️', letter: 'B', hex: '#2563eb', color: 'blue',   bgClass: 'bg-blue-100 text-blue-700',    dotClass: 'bg-blue-500' },
-  { label: 'Ⓒ',  letter: 'C', hex: '#9333ea', color: 'purple', bgClass: 'bg-purple-100 text-purple-700', dotClass: 'bg-purple-500' },
-  { label: 'Ⓓ',  letter: 'D', hex: '#ea580c', color: 'orange', bgClass: 'bg-orange-100 text-orange-700', dotClass: 'bg-orange-500' },
-  { label: 'Ⓔ',  letter: 'E', hex: '#db2777', color: 'pink',   bgClass: 'bg-pink-100 text-pink-700',    dotClass: 'bg-pink-500' },
-  { label: 'Ⓕ',  letter: 'F', hex: '#0d9488', color: 'teal',   bgClass: 'bg-teal-100 text-teal-700',    dotClass: 'bg-teal-500' },
-  { label: 'Ⓖ',  letter: 'G', hex: '#d97706', color: 'amber',  bgClass: 'bg-amber-100 text-amber-700',  dotClass: 'bg-amber-500' },
-  { label: 'Ⓗ',  letter: 'H', hex: '#e11d48', color: 'rose',   bgClass: 'bg-rose-100 text-rose-700',    dotClass: 'bg-rose-500' },
+  { letter: 'A', hex: '#16a34a', color: 'green',  bgClass: 'bg-green-100 text-green-700',  dotClass: 'bg-green-500' },
+  { letter: 'B', hex: '#2563eb', color: 'blue',   bgClass: 'bg-blue-100 text-blue-700',    dotClass: 'bg-blue-500' },
+  { letter: 'C', hex: '#9333ea', color: 'purple', bgClass: 'bg-purple-100 text-purple-700', dotClass: 'bg-purple-500' },
+  { letter: 'D', hex: '#ea580c', color: 'orange', bgClass: 'bg-orange-100 text-orange-700', dotClass: 'bg-orange-500' },
+  { letter: 'E', hex: '#db2777', color: 'pink',   bgClass: 'bg-pink-100 text-pink-700',    dotClass: 'bg-pink-500' },
+  { letter: 'F', hex: '#0d9488', color: 'teal',   bgClass: 'bg-teal-100 text-teal-700',    dotClass: 'bg-teal-500' },
+  { letter: 'G', hex: '#d97706', color: 'amber',  bgClass: 'bg-amber-100 text-amber-700',  dotClass: 'bg-amber-500' },
+  { letter: 'H', hex: '#e11d48', color: 'rose',   bgClass: 'bg-rose-100 text-rose-700',    dotClass: 'bg-rose-500' },
 ];
 
 // Pure: device slot index → <Badge> props. A/B = rounded square, C–H = circle.
@@ -102,9 +102,9 @@ export function useMultiplayerSync() {
     return getDeviceStyle(deviceId.current);
   }, [getDeviceStyle]);
 
-  // Get label emoji for a device
+  // Get plain letter (A–H) for a device — text fallback for serialized labels
   const getDeviceLabel = useCallback((devId) => {
-    return getDeviceStyle(devId).label;
+    return getDeviceStyle(devId).letter;
   }, [getDeviceStyle]);
 
   // Get <Badge> props {label, shape, color} for a device
