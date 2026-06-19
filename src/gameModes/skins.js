@@ -7,14 +7,11 @@
  * - 如果平局，奖金累积到下一洞
  */
 
-import { CircleDollarSign } from 'lucide-react';
-
 // 模式配置
 export const config = {
   name: 'skins',
   nameZh: 'Skins',
   nameEn: 'Skins',
-  icon: CircleDollarSign,
   color: 'purple',
   bgColor: 'bg-purple-600',
   bgColorLight: 'bg-purple-100',

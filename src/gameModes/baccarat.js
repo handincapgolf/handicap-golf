@@ -18,14 +18,11 @@
  * - 第四UP：紫色 4
  */
 
-import { CircleDollarSign } from 'lucide-react';
-
 // 模式配置
 export const config = {
   name: 'baccarat',
   nameZh: '百家乐',
   nameEn: 'Baccarat',
-  icon: CircleDollarSign,
   color: 'amber',
   bgColor: 'bg-amber-600',
   bgColorLight: 'bg-amber-100',

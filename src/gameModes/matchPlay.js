@@ -8,14 +8,11 @@
  * - 平局不换钱
  */
 
-import { Trophy } from 'lucide-react';
-
 // 模式配置
 export const config = {
   name: 'matchPlay',
   nameZh: '比洞赛',
   nameEn: 'Match Play',
-  icon: Trophy,
   color: 'blue',
   bgColor: 'bg-blue-600',
   bgColorLight: 'bg-blue-100',

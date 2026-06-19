@@ -4,7 +4,6 @@
  */
 
 import React, { memo } from 'react';
-import { TrendingUp } from 'lucide-react';
 import Icon from '../components/Icon';
 
 // ========== 百家乐独有：UP 顺序样式配置 ==========

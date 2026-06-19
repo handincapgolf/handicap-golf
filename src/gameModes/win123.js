@@ -15,14 +15,11 @@
  * - 全部同杆 + 没UP：全部 $0
  */
 
-import { DollarSign } from 'lucide-react';
-
 // 模式配置
 export const config = {
   name: 'win123',
   nameZh: 'Win123',
   nameEn: 'Win123',
-  icon: DollarSign,
   color: 'green',
   bgColor: 'bg-green-600',
   bgColorLight: 'bg-green-100',
