@@ -1,5 +1,4 @@
 import React from 'react';
-import { TrendingUp, BarChart3, Eye } from 'lucide-react';
 import Icon from '../components/Icon';
 import Badge from '../components/Badge';
 import ViewerGameScreen from '../ViewerGameScreen';
@@ -235,7 +234,7 @@ const GameSection = ({
                   : 'bg-gray-200 text-gray-500 hover:bg-gray-300'
               }`}
             >
-              <TrendingUp className="w-3.5 h-3.5" />
+              <Icon name="trending-up" size={14} />
               <span className="text-[8px] leading-none mt-0.5">UP</span>
             </button>
           )}
@@ -244,7 +243,7 @@ const GameSection = ({
               onClick={() => toggleBaccaratUp(player)}
               className={`w-9 h-9 rounded-lg font-bold text-[10px] btn-press flex flex-col items-center justify-center mb-1 transition ${getBaccaratUpBtnClass(player, upOrder)}`}
             >
-              <TrendingUp className="w-3.5 h-3.5" />
+              <Icon name="trending-up" size={14} />
               <span className="text-[8px] leading-none mt-0.5">{getBaccaratUpLabel(player, upOrder)}</span>
             </button>
           )}
@@ -399,7 +398,7 @@ const GameSection = ({
             {mp.isViewer && (
               <div className="mb-3 border-2 border-dashed border-purple-300 rounded-lg p-3 bg-purple-50">
                 <div className="flex items-start gap-2">
-                  <Eye className="w-5 h-5 text-purple-500 flex-shrink-0 mt-0.5" />
+                  <Icon name="eye" size={20} className="text-purple-500 flex-shrink-0 mt-0.5" />
                   <div>
                     <div className="text-sm font-semibold text-purple-700">
                       {t('mpViewerReminder')}
@@ -451,7 +450,7 @@ const GameSection = ({
                     onClick={() => setCurrentSection('scorecard')}
                     className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition"
                   >
-                    <BarChart3 className="w-5 h-5" />
+                    <Icon name="chart" size={20} />
                   </button>
                 </>
               ) : (
@@ -524,7 +523,7 @@ const GameSection = ({
                 onClick={() => setCurrentSection('scorecard')}
                 className="bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-lg transition"
               >
-                <BarChart3 className="w-5 h-5" />
+                <Icon name="chart" size={20} />
               </button>
               </>
               )}

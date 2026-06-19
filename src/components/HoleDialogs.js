@@ -1,5 +1,5 @@
 import React, { useState, useEffect, memo } from 'react';
-import { X, CheckCircle, Plus, Minus, TrendingUp } from 'lucide-react';
+import Icon from './Icon';
 
 // ========== 洞成绩确认弹窗 ==========
 export const HoleScoreConfirmDialog = memo(({ isOpen, onClose, onConfirm, hole, players, scores, putts, rankings, gameMode, getHandicapForHole, pars, t, stake, prizePool, activePlayers }) => {
@@ -131,7 +131,7 @@ export const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], on
             {t('selectHoleToEdit')}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <X className="w-5 h-5" />
+            <Icon name="x" size={20} />
           </button>
         </div>
         
@@ -282,7 +282,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
             {t('editHole')} {hole} ({t('par')} {par})
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600 p-1">
-            <X className="w-5 h-5" />
+            <Icon name="x" size={20} />
           </button>
         </div>
         
@@ -308,7 +308,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
                             : 'bg-gray-200 text-gray-500'
                         }`}
                       >
-                        <TrendingUp className="w-3 h-3" />
+                        <Icon name="trending-up" size={12} />
                         <span style={{fontSize: '7px', lineHeight: 1}}>UP</span>
                       </button>
                     )}
@@ -317,7 +317,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
                         onClick={() => toggleBaccaratUp(player)}
                         className={`w-8 h-8 rounded-md font-bold text-xs btn-press flex flex-col items-center justify-center transition mb-0.5 ${getBaccaratUpBtnStyle(baccaratUpPos)}`}
                       >
-                        <TrendingUp className="w-3 h-3" />
+                        <Icon name="trending-up" size={12} />
                         <span style={{fontSize: '7px', lineHeight: 1}}>{baccaratUpPos > 0 ? `UP${upSymbols[baccaratUpPos]}` : 'UP'}</span>
                       </button>
                     )}
@@ -339,14 +339,14 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
                           playerOn > 1 ? 'bg-gray-400 text-white' : 'bg-gray-200 text-gray-400'
                         }`}
                       >
-                        <Minus className="w-3.5 h-3.5" />
+                        <Icon name="minus" size={14} />
                       </button>
                       <span className="text-xl font-bold w-8 text-center text-gray-900">{playerOn}</span>
                       <button
                         onClick={() => changeScore(player, 1)}
                         className="w-8 h-8 bg-green-500 text-white rounded-full flex items-center justify-center btn-press"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Icon name="plus" size={14} />
                       </button>
                     </div>
                     
@@ -359,14 +359,14 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
                           playerPutts > 0 ? 'bg-gray-400 text-white' : 'bg-gray-200 text-gray-400'
                         }`}
                       >
-                        <Minus className="w-3.5 h-3.5" />
+                        <Icon name="minus" size={14} />
                       </button>
                       <span className="text-xl font-bold w-8 text-center text-blue-600">{playerPutts}</span>
                       <button
                         onClick={() => changePutts(player, 1)}
                         className="w-8 h-8 bg-blue-500 text-white rounded-full flex items-center justify-center btn-press"
                       >
-                        <Plus className="w-3.5 h-3.5" />
+                        <Icon name="plus" size={14} />
                       </button>
                     </div>
                   </div>
@@ -387,7 +387,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
             onClick={() => { onSave(hole, editScores, editUps, editPutts, editUpOrder); onClose(); }}
             className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg font-medium text-sm flex items-center justify-center gap-1"
           >
-            <CheckCircle className="w-4 h-4" />
+            <Icon name="check-circle" size={16} />
             {t('save')}
           </button>
         </div>

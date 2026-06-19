@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { AlertCircle, Edit2, Home, ChevronDown, ChevronUp, Droplets, XCircle } from 'lucide-react';
 import Icon from '../components/Icon';
 
 // ===== PGA-style ScoreCell (Vertical view) =====
@@ -148,7 +147,7 @@ const PenaltyWidget = ({ activePlayers, completedHoles, allWater, allOb, holes, 
               {p.player}: {p.total}
             </span>
           ))}
-          {expanded ? <ChevronUp className="w-4 h-4 text-red-600" /> : <ChevronDown className="w-4 h-4 text-red-600" />}
+          {expanded ? <Icon name="chevron-up" size={16} className="text-red-600" /> : <Icon name="chevron-down" size={16} className="text-red-600" />}
         </div>
       </button>
 
@@ -163,12 +162,12 @@ const PenaltyWidget = ({ activePlayers, completedHoles, allWater, allOb, holes, 
                 <div className="flex items-center justify-center gap-2 mt-1">
                   {water > 0 && (
                     <span className="flex items-center gap-0.5 text-xs font-bold text-blue-700">
-                      <Droplets className="w-3 h-3" />{water}
+                      <Icon name="water" size={12} />{water}
                     </span>
                   )}
                   {ob > 0 && (
                     <span className="flex items-center gap-0.5 text-xs font-bold text-red-700">
-                      <XCircle className="w-3 h-3" />{ob}
+                      <Icon name="x-circle" size={12} />{ob}
                     </span>
                   )}
                   {water === 0 && ob === 0 && (
@@ -564,7 +563,7 @@ const ScorecardSection = ({
       ) : (
         // ===== No data =====
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-center">
-          <AlertCircle className="w-8 h-8 text-blue-500 mx-auto mb-2" />
+          <Icon name="alert-circle" size={32} className="text-blue-500 mx-auto mb-2" />
           <p className="text-blue-700 text-sm">{t('noScoreData')}</p>
         </div>
       )}
@@ -606,7 +605,7 @@ const ScorecardSection = ({
                 onClick={() => setHoleSelectDialog(true)}
                 className="w-14 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg flex items-center justify-center transition"
               >
-                <Edit2 className="w-5 h-5" />
+                <Icon name="edit" size={20} />
               </button>
             )}
           </>
@@ -616,7 +615,7 @@ const ScorecardSection = ({
               onClick={goHome}
               className="w-full bg-gray-600 hover:bg-gray-700 text-white py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2"
             >
-              <Home className="w-5 h-5" />
+              <Icon name="home" size={20} />
               {t('backToHome')}
             </button>
             <p className="text-xs text-gray-500 text-center mt-2">{t('allDataCleared')}</p>
