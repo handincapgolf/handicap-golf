@@ -21,15 +21,22 @@ const API_BASE = '/api';
 
 // Device labels and colors for up to 8 devices
 const DEVICE_STYLES = [
-  { label: '🅰️', color: 'green',  bgClass: 'bg-green-100 text-green-700',  dotClass: 'bg-green-500' },
-  { label: '🅱️', color: 'blue',   bgClass: 'bg-blue-100 text-blue-700',    dotClass: 'bg-blue-500' },
-  { label: 'Ⓒ',  color: 'purple', bgClass: 'bg-purple-100 text-purple-700', dotClass: 'bg-purple-500' },
-  { label: 'Ⓓ',  color: 'orange', bgClass: 'bg-orange-100 text-orange-700', dotClass: 'bg-orange-500' },
-  { label: 'Ⓔ',  color: 'pink',   bgClass: 'bg-pink-100 text-pink-700',    dotClass: 'bg-pink-500' },
-  { label: 'Ⓕ',  color: 'teal',   bgClass: 'bg-teal-100 text-teal-700',    dotClass: 'bg-teal-500' },
-  { label: 'Ⓖ',  color: 'amber',  bgClass: 'bg-amber-100 text-amber-700',  dotClass: 'bg-amber-500' },
-  { label: 'Ⓗ',  color: 'rose',   bgClass: 'bg-rose-100 text-rose-700',    dotClass: 'bg-rose-500' },
+  { label: '🅰️', letter: 'A', hex: '#16a34a', color: 'green',  bgClass: 'bg-green-100 text-green-700',  dotClass: 'bg-green-500' },
+  { label: '🅱️', letter: 'B', hex: '#2563eb', color: 'blue',   bgClass: 'bg-blue-100 text-blue-700',    dotClass: 'bg-blue-500' },
+  { label: 'Ⓒ',  letter: 'C', hex: '#9333ea', color: 'purple', bgClass: 'bg-purple-100 text-purple-700', dotClass: 'bg-purple-500' },
+  { label: 'Ⓓ',  letter: 'D', hex: '#ea580c', color: 'orange', bgClass: 'bg-orange-100 text-orange-700', dotClass: 'bg-orange-500' },
+  { label: 'Ⓔ',  letter: 'E', hex: '#db2777', color: 'pink',   bgClass: 'bg-pink-100 text-pink-700',    dotClass: 'bg-pink-500' },
+  { label: 'Ⓕ',  letter: 'F', hex: '#0d9488', color: 'teal',   bgClass: 'bg-teal-100 text-teal-700',    dotClass: 'bg-teal-500' },
+  { label: 'Ⓖ',  letter: 'G', hex: '#d97706', color: 'amber',  bgClass: 'bg-amber-100 text-amber-700',  dotClass: 'bg-amber-500' },
+  { label: 'Ⓗ',  letter: 'H', hex: '#e11d48', color: 'rose',   bgClass: 'bg-rose-100 text-rose-700',    dotClass: 'bg-rose-500' },
 ];
+
+// Pure: device slot index → <Badge> props. A/B = rounded square, C–H = circle.
+export function deviceBadgeProps(index) {
+  const i = DEVICE_STYLES[index] ? index : 0;
+  const s = DEVICE_STYLES[i];
+  return { label: s.letter, shape: i < 2 ? 'square' : 'circle', color: s.hex };
+}
 
 // Generate unique device ID (persisted in localStorage)
 function getDeviceId() {
@@ -99,6 +106,12 @@ export function useMultiplayerSync() {
   const getDeviceLabel = useCallback((devId) => {
     return getDeviceStyle(devId).label;
   }, [getDeviceStyle]);
+
+  // Get <Badge> props {label, shape, color} for a device
+  const getDeviceBadge = useCallback((devId) => {
+    const dev = devices[devId];
+    return deviceBadgeProps(dev ? dev.index : 0);
+  }, [devices]);
 
   // Get bgClass for a device (for badges)
   const getDeviceBgClass = useCallback((devId) => {
@@ -605,6 +618,7 @@ export function useMultiplayerSync() {
     getDeviceStyle,
     getMyStyle,
     getDeviceLabel,
+    getDeviceBadge,
     getDeviceBgClass,
     getActiveDeviceIds,
     getPlayersForDevice,
