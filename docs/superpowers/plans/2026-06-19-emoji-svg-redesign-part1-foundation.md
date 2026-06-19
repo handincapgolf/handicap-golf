@@ -148,8 +148,11 @@ test('passes className through', () => {
 });
 
 test('unknown name renders nothing (null), no throw', () => {
+  const warnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {});
   const { container } = render(<Icon name="does-not-exist" />);
   expect(container.querySelector('svg')).toBeNull();
+  expect(warnSpy).toHaveBeenCalledWith(expect.stringContaining('does-not-exist'));
+  warnSpy.mockRestore();
 });
 
 test('every registry entry has a non-empty body', () => {
