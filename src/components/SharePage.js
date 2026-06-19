@@ -7,6 +7,7 @@
 
 import React, { useState, useEffect, memo } from 'react';
 import { useTranslation, detectLanguage } from '../locales';
+import Icon from './Icon';
 
 // ========== 分享页面样式 ==========
 const sharePageStyles = `
@@ -169,7 +170,7 @@ export const CourseLogo = memo(({ shortName, fullName }) => {
 
   if (!logoPath || imgError) {
     return (
-      <div className="logo-large"><span>⛳</span></div>
+      <div className="logo-large"><Icon name="flag" size={40} /></div>
     );
   }
 
@@ -189,7 +190,7 @@ export const CourseLogo = memo(({ shortName, fullName }) => {
 export const BrandFooter = memo(({ t }) => (
   <div className="text-center py-3 bg-gray-50 border-t">
     <div className="flex items-center justify-center gap-2">
-      <span className="text-green-600 text-lg">⛳</span>
+      <Icon name="flag" size={18} />
       <span className="text-sm font-semibold text-gray-600">
         {t ? t('poweredBy') : 'Powered by'} <span className="text-green-600">HandinCap.golf</span>
       </span>
@@ -249,7 +250,7 @@ export const ShareReportPage = memo(({ data, onViewFull, t }) => {
       <div className="flex-1 p-4 space-y-3 overflow-auto">
         {/* Hole by Hole */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
-          <div className="text-sm font-semibold text-gray-500 mb-2">📋 {t('holeByHole')}</div>
+          <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="clipboard" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('holeByHole')}</div>
 
           {front9.length > 0 && (
   <div className="mb-4">
@@ -306,7 +307,7 @@ export const ShareReportPage = memo(({ data, onViewFull, t }) => {
 
         {/* Score Distribution */}
 <div className="bg-white border border-gray-200 rounded-xl p-3">
-  <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
+  <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="target" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('scoreDistribution')}</div>
   <div className="flex justify-around">
     <div className="flex flex-col items-center gap-2">
       <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">
@@ -360,7 +361,7 @@ export const ShareReportPage = memo(({ data, onViewFull, t }) => {
 
         {/* Putting Analysis */}
         <div className="bg-white border border-gray-200 rounded-xl p-3">
-          <div className="text-sm font-semibold text-gray-500 mb-2">📊 {t('puttingAnalysis')}</div>
+          <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="chart" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('puttingAnalysis')}</div>
           <div className="grid grid-cols-3 gap-2">
             <div className="text-center p-2 bg-gray-50 rounded-lg">
               <div className="text-xs text-gray-500 mb-1">{t('totalLabel')}</div>
@@ -376,7 +377,7 @@ export const ShareReportPage = memo(({ data, onViewFull, t }) => {
             </div>
           </div>
           {threePutts > 0 && (
-            <div className="mt-2 text-center text-sm text-red-500">⚠️ {t('threePutts')}: {threePutts}</div>
+            <div className="mt-2 text-center text-sm text-red-500"><Icon name="alert" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('threePutts')}: {threePutts}</div>
           )}
         </div>
       </div>
@@ -384,7 +385,7 @@ export const ShareReportPage = memo(({ data, onViewFull, t }) => {
       {/* View Full Detail */}
       <div className="flex-shrink-0 p-4 border-t" style={{ paddingBottom: 'max(16px, env(safe-area-inset-bottom))' }}>
         <button onClick={onViewFull} className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition">
-          {t('viewFullDetail')} →
+          {t('viewFullDetail')} <Icon name="arrow-right" size={16} style={{ verticalAlign: 'text-bottom' }} />
         </button>
       </div>
 
@@ -421,7 +422,7 @@ export const ShareDetailPage = memo(({ data, onBack, t }) => {
       <div className="classic-header text-white relative">
         <div className="py-3 px-4 relative z-10">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg">←</button>
+            <button onClick={onBack} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="arrow-left" size={18} /></button>
             <div className="flex-1 min-w-0">
               <h1 className="font-bold text-sm gold-accent truncate">{data.c}</h1>
               <p className="text-green-200 text-xs">{data.d}</p>
@@ -450,7 +451,7 @@ export const ShareDetailPage = memo(({ data, onBack, t }) => {
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('onLabel')}</th>
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('putt')}</th>
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('total')}</th>
-                  {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>}
+                  {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600"><Icon name="water" size={14} /></th>}
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>}
                 </tr>
               </thead>
@@ -486,7 +487,7 @@ export const ShareDetailPage = memo(({ data, onBack, t }) => {
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('onLabel')}</th>
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('putt')}</th>
                   <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">{t('total')}</th>
-                  {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">💧</th>}
+                  {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600"><Icon name="water" size={14} /></th>}
                   {data.a && <th className="py-2 px-2 text-center text-xs font-semibold text-gray-600">OB</th>}
                 </tr>
               </thead>
@@ -525,7 +526,7 @@ export const ShareDetailPage = memo(({ data, onBack, t }) => {
           </div>
           {data.a && (
             <div className="bg-white rounded-lg p-2 shadow-sm">
-              <div className="text-gray-500 text-xs">💧</div>
+              <div className="text-gray-500 text-xs"><Icon name="water" size={13} /></div>
               <div className="font-bold text-xl text-cyan-600">{totalWater}</div>
             </div>
           )}
@@ -568,7 +569,7 @@ const SharePage = memo(({ data, PWAInstallPrompt }) => {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-xl p-6 text-center shadow-lg">
-          <div className="text-4xl mb-3">❌</div>
+          <div className="mb-3"><Icon name="x-circle" size={40} /></div>
           <h2 className="text-lg font-bold text-gray-800 mb-2">{t('shareInvalidLink')}</h2>
           <p className="text-gray-600 text-sm">{t('shareInvalidDesc')}</p>
           <a href="/" className="mt-4 inline-block px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium">
