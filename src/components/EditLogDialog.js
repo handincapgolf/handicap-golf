@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { CheckCircle, X } from 'lucide-react';
 import Icon from './Icon';
+import Badge from './Badge';
 
 // ========== 修改记录弹窗 ==========
 export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => {
@@ -56,9 +57,11 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
                   <span className="text-sm font-bold text-gray-900">
                     {t('hole')} {log.hole}
                   </span>
-                  {log.editedByLabel && (
-                    <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{log.editedByLabel}</span>
-                  )}
+                  {log.editedByBadge
+                    ? <Badge {...log.editedByBadge} size={18} />
+                    : (log.editedByLabel && (
+                      <span className="px-2 py-0.5 bg-blue-100 text-blue-700 rounded text-xs font-medium">{log.editedByLabel}</span>
+                    ))}
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-gray-500">{fmtTime(log.timestamp)}</div>

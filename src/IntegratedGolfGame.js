@@ -1842,6 +1842,7 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
       hole,
       editedBy: mp.multiplayerOn ? mp.deviceId : 'local',
       editedByLabel: mp.multiplayerOn ? (mp.getDeviceLabel(mp.deviceId) || mp.deviceId) : '',
+      editedByBadge: mp.multiplayerOn ? mp.getDeviceBadge(mp.deviceId) : null,
       changes,
     } : null;
     if (editLogEntry) {

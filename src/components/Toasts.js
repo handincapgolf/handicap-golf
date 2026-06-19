@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { AlertCircle, CheckCircle, X } from 'lucide-react';
 import Icon from './Icon';
+import Badge from './Badge';
 
 // ========== 通用 Toast ==========
 export const Toast = memo(({ message, type, onClose }) => {
@@ -72,7 +73,10 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
               </span>
             </div>
             <div style={{ color: '#aaa', fontSize: 11, marginTop: 1 }}>
-              {log.editedByLabel ? t('editNotifyBy').replace('{who}', log.editedByLabel) : ''}
+              {log.editedByBadge
+                ? t('editNotifyBy').split('{who}').flatMap((part, i) =>
+                    i === 0 ? [part] : [<Badge key={i} {...log.editedByBadge} size={14} className="inline-flex align-text-bottom mx-0.5" />, part])
+                : (log.editedByLabel ? t('editNotifyBy').replace('{who}', log.editedByLabel) : '')}
             </div>
           </div>
           <button onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label={t('close')}
