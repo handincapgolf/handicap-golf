@@ -1674,10 +1674,14 @@ const getScoreLabel = useCallback((stroke, par) => {
     });
     // 只有 Win123 + 有下注 + 4人或以上 时启用特殊音效
     const enableSpecialAudio = gameMode === 'win123' && Number(stake) > 0 && activePlayers.length >= 4;
-    // 播报完成绩后，如果还有下一洞，等10秒再播报下一洞信息
-    const nextHoleIdx = currentHole + 1;
-    const hasNextHole = nextHoleIdx < holes.length;
-    const nextHoleIntro = hasNextHole ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextHoleIdx]); }, 10000); } : null;
+    const newCompletedHoles = [...completedHoles, holeNum];
+    const allHolesPlayed = holes.every(h => newCompletedHoles.includes(h));
+    const nextUnplayed = allHolesPlayed ? null : findNextUnplayedHole(holes, newCompletedHoles, currentHole);
+
+    // 播报完成绩后，如果还有下一洞（按未打洞顺序），等10秒再播报下一洞信息
+    const nextHoleIntro = nextUnplayed
+      ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextUnplayed.index]); }, 10000); }
+      : null;
     if (hasUpWin) {
       // UP win: voice plays first → after last player announced → fist effect → next hole
       playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied,
@@ -1686,21 +1690,19 @@ const getScoreLabel = useCallback((stroke, par) => {
     } else {
       playHoleResults(sortedPlayersForVoice, currentHoleScores, currentHolePutts, enableSpecialAudio, win123Rankings, win123IsTied, nextHoleIntro);
     }
-    setCompletedHoles([...completedHoles, holeNum]);
-    
-    const newCompletedHoles = [...completedHoles, holeNum];
-    
-    if (currentHole >= holes.length - 1) {
+    setCompletedHoles(newCompletedHoles);
+
+    if (allHolesPlayed) {
       setGameComplete(true);
-	showToast(t('gameOver'));
-	setCurrentSection('scorecard');
-	triggerConfetti();
-	// 多人同步：通知结束
-	if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-	  mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool, finished: true });
-	}
+      showToast(t('gameOver'));
+      setCurrentSection('scorecard');
+      triggerConfetti();
+      // 多人同步：通知结束
+      if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
+        mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool, finished: true });
+      }
     } else {
-      setCurrentHole(currentHole + 1);
+      setCurrentHole(nextUnplayed.index);
       setScores({});
       setUps({});
       setUpOrder([]);  // 重置百家乐UP顺序
@@ -1708,9 +1710,14 @@ const getScoreLabel = useCallback((stroke, par) => {
       setWater({});
       setOb({});
       setCurrentHoleSettlement(null);
+      // 跳洞绕回：往前没有未打洞时回到最早未打洞并提示
+      if (nextUnplayed.wrapped) {
+        const remaining = holes.filter(h => !newCompletedHoles.includes(h)).length;
+        showToast(t('holeJumpReturnToast').replace('{n}', remaining).replace('{hole}', holes[nextUnplayed.index]));
+      }
       // 多人同步：通知下一洞
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
-        mp.syncNextHole(currentHole + 1, holes[currentHole + 1], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool });
+        mp.syncNextHole(nextUnplayed.index, holes[nextUnplayed.index], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool });
       }
     }
     
