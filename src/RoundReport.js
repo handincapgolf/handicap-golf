@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
 import { useTranslation, detectLanguage } from './locales';
+import Icon from './components/Icon';
 
 // ============================================================
 // Round Report - 完整回合报告组件
@@ -648,7 +649,7 @@ export const RoundReportCard = memo(({ data, forCapture = false, vertical = fals
         backgroundColor: forCapture ? '#f0fdf4' : 'transparent',
         borderTop: forCapture ? '1px solid #d1fae5' : 'none'
       }}>
-        <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
+        <Icon name="flag" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />
         <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
           {t('poweredBy')} <span style={{ color: '#047857' }}>HandinCap.golf</span>
         </span>
@@ -763,7 +764,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
           padding: '14px 16px', borderBottom: '1px solid #e5e7eb'
         }}>
           <span style={{ fontWeight: 700, fontSize: '16px', color: '#111827' }}>
-            📊 {t('rrTitle')}
+            <Icon name="chart" size={18} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('rrTitle')}
           </span>
           <button
             onClick={onClose}
@@ -774,7 +775,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
               fontSize: '18px', color: '#6b7280'
             }}
           >
-            ✕
+            <Icon name="x" size={18} />
           </button>
         </div>
 
@@ -792,7 +793,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
               }}
             >
-              {capturing ? '⏳' : '📷'} {t('rrShareImage')}
+              {capturing ? <Icon name="loading" size={16} style={{ verticalAlign: 'text-bottom' }} /> : <Icon name="camera" size={16} style={{ verticalAlign: 'text-bottom' }} />} {t('rrShareImage')}
             </button>
           )}
           <button
@@ -805,7 +806,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px'
             }}
           >
-            🔗 {t('rrShareLink')}
+            <Icon name="link" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('rrShareLink')}
           </button>
         </div>
 
@@ -824,7 +825,7 @@ export const RoundReportShareModal = memo(({ isOpen, onClose, reportData, lang =
                 backgroundColor: '#f0fdf4',
                 borderTop: '1px solid #d1fae5'
               }}>
-                <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
+                <Icon name="flag" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />
                 <span style={{ fontSize: '13px', fontWeight: 600, color: '#6b7280' }}>
                   {t('poweredBy')} <span style={{ color: '#047857' }}>HandinCap.golf</span>
                 </span>
@@ -848,7 +849,7 @@ export const EditLogInline = memo(({ logs, forCapture = false, t: tProp }) => {
   const fmtVal = (f, v) => {
     if (f === 'up') {
       if (typeof v === 'string') return v;
-      return v ? '✓' : '✗';
+      return v ? <Icon name="check" size={13} /> : <Icon name="x" size={13} />;
     }
     return v;
   };
@@ -862,7 +863,7 @@ export const EditLogInline = memo(({ logs, forCapture = false, t: tProp }) => {
       <div style={{ padding: forCapture ? '10px 12px 6px' : '14px 16px 10px', borderBottom: '1px solid #e5e7eb' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <span style={{ fontSize: forCapture ? 14 : 18 }}>📋</span>
+            <Icon name="clipboard" size={forCapture ? 14 : 18} />
             <span style={{ fontSize: forCapture ? 13 : 16, fontWeight: 700, color: '#111827' }}>{t('editLogTitle')}</span>
           </div>
           <span style={{ fontSize: 12, color: '#9ca3af', background: '#f3f4f6', padding: '2px 8px', borderRadius: 10, fontWeight: 600 }}>
@@ -894,7 +895,7 @@ export const EditLogInline = memo(({ logs, forCapture = false, t: tProp }) => {
                   }}>{fieldLabel(c.field)}</span>
                   <div style={{ flex: 1 }} />
                   <span style={{ color: '#ef4444', textDecoration: 'line-through', fontSize: 13, fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
-                  <span style={{ color: '#d1d5db', fontSize: 11 }}>→</span>
+                  <span style={{ color: '#d1d5db' }}><Icon name="arrow-right" size={12} /></span>
                   <span style={{ color: '#059669', fontWeight: 700, fontSize: 13, fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
                 </div>
               ))}
@@ -920,10 +921,10 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
   const activeRating = hoverRating || rating;
   const starLabels = ['', t('feedbackStar1'), t('feedbackStar2'), t('feedbackStar3'), t('feedbackStar4'), t('feedbackStar5')];
   const CATS = [
-    { key: 'modes', label: t('feedbackCatNewModes') }, { key: 'ui', label: t('feedbackCatUI') },
-    { key: 'speed', label: t('feedbackCatSpeed') }, { key: 'course', label: t('feedbackCatCourse') },
-    { key: 'scoring', label: t('feedbackCatScoring') }, { key: 'mp', label: t('feedbackCatMultiplayer') },
-    { key: 'bug', label: t('feedbackCatBug') }, { key: 'other', label: t('feedbackCatOther') },
+    { key: 'modes', label: t('feedbackCatNewModes'), icon: 'game' }, { key: 'ui', label: t('feedbackCatUI'), icon: 'device' },
+    { key: 'speed', label: t('feedbackCatSpeed'), icon: 'bolt' }, { key: 'course', label: t('feedbackCatCourse'), icon: 'flag' },
+    { key: 'scoring', label: t('feedbackCatScoring'), icon: 'chart' }, { key: 'mp', label: t('feedbackCatMultiplayer'), icon: 'users' },
+    { key: 'bug', label: t('feedbackCatBug'), icon: 'bug' }, { key: 'other', label: t('feedbackCatOther'), icon: 'tip' },
   ];
   const toggleCat = (k) => setCategories(prev => prev.includes(k) ? prev.filter(x => x !== k) : [...prev, k]);
 
@@ -946,7 +947,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
   if (submitted) {
     return (
       <div style={{ backgroundColor: 'white', borderRadius: 12, boxShadow: '0 1px 3px rgba(0,0,0,0.1)', textAlign: 'center', padding: '32px 20px' }}>
-        <div style={{ fontSize: 56, marginBottom: 12 }}>🎉</div>
+        <div style={{ marginBottom: 12 }}><Icon name="celebrate" size={52} /></div>
         <h3 style={{ fontSize: 20, fontWeight: 700, color: '#111827', marginBottom: 6 }}>{t('feedbackThanks')}</h3>
         <p style={{ fontSize: 14, color: '#6b7280' }}>{t('feedbackThanksDetail')}</p>
       </div>
@@ -957,7 +958,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
     <div style={{ backgroundColor: 'white', borderRadius: 12, overflow: 'hidden', boxShadow: '0 1px 3px rgba(0,0,0,0.1)' }}>
       <div style={{ padding: '14px 16px 10px', borderBottom: '1px solid #f3f4f6' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <span style={{ fontSize: 18 }}>💬</span>
+          <Icon name="comment" size={18} />
           <span style={{ fontSize: 16, fontWeight: 700, color: '#111827' }}>{t('feedbackRateLabel')}</span>
         </div>
         <p style={{ fontSize: 12, color: '#9ca3af', marginTop: 4 }}>{t('feedbackSubtitle')}</p>
@@ -968,7 +969,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
             {[1,2,3,4,5].map(s => (
               <span key={s} onClick={() => setRating(s)} onMouseEnter={() => setHoverRating(s)} onMouseLeave={() => setHoverRating(0)}
                 style={{ fontSize: 36, cursor: 'pointer', userSelect: 'none', transition: 'transform 0.15s', transform: activeRating >= s ? 'scale(1.1)' : 'scale(1)' }}>
-                {activeRating >= s ? '⭐' : '☆'}
+                <Icon name={activeRating >= s ? 'star' : 'star-outline'} size={26} />
               </span>
             ))}
             {activeRating > 0 && <span style={{ fontSize: 13, color: '#059669', fontWeight: 600, marginLeft: 8 }}>{starLabels[activeRating]}</span>}
@@ -977,7 +978,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
         <div style={{ marginBottom: 16 }}>
           <label style={{ fontSize: 13, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 8 }}>{t('feedbackCatLabel')}</label>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-            {CATS.map(({ key, label }) => {
+            {CATS.map(({ key, label, icon }) => {
               const active = categories.includes(key);
               return (
                 <div key={key} onClick={() => toggleCat(key)} style={{
@@ -985,7 +986,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
                   border: `2px solid ${active ? '#059669' : '#e5e7eb'}`, background: active ? '#ecfdf5' : 'white',
                   color: active ? '#065f46' : '#374151', fontWeight: active ? 600 : 500, fontSize: 13,
                   display: 'flex', alignItems: 'center', gap: 4, transition: 'all 0.2s',
-                }}>{active && <span style={{ color: '#059669' }}>✓</span>}{label}</div>
+                }}>{active && <Icon name="check" size={14} style={{ color: '#059669' }} />}<Icon name={icon} size={16} style={{ marginRight: 2 }} />{label}</div>
               );
             })}
           </div>
@@ -999,7 +1000,7 @@ export const FeedbackInline = memo(({ courseName = '', t: tProp }) => {
           background: (submitting || rating === 0) ? '#d1d5db' : 'linear-gradient(135deg, #059669, #047857)',
           color: 'white', fontSize: 15, fontWeight: 700,
           boxShadow: rating > 0 ? '0 4px 14px rgba(5,150,105,0.4)' : 'none', transition: 'all 0.2s',
-        }}>{submitting ? `⏳ ${t('feedbackSubmitting')}` : `📨 ${t('feedbackSubmit')}`}</button>
+        }}>{submitting ? <><Icon name="loading" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('feedbackSubmitting')}</> : <><Icon name="mail" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('feedbackSubmit')}</>}</button>
       </div>
     </div>
   );
@@ -1039,7 +1040,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
           backgroundColor: 'white', borderRadius: '16px', padding: '24px',
           textAlign: 'center', boxShadow: '0 4px 20px rgba(0,0,0,0.1)', maxWidth: '360px'
         }}>
-          <div style={{ fontSize: '48px', marginBottom: '12px' }}>❌</div>
+          <div style={{ marginBottom: '12px' }}><Icon name="x-circle" size={44} /></div>
           <h2 style={{ fontSize: '18px', fontWeight: 700, color: '#111827', marginBottom: '8px' }}>
             {t('shareInvalidLink')}
           </h2>
@@ -1068,7 +1069,7 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
         backgroundColor: '#f3f4f6'
       }}>
         <div style={{ textAlign: 'center', color: '#6b7280' }}>
-          <div style={{ fontSize: '32px', marginBottom: '8px' }}>⛳</div>
+          <div style={{ marginBottom: '8px' }}><Icon name="flag" size={30} /></div>
           {t('loading')}
         </div>
       </div>
@@ -1107,13 +1108,13 @@ export const RoundReportPage = memo(({ encoded, vertical = false, editLogEncoded
               textDecoration: 'none', fontWeight: 600, fontSize: '14px'
             }}
           >
-            ⛳ {t('rrOpenApp')}
+            <Icon name="flag" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('rrOpenApp')}
           </a>
         </div>
 
         {/* Powered by footer */}
         <div style={{ textAlign: 'center', padding: '16px 0' }}>
-          <span style={{ color: '#047857', marginRight: '6px' }}>⛳</span>
+          <Icon name="flag" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />
           <span style={{ fontSize: '13px', fontWeight: 600, color: 'rgba(255,255,255,0.4)' }}>
             {t('poweredBy')} <span style={{ color: '#22c55e' }}>HandinCap.golf</span>
           </span>
