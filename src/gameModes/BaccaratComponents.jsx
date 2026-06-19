@@ -10,10 +10,10 @@ import Icon from '../components/Icon';
 // ========== 百家乐独有：UP 顺序样式配置 ==========
 export const upStyles = {
   0: { btn: 'bg-gray-200 text-gray-500 hover:bg-gray-300', card: 'bg-gray-50 border border-gray-200', label: 'UP' },
-  1: { btn: 'bg-yellow-400 text-yellow-900 shadow', card: 'bg-gradient-to-br from-yellow-100 to-yellow-300 border-2 border-yellow-400', label: 'UP ①' },
-  2: { btn: 'bg-orange-400 text-orange-900 shadow', card: 'bg-gradient-to-br from-orange-100 to-orange-300 border-2 border-orange-400', label: 'UP ②' },
-  3: { btn: 'bg-red-400 text-red-900 shadow', card: 'bg-gradient-to-br from-red-100 to-red-300 border-2 border-red-400', label: 'UP ③' },
-  4: { btn: 'bg-purple-400 text-purple-900 shadow', card: 'bg-gradient-to-br from-purple-100 to-purple-300 border-2 border-purple-400', label: 'UP ④' }
+  1: { btn: 'bg-yellow-400 text-yellow-900 shadow', card: 'bg-gradient-to-br from-yellow-100 to-yellow-300 border-2 border-yellow-400', label: 'UP 1' },
+  2: { btn: 'bg-orange-400 text-orange-900 shadow', card: 'bg-gradient-to-br from-orange-100 to-orange-300 border-2 border-orange-400', label: 'UP 2' },
+  3: { btn: 'bg-red-400 text-red-900 shadow', card: 'bg-gradient-to-br from-red-100 to-red-300 border-2 border-red-400', label: 'UP 3' },
+  4: { btn: 'bg-purple-400 text-purple-900 shadow', card: 'bg-gradient-to-br from-purple-100 to-purple-300 border-2 border-purple-400', label: 'UP 4' }
 };
 
 // ========== 获取玩家UP位置 (1-4, 0表示没UP) ==========
@@ -51,7 +51,7 @@ export const BaccaratMatchupGrid = memo(({ matchupDetails, lang = 'zh', upOrder 
   };
   
   // UP符号
-  const upSymbols = ['', '①', '②', '③', '④'];
+  const upSymbols = ['', '1', '2', '3', '4'];
   
   // UP框样式
   const upBoxStyles = {

@@ -255,7 +255,7 @@ export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allSc
     return 'bg-gray-50 border border-gray-200';
   };
 
-  const upSymbols = ['', '①', '②', '③', '④'];
+  const upSymbols = ['', '1', '2', '3', '4'];
 
   const getScoreLabel = (stroke, par) => {
     const diff = stroke - par;

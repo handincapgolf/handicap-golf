@@ -12,10 +12,10 @@
  * - 没UP vs 没UP = 原版底注
  * 
  * UP 顺序：
- * - 第一UP：金色 ①
- * - 第二UP：橙色 ②
- * - 第三UP：红色 ③
- * - 第四UP：紫色 ④
+ * - 第一UP：金色 1
+ * - 第二UP：橙色 2
+ * - 第三UP：红色 3
+ * - 第四UP：紫色 4
  */
 
 import { CircleDollarSign } from 'lucide-react';
@@ -41,10 +41,10 @@ export const config = {
 
 // UP 顺序配置（用于UI显示）
 export const upOrderConfig = [
-  { position: 1, label: '①', color: 'amber', bgClass: 'bg-yellow-400', textClass: 'text-yellow-900', cardClass: 'first-up' },
-  { position: 2, label: '②', color: 'orange', bgClass: 'bg-orange-400', textClass: 'text-orange-900', cardClass: 'second-up' },
-  { position: 3, label: '③', color: 'red', bgClass: 'bg-red-400', textClass: 'text-red-900', cardClass: 'third-up' },
-  { position: 4, label: '④', color: 'purple', bgClass: 'bg-purple-400', textClass: 'text-purple-900', cardClass: 'fourth-up' }
+  { position: 1, label: '1', color: 'amber', bgClass: 'bg-yellow-400', textClass: 'text-yellow-900', cardClass: 'first-up' },
+  { position: 2, label: '2', color: 'orange', bgClass: 'bg-orange-400', textClass: 'text-orange-900', cardClass: 'second-up' },
+  { position: 3, label: '3', color: 'red', bgClass: 'bg-red-400', textClass: 'text-red-900', cardClass: 'third-up' },
+  { position: 4, label: '4', color: 'purple', bgClass: 'bg-purple-400', textClass: 'text-purple-900', cardClass: 'fourth-up' }
 ];
 
 /**

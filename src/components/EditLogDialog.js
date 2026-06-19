@@ -13,7 +13,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
   };
   const fmtVal = (f, v) => {
     if (f === 'up') {
-      if (typeof v === 'string') return v; // 百家乐: 'UP①', '—'
+      if (typeof v === 'string') return v; // 百家乐: 'UP1', '—'
       return v ? <Icon name="check" size={14} /> : <Icon name="x" size={14} />; // Win123: true/false
     }
     return v;

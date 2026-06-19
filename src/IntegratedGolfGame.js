@@ -1829,8 +1829,8 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
           const oldPos = oldOrder.indexOf(player);
           const newPos = newOrder.indexOf(player);
           if (oldPos !== newPos) {
-            const oldLabel = oldPos === -1 ? '—' : `UP${['①','②','③','④'][oldPos]}`;
-            const newLabel = newPos === -1 ? '—' : `UP${['①','②','③','④'][newPos]}`;
+            const oldLabel = oldPos === -1 ? '—' : `UP${['1','2','3','4'][oldPos]}`;
+            const newLabel = newPos === -1 ? '—' : `UP${['1','2','3','4'][newPos]}`;
             changes.push({ player, field: 'up', from: oldLabel, to: newLabel });
           }
         });
