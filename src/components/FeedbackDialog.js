@@ -1,9 +1,15 @@
 import React, { useState, memo } from 'react';
+import Icon from './Icon';
 
 const CATEGORY_KEYS = [
   'feedbackCatNewModes', 'feedbackCatUI', 'feedbackCatSpeed', 'feedbackCatCourse',
   'feedbackCatScoring', 'feedbackCatMultiplayer', 'feedbackCatBug', 'feedbackCatOther',
 ];
+
+const CATEGORY_ICONS = {
+  feedbackCatNewModes: 'game', feedbackCatUI: 'device', feedbackCatSpeed: 'bolt', feedbackCatCourse: 'flag',
+  feedbackCatScoring: 'chart', feedbackCatMultiplayer: 'users', feedbackCatBug: 'bug', feedbackCatOther: 'tip',
+};
 
 const WORKER_URL = 'https://handincap.golf'; // ← 改成你的 Worker URL
 
@@ -90,7 +96,7 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
         {submitted ? (
           /* ── Thank you ── */
           <div style={{ padding: '48px 24px', textAlign: 'center' }}>
-            <div style={{ fontSize: 64, animation: 'fbPop 0.5s ease', marginBottom: 16 }}>🎉</div>
+            <div style={{ animation: 'fbPop 0.5s ease', marginBottom: 16 }}><Icon name="celebrate" size={64} /></div>
             <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111827', marginBottom: 8 }}>{t('feedbackThanks')}</h2>
             <p style={{ fontSize: 15, color: '#6b7280', marginBottom: 32 }}>{t('feedbackThanksDetail')}</p>
             <button onClick={handleClose} style={{
@@ -106,21 +112,21 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
               padding: '18px 20px 0', position: 'sticky', top: 0, background: 'white', zIndex: 1,
             }}>
               <div>
-                <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}>{t('feedbackTitle')}</h2>
+                <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}><Icon name="comment" size={18} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('feedbackTitle')}</h2>
                 <p style={{ fontSize: 13, color: '#9ca3af', margin: '2px 0 0' }}>{t('feedbackSubtitle')}</p>
               </div>
               <button onClick={handleClose} style={{
                 width: 36, height: 36, borderRadius: '50%', border: 'none',
                 backgroundColor: '#f3f4f6', cursor: 'pointer', fontSize: 18, color: '#6b7280',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>✕</button>
+              }}><Icon name="x" size={18} /></button>
             </div>
 
             <div style={{ padding: '16px 20px 24px' }}>
               {/* ── Stars ── */}
               <div style={{ marginBottom: 24 }}>
                 <label style={{ fontSize: 15, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 12 }}>
-                  ⭐ {t('feedbackRateLabel')}
+                  <Icon name="star" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('feedbackRateLabel')}
                 </label>
                 <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
                   {[1, 2, 3, 4, 5].map((star) => (
@@ -135,7 +141,7 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
                         transform: activeRating >= star ? 'scale(1.1)' : 'scale(1)',
                       }}
                     >
-                      {activeRating >= star ? '⭐' : '☆'}
+                      <Icon name={activeRating >= star ? 'star' : 'star-outline'} size={40} />
                     </span>
                   ))}
                   {activeRating > 0 && (
@@ -152,7 +158,7 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
               {/* ── Categories ── */}
               <div style={{ marginBottom: 24 }}>
                 <label style={{ fontSize: 15, fontWeight: 600, color: '#374151', display: 'block', marginBottom: 12 }}>
-                  📋 {t('feedbackCatLabel')}
+                  <Icon name="clipboard" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('feedbackCatLabel')}
                 </label>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                   {CATEGORY_KEYS.map((key) => {
@@ -171,8 +177,8 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
                           transition: 'all 0.2s',
                         }}
                       >
-                        {active && <span style={{ color: '#059669' }}>✓</span>}
-                        {t(key)}
+                        {active && <Icon name="check" size={14} style={{ color: '#059669', flexShrink: 0 }} />}
+                        <Icon name={CATEGORY_ICONS[key]} size={15} style={{ flexShrink: 0 }} />{t(key)}
                       </div>
                     );
                   })}
@@ -210,7 +216,7 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
                   transition: 'all 0.2s',
                 }}
               >
-                {submitting ? '⏳ ' + t('feedbackSubmitting') : '📨 ' + t('feedbackSubmit')}
+                {submitting ? <><Icon name="loading" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('feedbackSubmitting')}</> : <><Icon name="mail" size={16} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('feedbackSubmit')}</>}
               </button>
 
               <button onClick={handleClose} style={{
