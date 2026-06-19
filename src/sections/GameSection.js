@@ -45,6 +45,7 @@ const GameSection = ({
   showConfirm,
   showToast,
   setCurrentSection,
+  setHoleJumpDialog,
   setGameComplete,
   triggerConfetti,
   endGameEarlyMP,
@@ -81,7 +82,17 @@ const GameSection = ({
         <div style={{ position: 'fixed', inset: 0, zIndex: 10, overflowY: 'auto', WebkitOverflowScrolling: 'touch' }} className="bg-gradient-to-b from-green-600 to-green-800 text-white">
           <div className="bg-green-800 bg-opacity-50 text-center pt-6 pb-3 relative">
             <h1 className="text-2xl font-bold mb-2">
-  {t('hole')} {holes[currentHole]}
+  {!mp.multiplayerOn ? (
+    <button
+      onClick={() => setHoleJumpDialog(true)}
+      className="inline-flex items-center gap-1 underline decoration-dotted underline-offset-4"
+    >
+      {t('hole')} {holes[currentHole]}
+      <Icon name="chevron-down" size={18} />
+    </button>
+  ) : (
+    <>{t('hole')} {holes[currentHole]}</>
+  )}
   <span className="ml-2 px-2 py-0.5 bg-white bg-opacity-20 rounded text-lg">
     {t('par')} {pars[holes[currentHole]] || 4}
   </span>
