@@ -39,5 +39,5 @@ test('renders nothing when closed', () => {
       pars={{}}
     />
   );
-  expect(container.firstChild).toBeNull(); // eslint-disable-line testing-library/no-node-access
+  expect(container).toBeEmptyDOMElement();
 });
