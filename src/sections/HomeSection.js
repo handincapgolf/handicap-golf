@@ -1,5 +1,4 @@
 import React from 'react';
-import { Play } from 'lucide-react';
 import { LANGUAGES } from '../locales';
 import Icon from '../components/Icon';
 
@@ -74,7 +73,7 @@ export const HomeContent = ({
           onClick={resumeGame}
           className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
         >
-          <Play className="w-5 h-5" />
+          <Icon name="play" size={20} />
           {t('resume')}
         </button>
       )}
@@ -87,7 +86,7 @@ export const HomeContent = ({
         }}
         className="w-full bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transform transition hover:scale-105 flex items-center justify-center gap-2"
       >
-        <Play className="w-5 h-5" />
+        <Icon name="play" size={20} />
         {t('create')}
       </button>
       

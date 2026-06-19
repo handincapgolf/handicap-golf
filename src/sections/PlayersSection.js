@@ -1,12 +1,5 @@
 import React, { memo } from 'react';
-import { Users, Trophy, DollarSign, CircleDollarSign } from 'lucide-react';
-
-// SpadeIcon inline (tiny, no need for separate file)
-const SpadeIcon = ({ className }) => (
-  <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-    <path d="M12 2C12 2 4 10 4 14c0 2.5 2 4 4 4 1.5 0 2.5-.5 3-1.5-.5 2-2 3.5-4 4.5h10c-2-1-3.5-2.5-4-4.5.5 1 1.5 1.5 3 1.5 2 0 4-1.5 4-4C20 10 12 2 12 2z"/>
-  </svg>
-);
+import Icon from '../components/Icon';
 
 const PlayersSection = memo(({
   playerNames, updatePlayerName,
@@ -32,7 +25,7 @@ const PlayersSection = memo(({
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <h3 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
-                    <Users className="w-4 h-4" />
+                    <Icon name="users" size={16} />
                     {t('players')}
                   </h3>
                   <button
@@ -113,7 +106,7 @@ const PlayersSection = memo(({
                         }`}
                       >
                         <div className="flex items-center gap-1">
-                          <Trophy className="w-4 h-4" />
+                          <Icon name="trophy" size={16} />
                           <span style={{ fontSize: '12px' }}>{t('matchPlay')}</span>
                         </div>
                         {gameMode === 'matchPlay' && showModeDesc && (
@@ -131,7 +124,7 @@ const PlayersSection = memo(({
                         }`}
                       >
                         <div className="flex items-center gap-1">
-                          <DollarSign className="w-4 h-4" />
+                          <Icon name="coin" size={16} />
                           <span style={{ fontSize: '12px' }}>{t('win123')}</span>
                         </div>
                         {gameMode === 'win123' && showModeDesc && (
@@ -149,7 +142,7 @@ const PlayersSection = memo(({
                         }`}
                       >
                         <div className="flex items-center gap-1">
-                          <CircleDollarSign className="w-4 h-4" />
+                          <Icon name="coin" size={16} />
                           <span style={{ fontSize: '12px' }}>{t('skins')}</span>
                         </div>
                         {gameMode === 'skins' && showModeDesc && (
@@ -167,7 +160,7 @@ const PlayersSection = memo(({
                         }`}
                       >
                         <div className="flex items-center gap-1">
-                          <SpadeIcon className="w-4 h-4" />
+                          <Icon name="suit-spade" size={16} />
                           <span style={{ fontSize: '12px' }}>{t('baccarat')}</span>
                         </div>
                         {gameMode === 'baccarat' && showModeDesc && (

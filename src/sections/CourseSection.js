@@ -1,5 +1,5 @@
 import React, { memo } from 'react';
-import { Target, Search, X, CheckCircle, MapPin, Settings, Clock } from 'lucide-react';
+import Icon from '../components/Icon';
 
 const courses = {
   f9: [1,2,3,4,5,6,7,8,9],
@@ -31,7 +31,7 @@ const CourseSection = memo(({
               <div className="bg-white rounded-lg p-4 shadow-sm">
                 <div className="flex items-center justify-between mb-3">
                   <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
-                    <Target className="w-5 h-5 text-green-600" />
+                    <Icon name="target" size={20} className="text-green-600" />
                     {t('courseTitle')}
                   </h2>
                 </div>
@@ -45,7 +45,7 @@ const CourseSection = memo(({
                         : 'bg-white text-gray-700 hover:bg-green-50'
                     }`}
                   >
-                    <Search className="w-4 h-4" />
+                    <Icon name="search" size={16} />
                     {t('autoMode')}
                   </button>
                   <button
@@ -56,7 +56,7 @@ const CourseSection = memo(({
                         : 'bg-white text-gray-700 hover:bg-green-50'
                     }`}
                   >
-                    <Settings className="w-4 h-4" />
+                    <Icon name="settings" size={16} />
                     {t('manualMode')}
                   </button>
                 </div>
@@ -66,12 +66,12 @@ const CourseSection = memo(({
                 <>
                   <div className="bg-white rounded-lg p-4 shadow-sm">
                     <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Search className="w-4 h-4" />
+                      <Icon name="search" size={16} />
                       {t('selectCourse')}
                     </h3>
                     
                     <div className="relative mb-3">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                      <Icon name="search" size={16} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
                       <input
                         type="text"
                         placeholder={t('searchPlaceholder')}
@@ -84,7 +84,7 @@ const CourseSection = memo(({
                           onClick={() => setSearchQuery('')}
                           className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
                         >
-                          <X className="w-4 h-4" />
+                          <Icon name="x" size={16} />
                         </button>
                       )}
                     </div>
@@ -113,7 +113,7 @@ const CourseSection = memo(({
                                     <div className="border-t border-gray-100 pt-2 mt-2">
                                       {course.location && (
                                         <div className="flex items-center gap-1 text-xs text-gray-600">
-                                          <MapPin className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                          <Icon name="map-pin" size={12} className="text-green-500 flex-shrink-0" />
                                           <span>{course.location[0]}, {course.location[1]}</span>
                                         </div>
                                       )}
@@ -126,7 +126,7 @@ const CourseSection = memo(({
                           })
                         ) : (
                           <div className="text-center py-8 text-gray-500">
-                            <Search className="w-12 h-12 mx-auto mb-2 opacity-30" />
+                            <Icon name="search" size={48} className="mx-auto mb-2 opacity-30" />
                             <p className="text-sm font-medium">{t('noCourses')}</p>
                             <p className="text-xs mt-1">{t('trySearch')}</p>
                           </div>
@@ -140,7 +140,7 @@ const CourseSection = memo(({
                       <div className="bg-white rounded-lg p-4 shadow-sm">
                         <div className="mb-3">
                           <div className="flex items-start gap-2 mb-1">
-                            <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                            <Icon name="check-circle" size={20} className="text-green-600 mt-0.5" />
                             <div className="flex-1">
                               <h3 className="text-sm font-semibold text-gray-900">
                                 {selectedCourse.fullName}
@@ -159,7 +159,7 @@ const CourseSection = memo(({
                         
 <div className="bg-white rounded-lg p-4 shadow-sm mb-4">
   <h3 className="text-base font-semibold text-gray-900 mb-3 flex items-center gap-2">
-    <Target className="w-4 h-4" />
+    <Icon name="target" size={16} />
     {t('gameType')}
   </h3>
   <div className="grid grid-cols-2 gap-3">
@@ -363,7 +363,7 @@ const CourseSection = memo(({
                 <div className="bg-white rounded-lg p-4 shadow-sm">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
-                      <Clock className="w-4 h-4 text-green-600" />
+                      <Icon name="clock" size={16} className="text-green-600" />
                       {t('recentCourses')}
                     </h3>
                     <button
@@ -396,7 +396,7 @@ const CourseSection = memo(({
                               </h4>
                               {course.location && (
                                 <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
-                                  <MapPin className="w-3 h-3 text-green-500 flex-shrink-0" />
+                                  <Icon name="map-pin" size={12} className="text-green-500 flex-shrink-0" />
                                   <span>{course.location[0]}, {course.location[1]}</span>
                                 </div>
                               )}
