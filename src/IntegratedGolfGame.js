@@ -16,6 +16,7 @@ import {
   generateShareUrl
 } from './utils/shareEncoder';
 import SharePage from './components/SharePage';
+import Icon from './components/Icon';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
 import CourseSection from './sections/CourseSection';
 import PlayersSection from './sections/PlayersSection';
@@ -2040,9 +2041,9 @@ const handleEditHoleSave = useCallback((hole, newScores, newUps, newPutts, newUp
   }, [gameComplete, clearSavedGame]);
 
   const getMedal = useCallback((rank) => {
-    if (rank === 1) return '🥇';
-    if (rank === 2) return '🥈';
-    if (rank === 3) return '🥉';
+    if (rank === 1) return <Icon name="medal-gold" size={20} />;
+    if (rank === 2) return <Icon name="medal-silver" size={20} />;
+    if (rank === 3) return <Icon name="medal-bronze" size={20} />;
     return '';
   }, []);
 
