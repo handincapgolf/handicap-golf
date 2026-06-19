@@ -1,6 +1,7 @@
 import React from 'react';
 import { Play } from 'lucide-react';
 import { LANGUAGES } from '../locales';
+import Icon from '../components/Icon';
 
 // Header bar with language picker (rendered outside flex-1 overflow-auto)
 export const HomeLangBar = ({
@@ -15,7 +16,7 @@ export const HomeLangBar = ({
       onClick={() => setShowLangPicker(!showLangPicker)}
       className="px-3 py-1.5 bg-gray-100 text-gray-700 rounded-md hover:bg-gray-200 text-xs font-medium shadow-sm"
     >
-      {t('switchLang')}
+      <span className="inline-flex items-center gap-1"><Icon name="globe" size={14} />{t('switchLang')}</span>
     </button>
     {showLangPicker && (
       <>
@@ -31,7 +32,7 @@ export const HomeLangBar = ({
               }}
               className={`w-full text-left px-4 py-2.5 text-sm transition-colors ${lang === code ? 'bg-green-50 text-green-700 font-semibold' : 'text-gray-700 hover:bg-gray-50'}`}
             >
-              {lang === code && <span className="mr-1.5">✓</span>}{label}
+              {lang === code && <Icon name="check" size={14} className="inline-block mr-1" />}{label}
             </button>
           ))}
         </div>
@@ -93,7 +94,7 @@ export const HomeContent = ({
       {/* 加入房间 */}
       <div className="pt-3 border-t border-gray-200 mt-3">
         <p className="text-xs text-gray-500 text-center mb-2">
-          {t('mpMultiplayer')}
+          <span className="inline-flex items-center gap-1"><Icon name="sync" size={12} />{t('mpMultiplayer')}</span>
         </p>
         <div className="flex gap-1.5">
           <input
@@ -135,7 +136,7 @@ export const HomeContent = ({
             className="px-2.5 py-2 bg-gray-700 text-white rounded-lg hover:bg-gray-800 transition text-sm"
             title="Scan QR"
           >
-            📷
+            <Icon name="camera" size={18} />
           </button>
         </div>
       </div>
@@ -165,7 +166,7 @@ export const HomeContent = ({
         style={{ border: '2px dashed #f59e0b', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)' }}
         className="w-full max-w-xs text-amber-800 py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-[15px]"
       >
-        {t('feedbackBtn')}
+        <Icon name="comment" size={16} />{t('feedbackBtn')}
       </button>
       <span className="text-gray-400 text-xs">© 2025 HandinCap. All rights reserved. {window.APP_VERSION}</span>
     </footer>
