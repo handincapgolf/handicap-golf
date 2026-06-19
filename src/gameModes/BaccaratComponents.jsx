@@ -5,6 +5,7 @@
 
 import React, { memo } from 'react';
 import { TrendingUp } from 'lucide-react';
+import Icon from '../components/Icon';
 
 // ========== 百家乐独有：UP 顺序样式配置 ==========
 export const upStyles = {
@@ -126,7 +127,7 @@ export const BaccaratMatchupGrid = memo(({ matchupDetails, lang = 'zh', upOrder 
                 <span className={amtClass}>${m.matchStake}</span>
               </div>
               <div className={`mt-1 ${resultClass}`}>
-                {m.s1} vs {m.s2} → {
+                {m.s1} vs {m.s2} <Icon name="arrow-right" size={12} style={{ display: 'inline', verticalAlign: 'middle' }} /> {
                   m.isTied 
                     ? (lang === 'zh' ? '平手' : 'Tie') 
                     : `${m.winner} ${lang === 'zh' ? '赢' : 'wins'}${winnerUpPos > 0 ? ' ' + upSymbols[winnerUpPos] : ''}`
