@@ -29,7 +29,7 @@ test('unknown name renders nothing (null), no throw', () => {
 
 test('every registry entry has a non-empty body', () => {
   Object.entries(ICONS).forEach(([name, def]) => {
-    expect(def.body, `icon ${name}`).toBeTruthy();
+    expect(def.body).toBeTruthy();
   });
 });
 
@@ -44,5 +44,5 @@ test('registry contains all Part 1 icon names', () => {
     'game','home','sound-on','sound-off','bolt','bug','suit-spade','mail',
     'star','star-outline',
   ];
-  required.forEach((n) => expect(ICONS[n], `missing ${n}`).toBeDefined());
+  required.forEach((n) => expect(ICONS[n]).toBeDefined());
 });
