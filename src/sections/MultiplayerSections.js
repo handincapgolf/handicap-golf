@@ -1,6 +1,7 @@
 import React, { memo } from 'react';
 import { Eye, Share2, Copy } from 'lucide-react';
 import Icon from '../components/Icon';
+import Badge from '../components/Badge';
 
 // ========== mp-lobby: Creator 大厅 / Joiner 等待 ==========
 const MpLobbySection = memo(({
@@ -133,9 +134,12 @@ const MpLobbySection = memo(({
                           : 'bg-gray-100 text-gray-500'
                       }`}>
                         {mp.claimed[player]
-                          ? (mp.claimed[player] === mp.deviceId
-                              ? (mp.getDeviceLabel(mp.claimed[player]) + ' ' + t('mpMine'))
-                              : (mp.getDeviceLabel(mp.claimed[player])))
+                          ? (
+                            <span className="inline-flex items-center gap-1">
+                              <Badge {...mp.getDeviceBadge(mp.claimed[player])} size={18} />
+                              {mp.claimed[player] === mp.deviceId && t('mpMine')}
+                            </span>
+                          )
                           : (t('mpUnclaimed'))}
                       </span>
                     </div>
@@ -477,7 +481,7 @@ const MpClaimSection = memo(({
                           </span>
                           {isClaimedByOtherJoiner && (
                             <span className={`ml-auto text-xs ${mp.getDeviceBgClass(claimedBy)} px-2 py-0.5 rounded`}>
-                              {mp.getDeviceLabel(claimedBy)} {t('mpClaimed')}
+                              <Badge {...mp.getDeviceBadge(claimedBy)} size={18} /> {t('mpClaimed')}
                             </span>
                           )}
                         </label>
