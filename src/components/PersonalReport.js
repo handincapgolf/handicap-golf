@@ -1,4 +1,5 @@
 import React, { memo } from 'react';
+import Icon from './Icon';
 
 // ========== Personal Report Card ==========
 export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, allScores, allPutts, allUps, pars, completedHoles, gameMode, t, getMedal }) => {
@@ -56,7 +57,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
             <span className="text-xl">{getMedal(rank)}</span>
             <span className="font-bold text-lg">{player} {t('reportTitle')}</span>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg">✕</button>
+          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
         </div>
 
         {/* Scrollable content */}
@@ -121,7 +122,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
 
           {/* Score distribution */}
           <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-2">🎯 {t('scoreDistribution')}</div>
+            <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="target" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('scoreDistribution')}</div>
             <div className="flex justify-around">
               <div className="flex flex-col items-center gap-2">
                 <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold">{t('birdie')}</span>
@@ -152,7 +153,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
 
           {/* Putting analysis */}
           <div className="bg-white border border-gray-200 rounded-xl p-3">
-            <div className="text-sm font-semibold text-gray-500 mb-2">📊 {t('puttingAnalysis')}</div>
+            <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="chart" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('puttingAnalysis')}</div>
             <div className="grid grid-cols-3 gap-2">
               <div className="text-center p-2 bg-gray-50 rounded-lg">
                 <div className="text-xs text-gray-500 mb-1">{t('totalPutts')}</div>
@@ -169,7 +170,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
             </div>
             {threePutts > 0 && (
               <div className="mt-2 text-center text-sm text-red-500">
-                ⚠️ {t('threePutts')}: {threePutts}{t('holes')}
+                <Icon name="alert" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('threePutts')}: {threePutts}{t('holes')}
               </div>
             )}
           </div>
@@ -177,7 +178,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
           {/* UP stats - Win123 only */}
           {isWin123 && (
             <div className="bg-white border border-gray-200 rounded-xl p-3">
-              <div className="text-sm font-semibold text-gray-500 mb-2">⬆️ UP{t('stats')}</div>
+              <div className="text-sm font-semibold text-gray-500 mb-2"><Icon name="arrow-up" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />UP{t('stats')}</div>
               <div className="flex items-center justify-between">
                 <span className="text-gray-600">UP{t('attempts')}</span>
                 <span className="text-xl font-bold text-green-600">{totalUp}{t('times')}</span>
@@ -192,7 +193,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
             onClick={onViewFull}
             className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-xl font-medium transition flex items-center justify-center gap-2"
           >
-            {t('viewFullDetail')} →
+            {t('viewFullDetail')} <Icon name="arrow-right" size={16} style={{ verticalAlign: 'text-bottom' }} />
           </button>
         </div>
       </div>
@@ -261,7 +262,7 @@ export const PersonalFullDetailModal = memo(({ player, rank, onClose, onBack, al
               <td className="py-2 px-2 text-center">
                 <span className={`inline-block w-7 h-7 leading-7 rounded-full font-bold text-sm ${getScoreColorText(d.total, d.par)}`}>{d.total}</span>
               </td>
-              {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <span className="text-green-600 font-bold">✓</span> : <span className="text-gray-300">-</span>}</td>}
+              {isWin123 && <td className="py-2 px-2 text-center">{d.up ? <Icon name="check" size={14} className="text-green-600" /> : <span className="text-gray-300">-</span>}</td>}
             </tr>
           ))}
         </tbody>
@@ -278,13 +279,13 @@ export const PersonalFullDetailModal = memo(({ player, rank, onClose, onBack, al
         {/* Header */}
         <div className="bg-green-600 text-white px-4 py-3 flex justify-between items-center flex-shrink-0">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg">←</button>
+            <button onClick={onBack} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="arrow-left" size={18} /></button>
             <div>
-              <div className="font-bold text-lg">👤 {player} {t('fullDetail')}</div>
+              <div className="font-bold text-lg"><Icon name="user" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{player} {t('fullDetail')}</div>
               <div className="text-sm text-green-100">{playerTotal}{t('strokes')} ({diffText})</div>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg">✕</button>
+          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
         </div>
 
         {/* Scrollable tables */}
