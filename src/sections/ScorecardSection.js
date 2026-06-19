@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { AlertCircle, Edit2, Home, ChevronDown, ChevronUp, Droplets, XCircle } from 'lucide-react';
+import Icon from '../components/Icon';
 
 // ===== PGA-style ScoreCell (Vertical view) =====
 const S = 40;
@@ -135,7 +136,7 @@ const PenaltyWidget = ({ activePlayers, completedHoles, allWater, allOb, holes, 
         className="w-full flex items-center justify-between px-4 py-2.5 bg-red-50 hover:bg-red-100 transition"
       >
         <div className="flex items-center gap-2">
-          <span style={{ fontSize: 16 }}>⚠️</span>
+          <Icon name="alert" size={16} />
           <span className="text-sm font-semibold text-red-800">
             {t('penalties')} ({t('ob')} / {t('water')})
           </span>
@@ -203,8 +204,8 @@ const PenaltyWidget = ({ activePlayers, completedHoles, allWater, allOb, holes, 
                         const o = allOb?.[p]?.[h] || 0;
                         return (
                           <td key={p} className="px-0 py-1.5 text-center">
-                            {w > 0 && <span className="text-blue-600 font-bold mr-1">💧{w}</span>}
-                            {o > 0 && <span className="text-red-600 font-bold">🚫{o}</span>}
+                            {w > 0 && <span className="text-blue-600 font-bold mr-1"><Icon name="water" size={13} className="inline-block align-text-bottom" />{w}</span>}
+                            {o > 0 && <span className="text-red-600 font-bold"><Icon name="ban" size={13} className="inline-block align-text-bottom" />{o}</span>}
                             {w === 0 && o === 0 && <span className="text-gray-300">-</span>}
                           </td>
                         );
@@ -307,11 +308,11 @@ const ScorecardSection = ({
           <button onClick={() => setScorecardView('horizontal')}
             className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
               scorecardView === 'horizontal' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            }`}>{t('scorecardHorizontal')}</button>
+            }`}><Icon name="clipboard" size={14} className="inline-block mr-1 align-text-bottom" />{t('scorecardHorizontal')}</button>
           <button onClick={() => setScorecardView('vertical')}
             className={`flex-1 py-2.5 px-3 rounded-lg text-sm font-semibold transition-all ${
               scorecardView === 'vertical' ? 'bg-green-700 text-white shadow-md' : 'text-gray-500 hover:bg-gray-50'
-            }`}>{t('scorecardVertical')}</button>
+            }`}><Icon name="chart" size={14} className="inline-block mr-1 align-text-bottom" />{t('scorecardVertical')}</button>
         </div>
       )}
 
@@ -348,7 +349,7 @@ const ScorecardSection = ({
                         className="mt-0.5 px-1.5 py-0.5 bg-green-100 hover:bg-green-200 text-green-700 rounded font-medium mx-auto flex items-center gap-0.5 justify-center"
                         style={{ fontSize: 10 }}
                       >
-                        📤 {t('shareBtn')}
+                        <Icon name="share" size={16} className="inline-block mr-1 align-text-bottom" />{t('shareBtn')}
                       </button>
                     )}
                   </div>
@@ -360,10 +361,10 @@ const ScorecardSection = ({
                 onClick={() => handleShareRoundReport(scorecardView === 'vertical')}
                 className="w-full mt-2 bg-gradient-to-r from-green-600 to-green-700 hover:from-green-700 hover:to-green-800 text-white py-2 px-3 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-sm"
               >
-                📊 {t('shareRoundReport')}
+                <Icon name="chart" size={16} className="inline-block mr-1 align-text-bottom" />{t('shareRoundReport')}
               </button>
             )}
-            <p className="text-xs text-gray-400 text-center mt-1">💡 {t('clickNameToView')}</p>
+            <p className="text-xs text-gray-400 text-center mt-1"><Icon name="tip" size={14} className="inline-block mr-1 align-text-bottom" />{t('clickNameToView')}</p>
           </div>
 
           {/* ── Settlement ── */}
@@ -574,7 +575,7 @@ const ScorecardSection = ({
           onClick={() => setEditLogDialog({ isOpen: true, hole: null })}
           className="w-full bg-white hover:bg-gray-50 text-gray-700 py-2.5 px-4 rounded-lg font-medium transition flex items-center justify-center gap-2 border border-gray-200 shadow-sm"
         >
-          📋 {t('editLogTitle')}
+          <Icon name="clipboard" size={16} className="inline-block mr-1 align-text-bottom" />{t('editLogTitle')}
           <span className="bg-red-500 text-white text-xs font-bold px-1.5 py-0.5 rounded-full min-w-[20px] text-center">{editLog.length}</span>
         </button>
       )}
@@ -586,7 +587,7 @@ const ScorecardSection = ({
           style={{ border: '2px dashed #f59e0b', background: 'linear-gradient(135deg, #fffbeb, #fef3c7)' }}
           className="w-full text-amber-800 py-3 px-4 rounded-lg font-semibold transition flex items-center justify-center gap-2 text-[15px]"
         >
-          {t('feedbackBtn')}
+          <Icon name="comment" size={16} className="inline-block mr-1 align-text-bottom" />{t('feedbackBtn')}
         </button>
       )}
 
