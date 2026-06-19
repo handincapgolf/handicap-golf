@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { CheckCircle, X } from 'lucide-react';
 import Icon from './Icon';
 import Badge from './Badge';
 
@@ -39,7 +38,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
           <h3 className="text-lg font-bold text-gray-900">
             <Icon name="clipboard" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{filterHole ? t('editLogHoleTitle').replace('{n}', filterHole) : t('editLogTitle')}
           </h3>
-          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><Icon name="x" size={20} /></button>
         </div>
         <p className="text-xs text-gray-500 mb-3">
           {t('editLogCount').replace('{n}', filtered.length)} · {t('editLogAllRecorded')}
@@ -47,7 +46,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
         <div className="flex-1 overflow-auto space-y-3 min-h-0">
           {filtered.length === 0 ? (
             <div className="text-center py-8">
-              <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
+              <Icon name="check-circle" size={32} className="text-green-500 mx-auto mb-2" />
               <p className="text-gray-500 text-sm">{t('editLogEmpty')} <Icon name="check-circle" size={16} style={{ verticalAlign: 'text-bottom' }} /></p>
             </div>
           ) : filtered.map((log) => (

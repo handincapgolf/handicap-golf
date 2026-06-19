@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { Eye, Share2, Copy } from 'lucide-react';
 import Icon from '../components/Icon';
 import Badge from '../components/Badge';
 
@@ -42,7 +41,7 @@ const MpLobbySection = memo(({
                       }}
                       className="flex items-center gap-1.5 px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium transition"
                     >
-                      <Copy className="w-4 h-4" />
+                      <Icon name="copy" size={16} />
                       {t('mpCopyLink')}
                     </button>
                     {navigator.share && (
@@ -52,7 +51,7 @@ const MpLobbySection = memo(({
                         }}
                         className="flex items-center gap-1.5 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
                       >
-                        <Share2 className="w-4 h-4" />
+                        <Icon name="share" size={16} />
                         {t('mpShareLink')}
                       </button>
                     )}
@@ -233,7 +232,7 @@ const MpLobbySection = memo(({
                   <div className="text-center">
                     {mp.multiplayerRole === 'viewer' && (
                       <div className="mb-2 inline-flex items-center gap-2 bg-purple-100 text-purple-700 px-3 py-1.5 rounded-full text-sm font-medium">
-                        <Eye className="w-4 h-4" /> {t('mpViewerRole')}
+                        <Icon name="eye" size={16} /> {t('mpViewerRole')}
                       </div>
                     )}
                     <p className="text-sm text-gray-500">

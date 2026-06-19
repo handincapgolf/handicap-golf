@@ -1,5 +1,4 @@
 import React, { useState, useEffect, useRef, memo } from 'react';
-import { AlertCircle, CheckCircle, X } from 'lucide-react';
 import Icon from './Icon';
 import Badge from './Badge';
 
@@ -14,14 +13,14 @@ export const Toast = memo(({ message, type, onClose }) => {
   }, [message]);
 
   const bgColor = type === 'error' ? 'bg-red-500' : 'bg-green-500';
-  const icon = type === 'error' ? <AlertCircle className="w-4 h-4" /> : <CheckCircle className="w-4 h-4" />;
+  const icon = type === 'error' ? <Icon name="alert-circle" size={16} /> : <Icon name="check-circle" size={16} />;
 
   return (
     <div className={`fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2 text-sm`}>
       {icon}
       <span className="font-medium">{message}</span>
       <button onClick={onClose} className="ml-2 hover:bg-white hover:bg-opacity-20 rounded p-1">
-        <X className="w-3 h-3" />
+        <Icon name="x" size={12} />
       </button>
     </div>
   );

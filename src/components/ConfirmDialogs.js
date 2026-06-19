@@ -1,5 +1,4 @@
 import React, { memo } from 'react';
-import { AlertCircle, Camera } from 'lucide-react';
 import Icon from './Icon';
 
 // ========== 通用确认弹窗 ==========
@@ -13,7 +12,7 @@ export const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, sho
         {showScreenshotHint && (
           <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
             <div className="flex items-start gap-2">
-              <Camera className="w-5 h-5 text-yellow-600 mt-0.5" />
+              <Icon name="camera" size={20} className="text-yellow-600 mt-0.5" />
               <p className="text-xs text-yellow-800">
                 {t('screenshotHint')}
               </p>
@@ -51,7 +50,7 @@ export const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, s
       <div className="bg-white rounded-xl p-4 max-w-xs w-full shadow-2xl">
         <div className="flex items-center gap-2 mb-3">
           <div className="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
-            <AlertCircle className="w-5 h-5 text-yellow-600" />
+            <Icon name="alert-circle" size={20} className="text-yellow-600" />
           </div>
           <h3 className="text-base font-bold text-gray-900">{t('confirmPutts')}</h3>
         </div>
