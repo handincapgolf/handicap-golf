@@ -168,24 +168,24 @@ export const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], on
 });
 
 // ========== 跳洞选择弹窗 ==========
-export const HoleJumpDialog = memo(({ isOpen, onClose, holes = [], completedHoles = [], currentHole = 0, onSelect, t, pars = {} }) => {
+export const HoleJumpDialog = memo(({ isOpen, onClose, holes = [], completedHoles = [], currentHole = 0, onSelect, t }) => {
   if (!isOpen) return null;
 
   const currentHoleNum = holes[currentHole];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl p-5 max-w-xs w-full shadow-2xl">
-        <div className="flex justify-between items-center mb-4">
-          <h3 className="text-lg font-bold text-gray-900">
+      <div className="bg-white rounded-2xl p-5 max-w-md w-full shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div className="flex justify-between items-center mb-5">
+          <h3 className="text-2xl font-bold text-gray-900">
             {t('holeJumpTitle')}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
-            <Icon name="x" size={20} />
+            <Icon name="x" size={26} />
           </button>
         </div>
 
-        <div className="grid grid-cols-5 gap-2 mb-4">
+        <div className="grid grid-cols-5 gap-2.5 mb-5">
           {holes.map(hole => {
             const played = completedHoles.includes(hole);
             if (played) {
@@ -193,24 +193,19 @@ export const HoleJumpDialog = memo(({ isOpen, onClose, holes = [], completedHole
                 <button
                   key={hole}
                   disabled
-                  className="w-12 h-12 bg-gray-200 text-gray-400 rounded-lg font-bold text-lg cursor-not-allowed"
+                  className="relative aspect-square w-full bg-gray-200 rounded-xl cursor-not-allowed flex items-center justify-center"
                 >
-                  {hole}
+                  <span className="absolute top-1 left-1.5 text-sm font-bold text-gray-400">{hole}</span>
+                  <Icon name="check" size={38} className="text-green-600" />
                 </button>
               );
             }
-            const par = pars[hole] || 4;
-            const colorClass = par === 3
-              ? 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900'
-              : par === 5
-                ? 'bg-orange-300 hover:bg-orange-400 text-orange-900'
-                : 'bg-green-500 hover:bg-green-600 text-white';
             const isCurrent = hole === currentHoleNum;
             return (
               <button
                 key={hole}
                 onClick={() => { onSelect(hole); onClose(); }}
-                className={`w-12 h-12 ${colorClass} rounded-lg font-bold text-lg transition ${isCurrent ? 'ring-2 ring-offset-1 ring-green-700' : ''}`}
+                className={`aspect-square w-full bg-green-500 hover:bg-green-600 text-white rounded-xl font-bold text-2xl transition ${isCurrent ? 'ring-2 ring-offset-1 ring-green-700' : ''}`}
               >
                 {hole}
               </button>
@@ -220,9 +215,27 @@ export const HoleJumpDialog = memo(({ isOpen, onClose, holes = [], completedHole
 
         <button
           onClick={onClose}
-          className="w-full px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+          className="w-full px-4 py-3.5 bg-gray-200 text-gray-800 rounded-xl font-medium text-lg hover:bg-gray-300"
         >
           {t('cancel')}
+        </button>
+      </div>
+    </div>
+  );
+});
+
+// ========== 跳洞绕回提示弹窗（居中，仅一个「确定」按钮，点了才跳回）==========
+export const HoleReturnDialog = memo(({ isOpen, message, onConfirm, t }) => {
+  if (!isOpen) return null;
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-6 max-w-xs w-full shadow-2xl text-center">
+        <p className="text-lg font-bold text-gray-900 mb-5 leading-relaxed">{message}</p>
+        <button
+          onClick={onConfirm}
+          className="w-full px-4 py-3 bg-green-600 text-white rounded-lg font-bold text-lg hover:bg-green-700"
+        >
+          {t('yes')}
         </button>
       </div>
     </div>

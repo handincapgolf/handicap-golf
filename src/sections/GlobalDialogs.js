@@ -3,7 +3,7 @@ import { RoundReportShareModal } from '../RoundReport';
 import { Toast, EditToast } from '../components/Toasts';
 import { EditLogDialog } from '../components/EditLogDialog';
 import { ConfirmDialog, PuttsWarningDialog } from '../components/ConfirmDialogs';
-import { HoleScoreConfirmDialog, HoleSelectDialog, HoleJumpDialog, EditHoleDialog } from '../components/HoleDialogs';
+import { HoleScoreConfirmDialog, HoleSelectDialog, HoleJumpDialog, HoleReturnDialog, EditHoleDialog } from '../components/HoleDialogs';
 import { PersonalReportCard, PersonalFullDetailModal } from '../components/PersonalReport';
 import { PWAInstallPrompt } from '../components/PWAInstallPrompt';
 
@@ -63,6 +63,9 @@ const GlobalDialogs = ({
   holeJumpDialog,
   setHoleJumpDialog,
   handleHoleJump,
+  // Hole return (绕回) dialog
+  holeReturnDialog,
+  handleHoleReturnConfirm,
   mp,
   // Edit hole dialog
   editHoleDialog,
@@ -196,8 +199,14 @@ const GlobalDialogs = ({
         holes={holes}
         completedHoles={completedHoles}
         currentHole={currentHole}
-        pars={pars}
         onSelect={(hole) => handleHoleJump(hole)}
+        t={t}
+      />
+
+      <HoleReturnDialog
+        isOpen={!!holeReturnDialog}
+        message={holeReturnDialog ? t('holeJumpReturnToast').replace('{n}', holeReturnDialog.remaining).replace('{hole}', holes[holeReturnDialog.targetIndex]) : ''}
+        onConfirm={handleHoleReturnConfirm}
         t={t}
       />
 

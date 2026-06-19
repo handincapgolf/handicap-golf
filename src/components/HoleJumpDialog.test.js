@@ -15,7 +15,6 @@ test('lists all holes, disables played ones, selects an unplayed hole', () => {
       currentHole={2}
       onSelect={onSelect}
       t={t}
-      pars={{}}
     />
   );
   expect(screen.getByRole('button', { name: '1' })).toBeDisabled();
@@ -36,7 +35,6 @@ test('renders nothing when closed', () => {
       currentHole={0}
       onSelect={() => {}}
       t={t}
-      pars={{}}
     />
   );
   expect(container).toBeEmptyDOMElement();

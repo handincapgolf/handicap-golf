@@ -56,6 +56,7 @@ function IntegratedGolfGame() {
   const [holeConfirmDialog, setHoleConfirmDialog] = useState({ isOpen: false, action: null });
   const [holeSelectDialog, setHoleSelectDialog] = useState(false);
   const [holeJumpDialog, setHoleJumpDialog] = useState(false);
+  const [holeReturnDialog, setHoleReturnDialog] = useState(null); // {targetIndex, remaining} | null — 绕回确认弹窗
   const [editHoleDialog, setEditHoleDialog] = useState({ isOpen: false, hole: null });
   const [editLog, setEditLog] = useState([]);
   const [editToastData, setEditToastData] = useState(null);
@@ -1679,7 +1680,8 @@ const getScoreLabel = useCallback((stroke, par) => {
     const nextUnplayed = allHolesPlayed ? null : findNextUnplayedHole(holes, newCompletedHoles, currentHole);
 
     // 播报完成绩后，如果还有下一洞（按未打洞顺序），等10秒再播报下一洞信息
-    const nextHoleIntro = nextUnplayed
+    // 绕回（wrapped）不自动播报：等用户在居中弹窗点「确定」跳回后再播报（见 handleHoleReturnConfirm）
+    const nextHoleIntro = (nextUnplayed && !nextUnplayed.wrapped)
       ? () => { setTimeout(() => { if (playHoleIntroRef.current) playHoleIntroRef.current(holes[nextUnplayed.index]); }, 10000); }
       : null;
     if (hasUpWin) {
@@ -1701,6 +1703,11 @@ const getScoreLabel = useCallback((stroke, par) => {
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
         mp.syncNextHole(holes.length, holes.length, { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool, finished: true });
       }
+    } else if (nextUnplayed.wrapped) {
+      // 跳洞绕回（仅单人会发生）：往前没有未打洞，弹居中确认框，不在此跳回；
+      // 等用户点「确定」后由 handleHoleReturnConfirm 执行 setCurrentHole 与清空输入
+      const remaining = holes.filter(h => !newCompletedHoles.includes(h)).length;
+      setHoleReturnDialog({ targetIndex: nextUnplayed.index, remaining });
     } else {
       setCurrentHole(nextUnplayed.index);
       setScores({});
@@ -1710,11 +1717,6 @@ const getScoreLabel = useCallback((stroke, par) => {
       setWater({});
       setOb({});
       setCurrentHoleSettlement(null);
-      // 跳洞绕回：往前没有未打洞时回到最早未打洞并提示
-      if (nextUnplayed.wrapped) {
-        const remaining = holes.filter(h => !newCompletedHoles.includes(h)).length;
-        showToast(t('holeJumpReturnToast').replace('{n}', remaining).replace('{hole}', holes[nextUnplayed.index]));
-      }
       // 多人同步：通知下一洞
       if (mp.multiplayerOn && mp.multiplayerRole === 'creator') {
         mp.syncNextHole(nextUnplayed.index, holes[nextUnplayed.index], { totalMoney: newTotalMoney, moneyDetails: newMoneyDetails, allScores: newAllScores, allUps: newAllUps, allPutts: newAllPutts, allWater: newAllWater, allOb: newAllOb, totalSpent: newTotalSpent, completedHoles: newCompletedHoles, prizePool: finalPrizePool });
@@ -1738,6 +1740,21 @@ const handleHoleJump = useCallback((holeNum) => {
   setCurrentHoleSettlement(null);
   setHoleJumpDialog(false);
 }, [holes]);
+
+const handleHoleReturnConfirm = useCallback(() => {
+  if (!holeReturnDialog) return;
+  const { targetIndex } = holeReturnDialog;
+  setCurrentHole(targetIndex);
+  setScores({});
+  setUps({});
+  setUpOrder([]);
+  setPutts({});
+  setWater({});
+  setOb({});
+  setCurrentHoleSettlement(null);
+  setHoleReturnDialog(null);
+  if (playHoleIntroRef.current) playHoleIntroRef.current(holes[targetIndex]);
+}, [holeReturnDialog, holes]);
 
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
@@ -2479,6 +2496,8 @@ const triggerConfetti = useCallback(() => {
         holeJumpDialog={holeJumpDialog}
         setHoleJumpDialog={setHoleJumpDialog}
         handleHoleJump={handleHoleJump}
+        holeReturnDialog={holeReturnDialog}
+        handleHoleReturnConfirm={handleHoleReturnConfirm}
         t={t}
       />
 
