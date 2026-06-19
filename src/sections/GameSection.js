@@ -1,6 +1,7 @@
 import React from 'react';
 import { TrendingUp, BarChart3, Eye } from 'lucide-react';
 import Icon from '../components/Icon';
+import Badge from '../components/Badge';
 import ViewerGameScreen from '../ViewerGameScreen';
 import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from '../gameModes/BaccaratComponents';
 
@@ -507,7 +508,9 @@ const GameSection = ({
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
-                  <Icon name="loading" size={14} className="inline-block mr-1 align-text-bottom" />{t('waitingProceed')}
+                  <Icon name="loading" size={14} className="inline-block mr-1 align-text-bottom" />{t('waitingProceed').split('{badge}').flatMap((part, i) =>
+                    i === 0 ? [part] : [<Badge key={i} label="A" shape="square" color="#16a34a" size={16} className="inline-flex align-text-bottom mx-0.5" />, part]
+                  )}
                 </button>
               ) : (
                 <button

@@ -192,7 +192,7 @@ export const ja = {
   mpSyncBubble: '自分のプレーヤーは自分で、相手のは相手がスコア入力。自動同期。',
   hcpBubble: 'ハンディキャップ(0-36)：異なるレベルのプレーヤーが公平に競えます。コース難度に応じてストロークが自動配分されます。',
   undoEdit: '取り消して編集',
-  waitingProceed: '🅰️の進行を待っています...',
+  waitingProceed: '{badge}の進行を待っています...',
   voiceWithHcp: '{player}、{on}オン{putt}パット、ハンディ{handicap}。',
   voiceNoHcp: '{player}、{on}オン{putt}パット。',
   voiceHoleIntro: 'ホール{hole}、パー{par}、インデックス{index}。',

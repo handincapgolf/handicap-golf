@@ -197,7 +197,7 @@ export const zh = {
   mpSyncBubble: '你记你的球员，朋友记他的，分数自动同步。不用再传来传去。',
   hcpBubble: '差点(0-36)：让不同水平的球员公平竞争。系统根据球场难度自动分配让杆到各洞。',
   undoEdit: '撤回修改',
-  waitingProceed: '等待 🅰️ 进入下一洞...',
+  waitingProceed: '等待 {badge} 进入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，让杆{handicap}。',
   voiceNoHcp: '{player}，{on}上{putt}推。',
   voiceHoleIntro: '第{hole}洞，标准杆{par}，难度指数{index}。',

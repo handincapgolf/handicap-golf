@@ -192,7 +192,7 @@ export const zhTW = {
   mpSyncBubble: '你記你的球員，朋友記他的，分數自動同步。不用再傳來傳去。',
   hcpBubble: '差點(0-36)：讓不同水平的球員公平競爭。系統根據球場難度自動分配讓桿到各洞。',
   undoEdit: '撤回修改',
-  waitingProceed: '等待 🅰️ 進入下一洞...',
+  waitingProceed: '等待 {badge} 進入下一洞...',
   voiceWithHcp: '{player}，{on}上{putt}推，讓桿{handicap}。',
   voiceNoHcp: '{player}，{on}上{putt}推。',
   voiceHoleIntro: '第{hole}洞，標準桿{par}，難度指數{index}。',

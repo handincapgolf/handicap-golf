@@ -192,7 +192,7 @@ export const ms = {
   mpSyncBubble: 'Anda skor pemain anda, rakan skor mereka. Skor disegerakkan automatik.',
   hcpBubble: 'Handicap (0-36): Menyeimbangkan pemain berlainan tahap. Pukulan diagihkan auto mengikut kesukaran lubang.',
   undoEdit: 'Buat Asal & Edit',
-  waitingProceed: 'Menunggu 🅰️ meneruskan...',
+  waitingProceed: 'Menunggu {badge} meneruskan...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
   voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
   voiceHoleIntro: 'Ini Lubang {hole}, Par {par}, Indeks {index}.',

@@ -192,7 +192,7 @@ export const ko = {
   mpSyncBubble: '내 플레이어는 내가, 상대는 상대가 스코어 입력. 자동 동기화.',
   hcpBubble: '핸디캡 (0-36): 다른 실력의 플레이어가 공정하게 경쟁. 코스 난이도에 따라 스트로크가 자동 배분됩니다.',
   undoEdit: '취소 및 수정',
-  waitingProceed: '🅰️ 진행 대기 중...',
+  waitingProceed: '{badge} 진행 대기 중...',
   voiceWithHcp: '{player}, {on} 온, {putt} 퍼팅, 핸디캡 {handicap}.',
   voiceNoHcp: '{player}, {on} 온, {putt} 퍼팅.',
   voiceHoleIntro: '홀 {hole}, 파 {par}, 인덱스 {index}.',

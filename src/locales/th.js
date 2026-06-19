@@ -192,7 +192,7 @@ export const th = {
   mpSyncBubble: 'คุณบันทึกผู้เล่นคุณ เพื่อนบันทึกของเขา สกอร์ซิงค์อัตโนมัติ',
   hcpBubble: 'แต้มต่อ (0-36): ทำให้ผู้เล่นต่างระดับแข่งได้ยุติธรรม ระบบแจกสโตรกตามความยากของหลุมอัตโนมัติ',
   undoEdit: 'ยกเลิก & แก้ไข',
-  waitingProceed: 'กำลังรอ 🅰️ ดำเนินการต่อ...',
+  waitingProceed: 'กำลังรอ {badge} ดำเนินการต่อ...',
   voiceWithHcp: '{player}, {on} on, {putt} {puttWord}, {handicap} handicap.',
   voiceNoHcp: '{player}, {on} on, {putt} {puttWord}.',
   voiceHoleIntro: 'หลุม {hole}, พาร์ {par}, อินเด็กซ์ {index}',
