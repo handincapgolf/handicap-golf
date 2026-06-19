@@ -1,5 +1,6 @@
 import React from 'react';
 import { TrendingUp, BarChart3, Eye } from 'lucide-react';
+import Icon from '../components/Icon';
 import ViewerGameScreen from '../ViewerGameScreen';
 import { getBaccaratCardClass, getBaccaratUpBtnClass, getBaccaratUpLabel, BaccaratMatchupGrid } from '../gameModes/BaccaratComponents';
 
@@ -166,7 +167,7 @@ const GameSection = ({
               }}
               className="absolute top-4 left-4 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
             >
-              {voiceEnabled ? '🔊' : '🔇'}
+              <Icon name={voiceEnabled ? 'sound-on' : 'sound-off'} size={18} />
             </button>
 
             {!gameComplete && !mp.isViewer && (
@@ -330,14 +331,14 @@ const GameSection = ({
                            style={allOtherConfirmed ? { background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)' } : {}}>
                         {allOtherConfirmed && (
                           <div className="text-xs font-semibold text-green-700 flex items-center gap-1 px-2 py-1">
-                            ✅ {t('allConfirmed')} ✓
+                            <Icon name="check-circle" size={16} className="inline-block align-text-bottom" /> {t('allConfirmed')} <Icon name="check" size={14} className="inline-block align-text-bottom" />
                           </div>
                         )}
                         {!allOtherConfirmed && otherDeviceIds.length > 0 && (
                           <div className="flex items-center gap-1 px-2 py-1 flex-wrap">
                             {otherDeviceIds.map(devId => (
                               <span key={devId} className={`text-xs px-1.5 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
-                                {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? '✓' : '...'}
+                                {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
                               </span>
                             ))}
                           </div>
@@ -418,12 +419,12 @@ const GameSection = ({
               <div className="mb-2 flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2 text-xs">
                 <div className="flex items-center gap-2">
                   <span className={`w-2 h-2 rounded-full ${mp.syncStatus === 'connected' ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
-                  <span className="text-gray-600">📡 {mp.gameCode}</span>
+                  <span className="text-gray-600"><Icon name="sync" size={12} className="inline-block mr-1 align-text-bottom" />{mp.gameCode}</span>
                 </div>
                 <div className="flex gap-1 flex-wrap">
                   {mp.getActiveDeviceIds().map(devId => (
                     <span key={devId} className={`px-2 py-0.5 rounded-full ${mp.confirmed[devId] ? mp.getDeviceBgClass(devId) : 'bg-gray-200 text-gray-500'}`}>
-                      {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? '✓' : '...'}
+                      {mp.getDeviceLabel(devId)} {mp.confirmed[devId] ? <Icon name="check" size={12} className="inline-block" /> : '...'}
                     </span>
                   ))}
                 </div>
@@ -482,7 +483,7 @@ const GameSection = ({
                   }}
                   className="flex-1 bg-amber-500 hover:bg-amber-600 text-white py-3 px-4 rounded-lg font-semibold transition animate-pulse"
                 >
-                  {t('mpConfirmSubmit')}
+                  <Icon name="share" size={16} className="inline-block mr-1 align-text-bottom" />{t('mpConfirmSubmit')}
                 </button>
               ) : mp.multiplayerOn && mp.isMyConfirmed() && !mp.isAllConfirmed() ? (
                 <button
@@ -493,7 +494,7 @@ const GameSection = ({
                   }}
                   className="flex-1 bg-yellow-500 hover:bg-yellow-600 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
-                  ✏️ {t('undoEdit')} ({(() => { const s = mp.getConfirmedSummary(); return `${s.confirmed}/${s.total}`; })()})
+                  <Icon name="edit" size={14} className="inline-block mr-1 align-text-bottom" />{t('undoEdit')} ({(() => { const s = mp.getConfirmedSummary(); return `${s.confirmed}/${s.total}`; })()})
                 </button>
               ) : mp.multiplayerOn && mp.isAllConfirmed() && mp.multiplayerRole === 'creator' ? (
                 <button
@@ -501,15 +502,15 @@ const GameSection = ({
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
                   {currentHole === holes.length - 1 
-                    ? (t('mpConfirmFinish'))
-                    : (t('mpConfirmNext'))}
+                    ? (<><Icon name="check-circle" size={16} className="inline-block mr-1 align-text-bottom" />{t('mpConfirmFinish')}</>)
+                    : (<><Icon name="check-circle" size={16} className="inline-block mr-1 align-text-bottom" />{t('mpConfirmNext')}</>)}
                 </button>
               ) : mp.multiplayerOn && mp.isAllConfirmed() && mp.multiplayerRole !== 'creator' ? (
                 <button
                   disabled
                   className="flex-1 bg-gray-300 text-gray-500 py-3 px-4 rounded-lg font-semibold cursor-not-allowed"
                 >
-                  ⏳ {t('waitingProceed')}
+                  <Icon name="loading" size={14} className="inline-block mr-1 align-text-bottom" />{t('waitingProceed')}
                 </button>
               ) : (
                 <button
