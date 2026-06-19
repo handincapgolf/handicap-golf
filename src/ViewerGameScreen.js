@@ -7,6 +7,7 @@
 //   totalMoney, currentHoleSettlement, mp, t, setCurrentSection
 
 import { useState, useMemo, memo } from 'react';
+import Icon from './components/Icon';
 
 // ===== Score label helpers =====
 // Score label — uses t() for i18n, fallback to English
@@ -130,7 +131,7 @@ const TabLive = memo(({
   if (!lastCompleted) {
     return (
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 10, justifyContent: 'center', alignItems: 'center' }}>
-        <div style={{ fontSize: 40, opacity: 0.5 }}>⛳</div>
+        <div style={{ opacity: 0.5 }}><Icon name="flag" size={38} /></div>
         <div style={{ fontSize: 15, fontWeight: 700, color: '#6b7280' }}>
           Waiting for first hole to be completed...
         </div>
@@ -277,7 +278,7 @@ const NowPlayingCard = memo(({
       {/* Single line: Now Playing Hole X Par X Index X */}
       <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: hcpPlayers.length > 0 ? 6 : 0 }}>
         <span style={{ fontSize: 13, fontWeight: 800, color: '#78350f' }}>
-          ⏳ Now Playing Hole {holeNum}
+          <Icon name="loading" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />Now Playing Hole {holeNum}
         </span>
         <span style={{ fontSize: 12, fontWeight: 700, color: '#92400e' }}>Par {par}</span>
         {index != null && (
@@ -294,7 +295,7 @@ const NowPlayingCard = memo(({
               background: '#dcfce7', color: '#166534',
               padding: '2px 8px', borderRadius: 8,
             }}>
-              🏌️ {hp.name} <span style={{ fontWeight: 800 }}>-{hp.strokes}</span>
+              <Icon name="golfer" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{hp.name} <span style={{ fontWeight: 800 }}>-{hp.strokes}</span>
             </span>
           ))}
         </div>
@@ -461,8 +462,8 @@ const ViewerGameScreen = memo(({
   const barIndex = selectedCourse?.index?.[barHole - 1];
 
   const tabList = [
-    { id: 'live', label: `⛳ ${t('live') || 'Live'}` },
-    { id: 'card', label: `📋 ${t('scorecard') || 'Card'}` },
+    { id: 'live', label: <><Icon name="flag" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('live') || 'Live'}</> },
+    { id: 'card', label: <><Icon name="clipboard" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('scorecard') || 'Card'}</> },
   ];
 
   return (
@@ -480,10 +481,10 @@ const ViewerGameScreen = memo(({
         display: 'flex', alignItems: 'center', justifyContent: 'space-between'
       }}>
         <span style={{ fontSize: 10, fontWeight: 700, color: '#86efac', letterSpacing: 2 }}>
-          👁 VIEW ONLY
+          <Icon name="eye" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />VIEW ONLY
         </span>
         <span style={{ fontSize: 10, fontWeight: 700, color: '#4ade80' }}>
-          ● LIVE
+          <Icon name="dot" size={10} style={{ marginRight: 4 }} />LIVE
         </span>
       </div>
 
@@ -498,11 +499,11 @@ const ViewerGameScreen = memo(({
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
           {lastCompletedHole ? (
             <span style={{ fontSize: 13, fontWeight: 800, color: '#166534' }}>
-              ✅ {t('hole') || 'Hole'} {lastCompletedHole}
+              <Icon name="check-circle" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('hole') || 'Hole'} {lastCompletedHole}
             </span>
           ) : (
             <span style={{ fontSize: 13, fontWeight: 800, color: '#9ca3af' }}>
-              ⏳ {t('hole') || 'Hole'} {holeNum}
+              <Icon name="loading" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('hole') || 'Hole'} {holeNum}
             </span>
           )}
           <span style={{ fontSize: 11, color: '#15803d', fontWeight: 600 }}>Par {barPar}</span>
@@ -595,7 +596,7 @@ const ViewerGameScreen = memo(({
           {t('exit') || 'Exit'}
         </button>
         <span style={{ fontSize: 10, color: '#16a34a', fontWeight: 600 }}>
-          ● {mp.syncStatus === 'connected' ? 'Syncing' : mp.syncStatus === 'error' ? 'Reconnecting...' : 'Connecting...'}
+          <Icon name="dot" size={8} style={{ marginRight: 4 }} />{mp.syncStatus === 'connected' ? 'Syncing' : mp.syncStatus === 'error' ? 'Reconnecting...' : 'Connecting...'}
         </span>
       </div>
     </div>
