@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { CheckCircle, X } from 'lucide-react';
+import Icon from './Icon';
 
 // ========== 修改记录弹窗 ==========
 export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => {
@@ -13,7 +14,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
   const fmtVal = (f, v) => {
     if (f === 'up') {
       if (typeof v === 'string') return v; // 百家乐: 'UP①', '—'
-      return v ? '✓' : '✗'; // Win123: true/false
+      return v ? <Icon name="check" size={14} /> : <Icon name="x" size={14} />; // Win123: true/false
     }
     return v;
   };
@@ -35,7 +36,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
       <div className="bg-white rounded-xl p-5 max-w-sm w-full shadow-2xl max-h-[80vh] flex flex-col">
         <div className="flex justify-between items-center mb-3">
           <h3 className="text-lg font-bold text-gray-900">
-            📋 {filterHole ? t('editLogHoleTitle').replace('{n}', filterHole) : t('editLogTitle')}
+            <Icon name="clipboard" size={16} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{filterHole ? t('editLogHoleTitle').replace('{n}', filterHole) : t('editLogTitle')}
           </h3>
           <button onClick={onClose} className="text-gray-400 hover:text-gray-600"><X className="w-5 h-5" /></button>
         </div>
@@ -46,7 +47,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
           {filtered.length === 0 ? (
             <div className="text-center py-8">
               <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
-              <p className="text-gray-500 text-sm">{t('editLogEmpty')} ✅</p>
+              <p className="text-gray-500 text-sm">{t('editLogEmpty')} <Icon name="check-circle" size={16} style={{ verticalAlign: 'text-bottom' }} /></p>
             </div>
           ) : filtered.map((log) => (
             <div key={log.id} className="bg-gray-50 rounded-lg p-3 border border-gray-200">
@@ -75,7 +76,7 @@ export const EditLogDialog = memo(({ isOpen, onClose, logs, filterHole, t }) => 
                     }`}>{fieldLabel(c.field)}</span>
                     <div className="flex-1" />
                     <span className="text-red-500 line-through text-sm" style={{ fontFamily: 'monospace' }}>{fmtVal(c.field, c.from)}</span>
-                    <span className="text-gray-400 text-xs">→</span>
+                    <span className="text-gray-400 text-xs"><Icon name="arrow-right" size={12} /></span>
                     <span className="text-green-600 font-bold text-sm" style={{ fontFamily: 'monospace' }}>{fmtVal(c.field, c.to)}</span>
                   </div>
                 ))}
