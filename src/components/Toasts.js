@@ -75,7 +75,7 @@ export const EditToast = memo(({ log, onClose, onViewDetail, t }) => {
               {log.editedByLabel ? t('editNotifyBy').replace('{who}', log.editedByLabel) : ''}
             </div>
           </div>
-          <button onClick={(e) => { e.stopPropagation(); onClose(); }}
+          <button onClick={(e) => { e.stopPropagation(); onClose(); }} aria-label={t('close')}
             style={{ background: 'none', border: 'none', color: '#888', fontSize: 18, cursor: 'pointer', padding: 4 }}><Icon name="x" size={16} /></button>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 4, paddingLeft: 42 }}>

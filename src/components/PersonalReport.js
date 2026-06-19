@@ -57,7 +57,7 @@ export const PersonalReportCard = memo(({ player, rank, onClose, onViewFull, all
             <span className="text-xl">{getMedal(rank)}</span>
             <span className="font-bold text-lg">{player} {t('reportTitle')}</span>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
+          <button onClick={onClose} aria-label={t('close')} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
         </div>
 
         {/* Scrollable content */}
@@ -285,7 +285,7 @@ export const PersonalFullDetailModal = memo(({ player, rank, onClose, onBack, al
               <div className="text-sm text-green-100">{playerTotal}{t('strokes')} ({diffText})</div>
             </div>
           </div>
-          <button onClick={onClose} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
+          <button onClick={onClose} aria-label={t('close')} className="w-8 h-8 bg-white bg-opacity-20 rounded-full flex items-center justify-center hover:bg-opacity-30 text-lg"><Icon name="x" size={18} /></button>
         </div>
 
         {/* Scrollable tables */}

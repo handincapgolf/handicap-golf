@@ -115,7 +115,7 @@ const FeedbackDialog = memo(({ isOpen, onClose, t, courseName = '' }) => {
                 <h2 style={{ fontSize: 20, fontWeight: 700, color: '#111827', margin: 0 }}><Icon name="comment" size={18} style={{ marginRight: 6, verticalAlign: 'text-bottom' }} />{t('feedbackTitle')}</h2>
                 <p style={{ fontSize: 13, color: '#9ca3af', margin: '2px 0 0' }}>{t('feedbackSubtitle')}</p>
               </div>
-              <button onClick={handleClose} style={{
+              <button onClick={handleClose} aria-label={t('close')} style={{
                 width: 36, height: 36, borderRadius: '50%', border: 'none',
                 backgroundColor: '#f3f4f6', cursor: 'pointer', fontSize: 18, color: '#6b7280',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
