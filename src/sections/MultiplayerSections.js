@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { Eye, Share2, Copy } from 'lucide-react';
+import Icon from '../components/Icon';
 
 // ========== mp-lobby: Creator 大厅 / Joiner 等待 ==========
 const MpLobbySection = memo(({
@@ -17,7 +18,7 @@ const MpLobbySection = memo(({
               <div className="max-w-md mx-auto px-4 space-y-4">
                 <div className="text-center">
                   <h2 className="text-xl font-bold text-gray-900">
-                    {mp.multiplayerRole === 'creator' ? t('mpWaitingPartner') : t('mpWaitingStart')}
+                    {mp.multiplayerRole === 'creator' ? <><Icon name="sync" size={14} className="inline-block mr-1 align-text-bottom" />{t('mpWaitingPartner')}</> : <><Icon name="sync" size={14} className="inline-block mr-1 align-text-bottom" />{t('mpWaitingStart')}</>}
                   </h2>
                 </div>
 
@@ -83,10 +84,10 @@ const MpLobbySection = memo(({
                   <div className="flex items-center justify-between py-2 border-b">
                     <span className="text-sm text-gray-500">{t('mpMode')}</span>
                     <span className="font-medium text-sm">
-                      {mp.remoteGame.gameMode === 'matchPlay' ? `🏆 ${t('matchPlay')}` :
-                       mp.remoteGame.gameMode === 'win123' ? `💵 ${t('win123')}` :
-                       mp.remoteGame.gameMode === 'skins' ? `💰 ${t('skins')}` :
-                       `♠ ${t('baccarat')}`}
+                      {mp.remoteGame.gameMode === 'matchPlay' ? <><Icon name="trophy" size={16} className="inline-block mr-1 align-text-bottom" />{t('matchPlay')}</> :
+                       mp.remoteGame.gameMode === 'win123' ? <><Icon name="cash" size={16} className="inline-block mr-1 align-text-bottom" />{t('win123')}</> :
+                       mp.remoteGame.gameMode === 'skins' ? <><Icon name="money-bag" size={16} className="inline-block mr-1 align-text-bottom" />{t('skins')}</> :
+                       <><Icon name="suit-spade" size={16} className="inline-block mr-1 align-text-bottom" />{t('baccarat')}</>}
                     </span>
                   </div>
                   {mp.remoteGame.stake > 0 && (
@@ -167,7 +168,7 @@ const MpLobbySection = memo(({
                     </h3>
                     <div className="flex items-center justify-between py-2 border-b">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">🎯</span>
+                        <Icon name="target" size={20} />
                         <span className="text-sm text-gray-600">{t('mpPlayersJoined')}</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
@@ -178,7 +179,7 @@ const MpLobbySection = memo(({
                     </div>
                     <div className="flex items-center justify-between py-2">
                       <div className="flex items-center gap-2">
-                        <span className="text-lg">👁</span>
+                        <Icon name="eye" size={20} />
                         <span className="text-sm text-gray-600">{t('mpViewersJoined')}</span>
                       </div>
                       <span className={`text-sm font-bold px-2.5 py-0.5 rounded-full ${
@@ -189,7 +190,7 @@ const MpLobbySection = memo(({
                     </div>
                     {mp.playerDeviceCount === 0 && (
                       <p className="text-xs text-amber-600 mt-2 bg-amber-50 rounded-lg px-3 py-2">
-                        💡 {t('mpNoPlayersYet')}
+                        <Icon name="tip" size={14} className="inline-block mr-1 align-text-bottom" />{t('mpNoPlayersYet')}
                       </p>
                     )}
                   </div>
@@ -219,7 +220,7 @@ const MpLobbySection = memo(({
                         : 'bg-blue-600 hover:bg-blue-700 text-white'
                     }`}
                   >
-                    {hasJoiners ? t('mpStartGame') : t('startSolo')}
+                    {hasJoiners ? <><Icon name="golfer" size={16} className="inline-block mr-1 align-text-bottom" />{t('mpStartGame')}</> : t('startSolo')}
                   </button>
                 )}
 
@@ -232,7 +233,7 @@ const MpLobbySection = memo(({
                       </div>
                     )}
                     <p className="text-sm text-gray-500">
-                      ⏳ {t('mpWaitingCreator')}
+                      <Icon name="loading" size={14} className="inline-block mr-1 align-text-bottom" />{t('mpWaitingCreator')}
                     </p>
                   </div>
                 )}
@@ -337,7 +338,7 @@ const MpRoleSection = memo(({
                     {t('mpRoleDesc')}
                   </p>
                   <div className="mt-2 inline-flex items-center gap-2 bg-amber-50 text-amber-700 px-3 py-1 rounded-full text-sm font-mono">
-                    🏠 {mp.gameCode}
+                    <Icon name="home" size={16} className="inline-block mr-1 align-text-bottom" />{mp.gameCode}
                   </div>
                 </div>
 
@@ -347,7 +348,7 @@ const MpRoleSection = memo(({
                     onClick={() => setCurrentSection('mp-claim')}
                     className="bg-white rounded-xl p-5 shadow-md border-2 border-blue-200 hover:border-blue-400 hover:shadow-lg transition text-left"
                   >
-                    <div className="text-3xl mb-2">🎯</div>
+                    <div className="mb-2 flex justify-center"><Icon name="target" size={34} /></div>
                     <div className="text-lg font-bold text-blue-700 mb-1">
                       {t('mpPlayerRole')}
                     </div>
@@ -356,10 +357,10 @@ const MpRoleSection = memo(({
                     </p>
                     <div className="space-y-1">
                       <div className="text-xs text-blue-600 flex items-center gap-1">
-                        ✏️ <span>{t('mpPlayerTagInput')}</span>
+                        <Icon name="edit" size={14} className="inline-block mr-1 align-text-bottom" /><span>{t('mpPlayerTagInput')}</span>
                       </div>
                       <div className="text-xs text-blue-600 flex items-center gap-1">
-                        👤 <span>{t('mpPlayerTagClaim')}</span>
+                        <Icon name="user" size={14} className="inline-block mr-1 align-text-bottom" /><span>{t('mpPlayerTagClaim')}</span>
                       </div>
                     </div>
                   </button>
@@ -378,7 +379,7 @@ const MpRoleSection = memo(({
                     }}
                     className="bg-white rounded-xl p-5 shadow-md border-2 border-purple-200 hover:border-purple-400 hover:shadow-lg transition text-left"
                   >
-                    <div className="text-3xl mb-2">👁</div>
+                    <div className="mb-2 flex justify-center"><Icon name="eye" size={34} /></div>
                     <div className="text-lg font-bold text-purple-700 mb-1">
                       {t('mpViewerRole')}
                     </div>
@@ -387,10 +388,10 @@ const MpRoleSection = memo(({
                     </p>
                     <div className="space-y-1">
                       <div className="text-xs text-purple-600 flex items-center gap-1">
-                        👁 <span>{t('mpViewerTagLive')}</span>
+                        <Icon name="eye" size={14} className="inline-block mr-1 align-text-bottom" /><span>{t('mpViewerTagLive')}</span>
                       </div>
                       <div className="text-xs text-gray-400 flex items-center gap-1 line-through">
-                        ✏️ <span>{t('mpViewerTagNoInput')}</span>
+                        <Icon name="edit" size={14} className="inline-block mr-1 align-text-bottom" /><span>{t('mpViewerTagNoInput')}</span>
                       </div>
                     </div>
                   </button>
