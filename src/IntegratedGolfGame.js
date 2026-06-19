@@ -15,6 +15,7 @@ import {
   generatePlayerShareData,
   generateShareUrl
 } from './utils/shareEncoder';
+import { findNextUnplayedHole } from './utils/holeNavigation';
 import SharePage from './components/SharePage';
 import Icon from './components/Icon';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -54,6 +55,7 @@ function IntegratedGolfGame() {
   const [confirmDialog, setConfirmDialog] = useState({ isOpen: false, message: '', action: null, showScreenshotHint: false });
   const [holeConfirmDialog, setHoleConfirmDialog] = useState({ isOpen: false, action: null });
   const [holeSelectDialog, setHoleSelectDialog] = useState(false);
+  const [holeJumpDialog, setHoleJumpDialog] = useState(false);
   const [editHoleDialog, setEditHoleDialog] = useState({ isOpen: false, hole: null });
   const [editLog, setEditLog] = useState([]);
   const [editToastData, setEditToastData] = useState(null);
@@ -1716,6 +1718,20 @@ const getScoreLabel = useCallback((stroke, par) => {
     setPendingRankings(null);
   }, [currentHole, holes, scores, ups, upOrder, putts, water, ob, activePlayers, allScores, allUps, allPutts, allWater, allOb, gameMode, totalMoney, moneyDetails, completedHoles, prizePool, pars, stake, calculateMatchPlay, calculateSkins, calculateWin123, calculateBaccarat, showToast, t, totalSpent, playHoleResults, mp]);
 
+const handleHoleJump = useCallback((holeNum) => {
+  const idx = holes.indexOf(holeNum);
+  if (idx === -1) return;
+  setCurrentHole(idx);
+  setScores({});
+  setUps({});
+  setUpOrder([]);
+  setPutts({});
+  setWater({});
+  setOb({});
+  setCurrentHoleSettlement(null);
+  setHoleJumpDialog(false);
+}, [holes]);
+
 const nextHole = useCallback(() => {
   const holeNum = holes[currentHole];
   const par = pars[holeNum] || 4;
@@ -2395,6 +2411,7 @@ const triggerConfetti = useCallback(() => {
           setGameComplete={setGameComplete}
           triggerConfetti={triggerConfetti}
           endGameEarlyMP={endGameEarlyMP}
+          setHoleJumpDialog={setHoleJumpDialog}
           t={t}
           lang={lang}
         />
@@ -2452,6 +2469,9 @@ const triggerConfetti = useCallback(() => {
         puttsWarningDialog={puttsWarningDialog}
         setPuttsWarningDialog={setPuttsWarningDialog}
         handlePuttsWarningConfirm={handlePuttsWarningConfirm}
+        holeJumpDialog={holeJumpDialog}
+        setHoleJumpDialog={setHoleJumpDialog}
+        handleHoleJump={handleHoleJump}
         t={t}
       />
 
