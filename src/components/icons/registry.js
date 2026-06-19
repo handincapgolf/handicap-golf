@@ -233,4 +233,51 @@ export const ICONS = {
   'star-outline': { body: (
     <path d="M12 3.5l2.5 5.2 5.7.8-4.1 4 .98 5.7L12 17.2 6.92 22l.98-5.7-4.1-4 5.7-.8z" fill="none" stroke="#cbd5e1" strokeWidth="1.6" strokeLinejoin="round"/>
   ) },
+
+  // ---- Part 3: money / status ----
+  'coin': { body: (<>
+    <circle cx="12" cy="12" r="9" fill="#f59e0b"/>
+    <circle cx="12" cy="12" r="6.6" fill="#fcd34d"/>
+    <path d="M12 7.2v9.6M9.9 9.3c0-1 .95-1.6 2.1-1.6s2.1.6 2.1 1.6-.95 1.4-2.1 1.7-2.1.7-2.1 1.7.95 1.6 2.1 1.6 2.1-.6 2.1-1.6" fill="none" stroke="#b45309" strokeWidth="1.4" strokeLinecap="round"/>
+  </>) },
+  'alert-circle': { body: (<>
+    <circle cx="12" cy="12" r="9.5" fill="#f59e0b"/>
+    <path d="M12 7v6" stroke="#fff" strokeWidth="2.2" strokeLinecap="round"/>
+    <circle cx="12" cy="16.4" r="1.3" fill="#fff"/>
+  </>) },
+  'map-pin': { body: (<>
+    <path d="M12 2.5c-3.9 0-7 3-7 6.8 0 4.6 5.3 10 6.4 11.1a.85.85 0 0 0 1.2 0C13.7 19.3 19 13.9 19 9.3c0-3.8-3.1-6.8-7-6.8z" fill="#ef4444"/>
+    <circle cx="12" cy="9.2" r="2.6" fill="#fff"/>
+  </>) },
+  'settings': { body: (<>
+    <path d="M10.6 2.6h2.8l.5 2.5 2.4 1 2.2-1.3 2 2-1.3 2.2 1 2.4 2.5.5v2.8l-2.5.5-1 2.4 1.3 2.2-2 2-2.2-1.3-2.4 1-.5 2.5h-2.8l-.5-2.5-2.4-1-2.2 1.3-2-2 1.3-2.2-1-2.4-2.5-.5v-2.8l2.5-.5 1-2.4-1.3-2.2 2-2 2.2 1.3 2.4-1z" fill="#64748b"/>
+    <circle cx="12" cy="12" r="3.2" fill="#e2e8f0"/>
+  </>) },
+  'clock': { body: (<>
+    <circle cx="12" cy="12" r="9" fill="#3b82f6"/>
+    <circle cx="12" cy="12" r="6.6" fill="#dbeafe"/>
+    <path d="M12 8.2v4l2.8 1.7" fill="none" stroke="#1d4ed8" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+  </>) },
+  // ---- Part 3: tool icons (currentColor) ----
+  'trending-up': { currentColor: true, body: (
+    <g fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l6-6 4 4 8-8"/><path d="M16 7h5v5"/></g>
+  ) },
+  'play': { currentColor: true, body: (
+    <path d="M7 4.5l12 7.5-12 7.5z" fill="currentColor"/>
+  ) },
+  'copy': { currentColor: true, body: (
+    <g fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M4 16V5a1 1 0 0 1 1-1h11"/></g>
+  ) },
+  'chevron-down': { currentColor: true, body: (
+    <path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+  ) },
+  'chevron-up': { currentColor: true, body: (
+    <path d="M6 15l6-6 6 6" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round"/>
+  ) },
+  'plus': { currentColor: true, body: (
+    <path d="M12 5v14M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+  ) },
+  'minus': { currentColor: true, body: (
+    <path d="M5 12h14" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round"/>
+  ) },
 };
