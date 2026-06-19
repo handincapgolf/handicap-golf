@@ -91,6 +91,8 @@ export const ms = {
   bogey: 'Bogey',
   doubleplus: 'Double+',
   selectHoleToEdit: 'Pilih Lubang untuk Edit',
+  holeJumpTitle: 'Lompat ke Lubang',
+  holeJumpReturnToast: 'Tinggal {n} lubang — kembali ke lubang {hole}',
   editHole: 'Edit',
   save: 'Simpan',
   scoreUpdated: 'Skor dikemas kini, wang dikira semula',

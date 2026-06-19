@@ -91,6 +91,8 @@ export const ja = {
   bogey: 'ボギー',
   doubleplus: 'ダブル+',
   selectHoleToEdit: '編集するホールを選択',
+  holeJumpTitle: 'ホールへジャンプ',
+  holeJumpReturnToast: '残り{n}ホール — ホール{hole}に戻ります',
   editHole: '編集',
   save: '保存',
   scoreUpdated: 'スコア更新済み、金額再計算済み',

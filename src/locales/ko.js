@@ -91,6 +91,8 @@ export const ko = {
   bogey: '보기',
   doubleplus: '더블보기+',
   selectHoleToEdit: '편집할 홀 선택',
+  holeJumpTitle: '홀로 이동',
+  holeJumpReturnToast: '{n}개 홀 남음 — {hole}번 홀로 돌아갑니다',
   editHole: '편집',
   save: '저장',
   scoreUpdated: '스코어 업데이트 완료, 금액 재계산 완료',

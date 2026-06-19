@@ -91,6 +91,8 @@ export const en = {
   bogey: 'Bogey',
   doubleplus: 'Double+',
   selectHoleToEdit: 'Select Hole to Edit',
+  holeJumpTitle: 'Jump to Hole',
+  holeJumpReturnToast: '{n} holes left — back to hole {hole}',
   editHole: 'Edit Hole',
   save: 'Save',
   scoreUpdated: 'Scores updated, money recalculated',

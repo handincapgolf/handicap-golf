@@ -91,6 +91,8 @@ export const zh = {
   bogey: '柏忌',
   doubleplus: '双柏忌+',
   selectHoleToEdit: '选择要修改的洞',
+  holeJumpTitle: '跳到第几洞',
+  holeJumpReturnToast: '还有 {n} 个洞没打，回到第 {hole} 洞',
   editHole: '修改',
   save: '保存',
   scoreUpdated: '成绩已更新，金额已重算',

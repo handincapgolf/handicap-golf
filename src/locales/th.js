@@ -91,6 +91,8 @@ export const th = {
   bogey: 'Bogey',
   doubleplus: 'Double+',
   selectHoleToEdit: 'เลือกหลุมที่จะแก้ไข',
+  holeJumpTitle: 'ข้ามไปยังหลุม',
+  holeJumpReturnToast: 'เหลืออีก {n} หลุม — กลับไปที่หลุม {hole}',
   editHole: 'แก้ไข',
   save: 'บันทึก',
   scoreUpdated: 'อัปเดตสกอร์แล้ว คำนวณเงินใหม่แล้ว',
