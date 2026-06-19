@@ -1,5 +1,6 @@
 import React, { memo } from 'react';
 import { AlertCircle, Camera } from 'lucide-react';
+import Icon from './Icon';
 
 // ========== 通用确认弹窗 ==========
 export const ConfirmDialog = memo(({ isOpen, onClose, onConfirm, message, t, showScreenshotHint }) => {
@@ -73,7 +74,7 @@ export const PuttsWarningDialog = memo(({ isOpen, onClose, onConfirm, players, s
         </div>
         
         <p className="text-xs text-gray-500 mb-3">
-          💡 {t('puttsTip')}
+          <Icon name="tip" size={14} style={{ marginRight: 4, verticalAlign: 'text-bottom' }} />{t('puttsTip')}
         </p>
         
         <div className="flex gap-2">
