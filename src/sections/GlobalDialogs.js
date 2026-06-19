@@ -3,7 +3,7 @@ import { RoundReportShareModal } from '../RoundReport';
 import { Toast, EditToast } from '../components/Toasts';
 import { EditLogDialog } from '../components/EditLogDialog';
 import { ConfirmDialog, PuttsWarningDialog } from '../components/ConfirmDialogs';
-import { HoleScoreConfirmDialog, HoleSelectDialog, EditHoleDialog } from '../components/HoleDialogs';
+import { HoleScoreConfirmDialog, HoleSelectDialog, HoleJumpDialog, EditHoleDialog } from '../components/HoleDialogs';
 import { PersonalReportCard, PersonalFullDetailModal } from '../components/PersonalReport';
 import { PWAInstallPrompt } from '../components/PWAInstallPrompt';
 
@@ -59,6 +59,10 @@ const GlobalDialogs = ({
   holeSelectDialog,
   setHoleSelectDialog,
   setEditHoleDialog,
+  // Hole jump dialog
+  holeJumpDialog,
+  setHoleJumpDialog,
+  handleHoleJump,
   mp,
   // Edit hole dialog
   editHoleDialog,
@@ -184,6 +188,17 @@ const GlobalDialogs = ({
         onSave={handleEditHoleSave}
         t={t}
         gameMode={gameMode}
+      />
+
+      <HoleJumpDialog
+        isOpen={holeJumpDialog}
+        onClose={() => setHoleJumpDialog(false)}
+        holes={holes}
+        completedHoles={completedHoles}
+        currentHole={currentHole}
+        pars={pars}
+        onSelect={(hole) => handleHoleJump(hole)}
+        t={t}
       />
 
       <PuttsWarningDialog
