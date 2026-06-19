@@ -167,6 +167,68 @@ export const HoleSelectDialog = memo(({ isOpen, onClose, completedHoles = [], on
   );
 });
 
+// ========== 跳洞选择弹窗 ==========
+export const HoleJumpDialog = memo(({ isOpen, onClose, holes = [], completedHoles = [], currentHole = 0, onSelect, t, pars = {} }) => {
+  if (!isOpen) return null;
+
+  const currentHoleNum = holes[currentHole];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-xl p-5 max-w-xs w-full shadow-2xl">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-bold text-gray-900">
+            {t('holeJumpTitle')}
+          </h3>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600">
+            <Icon name="x" size={20} />
+          </button>
+        </div>
+
+        <div className="grid grid-cols-5 gap-2 mb-4">
+          {holes.map(hole => {
+            const played = completedHoles.includes(hole);
+            if (played) {
+              return (
+                <button
+                  key={hole}
+                  disabled
+                  className="w-12 h-12 bg-gray-200 text-gray-400 rounded-lg font-bold text-lg cursor-not-allowed"
+                >
+                  {hole}
+                </button>
+              );
+            }
+            const par = pars[hole] || 4;
+            const colorClass = par === 3
+              ? 'bg-yellow-300 hover:bg-yellow-400 text-yellow-900'
+              : par === 5
+                ? 'bg-orange-300 hover:bg-orange-400 text-orange-900'
+                : 'bg-green-500 hover:bg-green-600 text-white';
+            const isCurrent = hole === currentHoleNum;
+            return (
+              <button
+                key={hole}
+                onClick={() => { onSelect(hole); onClose(); }}
+                className={`w-12 h-12 ${colorClass} rounded-lg font-bold text-lg transition ${isCurrent ? 'ring-2 ring-offset-1 ring-green-700' : ''}`}
+              >
+                {hole}
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          onClick={onClose}
+          className="w-full px-4 py-2.5 bg-gray-200 text-gray-800 rounded-lg font-medium hover:bg-gray-300"
+        >
+          {t('cancel')}
+        </button>
+      </div>
+    </div>
+  );
+});
+
 // ========== 编辑洞成绩弹窗 - iPhone优化版 ==========
 export const EditHoleDialog = memo(({ isOpen, onClose, hole, players = [], allScores = {}, allUps = {}, allUpOrders = {}, allPutts = {}, pars = {}, onSave, t, gameMode }) => {
   const [editScores, setEditScores] = useState({});
