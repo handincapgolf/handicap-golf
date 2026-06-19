@@ -1,4 +1,5 @@
 // src/components/icons/Icon.test.js
+/* eslint-disable testing-library/no-container, testing-library/no-node-access -- an SVG icon exposes no implicit ARIA role, so asserting on the rendered <svg> requires container/node access */
 import { render } from '@testing-library/react';
 import Icon from '../Icon';
 import { ICONS } from './registry';

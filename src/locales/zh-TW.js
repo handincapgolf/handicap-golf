@@ -40,7 +40,7 @@ export const zhTW = {
   start: '開始比賽',
   hole: '洞',
   par: 'PAR',
-  nextHole: '確認成績 →',
+  nextHole: '確認成績',
   currentMoney: '即時戰況',
   poolBalance: '獎池餘額',
   holeTied: '本洞平手',

@@ -40,7 +40,7 @@ export const zh = {
   start: '开始比赛',
   hole: '洞',
   par: 'PAR',
-  nextHole: '确认成绩 →',
+  nextHole: '确认成绩',
   currentMoney: '实时战况',
   poolBalance: '奖池余额',
   holeTied: '本洞平局',
