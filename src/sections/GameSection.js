@@ -165,9 +165,9 @@ const GameSection = ({
                   speechSynthesis.speak(u);
                 }
               }}
-              className="absolute top-4 left-4 px-3 py-1.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg text-lg transition"
+              className="absolute top-4 left-4 px-3.5 py-2.5 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-lg transition"
             >
-              <Icon name={voiceEnabled ? 'sound-on' : 'sound-off'} size={18} />
+              <Icon name={voiceEnabled ? 'sound-on' : 'sound-off'} size={26} />
             </button>
 
             {!gameComplete && !mp.isViewer && (
@@ -370,19 +370,16 @@ const GameSection = ({
         return (
           <div key={player} className="bg-white p-2 rounded-md text-center">
             <div className="text-xs font-medium truncate">{player}</div>
-            <div className={`text-sm font-bold ${
-              holeAmt > 0 ? 'text-green-600' : 
-              holeAmt < 0 ? 'text-red-600' : 
-              'text-gray-500'
+            <div className={`text-lg font-extrabold ${
+              holeAmt > 0 ? 'text-green-600' : holeAmt < 0 ? 'text-red-600' : 'text-gray-900'
             }`}>
               {holeAmt === 0 ? '$0' : holeAmt > 0 ? `+$${holeAmt.toFixed(1)}` : `-$${Math.abs(holeAmt).toFixed(1)}`}
             </div>
-            <div className={`text-xs mt-1 ${
-              totalAmt > 0 ? 'text-green-500' : 
-              totalAmt < 0 ? 'text-red-400' : 
-              'text-gray-400'
+            <div className="text-[10px] text-gray-400 mt-1 uppercase tracking-wide">{t('totalLabel')}</div>
+            <div className={`text-2xl font-extrabold leading-tight ${
+              totalAmt > 0 ? 'text-green-600' : totalAmt < 0 ? 'text-red-600' : 'text-gray-900'
             }`}>
-              {t('totalLabel')}: {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
+              {totalAmt === 0 ? '$0' : totalAmt > 0 ? `+$${totalAmt.toFixed(1)}` : `-$${Math.abs(totalAmt).toFixed(1)}`}
             </div>
           </div>
         );

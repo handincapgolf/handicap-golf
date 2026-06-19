@@ -202,11 +202,11 @@ export const ICONS = {
     <rect x="10" y="14" width="4" height="6" rx="0.5" fill="#15803d"/>
   </>) },
   'sound-on': { body: (<>
-    <path d="M4 9.5h3l4-3.5v12l-4-3.5H4z" fill="#16a34a"/>
-    <path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="#16a34a" strokeWidth="2" strokeLinecap="round"/>
+    <path d="M4 9.5h3l4-3.5v12l-4-3.5H4z" fill="currentColor"/>
+    <path d="M15 9a4 4 0 0 1 0 6M17.5 6.5a7.5 7.5 0 0 1 0 11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
   </>) },
   'sound-off': { body: (<>
-    <path d="M4 9.5h3l4-3.5v12l-4-3.5H4z" fill="#94a3b8"/>
+    <path d="M4 9.5h3l4-3.5v12l-4-3.5H4z" fill="currentColor"/>
     <path d="M15.5 9.5l5 5M20.5 9.5l-5 5" stroke="#ef4444" strokeWidth="2" strokeLinecap="round"/>
   </>) },
   'bolt': { body: (
