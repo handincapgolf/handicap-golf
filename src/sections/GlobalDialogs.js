@@ -134,6 +134,7 @@ const GlobalDialogs = ({
         onClose={() => setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false })}
         onConfirm={() => {
           if (confirmDialog.action) confirmDialog.action();
+          setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
         }}
         message={confirmDialog.message}
         t={t}
