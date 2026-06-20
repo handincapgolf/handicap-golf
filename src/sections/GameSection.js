@@ -527,7 +527,8 @@ const GameSection = ({
                   onClick={nextHole}
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-lg font-semibold transition"
                 >
-                  {currentHole === holes.length - 1 ? t('finishRound') : t('nextHole')}
+                  {/* 跳洞后最后一洞不一定是数组末位:打完本洞若所有洞都完成才算结束,与 nextHole 的 allHolesPlayed 保持一致 */}
+                  {holes.every(h => h === holes[currentHole] || completedHoles.includes(h)) ? t('finishRound') : t('nextHole')}
                 </button>
               )}
               <button
