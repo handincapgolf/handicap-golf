@@ -16,6 +16,7 @@ import {
   generateShareUrl
 } from './utils/shareEncoder';
 import { findNextUnplayedHole } from './utils/holeNavigation';
+import { loadKaki, saveKaki, deleteKaki } from './utils/kakiStorage';
 import SharePage from './components/SharePage';
 import Icon from './components/Icon';
 import { PWAInstallPrompt } from './components/PWAInstallPrompt';
@@ -78,6 +79,7 @@ function IntegratedGolfGame() {
   const [stake, setStake] = useState('');
   const [prizePool, setPrizePool] = useState(0);
   const [playerHandicaps, setPlayerHandicaps] = useState({});
+  const [kakiList, setKakiList] = useState(loadKaki);
   const [puttsWarningDialog, setPuttsWarningDialog] = useState({ isOpen: false, players: [] });
   
   const [currentHole, setCurrentHole] = useState(1);
@@ -855,6 +857,28 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
   }, []);
 
+  const applyKaki = useCallback((names) => {
+    const jumbo = names.length > 4;
+    const slots = jumbo ? 8 : 4;
+    const padded = Array.from({ length: slots }, (_, i) => names[i] || '');
+    setJumboMode(jumbo);
+    setPlayerNames(padded);
+    setPlayerHandicaps({}); // 只填名字,HCP 留空
+    setSearchQuery('');
+    setSelectedCourse(null);
+    setCourseApplied(false);
+    setCurrentSection('course');
+  }, []);
+
+  const removeKaki = useCallback((id) => {
+    const entry = kakiList.find((e) => e.id === id);
+    const namesLine = entry ? entry.names.join(' · ') : '';
+    showConfirm(
+      `${t('kakiDeleteConfirm')}\n${namesLine}`,
+      () => setKakiList(deleteKaki(id, kakiList))
+    );
+  }, [kakiList, showConfirm, t]);
+
   useEffect(() => {
     if (currentSection === 'scorecard') {
       setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
@@ -1174,6 +1198,9 @@ const getScoreLabel = useCallback((stroke, par) => {
     setGameComplete(false);
     setCurrentHoleSettlement(null);
     
+    // 仅在比赛真正开始时保存这组球友(已通过全部校验)
+    setKakiList(saveKaki(activePlayers));
+
     // ===== 始终创建房间，进入大厅等待 =====
     const gameSetup = {
       course: selectedCourse || {},
@@ -2273,6 +2300,9 @@ const triggerConfetti = useCallback(() => {
               mp={mp}
               showToast={showToast}
               setFeedbackDialog={setFeedbackDialog}
+              kakiList={kakiList}
+              applyKaki={applyKaki}
+              removeKaki={removeKaki}
               t={t}
             />
           )}
