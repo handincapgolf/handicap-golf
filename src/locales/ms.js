@@ -52,6 +52,8 @@ export const ms = {
   winner: 'Pemenang',
   resume: 'Sambung Permainan',
   finishRound: 'Sahkan & Tamat',
+  kaki: 'Kaki Golf',
+  kakiDeleteConfirm: 'Padam Kaki Golf ini?',
   confirmHoleScore: 'Sahkan Skor Lubang {hole}',
   holeScoresSummary: 'Skor Pemain:',
   cancel: 'Batal',

@@ -52,6 +52,8 @@ export const ko = {
   winner: '승자',
   resume: '게임 계속',
   finishRound: '확인 후 종료',
+  kaki: '골프 친구',
+  kakiDeleteConfirm: '이 골프 친구를 삭제할까요?',
   confirmHoleScore: '홀 {hole} 스코어 확인',
   holeScoresSummary: '플레이어 스코어:',
   cancel: '취소',

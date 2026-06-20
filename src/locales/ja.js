@@ -52,6 +52,8 @@ export const ja = {
   winner: '勝者',
   resume: 'ゲーム再開',
   finishRound: '確認して終了',
+  kaki: 'ゴルフ仲間',
+  kakiDeleteConfirm: 'このゴルフ仲間を削除しますか?',
   confirmHoleScore: 'ホール{hole}のスコアを確認',
   holeScoresSummary: 'プレーヤースコア:',
   cancel: 'キャンセル',

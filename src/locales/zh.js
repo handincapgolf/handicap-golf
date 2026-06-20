@@ -52,6 +52,8 @@ export const zh = {
   winner: '胜利',
   resume: '继续比赛',
   finishRound: '确认并结束',
+  kaki: '球友',
+  kakiDeleteConfirm: '确定删除这组球友吗?',
   confirmHoleScore: '确认第{hole}洞成绩',
   holeScoresSummary: '各玩家成绩：',
   cancel: '取消',

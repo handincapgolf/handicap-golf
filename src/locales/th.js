@@ -52,6 +52,8 @@ export const th = {
   winner: 'ผู้ชนะ',
   resume: 'เล่นต่อ',
   finishRound: 'ยืนยันและจบ',
+  kaki: 'ก๊วนกอล์ฟ',
+  kakiDeleteConfirm: 'ลบก๊วนกอล์ฟนี้?',
   confirmHoleScore: 'ยืนยันสกอร์หลุม {hole}',
   holeScoresSummary: 'สกอร์ผู้เล่น:',
   cancel: 'ยกเลิก',

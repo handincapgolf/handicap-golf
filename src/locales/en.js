@@ -52,6 +52,8 @@ export const en = {
   winner: 'Winner',
   resume: 'Resume Game',
   finishRound: 'Confirm & Finish',
+  kaki: 'Kaki',
+  kakiDeleteConfirm: 'Delete this Kaki?',
   confirmHoleScore: 'Confirm Hole {hole} Scores',
   holeScoresSummary: 'Player Scores:',
   cancel: 'Cancel',
