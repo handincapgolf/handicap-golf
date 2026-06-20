@@ -55,6 +55,9 @@ export const HomeContent = ({
   mp,
   showToast,
   setFeedbackDialog,
+  kakiList,
+  applyKaki,
+  removeKaki,
   t,
 }) => (
   <div className="h-full flex flex-col items-center justify-center px-4">
@@ -90,6 +93,31 @@ export const HomeContent = ({
         {t('create')}
       </button>
       
+      {/* Kaki — 常用球友组 */}
+      {kakiList.length > 0 && (
+        <div className="pt-3 border-t border-gray-200 mt-3">
+          <p className="text-xs text-gray-500 text-center mb-2">{t('kaki')}</p>
+          <div className="space-y-1.5">
+            {kakiList.map((entry) => (
+              <div
+                key={entry.id}
+                onClick={() => applyKaki(entry.names)}
+                className="flex items-center justify-between gap-2 px-3 py-2 bg-gray-50 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-100 transition"
+              >
+                <span className="text-sm text-gray-700 truncate">{entry.names.join(' · ')}</span>
+                <button
+                  onClick={(e) => { e.stopPropagation(); removeKaki(entry.id); }}
+                  className="flex-shrink-0 text-gray-400 hover:text-red-500 transition"
+                  aria-label="Delete"
+                >
+                  <Icon name="x" size={16} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* 加入房间 */}
       <div className="pt-3 border-t border-gray-200 mt-3">
         <p className="text-xs text-gray-500 text-center mb-2">
