@@ -857,28 +857,6 @@ const playHoleResults = useCallback((players, holeScores, holePutts, enableSpeci
     setConfirmDialog({ isOpen: true, message, action, showScreenshotHint });
   }, []);
 
-  const applyKaki = useCallback((names) => {
-    const jumbo = names.length > 4;
-    const slots = jumbo ? 8 : 4;
-    const padded = Array.from({ length: slots }, (_, i) => names[i] || '');
-    setJumboMode(jumbo);
-    setPlayerNames(padded);
-    setPlayerHandicaps({}); // 只填名字,HCP 留空
-    setSearchQuery('');
-    setSelectedCourse(null);
-    setCourseApplied(false);
-    setCurrentSection('course');
-  }, []);
-
-  const removeKaki = useCallback((id) => {
-    const entry = kakiList.find((e) => e.id === id);
-    const namesLine = entry ? entry.names.join(' · ') : '';
-    showConfirm(
-      `${t('kakiDeleteConfirm')}\n${namesLine}`,
-      () => setKakiList(deleteKaki(id, kakiList))
-    );
-  }, [kakiList, showConfirm, t]);
-
   useEffect(() => {
     if (currentSection === 'scorecard') {
       setConfirmDialog({ isOpen: false, message: '', action: null, showScreenshotHint: false });
@@ -968,6 +946,28 @@ const filteredCourses = useMemo(() => {
   }, []);
 
 const t = useTranslation(lang);
+
+  const applyKaki = useCallback((names) => {
+    const jumbo = names.length > 4;
+    const slots = jumbo ? 8 : 4;
+    const padded = Array.from({ length: slots }, (_, i) => names[i] || '');
+    setJumboMode(jumbo);
+    setPlayerNames(padded);
+    setPlayerHandicaps({}); // 只填名字,HCP 留空
+    setSearchQuery('');
+    setSelectedCourse(null);
+    setCourseApplied(false);
+    setCurrentSection('course');
+  }, []);
+
+  const removeKaki = useCallback((id) => {
+    const entry = kakiList.find((e) => e.id === id);
+    const namesLine = entry ? entry.names.join(' · ') : '';
+    showConfirm(
+      `${t('kakiDeleteConfirm')}\n${namesLine}`,
+      () => setKakiList(deleteKaki(id, kakiList))
+    );
+  }, [kakiList, showConfirm, t]);
 
   const setCourse = useCallback((type) => {
     setCourseType(type);
