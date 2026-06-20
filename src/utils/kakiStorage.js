@@ -21,9 +21,11 @@ function persist(list) {
   } catch {}
 }
 
-// order-independent, case-sensitive identity for a group of names
+// Order-independent, case-sensitive identity for a group of names.
+// JSON-encoding the sorted array avoids separator collisions when a
+// name itself contains the separator character.
 function groupKey(names) {
-  return [...names].sort().join(' ');
+  return JSON.stringify([...names].sort());
 }
 
 export function saveKaki(names) {

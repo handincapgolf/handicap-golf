@@ -54,6 +54,13 @@ describe('kakiStorage', () => {
     expect(list).toHaveLength(2);
   });
 
+  test('saveKaki does not collide when names contain spaces', () => {
+    // Different groupings that a naive space-join would treat as equal.
+    saveKaki(['John', 'Smith Jr']);
+    const list = saveKaki(['John Smith', 'Jr']);
+    expect(list).toHaveLength(2);
+  });
+
   test('saveKaki caps at 5, dropping the oldest', () => {
     saveKaki(['A', 'B']);
     saveKaki(['C', 'D']);
